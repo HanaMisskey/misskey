@@ -50,7 +50,7 @@ export type DbJobMap = {
 	exportBlocking: DbJobDataWithUser;
 	exportUserLists: DbJobDataWithUser;
 	importAntennas: DBAntennaImportJobData;
-	importNotes: DbUserImportJobData;
+	importNotes: DbNoteImportJobData;
 	importTweetsToDb: DbNoteImportToDbJobData;
 	importIGToDb: DbNoteImportToDbJobData;
 	importMastoToDb: DbNoteImportToDbJobData;
