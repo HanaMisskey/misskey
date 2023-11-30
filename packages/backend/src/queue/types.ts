@@ -51,12 +51,12 @@ export type DbJobMap = {
 	exportUserLists: DbJobDataWithUser;
 	importAntennas: DBAntennaImportJobData;
 	importNotes: DbNoteImportJobData;
-	importTweetsToDb: DbKeyNoteImportToDbJobData;
+	importTweetsToDb: DbNoteWithParentImportToDbJobData;
 	importIGToDb: DbNoteImportToDbJobData;
 	importFBToDb: DbNoteImportToDbJobData;
-	importMastoToDb: DbNoteImportToDbJobData;
+	importMastoToDb: DbNoteWithParentImportToDbJobData;
 	importPleroToDb: DbNoteImportToDbJobData;
-	importKeyNotesToDb: DbKeyNoteImportToDbJobData;
+	importKeyNotesToDb: DbNoteWithParentImportToDbJobData;
 	importFollowing: DbUserImportJobData;
 	importFollowingToDb: DbUserImportToDbJobData;
 	importMuting: DbUserImportJobData;
@@ -114,7 +114,7 @@ export type DbNoteImportToDbJobData = {
 	target: any;
 };
 
-export type DbKeyNoteImportToDbJobData = {
+export type DbNoteWithParentImportToDbJobData = {
 	user: ThinUser;
 	target: any;
 	note: MiNote['id'] | null;
