@@ -382,7 +382,7 @@ export class ImportNotesProcessorService {
 
 		if (toot.directMessage || (!toot.to.includes('https://www.w3.org/ns/activitystreams#Public') || !followers)) return;
 
-		const visibility = followers ? 'home' : 'public';
+		const visibility = followers ? 'followers' : 'public';
 
 		const date = new Date(toot.object.published);
 		let text = undefined;
