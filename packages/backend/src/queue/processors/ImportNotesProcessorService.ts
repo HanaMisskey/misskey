@@ -475,7 +475,7 @@ export class ImportNotesProcessorService {
 				const slashdex = file.url.lastIndexOf('/');
 				const filename = file.url.substring(slashdex + 1);
 				const hash = crypto.createHash('md5');
-				const urlHash = hash.update(file.url).digest('hex');
+				const urlHash = hash.update(file.url).digest('base64url');
 				const name = `${urlHash}-${filename}`;
 				const [filePath, cleanup] = await createTemp();
 
