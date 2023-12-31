@@ -73,7 +73,6 @@ export class ImportNotesProcessorService {
 		}
 	}
 
-	// Function was taken from Firefish and modified for our needs
 	@bindThis
 	private async recreateChain(idFieldPath: string[], replyFieldPath: string[], arr: any[], includeOrphans: boolean): Promise<any[]> {
 		type NotesMap = {
@@ -379,7 +378,11 @@ export class ImportNotesProcessorService {
 			return;
 		}
 
-		if (toot.directMessage) return;
+		const followers = toot.to.some((str: string) => str.includes('/followers'));
+
+		if (toot.directMessage || (!toot.to.includes('https://www.w3.org/ns/activitystreams#Public') || !followers)) return;
+
+		const visibility = followers ? 'home' : 'public';
 
 		const date = new Date(toot.object.published);
 		let text = undefined;
@@ -418,7 +421,7 @@ export class ImportNotesProcessorService {
 			}
 		}
 
-		const createdNote = await this.noteCreateService.import(user, { createdAt: date, text: text, files: files, apMentions: new Array(0), cw: toot.object.sensitive ? toot.object.summary : null, reply: reply });
+		const createdNote = await this.noteCreateService.import(user, { createdAt: date, text: text, files: files, visibility: visibility, apMentions: new Array(0), cw: toot.object.sensitive ? toot.object.summary : null, reply: reply });
 		if (toot.childNotes) this.queueService.createImportMastoToDbJob(user, toot.childNotes, createdNote.id);
 	}
 
