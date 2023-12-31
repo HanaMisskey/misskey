@@ -474,8 +474,8 @@ export class ImportNotesProcessorService {
 			for await (const file of post.object.attachment) {
 				const slashdex = file.url.lastIndexOf('/');
 				const filename = file.url.substring(slashdex + 1);
-				const hash = crypto.createHash('md5').setEncoding('hex');
-				const urlHash = hash.update(file.url).digest('base64');
+				const hash = crypto.createHash('md5');
+				const urlHash = hash.update(file.url).digest('hex');
 				const name = `${urlHash}-${filename}`;
 				const [filePath, cleanup] = await createTemp();
 
