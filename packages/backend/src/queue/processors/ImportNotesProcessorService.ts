@@ -380,7 +380,7 @@ export class ImportNotesProcessorService {
 
 		const followers = toot.to.some((str: string) => str.includes('/followers'));
 
-		if (toot.directMessage || (!toot.to.includes('https://www.w3.org/ns/activitystreams#Public') || !followers)) return;
+		if (toot.directMessage || !toot.to.includes('https://www.w3.org/ns/activitystreams#Public') && !followers) return;
 
 		const visibility = followers ? 'followers' : 'public';
 
