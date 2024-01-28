@@ -575,7 +575,7 @@ export class ImportNotesProcessorService {
 		async function replaceTwitterMentions(full_text: string, mentions: any) {
 			let full_textedit = full_text;
 			mentions.forEach((mention: any) => {
-				full_textedit = full_textedit.replaceAll(`@${mention.screen_name}`, `[@${mention.screen_name}](https://nitter.net/${mention.screen_name})`);
+				full_textedit = full_textedit.replaceAll(`@${mention.screen_name}`, `[@${mention.screen_name}](https://twitter.com/${mention.screen_name})`);
 			});
 			return full_textedit;
 		}
