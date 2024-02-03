@@ -1,4 +1,5 @@
 import * as fs from 'node:fs';
+import * as fsp from 'node:fs/promises';
 import * as vm from 'node:vm';
 import * as crypto from 'node:crypto';
 import { Inject, Injectable } from '@nestjs/common';
@@ -51,7 +52,7 @@ export class ImportNotesProcessorService {
 
 	@bindThis
 	private async uploadFiles(dir: string, user: MiUser, folder?: MiDriveFolder['id']) {
-		const fileList = await fs.promises.readdir(dir);
+		const fileList = await fsp.readdir(dir);
 		for await (const file of fileList) {
 			const name = `${dir}/${file}`;
 			if (fs.statSync(name).isDirectory()) {
@@ -175,7 +176,7 @@ export class ImportNotesProcessorService {
 			const destPath = path + '/twitter.zip';
 
 			try {
-				await fs.promises.writeFile(destPath, '', 'binary');
+				await fsp.writeFile(destPath, '', 'binary');
 				await this.downloadService.downloadUrl(file.url, destPath);
 			} catch (e) { // TODO: 何度か再試行
 				if (e instanceof Error || typeof e === 'string') {
@@ -187,9 +188,9 @@ export class ImportNotesProcessorService {
 			const outputPath = path + '/twitter';
 			try {
 				this.logger.succ(`Unzipping to ${outputPath}`);
-				ZipReader.withDestinationPath(outputPath).viaBuffer(await fs.promises.readFile(destPath));
+				ZipReader.withDestinationPath(outputPath).viaBuffer(await fsp.readFile(destPath));
 
-				const unprocessedTweets = this.parseTwitterFile(await fs.promises.readFile(outputPath + '/data/tweets.js', 'utf-8'));
+				const unprocessedTweets = this.parseTwitterFile(await fsp.readFile(outputPath + '/data/tweets.js', 'utf-8'));
 
 				const tweets = unprocessedTweets.map(e => e.tweet);
 				const processedTweets = await this.recreateChain(['id_str'], ['in_reply_to_status_id_str'], tweets, false);
@@ -205,7 +206,7 @@ export class ImportNotesProcessorService {
 			const destPath = path + '/facebook.zip';
 
 			try {
-				await fs.promises.writeFile(destPath, '', 'binary');
+				await fsp.writeFile(destPath, '', 'binary');
 				await this.downloadService.downloadUrl(file.url, destPath);
 			} catch (e) { // TODO: 何度か再試行
 				if (e instanceof Error || typeof e === 'string') {
@@ -217,8 +218,8 @@ export class ImportNotesProcessorService {
 			const outputPath = path + '/facebook';
 			try {
 				this.logger.succ(`Unzipping to ${outputPath}`);
-				ZipReader.withDestinationPath(outputPath).viaBuffer(await fs.promises.readFile(destPath));
-				const postsJson = await fs.promises.readFile(outputPath + '/your_activity_across_facebook/posts/your_posts__check_ins__photos_and_videos_1.json', 'utf-8');
+				ZipReader.withDestinationPath(outputPath).viaBuffer(await fsp.readFile(destPath));
+				const postsJson = await fsp.readFile(outputPath + '/your_activity_across_facebook/posts/your_posts__check_ins__photos_and_videos_1.json', 'utf-8');
 				const posts = JSON.parse(postsJson);
 				const facebookFolder = await this.driveFoldersRepository.findOneBy({ name: 'Facebook', userId: job.data.user.id, parentId: folder?.id });
 				if (facebookFolder == null && folder) {
@@ -238,7 +239,7 @@ export class ImportNotesProcessorService {
 			const destPath = path + '/unknown.zip';
 
 			try {
-				await fs.promises.writeFile(destPath, '', 'binary');
+				await fsp.writeFile(destPath, '', 'binary');
 				await this.downloadService.downloadUrl(file.url, destPath);
 			} catch (e) { // TODO: 何度か再試行
 				if (e instanceof Error || typeof e === 'string') {
@@ -250,11 +251,11 @@ export class ImportNotesProcessorService {
 			const outputPath = path + '/unknown';
 			try {
 				this.logger.succ(`Unzipping to ${outputPath}`);
-				ZipReader.withDestinationPath(outputPath).viaBuffer(await fs.promises.readFile(destPath));
+				ZipReader.withDestinationPath(outputPath).viaBuffer(await fsp.readFile(destPath));
 				const isInstagram = type === 'Instagram' || fs.existsSync(outputPath + '/instagram_live') || fs.existsSync(outputPath + '/instagram_ads_and_businesses');
 				const isOutbox = type === 'Mastodon' || fs.existsSync(outputPath + '/outbox.json');
 				if (isInstagram) {
-					const postsJson = await fs.promises.readFile(outputPath + '/content/posts_1.json', 'utf-8');
+					const postsJson = await fsp.readFile(outputPath + '/content/posts_1.json', 'utf-8');
 					const posts = JSON.parse(postsJson);
 					const igFolder = await this.driveFoldersRepository.findOneBy({ name: 'Instagram', userId: job.data.user.id, parentId: folder?.id });
 					if (igFolder == null && folder) {
@@ -264,16 +265,16 @@ export class ImportNotesProcessorService {
 					}
 					this.queueService.createImportIGToDbJob(job.data.user, posts);
 				} else if (isOutbox) {
-					const actorJson = await fs.promises.readFile(outputPath + '/actor.json', 'utf-8');
+					const actorJson = await fsp.readFile(outputPath + '/actor.json', 'utf-8');
 					const actor = JSON.parse(actorJson);
 					const isPleroma = actor['@context'].some((v: any) => typeof v === 'string' && v.match(/litepub(.*)/));
 					if (isPleroma) {
-						const outboxJson = await fs.promises.readFile(outputPath + '/outbox.json', 'utf-8');
+						const outboxJson = await fsp.readFile(outputPath + '/outbox.json', 'utf-8');
 						const outbox = JSON.parse(outboxJson);
 						const processedToots = await this.recreateChain(['object', 'id'], ['object', 'inReplyTo'], outbox.orderedItems.filter((x: any) => x.type === 'Create' && x.object.type === 'Note'), true);
 						this.queueService.createImportPleroToDbJob(job.data.user, processedToots, null);
 					} else {
-						const outboxJson = await fs.promises.readFile(outputPath + '/outbox.json', 'utf-8');
+						const outboxJson = await fsp.readFile(outputPath + '/outbox.json', 'utf-8');
 						const outbox = JSON.parse(outboxJson);
 						let mastoFolder = await this.driveFoldersRepository.findOneBy({ name: 'Mastodon', userId: job.data.user.id, parentId: folder?.id });
 						if (mastoFolder == null && folder) {
@@ -296,7 +297,7 @@ export class ImportNotesProcessorService {
 			this.logger.info(`Temp dir is ${path}`);
 
 			try {
-				await fs.promises.writeFile(path, '', 'utf-8');
+				await fsp.writeFile(path, '', 'utf-8');
 				await this.downloadService.downloadUrl(file.url, path);
 			} catch (e) { // TODO: 何度か再試行
 				if (e instanceof Error || typeof e === 'string') {
@@ -305,7 +306,7 @@ export class ImportNotesProcessorService {
 				throw e;
 			}
 
-			const notesJson = await fs.promises.readFile(path, 'utf-8');
+			const notesJson = await fsp.readFile(path, 'utf-8');
 			const notes = JSON.parse(notesJson);
 			const processedNotes = await this.recreateChain(['id'], ['replyId'], notes, false);
 			this.queueService.createImportKeyNotesToDbJob(job.data.user, processedNotes, null);
