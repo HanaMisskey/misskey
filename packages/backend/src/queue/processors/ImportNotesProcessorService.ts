@@ -187,14 +187,11 @@ export class ImportNotesProcessorService {
 				this.logger.succ(`Unzipping to ${outputPath}`);
 				ZipReader.withDestinationPath(outputPath).viaBuffer(await fs.promises.readFile(destPath));
 
-				const unprocessedTweetJson = this.parseTwitterFile(fs.readFileSync(outputPath + '/data/tweets.js', 'utf-8'));
+				const unprocessedTweets = this.parseTwitterFile(fs.readFileSync(outputPath + '/data/tweets.js', 'utf-8'));
 
 				//Make sure that it isnt null (because if something went wrong in parseTwitterFile it returns null)
 				if (unprocessedTweetJson) {
-					const tweets = Object.keys(unprocessedTweetJson).reduce((m, key, i, obj) => {
-						return m.concat(unprocessedTweetJson[i].tweet);
-					}, []);
-
+					const tweets = unprocessedTweets.map(e=>e.tweet);
 					const processedTweets = await this.recreateChain(['id_str'], ['in_reply_to_status_id_str'], tweets, false);
 					this.queueService.createImportTweetsToDbJob(job.data.user, processedTweets, null);
 				} else {
