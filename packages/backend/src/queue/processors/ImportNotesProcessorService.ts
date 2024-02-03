@@ -584,7 +584,8 @@ export class ImportNotesProcessorService {
 
 		try {
 			const date = new Date(tweet.created_at);
-			const textReplaceURLs = tweet.entities.urls && tweet.entities.urls.length > 0 ? await replaceTwitterUrls(tweet.full_text, tweet.entities.urls) : tweet.full_text;
+			const decodedText = tweet.full_text.replaceAll('&gt;','>').replaceAll('&lt;','<').replaceAll('&amp;','&');
+			const textReplaceURLs = tweet.entities.urls && tweet.entities.urls.length > 0 ? await replaceTwitterUrls(decodedText, tweet.entities.urls) : decodedText;
 			const text = tweet.entities.user_mentions && tweet.entities.user_mentions.length > 0 ? await replaceTwitterMentions(textReplaceURLs, tweet.entities.user_mentions) : textReplaceURLs;
 			const files: MiDriveFile[] = [];
 
