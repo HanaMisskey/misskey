@@ -131,7 +131,7 @@ export class ImportNotesProcessorService {
 	}
 
 	@bindThis
-	private parseTwitterFile(str : string) : null | { tweet: object }[] {
+	private parseTwitterFile(str : string) : { tweet: object }[] {
 		const jsonStr = str.replace(/^\s*window\.YTD\.tweets\.part0\s*=\s*/, '');
 
 		try {
@@ -191,7 +191,7 @@ export class ImportNotesProcessorService {
 
 				const unprocessedTweets = this.parseTwitterFile(await fs.promises.readFile(outputPath + '/data/tweets.js', 'utf-8'));
 
-				const tweets = unprocessedTweets.map(e=>e.tweet);
+				const tweets = unprocessedTweets.map(e => e.tweet);
 				const processedTweets = await this.recreateChain(['id_str'], ['in_reply_to_status_id_str'], tweets, false);
 				this.queueService.createImportTweetsToDbJob(job.data.user, processedTweets, null);
 			} finally {
@@ -584,7 +584,7 @@ export class ImportNotesProcessorService {
 
 		try {
 			const date = new Date(tweet.created_at);
-			const decodedText = tweet.full_text.replaceAll('&gt;','>').replaceAll('&lt;','<').replaceAll('&amp;','&');
+			const decodedText = tweet.full_text.replaceAll('&gt;', '>').replaceAll('&lt;', '<').replaceAll('&amp;', '&');
 			const textReplaceURLs = tweet.entities.urls && tweet.entities.urls.length > 0 ? await replaceTwitterUrls(decodedText, tweet.entities.urls) : decodedText;
 			const text = tweet.entities.user_mentions && tweet.entities.user_mentions.length > 0 ? await replaceTwitterMentions(textReplaceURLs, tweet.entities.user_mentions) : textReplaceURLs;
 			const files: MiDriveFile[] = [];
