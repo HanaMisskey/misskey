@@ -130,6 +130,7 @@ export class ImportNotesProcessorService {
 		return typeof obj[Symbol.iterator] === 'function';
 	}
 
+	@bindThis
 	private parseTwitterFile(str : string) : null | { tweet: object }[] {
 		const jsonStr = str.replace(/^\s*window\.YTD\.tweets\.part0\s*=\s*/, '');
 
@@ -137,7 +138,8 @@ export class ImportNotesProcessorService {
 			return JSON.parse(jsonStr);
 		} catch (error) {
 			//The format is not what we expected. Either this file was tampered with or twitters exports changed
-			return null;
+			this.logger.warn('Failed to import twitter notes due to malformed file');
+			throw error;
 		}
 	}
 
@@ -189,14 +191,9 @@ export class ImportNotesProcessorService {
 
 				const unprocessedTweets = this.parseTwitterFile(await fs.promises.readFile(outputPath + '/data/tweets.js', 'utf-8'));
 
-				//Make sure that it isnt null (because if something went wrong in parseTwitterFile it returns null)
-				if (unprocessedTweetJson) {
-					const tweets = unprocessedTweets.map(e=>e.tweet);
-					const processedTweets = await this.recreateChain(['id_str'], ['in_reply_to_status_id_str'], tweets, false);
-					this.queueService.createImportTweetsToDbJob(job.data.user, processedTweets, null);
-				} else {
-					this.logger.warn('Failed to import twitter notes due to malformed file');
-				}
+				const tweets = unprocessedTweets.map(e=>e.tweet);
+				const processedTweets = await this.recreateChain(['id_str'], ['in_reply_to_status_id_str'], tweets, false);
+				this.queueService.createImportTweetsToDbJob(job.data.user, processedTweets, null);
 			} finally {
 				cleanup();
 			}
