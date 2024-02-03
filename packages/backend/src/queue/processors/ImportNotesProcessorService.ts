@@ -130,11 +130,11 @@ export class ImportNotesProcessorService {
 		return typeof obj[Symbol.iterator] === 'function';
 	}
 
-	private parseTwitterFile(str : string) : null | [{ tweet: any }] {
-		const removed = str.replace(new RegExp('window\\.YTD\\.tweets\\.part0 = ', 'g'), '');
-	
+	private parseTwitterFile(str : string) : null | { tweet: object }[] {
+		const jsonStr = str.replace(/^\s*window\.YTD\.tweets\.part0\s*=\s*/, '');
+
 		try {
-			return JSON.parse(removed);
+			return JSON.parse(jsonStr);
 		} catch (error) {
 			//The format is not what we expected. Either this file was tampered with or twitters exports changed
 			return null;
