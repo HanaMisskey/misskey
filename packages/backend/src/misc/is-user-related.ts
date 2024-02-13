@@ -22,3 +22,11 @@ export function isUserRelated(note: any, userIds: Set<string>, ignoreAuthor = fa
 
 	return false;
 }
+
+export function isThisReactionUserRelated(reaction: any, userIds: Set<string>): boolean {
+	if (userIds.has(reaction.userId)) {
+		return true;
+	}
+
+	return false;
+}
