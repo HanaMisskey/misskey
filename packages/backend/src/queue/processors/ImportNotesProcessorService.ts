@@ -419,6 +419,10 @@ export class ImportNotesProcessorService {
 				const name = file.url.substring(slashdex + 1);
 				const exists = await this.driveFilesRepository.findOneBy({ name: name, userId: user.id });
 				if (exists) {
+					if (file.name) {
+						this.driveService.updateFile(exists, { comment: file.name }, user);
+					}
+					
 					files.push(exists);
 				}
 			}
