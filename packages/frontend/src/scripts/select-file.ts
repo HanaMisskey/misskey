@@ -5,6 +5,7 @@
 
 import { ref } from 'vue';
 import * as Misskey from 'misskey-js';
+import type { MenuItem } from '@/types/menu.js';
 import * as os from '@/os.js';
 import { misskeyApi } from '@/scripts/misskey-api.js';
 import { useStream } from '@/stream.js';
@@ -80,7 +81,7 @@ export function chooseFileFromUrl(): Promise<Misskey.entities.DriveFile> {
 	});
 }
 
-function select(src: any, label: string | null, multiple: boolean): Promise<Misskey.entities.DriveFile[]> {
+function select(src: any, label: string | null, multiple: boolean, additionalMenu: MenuItem[] = []): Promise<Misskey.entities.DriveFile[]> {
 	return new Promise((res, rej) => {
 		const keepOriginal = ref(defaultStore.state.keepOriginalUploading);
 
@@ -103,14 +104,14 @@ function select(src: any, label: string | null, multiple: boolean): Promise<Miss
 			text: i18n.ts.fromUrl,
 			icon: 'ti ti-link',
 			action: () => chooseFileFromUrl().then(file => res([file])),
-		}], src);
+		}, ...additionalMenu], src);
 	});
 }
 
-export function selectFile(src: any, label: string | null = null): Promise<Misskey.entities.DriveFile> {
-	return select(src, label, false).then(files => files[0]);
+export function selectFile(src: any, label: string | null = null, additionalMenu?: MenuItem[]): Promise<Misskey.entities.DriveFile> {
+	return select(src, label, false, additionalMenu).then(files => files[0]);
 }
 
-export function selectFiles(src: any, label: string | null = null): Promise<Misskey.entities.DriveFile[]> {
-	return select(src, label, true);
+export function selectFiles(src: any, label: string | null = null, additionalMenu?: MenuItem[]): Promise<Misskey.entities.DriveFile[]> {
+	return select(src, label, true, additionalMenu);
 }
