@@ -108,10 +108,10 @@ function select(src: any, label: string | null, multiple: boolean, additionalMen
 	});
 }
 
-export function selectFile(src: any, label: string | null = null, additionalMenu?: MenuItem[]): Promise<Misskey.entities.DriveFile> {
-	return select(src, label, false, additionalMenu).then(files => files[0]);
+export function selectFile(src: any, label: string | null = null, options?: { additionalMenu?: MenuItem[]; }): Promise<Misskey.entities.DriveFile> {
+	return select(src, label, false, options?.additionalMenu).then(files => files[0]);
 }
 
-export function selectFiles(src: any, label: string | null = null, additionalMenu?: MenuItem[]): Promise<Misskey.entities.DriveFile[]> {
-	return select(src, label, true, additionalMenu);
+export function selectFiles(src: any, label: string | null = null, options?: { additionalMenu?: MenuItem[]; }): Promise<Misskey.entities.DriveFile[]> {
+	return select(src, label, true, options?.additionalMenu);
 }
