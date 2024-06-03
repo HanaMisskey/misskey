@@ -20,12 +20,16 @@ import { IdService } from '@/core/IdService.js';
 import { QueueLoggerService } from '../QueueLoggerService.js';
 import type * as Bull from 'bullmq';
 import type { DbNoteImportToDbJobData, DbNoteImportJobData, DbNoteWithParentImportToDbJobData } from '../types.js';
+import type { Config } from '@/config.js';
 
 @Injectable()
 export class ImportNotesProcessorService {
 	private logger: Logger;
 
 	constructor(
+		@Inject(DI.config)
+		private config: Config,
+
 		@Inject(DI.usersRepository)
 		private usersRepository: UsersRepository,
 
@@ -72,6 +76,11 @@ export class ImportNotesProcessorService {
 				}
 			}
 		}
+	}
+
+	@bindThis
+	private downloadUrl(url: string, path:string): Promise<{filename: string}> {
+		return this.downloadService.downloadUrl(url, path, { operationTimeout: this.config.import?.downloadTimeout, maxSize: this.config.import?.maxFileSize });
 	}
 
 	@bindThis
@@ -177,7 +186,7 @@ export class ImportNotesProcessorService {
 
 			try {
 				await fsp.writeFile(destPath, '', 'binary');
-				await this.downloadService.downloadUrl(file.url, destPath);
+				await this.downloadUrl(file.url, destPath);
 			} catch (e) { // TODO: 何度か再試行
 				if (e instanceof Error || typeof e === 'string') {
 					this.logger.error(e);
@@ -207,7 +216,7 @@ export class ImportNotesProcessorService {
 
 			try {
 				await fsp.writeFile(destPath, '', 'binary');
-				await this.downloadService.downloadUrl(file.url, destPath);
+				await this.downloadUrl(file.url, destPath);
 			} catch (e) { // TODO: 何度か再試行
 				if (e instanceof Error || typeof e === 'string') {
 					this.logger.error(e);
@@ -240,7 +249,7 @@ export class ImportNotesProcessorService {
 
 			try {
 				await fsp.writeFile(destPath, '', 'binary');
-				await this.downloadService.downloadUrl(file.url, destPath);
+				await this.downloadUrl(file.url, destPath);
 			} catch (e) { // TODO: 何度か再試行
 				if (e instanceof Error || typeof e === 'string') {
 					this.logger.error(e);
@@ -298,7 +307,7 @@ export class ImportNotesProcessorService {
 
 			try {
 				await fsp.writeFile(path, '', 'utf-8');
-				await this.downloadService.downloadUrl(file.url, path);
+				await this.downloadUrl(file.url, path);
 			} catch (e) { // TODO: 何度か再試行
 				if (e instanceof Error || typeof e === 'string') {
 					this.logger.error(e);
@@ -350,7 +359,7 @@ export class ImportNotesProcessorService {
 
 				if (!exists) {
 					try {
-						await this.downloadService.downloadUrl(file.url, filePath);
+						await this.downloadUrl(file.url, filePath);
 					} catch (e) { // TODO: 何度か再試行
 						this.logger.error(e instanceof Error ? e : new Error(e as string));
 					}
@@ -489,7 +498,7 @@ export class ImportNotesProcessorService {
 
 				if (!exists) {
 					try {
-						await this.downloadService.downloadUrl(file.url, filePath);
+						await this.downloadUrl(file.url, filePath);
 					} catch (e) { // TODO: 何度か再試行
 						this.logger.error(e instanceof Error ? e : new Error(e as string));
 					}
