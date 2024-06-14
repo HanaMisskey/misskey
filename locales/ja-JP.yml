@@ -2687,8 +2687,10 @@ _mediaControls:
   loop: "ループ再生"
 
 _hana:
+  _premiumFunctions:
+    themeCustomize: "テーマのカスタマイズ"
   _plans:
-    basic: "テスト"
+    basic: "はなみすきープレミアム"
   _paywallPanel:
     title: "{func}を利用するには、{plan}以上のプランが必要です"
     titleFallback: "この機能を利用するには、はなみすきープレミアムが必要です"

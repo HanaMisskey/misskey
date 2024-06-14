@@ -10071,9 +10071,15 @@ export interface Locale extends ILocale {
         "loop": string;
     };
     "_hana": {
+        "_premiumFunctions": {
+            /**
+             * テーマのカスタマイズ
+             */
+            "themeCustomize": string;
+        };
         "_plans": {
             /**
-             * テスト
+             * はなみすきープレミアム
              */
             "basic": string;
         };

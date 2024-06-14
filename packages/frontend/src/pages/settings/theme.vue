@@ -70,7 +70,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 		<MkButton v-else @click="wallpaper = null">{{ i18n.ts.removeWallpaper }}</MkButton>
 	</template>
 
-	<HanaPaywallPanel v-else/>
+	<HanaPaywallPanel v-else :funcName="i18n.ts._hana._premiumFunctions.themeCustomize" :planName="i18n.ts._hana._plans.basic"/>
 </div>
 </template>
 
