@@ -6647,6 +6647,10 @@ export interface Locale extends ILocale {
              */
             "canUseTranslator": string;
             /**
+             * クライアントテーマのカスタマイズ
+             */
+            "canUseCustomTheme": string;
+            /**
              * アイコンデコレーションの最大取付個数
              */
             "avatarDecorationLimit": string;
@@ -10065,6 +10069,28 @@ export interface Locale extends ILocale {
          * ループ再生
          */
         "loop": string;
+    };
+    "_hana": {
+        "_plans": {
+            /**
+             * テスト
+             */
+            "basic": string;
+        };
+        "_paywallPanel": {
+            /**
+             * {func}を利用するには、{plan}以上のプランが必要です
+             */
+            "title": ParameterizedString<"func" | "plan">;
+            /**
+             * この機能を利用するには、はなみすきープレミアムが必要です
+             */
+            "titleFallback": string;
+            /**
+             * はなみすきープレミアムに登録して、あなた色の花が咲き誇るSNS体験をしてみませんか。
+             */
+            "description": string;
+        };
     };
 }
 declare const locales: {
