@@ -101,6 +101,9 @@ importers:
       '@discordapp/twemoji':
         specifier: 15.1.0
         version: 15.1.0
+      '@elastic/elasticsearch':
+        specifier: ^8.14.0
+        version: 8.14.0
       '@fastify/accepts':
         specifier: 5.0.1
         version: 5.0.1
@@ -1967,6 +1970,14 @@ packages:
 
   '@discordapp/twemoji@15.1.0':
     resolution: {integrity: sha512-QdpV4ifTONAXvDjRrMohausZeGrQ1ac/Ox6togUh6Xl3XKJ/KAaMMuAEi0qsb0wDwoVTSZBll5Y6+N3hB2ktBw==}
+
+  '@elastic/elasticsearch@8.14.0':
+    resolution: {integrity: sha512-MGrgCI4y+Ozssf5Q2IkVJlqt5bUMnKIICG2qxeOfrJNrVugMCBCAQypyesmSSocAtNm8IX3LxfJ3jQlFHmKe2w==}
+    engines: {node: '>=18'}
+
+  '@elastic/transport@8.7.0':
+    resolution: {integrity: sha512-IqXT7a8DZPJtqP2qmX1I2QKmxYyN27kvSW4g6pInESE1SuGwZDp2FxHJ6W2kwmYOJwQdAt+2aWwzXO5jHo9l4A==}
+    engines: {node: '>=18'}
 
   '@emnapi/runtime@1.2.0':
     resolution: {integrity: sha512-bV21/9LQmcQeCPEg3BDFtvwL6cwiTMksYNWQQ4KOxCZikEGalWtenoZ0wCiukJINlGCIi2KXx01g4FoH/LxpzQ==}
@@ -11430,6 +11441,9 @@ packages:
   vue-component-type-helpers@2.1.6:
     resolution: {integrity: sha512-ng11B8B/ZADUMMOsRbqv0arc442q7lifSubD0v8oDXIFoMg/mXwAPUunrroIDkY+mcD0dHKccdaznSVp8EoX3w==}
 
+  vue-component-type-helpers@2.0.26:
+    resolution: {integrity: sha512-sO9qQ8oC520SW6kqlls0iqDak53gsTVSrYylajgjmkt1c0vcgjsGSy1KzlDrbEx8pm02IEYhlUkU5hCYf8rwtg==}
+
   vue-demi@0.14.7:
     resolution: {integrity: sha512-EOG8KXDQNwkJILkx/gPcoL/7vH+hORoBaKgGe+6W7VFMvCYJfmF2dGbvgDroVnI8LU7/kTu8mbjRZGBU1z9NTA==}
     engines: {node: '>=12'}
@@ -12734,6 +12748,25 @@ snapshots:
       fs-extra: 8.1.0
       jsonfile: 5.0.0
       universalify: 0.1.2
+
+  '@elastic/elasticsearch@8.14.0':
+    dependencies:
+      '@elastic/transport': 8.7.0
+      tslib: 2.6.2
+    transitivePeerDependencies:
+      - supports-color
+
+  '@elastic/transport@8.7.0':
+    dependencies:
+      '@opentelemetry/api': 1.9.0
+      debug: 4.3.4(supports-color@8.1.1)
+      hpagent: 1.2.0
+      ms: 2.1.3
+      secure-json-parse: 2.7.0
+      tslib: 2.6.2
+      undici: 6.19.2
+    transitivePeerDependencies:
+      - supports-color
 
   '@emnapi/runtime@1.2.0':
     dependencies:
