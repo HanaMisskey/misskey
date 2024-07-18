@@ -15,6 +15,26 @@ export const meta = {
 	requireCredential: true,
 
 	secure: true,
+
+	errors: {
+		incorrectPassword: {
+			message: 'Incorrect password.',
+			code: 'INCORRECT_PASSWORD',
+			id: '44326b04-08ea-4525-b01c-98cc117bdd2a',
+		},
+
+		authenticationFailed: {
+			message: 'Authentication failed.',
+			code: 'AUTHENTICATION_FAILED',
+			id: 'ea791cff-63e7-4b2a-92fc-646ab641794e',
+		},
+
+		subscriptionIsActive: {
+			message: 'If Subscription is active, cannot move account.',
+			code: 'SUBSCRIPTION_IS_ACTIVE',
+			id: 'f5c8b3b4-9e4d-4b7f-9f4d-9f1f0a7a3d0a',
+		},
+	},
 } as const;
 
 export const paramDef = {

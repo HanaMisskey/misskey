@@ -62,6 +62,11 @@ type Source = {
 
 	publishTarballInsteadOfProvideRepositoryUrl?: boolean;
 
+	stripe?: {
+		secretKey: string;
+		webhookSecret: string;
+	};
+
 	proxy?: string;
 	proxySmtp?: string;
 	proxyBypassHosts?: string[];
@@ -128,6 +133,10 @@ export type Config = {
 		ssl?: boolean;
 		index: string;
 		scope?: 'local' | 'global' | string[];
+	} | undefined;
+	stripe: {
+		secretKey: string;
+		webhookSecret?: string;
 	} | undefined;
 	proxy: string | undefined;
 	proxySmtp: string | undefined;
@@ -239,6 +248,7 @@ export function loadConfig(): Config {
 		dbReplications: config.dbReplications,
 		dbSlaves: config.dbSlaves,
 		meilisearch: config.meilisearch,
+		stripe: config.stripe,
 		redis,
 		redisForPubsub: config.redisForPubsub ? convertRedisOptions(config.redisForPubsub, host) : redis,
 		redisForJobQueue: config.redisForJobQueue ? convertRedisOptions(config.redisForJobQueue, host) : redis,

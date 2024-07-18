@@ -335,34 +335,19 @@ type AdminShowUsersRequest = operations['admin___show-users']['requestBody']['co
 type AdminShowUsersResponse = operations['admin___show-users']['responses']['200']['content']['application/json'];
 
 // @public (undocumented)
+type AdminSubscriptionPlansArchiveRequest = operations['admin___subscription-plans___archive']['requestBody']['content']['application/json'];
+
+// @public (undocumented)
+type AdminSubscriptionPlansCreateRequest = operations['admin___subscription-plans___create']['requestBody']['content']['application/json'];
+
+// @public (undocumented)
+type AdminSubscriptionPlansCreateResponse = operations['admin___subscription-plans___create']['responses']['200']['content']['application/json'];
+
+// @public (undocumented)
+type AdminSubscriptionPlansUpdateRequest = operations['admin___subscription-plans___update']['requestBody']['content']['application/json'];
+
+// @public (undocumented)
 type AdminSuspendUserRequest = operations['admin___suspend-user']['requestBody']['content']['application/json'];
-
-// @public (undocumented)
-type AdminSystemWebhookCreateRequest = operations['admin___system-webhook___create']['requestBody']['content']['application/json'];
-
-// @public (undocumented)
-type AdminSystemWebhookCreateResponse = operations['admin___system-webhook___create']['responses']['200']['content']['application/json'];
-
-// @public (undocumented)
-type AdminSystemWebhookDeleteRequest = operations['admin___system-webhook___delete']['requestBody']['content']['application/json'];
-
-// @public (undocumented)
-type AdminSystemWebhookListRequest = operations['admin___system-webhook___list']['requestBody']['content']['application/json'];
-
-// @public (undocumented)
-type AdminSystemWebhookListResponse = operations['admin___system-webhook___list']['responses']['200']['content']['application/json'];
-
-// @public (undocumented)
-type AdminSystemWebhookShowRequest = operations['admin___system-webhook___show']['requestBody']['content']['application/json'];
-
-// @public (undocumented)
-type AdminSystemWebhookShowResponse = operations['admin___system-webhook___show']['responses']['200']['content']['application/json'];
-
-// @public (undocumented)
-type AdminSystemWebhookUpdateRequest = operations['admin___system-webhook___update']['requestBody']['content']['application/json'];
-
-// @public (undocumented)
-type AdminSystemWebhookUpdateResponse = operations['admin___system-webhook___update']['responses']['200']['content']['application/json'];
 
 // @public (undocumented)
 type AdminUnsetUserAvatarRequest = operations['admin___unset-user-avatar']['requestBody']['content']['application/json'];
@@ -1301,15 +1286,10 @@ declare namespace entities {
         AdminRolesUpdateDefaultPoliciesRequest,
         AdminRolesUsersRequest,
         AdminRolesUsersResponse,
-        AdminSystemWebhookCreateRequest,
-        AdminSystemWebhookCreateResponse,
-        AdminSystemWebhookDeleteRequest,
-        AdminSystemWebhookListRequest,
-        AdminSystemWebhookListResponse,
-        AdminSystemWebhookShowRequest,
-        AdminSystemWebhookShowResponse,
-        AdminSystemWebhookUpdateRequest,
-        AdminSystemWebhookUpdateResponse,
+        AdminSubscriptionPlansCreateRequest,
+        AdminSubscriptionPlansCreateResponse,
+        AdminSubscriptionPlansUpdateRequest,
+        AdminSubscriptionPlansArchiveRequest,
         AnnouncementsRequest,
         AnnouncementsResponse,
         AnnouncementsShowRequest,
@@ -1538,6 +1518,7 @@ declare namespace entities {
         IPinResponse,
         IReadAnnouncementRequest,
         IRegenerateTokenRequest,
+        IRegisterSubscriptionRequest,
         IRegistryGetAllRequest,
         IRegistryGetAllResponse,
         IRegistryGetDetailRequest,
@@ -1680,6 +1661,9 @@ declare namespace entities {
         ResetPasswordRequest,
         ServerInfoResponse,
         StatsResponse,
+        SubscriptionPlansListResponse,
+        SubscriptionPlansShowRequest,
+        SubscriptionPlansShowResponse,
         SwShowRegistrationRequest,
         SwShowRegistrationResponse,
         SwUpdateRegistrationRequest,
@@ -1817,7 +1801,8 @@ declare namespace entities {
         MetaDetailedOnly,
         MetaDetailed,
         SystemWebhook,
-        AbuseReportNotificationRecipient
+        AbuseReportNotificationRecipient,
+        SubscriptionPlan
     }
 }
 export { entities }
@@ -2225,6 +2210,9 @@ type IReadAnnouncementRequest = operations['i___read-announcement']['requestBody
 
 // @public (undocumented)
 type IRegenerateTokenRequest = operations['i___regenerate-token']['requestBody']['content']['application/json'];
+
+// @public (undocumented)
+type IRegisterSubscriptionRequest = operations['i___register-subscription']['requestBody']['content']['application/json'];
 
 // @public (undocumented)
 type IRegistryGetAllRequest = operations['i___registry___get-all']['requestBody']['content']['application/json'];
@@ -3000,6 +2988,18 @@ export class Stream extends EventEmitter<StreamEvents> {
     // (undocumented)
     useChannel<C extends keyof Channels>(channel: C, params?: Channels[C]['params'], name?: string): ChannelConnection<Channels[C]>;
 }
+
+// @public (undocumented)
+type SubscriptionPlan = components['schemas']['SubscriptionPlan'];
+
+// @public (undocumented)
+type SubscriptionPlansListResponse = operations['subscription-plans___list']['responses']['200']['content']['application/json'];
+
+// @public (undocumented)
+type SubscriptionPlansShowRequest = operations['subscription-plans___show']['requestBody']['content']['application/json'];
+
+// @public (undocumented)
+type SubscriptionPlansShowResponse = operations['subscription-plans___show']['responses']['200']['content']['application/json'];
 
 // Warning: (ae-forgotten-export) The symbol "SwitchCase" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "IsCaseMatched" needs to be exported by the entry point index.d.ts

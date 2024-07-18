@@ -401,6 +401,9 @@ importers:
       stringz:
         specifier: 2.1.0
         version: 2.1.0
+      stripe:
+        specifier: 16.2.0
+        version: 16.2.0
       systeminformation:
         specifier: 5.22.11
         version: 5.22.11
@@ -11067,6 +11070,10 @@ packages:
   strip-outer@2.0.0:
     resolution: {integrity: sha512-A21Xsm1XzUkK0qK1ZrytDUvqsQWict2Cykhvi0fBQntGG5JSprESasEyV1EZ/4CiR5WB5KjzLTrP/bO37B0wPg==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+
+  stripe@16.2.0:
+    resolution: {integrity: sha512-kNHb5x6mlQJ8V92Afn+F+uyHG3U0+Mc1pOYxDkbEh/kI3oF63URnUt6dwTQthELYWBy04arerm2XjwgtzEPDEA==}
+    engines: {node: '>=12.*'}
 
   strnum@1.0.5:
     resolution: {integrity: sha512-J8bbNyKKXl5qYcR36TIO8W3mVGVHrmmxsd5PAItGkmyzwJvybiw2IVq5nqd0i4LSNSkB/sx9VHllbfFdr9k1JA==}
@@ -24466,6 +24473,11 @@ snapshots:
       js-tokens: 9.0.0
 
   strip-outer@2.0.0: {}
+
+  stripe@16.2.0:
+    dependencies:
+      '@types/node': 20.12.12
+      qs: 6.12.1
 
   strnum@1.0.5: {}
 

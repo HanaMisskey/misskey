@@ -108,15 +108,10 @@ import type {
 	AdminRolesUpdateDefaultPoliciesRequest,
 	AdminRolesUsersRequest,
 	AdminRolesUsersResponse,
-	AdminSystemWebhookCreateRequest,
-	AdminSystemWebhookCreateResponse,
-	AdminSystemWebhookDeleteRequest,
-	AdminSystemWebhookListRequest,
-	AdminSystemWebhookListResponse,
-	AdminSystemWebhookShowRequest,
-	AdminSystemWebhookShowResponse,
-	AdminSystemWebhookUpdateRequest,
-	AdminSystemWebhookUpdateResponse,
+	AdminSubscriptionPlansCreateRequest,
+	AdminSubscriptionPlansCreateResponse,
+	AdminSubscriptionPlansUpdateRequest,
+	AdminSubscriptionPlansArchiveRequest,
 	AnnouncementsRequest,
 	AnnouncementsResponse,
 	AnnouncementsShowRequest,
@@ -345,6 +340,7 @@ import type {
 	IPinResponse,
 	IReadAnnouncementRequest,
 	IRegenerateTokenRequest,
+	IRegisterSubscriptionRequest,
 	IRegistryGetAllRequest,
 	IRegistryGetAllResponse,
 	IRegistryGetDetailRequest,
@@ -487,6 +483,9 @@ import type {
 	ResetPasswordRequest,
 	ServerInfoResponse,
 	StatsResponse,
+	SubscriptionPlansListResponse,
+	SubscriptionPlansShowRequest,
+	SubscriptionPlansShowResponse,
 	SwShowRegistrationRequest,
 	SwShowRegistrationResponse,
 	SwUpdateRegistrationRequest,
@@ -655,11 +654,9 @@ export type Endpoints = {
 	'admin/roles/unassign': { req: AdminRolesUnassignRequest; res: EmptyResponse };
 	'admin/roles/update-default-policies': { req: AdminRolesUpdateDefaultPoliciesRequest; res: EmptyResponse };
 	'admin/roles/users': { req: AdminRolesUsersRequest; res: AdminRolesUsersResponse };
-	'admin/system-webhook/create': { req: AdminSystemWebhookCreateRequest; res: AdminSystemWebhookCreateResponse };
-	'admin/system-webhook/delete': { req: AdminSystemWebhookDeleteRequest; res: EmptyResponse };
-	'admin/system-webhook/list': { req: AdminSystemWebhookListRequest; res: AdminSystemWebhookListResponse };
-	'admin/system-webhook/show': { req: AdminSystemWebhookShowRequest; res: AdminSystemWebhookShowResponse };
-	'admin/system-webhook/update': { req: AdminSystemWebhookUpdateRequest; res: AdminSystemWebhookUpdateResponse };
+	'admin/subscription-plans/create': { req: AdminSubscriptionPlansCreateRequest; res: AdminSubscriptionPlansCreateResponse };
+	'admin/subscription-plans/update': { req: AdminSubscriptionPlansUpdateRequest; res: EmptyResponse };
+	'admin/subscription-plans/archive': { req: AdminSubscriptionPlansArchiveRequest; res: EmptyResponse };
 	'announcements': { req: AnnouncementsRequest; res: AnnouncementsResponse };
 	'announcements/show': { req: AnnouncementsShowRequest; res: AnnouncementsShowResponse };
 	'antennas/create': { req: AntennasCreateRequest; res: AntennasCreateResponse };
@@ -782,6 +779,7 @@ export type Endpoints = {
 	'i/authorized-apps': { req: IAuthorizedAppsRequest; res: IAuthorizedAppsResponse };
 	'i/claim-achievement': { req: IClaimAchievementRequest; res: EmptyResponse };
 	'i/change-password': { req: IChangePasswordRequest; res: EmptyResponse };
+	'i/customer-portal': { req: EmptyRequest; res: EmptyResponse };
 	'i/delete-account': { req: IDeleteAccountRequest; res: EmptyResponse };
 	'i/export-blocking': { req: EmptyRequest; res: EmptyResponse };
 	'i/export-following': { req: IExportFollowingRequest; res: EmptyResponse };
@@ -807,6 +805,7 @@ export type Endpoints = {
 	'i/read-all-unread-notes': { req: EmptyRequest; res: EmptyResponse };
 	'i/read-announcement': { req: IReadAnnouncementRequest; res: EmptyResponse };
 	'i/regenerate-token': { req: IRegenerateTokenRequest; res: EmptyResponse };
+	'i/register-subscription': { req: IRegisterSubscriptionRequest; res: EmptyResponse };
 	'i/registry/get-all': { req: IRegistryGetAllRequest; res: IRegistryGetAllResponse };
 	'i/registry/get-detail': { req: IRegistryGetDetailRequest; res: IRegistryGetDetailResponse };
 	'i/registry/get': { req: IRegistryGetRequest; res: IRegistryGetResponse };
@@ -904,6 +903,8 @@ export type Endpoints = {
 	'reset-password': { req: ResetPasswordRequest; res: EmptyResponse };
 	'server-info': { req: EmptyRequest; res: ServerInfoResponse };
 	'stats': { req: EmptyRequest; res: StatsResponse };
+	'subscription-plans/list': { req: EmptyRequest; res: SubscriptionPlansListResponse };
+	'subscription-plans/show': { req: SubscriptionPlansShowRequest; res: SubscriptionPlansShowResponse };
 	'sw/show-registration': { req: SwShowRegistrationRequest; res: SwShowRegistrationResponse };
 	'sw/update-registration': { req: SwUpdateRegistrationRequest; res: SwUpdateRegistrationResponse };
 	'sw/register': { req: SwRegisterRequest; res: SwRegisterResponse };
@@ -1037,11 +1038,9 @@ export const endpointReqTypes: Record<keyof Endpoints, 'application/json' | 'mul
 	'admin/roles/unassign': 'application/json',
 	'admin/roles/update-default-policies': 'application/json',
 	'admin/roles/users': 'application/json',
-	'admin/system-webhook/create': 'application/json',
-	'admin/system-webhook/delete': 'application/json',
-	'admin/system-webhook/list': 'application/json',
-	'admin/system-webhook/show': 'application/json',
-	'admin/system-webhook/update': 'application/json',
+	'admin/subscription-plans/create': 'application/json',
+	'admin/subscription-plans/update': 'application/json',
+	'admin/subscription-plans/archive': 'application/json',
 	'announcements': 'application/json',
 	'announcements/show': 'application/json',
 	'antennas/create': 'application/json',
@@ -1164,6 +1163,7 @@ export const endpointReqTypes: Record<keyof Endpoints, 'application/json' | 'mul
 	'i/authorized-apps': 'application/json',
 	'i/claim-achievement': 'application/json',
 	'i/change-password': 'application/json',
+	'i/customer-portal': 'application/json',
 	'i/delete-account': 'application/json',
 	'i/export-blocking': 'application/json',
 	'i/export-following': 'application/json',
@@ -1189,6 +1189,7 @@ export const endpointReqTypes: Record<keyof Endpoints, 'application/json' | 'mul
 	'i/read-all-unread-notes': 'application/json',
 	'i/read-announcement': 'application/json',
 	'i/regenerate-token': 'application/json',
+	'i/register-subscription': 'application/json',
 	'i/registry/get-all': 'application/json',
 	'i/registry/get-detail': 'application/json',
 	'i/registry/get': 'application/json',
@@ -1286,6 +1287,8 @@ export const endpointReqTypes: Record<keyof Endpoints, 'application/json' | 'mul
 	'reset-password': 'application/json',
 	'server-info': 'application/json',
 	'stats': 'application/json',
+	'subscription-plans/list': 'application/json',
+	'subscription-plans/show': 'application/json',
 	'sw/show-registration': 'application/json',
 	'sw/update-registration': 'application/json',
 	'sw/register': 'application/json',

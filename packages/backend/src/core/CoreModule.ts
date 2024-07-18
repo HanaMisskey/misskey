@@ -127,6 +127,7 @@ import { FlashLikeEntityService } from './entities/FlashLikeEntityService.js';
 import { RoleEntityService } from './entities/RoleEntityService.js';
 import { ReversiGameEntityService } from './entities/ReversiGameEntityService.js';
 import { MetaEntityService } from './entities/MetaEntityService.js';
+import { SubscriptionPlanEntityService } from './entities/SubscriptionPlanEntityService.js';
 
 import { ApAudienceService } from './activitypub/ApAudienceService.js';
 import { ApDbResolverService } from './activitypub/ApDbResolverService.js';
@@ -274,6 +275,7 @@ const $RoleEntityService: Provider = { provide: 'RoleEntityService', useExisting
 const $ReversiGameEntityService: Provider = { provide: 'ReversiGameEntityService', useExisting: ReversiGameEntityService };
 const $MetaEntityService: Provider = { provide: 'MetaEntityService', useExisting: MetaEntityService };
 const $SystemWebhookEntityService: Provider = { provide: 'SystemWebhookEntityService', useExisting: SystemWebhookEntityService };
+const $SubscriptionPlanEntityService: Provider = { provide: 'SubscriptionPlanEntityService', useExisting: SubscriptionPlanEntityService };
 
 const $ApAudienceService: Provider = { provide: 'ApAudienceService', useExisting: ApAudienceService };
 const $ApDbResolverService: Provider = { provide: 'ApDbResolverService', useExisting: ApDbResolverService };
@@ -422,6 +424,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		ReversiGameEntityService,
 		MetaEntityService,
 		SystemWebhookEntityService,
+		SubscriptionPlanEntityService,
 
 		ApAudienceService,
 		ApDbResolverService,
@@ -566,6 +569,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$ReversiGameEntityService,
 		$MetaEntityService,
 		$SystemWebhookEntityService,
+		$SubscriptionPlanEntityService,
 
 		$ApAudienceService,
 		$ApDbResolverService,
@@ -710,6 +714,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		ReversiGameEntityService,
 		MetaEntityService,
 		SystemWebhookEntityService,
+		SubscriptionPlanEntityService,
 
 		ApAudienceService,
 		ApDbResolverService,
@@ -853,6 +858,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$ReversiGameEntityService,
 		$MetaEntityService,
 		$SystemWebhookEntityService,
+		$SubscriptionPlanEntityService,
 
 		$ApAudienceService,
 		$ApDbResolverService,

@@ -98,6 +98,9 @@ import * as ep___admin_systemWebhook_delete from './endpoints/admin/system-webho
 import * as ep___admin_systemWebhook_list from './endpoints/admin/system-webhook/list.js';
 import * as ep___admin_systemWebhook_show from './endpoints/admin/system-webhook/show.js';
 import * as ep___admin_systemWebhook_update from './endpoints/admin/system-webhook/update.js';
+import * as ep___admin_subscriptionPlans_create from './endpoints/admin/subscription-plans/create.js';
+import * as ep___admin_subscriptionPlans_update from './endpoints/admin/subscription-plans/update.js';
+import * as ep___admin_subscriptionPlans_archive from './endpoints/admin/subscription-plans/archive.js';
 import * as ep___announcements from './endpoints/announcements.js';
 import * as ep___announcements_show from './endpoints/announcements/show.js';
 import * as ep___antennas_create from './endpoints/antennas/create.js';
@@ -220,6 +223,7 @@ import * as ep___i_apps from './endpoints/i/apps.js';
 import * as ep___i_authorizedApps from './endpoints/i/authorized-apps.js';
 import * as ep___i_claimAchievement from './endpoints/i/claim-achievement.js';
 import * as ep___i_changePassword from './endpoints/i/change-password.js';
+import * as ep___i_customerPortal from './endpoints/i/customer-portal.js';
 import * as ep___i_deleteAccount from './endpoints/i/delete-account.js';
 import * as ep___i_exportBlocking from './endpoints/i/export-blocking.js';
 import * as ep___i_exportFollowing from './endpoints/i/export-following.js';
@@ -245,6 +249,7 @@ import * as ep___i_pin from './endpoints/i/pin.js';
 import * as ep___i_readAllUnreadNotes from './endpoints/i/read-all-unread-notes.js';
 import * as ep___i_readAnnouncement from './endpoints/i/read-announcement.js';
 import * as ep___i_regenerateToken from './endpoints/i/regenerate-token.js';
+import * as ep___i_registerSubscription from './endpoints/i/register-subscription.js';
 import * as ep___i_registry_getAll from './endpoints/i/registry/get-all.js';
 import * as ep___i_registry_getDetail from './endpoints/i/registry/get-detail.js';
 import * as ep___i_registry_get from './endpoints/i/registry/get.js';
@@ -342,6 +347,8 @@ import * as ep___resetDb from './endpoints/reset-db.js';
 import * as ep___resetPassword from './endpoints/reset-password.js';
 import * as ep___serverInfo from './endpoints/server-info.js';
 import * as ep___stats from './endpoints/stats.js';
+import * as ep___subscription_plans_list from './endpoints/subscription-plans/list.js';
+import * as ep___subscription_plans_show from './endpoints/subscription-plans/show.js';
 import * as ep___sw_show_registration from './endpoints/sw/show-registration.js';
 import * as ep___sw_update_registration from './endpoints/sw/update-registration.js';
 import * as ep___sw_register from './endpoints/sw/register.js';
@@ -474,11 +481,9 @@ const eps = [
 	['admin/roles/unassign', ep___admin_roles_unassign],
 	['admin/roles/update-default-policies', ep___admin_roles_updateDefaultPolicies],
 	['admin/roles/users', ep___admin_roles_users],
-	['admin/system-webhook/create', ep___admin_systemWebhook_create],
-	['admin/system-webhook/delete', ep___admin_systemWebhook_delete],
-	['admin/system-webhook/list', ep___admin_systemWebhook_list],
-	['admin/system-webhook/show', ep___admin_systemWebhook_show],
-	['admin/system-webhook/update', ep___admin_systemWebhook_update],
+	['admin/subscription-plans/create', ep___admin_subscriptionPlans_create],
+	['admin/subscription-plans/update', ep___admin_subscriptionPlans_update],
+	['admin/subscription-plans/archive', ep___admin_subscriptionPlans_archive],
 	['announcements', ep___announcements],
 	['announcements/show', ep___announcements_show],
 	['antennas/create', ep___antennas_create],
@@ -601,6 +606,7 @@ const eps = [
 	['i/authorized-apps', ep___i_authorizedApps],
 	['i/claim-achievement', ep___i_claimAchievement],
 	['i/change-password', ep___i_changePassword],
+	['i/customer-portal', ep___i_customerPortal],
 	['i/delete-account', ep___i_deleteAccount],
 	['i/export-blocking', ep___i_exportBlocking],
 	['i/export-following', ep___i_exportFollowing],
@@ -626,6 +632,7 @@ const eps = [
 	['i/read-all-unread-notes', ep___i_readAllUnreadNotes],
 	['i/read-announcement', ep___i_readAnnouncement],
 	['i/regenerate-token', ep___i_regenerateToken],
+	['i/register-subscription', ep___i_registerSubscription],
 	['i/registry/get-all', ep___i_registry_getAll],
 	['i/registry/get-detail', ep___i_registry_getDetail],
 	['i/registry/get', ep___i_registry_get],
@@ -723,6 +730,8 @@ const eps = [
 	['reset-password', ep___resetPassword],
 	['server-info', ep___serverInfo],
 	['stats', ep___stats],
+	['subscription-plans/list', ep___subscription_plans_list],
+	['subscription-plans/show', ep___subscription_plans_show],
 	['sw/show-registration', ep___sw_show_registration],
 	['sw/update-registration', ep___sw_update_registration],
 	['sw/register', ep___sw_register],

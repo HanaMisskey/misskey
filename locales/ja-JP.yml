@@ -1250,6 +1250,14 @@ inquiry: "お問い合わせ"
 tryAgain: "もう一度お試しください。"
 confirmWhenRevealingSensitiveMedia: "センシティブなメディアを表示するとき確認する"
 sensitiveMediaRevealConfirm: "センシティブなメディアです。表示しますか？"
+subscription: "サブスクリプション"
+subscriptionStatus: "サブスクリプションの状態"
+
+_subscription:
+  current: "現在のプラン"
+  createSubscriptionPlan: "プランを作成"
+  updateSubscriptionPlan: "プランを更新"
+  archiveSubscriptionPlan: "プランをアーカイブ"
 
 _delivery:
   status: "配信状態"
