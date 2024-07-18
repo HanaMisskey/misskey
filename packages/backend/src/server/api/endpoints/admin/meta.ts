@@ -449,6 +449,10 @@ export const meta = {
 				type: 'string',
 				optional: false, nullable: true,
 			},
+			commerceDisclosureUrl: {
+				type: 'string',
+				optional: false, nullable: true,
+			},
 			uri: {
 				type: 'string',
 				optional: false, nullable: false,
@@ -611,6 +615,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				perUserHomeTimelineCacheMax: instance.perUserHomeTimelineCacheMax,
 				perUserListTimelineCacheMax: instance.perUserListTimelineCacheMax,
 				notesPerOneAd: instance.notesPerOneAd,
+				commerceDisclosureUrl: instance.commerceDisclosureUrl,
 				summalyProxy: instance.urlPreviewSummaryProxyUrl,
 				urlPreviewEnabled: instance.urlPreviewEnabled,
 				urlPreviewTimeout: instance.urlPreviewTimeout,

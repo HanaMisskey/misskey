@@ -4953,6 +4953,7 @@ export type components = {
       impressumUrl: string | null;
       logoImageUrl: string | null;
       privacyPolicyUrl: string | null;
+      commerceDisclosureUrl: string | null;
       inquiryUrl: string | null;
       serverRules: string[];
       themeColor: string | null;
@@ -5161,6 +5162,7 @@ export type operations = {
             summalyProxy: string | null;
             themeColor: string | null;
             tosUrl: string | null;
+            commerceDisclosureUrl: string | null;
             uri: string;
             version: string;
             urlPreviewEnabled: boolean;
@@ -9406,6 +9408,7 @@ export type operations = {
           perUserHomeTimelineCacheMax?: number;
           perUserListTimelineCacheMax?: number;
           notesPerOneAd?: number;
+          commerceDisclosureUrl?: string | null;
           silencedHosts?: string[] | null;
           /** @description [Deprecated] Use "urlPreviewSummaryProxyUrl" instead. */
           summalyProxy?: string | null;

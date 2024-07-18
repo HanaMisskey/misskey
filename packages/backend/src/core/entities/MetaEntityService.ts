@@ -129,6 +129,7 @@ export class MetaEntityService {
 			mediaProxy: this.config.mediaProxy,
 			enableUrlPreview: instance.urlPreviewEnabled,
 			enableSubscriptions: instance.enableSubscriptions,
+			commerceDisclosureUrl: instance.commerceDisclosureUrl,
 		};
 
 		return packed;

@@ -1196,6 +1196,8 @@ impressumDescription: "ドイツなどの一部の国と地域では表示が義
 privacyPolicy: "プライバシーポリシー"
 privacyPolicyUrl: "プライバシーポリシーURL"
 tosAndPrivacyPolicy: "利用規約・プライバシーポリシー"
+commerceDisclosure: "特定商取引法に基づく表記"
+commerceDisclosureUrl: "特定商取引法に基づく表記URL"
 avatarDecorations: "アイコンデコレーション"
 attach: "付ける"
 detach: "外す"

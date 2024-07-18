@@ -36,6 +36,11 @@ SPDX-License-Identifier: AGPL-3.0-only
 						<template #caption>{{ i18n.ts._serverSettings.inquiryUrlDescription }}</template>
 					</MkInput>
 
+					<MkInput v-model="commerceDisclosureUrl" type="url">
+						<template #prefix><i class="ti ti-link"></i></template>
+						<template #label>{{ i18n.ts.commerceDisclosureUrl }}</template>
+					</MkInput>
+
 					<MkTextarea v-model="preservedUsernames">
 						<template #label>{{ i18n.ts.preservedUsernames }}</template>
 						<template #caption>{{ i18n.ts.preservedUsernamesDescription }}</template>
@@ -93,6 +98,7 @@ const preservedUsernames = ref<string>('');
 const tosUrl = ref<string | null>(null);
 const privacyPolicyUrl = ref<string | null>(null);
 const inquiryUrl = ref<string | null>(null);
+const commerceDisclosureUrl = ref<string | null>(null);
 
 async function init() {
 	const meta = await misskeyApi('admin/meta');
@@ -105,6 +111,7 @@ async function init() {
 	tosUrl.value = meta.tosUrl;
 	privacyPolicyUrl.value = meta.privacyPolicyUrl;
 	inquiryUrl.value = meta.inquiryUrl;
+	commerceDisclosureUrl.value = meta.commerceDisclosureUrl;
 }
 
 function save() {
@@ -114,6 +121,7 @@ function save() {
 		tosUrl: tosUrl.value,
 		privacyPolicyUrl: privacyPolicyUrl.value,
 		inquiryUrl: inquiryUrl.value,
+		commerceDisclosureUrl: commerceDisclosureUrl.value,
 		sensitiveWords: sensitiveWords.value.split('\n'),
 		prohibitedWords: prohibitedWords.value.split('\n'),
 		hiddenTags: hiddenTags.value.split('\n'),

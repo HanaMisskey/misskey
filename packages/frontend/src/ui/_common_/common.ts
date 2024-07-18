@@ -102,6 +102,12 @@ export function openInstanceMenu(ev: MouseEvent) {
 		icon: 'ti ti-shield-lock',
 		href: instance.privacyPolicyUrl,
 		target: '_blank',
+	} : undefined, (instance.commerceDisclosureUrl) ? {
+		type: 'a',
+		text: i18n.ts.commerceDisclosure,
+		icon: 'ti ti-shopping-cart',
+		href: instance.commerceDisclosureUrl,
+		target: '_blank',
 	} : undefined, (!instance.impressumUrl && !instance.tosUrl && !instance.privacyPolicyUrl) ? undefined : { type: 'divider' }, {
 		type: 'a',
 		text: i18n.ts.document,
