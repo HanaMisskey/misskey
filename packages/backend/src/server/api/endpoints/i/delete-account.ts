@@ -10,6 +10,7 @@ import { Endpoint } from '@/server/api/endpoint-base.js';
 import { DeleteAccountService } from '@/core/DeleteAccountService.js';
 import { DI } from '@/di-symbols.js';
 import { UserAuthService } from '@/core/UserAuthService.js';
+import { ApiError } from '@/server/api/error.js';
 
 export const meta = {
 	requireCredential: true,
@@ -59,20 +60,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private deleteAccountService: DeleteAccountService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
-			const token = ps.token;
 			const profile = await this.userProfilesRepository.findOneByOrFail({ userId: me.id });
-
-			if (profile.twoFactorEnabled) {
-				if (token == null) {
-					throw new Error('authentication failed');
-				}
-
-				try {
-					await this.userAuthService.twoFactorAuthenticate(profile, token);
-				} catch (e) {
-					throw new Error('authentication failed');
-				}
-			}
 
 			const userDetailed = await this.usersRepository.findOneByOrFail({ id: me.id });
 			if (userDetailed.isDeleted) {
@@ -81,7 +69,21 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 
 			const passwordMatched = await bcrypt.compare(ps.password, profile.password!);
 			if (!passwordMatched) {
-				throw new Error('incorrect password');
+				throw new ApiError(meta.errors.incorrectPassword);
+			}
+
+			if (profile.twoFactorEnabled) {
+				const token = ps.token;
+				if (token == null) {
+					throw new ApiError(meta.errors.authenticationFailed);
+				}
+
+				await this.userAuthService.twoFactorAuthenticate(profile, token);
+			}
+
+			// abort if user has active subscription
+			if (!(me.subscriptionStatus === 'unpaid' || me.subscriptionStatus === 'canceled' || me.subscriptionStatus === 'none')) {
+				throw new ApiError(meta.errors.subscriptionIsActive);
 			}
 
 			await this.deleteAccountService.deleteAccount(me);
