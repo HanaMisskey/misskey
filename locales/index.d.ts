@@ -5090,17 +5090,65 @@ export interface Locale extends ILocale {
          */
         "current": string;
         /**
-         * プランを作成
+         * 価格
          */
-        "createSubscriptionPlan": string;
+        "price": string;
         /**
-         * プランを更新
+         * 通貨
          */
-        "updateSubscriptionPlan": string;
+        "currency": string;
         /**
-         * プランをアーカイブ
+         * Stripeの価格ID
          */
-        "archiveSubscriptionPlan": string;
+        "stripePriceId": string;
+        /**
+         * 購入
+         */
+        "subscribe": string;
+        /**
+         * 管理
+         */
+        "manage": string;
+        /**
+         * プランを変更
+         */
+        "changePlan": string;
+        /**
+         * プランを変更しますか？
+         */
+        "confirmChangePlan": string;
+        /**
+         * 未完了
+         */
+        "incomplete": string;
+        /**
+         * 期限切れ
+         */
+        "incomplete_expired": string;
+        /**
+         * トライアル中
+         */
+        "trialing": string;
+        /**
+         * 有効
+         */
+        "active": string;
+        /**
+         * 支払い期限切れ
+         */
+        "past_due": string;
+        /**
+         * キャンセル済み
+         */
+        "canceled": string;
+        /**
+         * 未払い
+         */
+        "unpaid": string;
+        /**
+         * なし
+         */
+        "none": string;
     };
     "_delivery": {
         /**

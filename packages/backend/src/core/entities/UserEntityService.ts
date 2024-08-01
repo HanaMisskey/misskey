@@ -511,6 +511,11 @@ export class UserEntityService implements OnModuleInit {
 				}))
 			) : undefined,
 
+			...(isMe ? {
+				subscriptionStatus: user.subscriptionStatus,
+				subscriptionPlanId: user.subscriptionPlanId,
+			} : {}),
+
 			...(isDetailed ? {
 				url: profile!.url,
 				uri: user.uri,
