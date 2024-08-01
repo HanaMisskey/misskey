@@ -5076,6 +5076,32 @@ export interface Locale extends ILocale {
      * 作成したアンテナ
      */
     "createdAntennas": string;
+    /**
+     * サブスクリプション
+     */
+    "subscription": string;
+    /**
+     * サブスクリプションの状態
+     */
+    "subscriptionStatus": string;
+    "_subscription": {
+        /**
+         * 現在のプラン
+         */
+        "current": string;
+        /**
+         * プランを作成
+         */
+        "createSubscriptionPlan": string;
+        /**
+         * プランを更新
+         */
+        "updateSubscriptionPlan": string;
+        /**
+         * プランをアーカイブ
+         */
+        "archiveSubscriptionPlan": string;
+    };
     "_delivery": {
         /**
          * 配信状態
@@ -5107,32 +5133,6 @@ export interface Locale extends ILocale {
              */
             "autoSuspendedForNotResponding": string;
         };
-    };
-    /**
-     * サブスクリプション
-     */
-    "subscription": string;
-    /**
-     * サブスクリプションの状態
-     */
-    "subscriptionStatus": string;
-    "_subscription": {
-        /**
-         * 現在のプラン
-         */
-        "current": string;
-        /**
-         * プランを作成
-         */
-        "createSubscriptionPlan": string;
-        /**
-         * プランを更新
-         */
-        "updateSubscriptionPlan": string;
-        /**
-         * プランをアーカイブ
-         */
-        "archiveSubscriptionPlan": string;
     };
     "_bubbleGame": {
         /**
