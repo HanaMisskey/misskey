@@ -25,6 +25,7 @@ export class StripeWebhookServerService {
 		private userProfilesRepository: UserProfilesRepository,
 		@Inject(DI.subscriptionPlansRepository)
 		private subscriptionPlansRepository: SubscriptionPlansRepository,
+
 		private roleService: RoleService,
 		private metaService: MetaService,
 		private userEntityService: UserEntityService,
@@ -118,7 +119,13 @@ export class StripeWebhookServerService {
 				return { userProfile, subscription: eventData };
 			};
 
-			const { userProfile, subscription } = await preprocessEvent(event.data.object);
+			const res = await preprocessEvent(event.data.object);
+
+			if (!res) {
+				return;
+			}
+
+			const { userProfile, subscription } = res;
 
 			// Handle the event.
 			switch (event.type) {

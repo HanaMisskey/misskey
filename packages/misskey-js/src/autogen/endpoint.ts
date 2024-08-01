@@ -920,6 +920,7 @@ export type Endpoints = {
 	'stats': { req: EmptyRequest; res: StatsResponse };
 	'subscription/create': { req: SubscriptionCreateRequest; res: EmptyResponse };
 	'subscription/manage': { req: EmptyRequest; res: EmptyResponse };
+	'subscription/refresh': { req: EmptyRequest; res: EmptyResponse };
 	'subscription-plans/list': { req: EmptyRequest; res: SubscriptionPlansListResponse };
 	'subscription-plans/show': { req: SubscriptionPlansShowRequest; res: SubscriptionPlansShowResponse };
 	'sw/show-registration': { req: SwShowRegistrationRequest; res: SwShowRegistrationResponse };
@@ -1311,6 +1312,7 @@ export const endpointReqTypes: Record<keyof Endpoints, 'application/json' | 'mul
 	'stats': 'application/json',
 	'subscription/create': 'application/json',
 	'subscription/manage': 'application/json',
+	'subscription/refresh': 'application/json',
 	'subscription-plans/list': 'application/json',
 	'subscription-plans/show': 'application/json',
 	'sw/show-registration': 'application/json',

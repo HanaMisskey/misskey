@@ -349,6 +349,7 @@ import * as ep___serverInfo from './endpoints/server-info.js';
 import * as ep___stats from './endpoints/stats.js';
 import * as ep___subscription_create from './endpoints/subscription/create.js';
 import * as ep___subscription_manage from './endpoints/subscription/manage.js';
+import * as ep___subscription_refresh from './endpoints/subscription/refresh.js';
 import * as ep___subscription_plans_list from './endpoints/subscription-plans/list.js';
 import * as ep___subscription_plans_show from './endpoints/subscription-plans/show.js';
 import * as ep___sw_show_registration from './endpoints/sw/show-registration.js';
@@ -739,6 +740,7 @@ const eps = [
 	['stats', ep___stats],
 	['subscription/create', ep___subscription_create],
 	['subscription/manage', ep___subscription_manage],
+	['subscription/refresh', ep___subscription_refresh],
 	['subscription-plans/list', ep___subscription_plans_list],
 	['subscription-plans/show', ep___subscription_plans_show],
 	['sw/show-registration', ep___sw_show_registration],

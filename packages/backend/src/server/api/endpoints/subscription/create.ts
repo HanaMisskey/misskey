@@ -7,6 +7,8 @@ import { DI } from '@/di-symbols.js';
 import { MetaService } from '@/core/MetaService.js';
 import type { Config } from '@/config.js';
 import { RoleService } from '@/core/RoleService.js';
+import { UserEntityService } from '@/core/entities/UserEntityService.js';
+import { GlobalEventService } from '@/core/GlobalEventService.js';
 import { ApiError } from '../../error.js';
 
 export const meta = {
@@ -73,6 +75,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private userProfilesRepository: UserProfilesRepository,
 		@Inject(DI.subscriptionPlansRepository)
 		private subscriptionPlansRepository: SubscriptionPlansRepository,
+
+		private globalEventService: GlobalEventService,
+		private userEntityService: UserEntityService,
 		private roleService: RoleService,
 		private metaService: MetaService,
 	) {
@@ -115,7 +120,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			}
 
 			const subscriptionStatus = user.subscriptionStatus;
-			if (subscriptionStatus === 'active') {
+			if (['active', 'trialing'].includes(subscriptionStatus)) {
 				if (plan.id !== user.subscriptionPlanId) {
 					// Upgrade or downgrade subscription
 					const subscription = await stripe.subscriptions.list({
@@ -151,6 +156,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 							stripeSubscriptionId: null,
 						});
 
+						this.globalEventService.publishMainStream(userProfile.userId, 'meUpdated', await this.userEntityService.pack(userProfile.userId, { id: userProfile.userId }, {
+							schema: 'MeDetailed',
+							includeSecrets: true,
+						}));
 						return;
 					}
 
