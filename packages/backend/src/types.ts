@@ -329,6 +329,18 @@ export type ModerationLogPayloads = {
 		recipientId: string;
 		recipient: any;
 	};
+	createSubscriptionPlan: {
+		planId: string;
+		plan: any;
+	};
+	updateSubscriptionPlan: {
+		subscriptionPlanId: string;
+		before: any;
+		after: any;
+	};
+	archiveSubscriptionPlan: {
+		subscriptionPlanId: string;
+	};
 };
 
 export type Serialized<T> = {
