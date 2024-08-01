@@ -206,7 +206,7 @@ export class MiUser {
 	})
 	public isDeleted: boolean;
 
-
+	//#region サブスク
 	@Column('enum', {
 		enum: subscriptionStatus,
 		default: 'none',
@@ -223,6 +223,7 @@ export class MiUser {
 		length: 128, nullable: true,
 	})
 	public stripeSubscriptionId: string | null;
+	//#endregion
 
 	@Column('varchar', {
 		length: 128, array: true, default: '{}',
