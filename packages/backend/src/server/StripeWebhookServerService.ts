@@ -31,7 +31,7 @@ export class StripeWebhookServerService {
 		private globalEventService: GlobalEventService,
 		private loggerService: LoggerService,
 	) {
-		this.logger = this.loggerService.getLogger('server', 'gray', false);
+		this.logger = this.loggerService.getLogger('server', 'gray');
 	}
 
 	@bindThis

@@ -267,4 +267,4 @@ export type FlashLikesRepository = Repository<MiFlashLike> & MiRepository<MiFlas
 export type UserMemoRepository = Repository<MiUserMemo> & MiRepository<MiUserMemo>;
 export type BubbleGameRecordsRepository = Repository<MiBubbleGameRecord> & MiRepository<MiBubbleGameRecord>;
 export type ReversiGamesRepository = Repository<MiReversiGame> & MiRepository<MiReversiGame>;
-export type SubscriptionPlanRepository = Repository<MiSubscriptionPlan> & MiRepository<MiSubscriptionPlan>;
+export type SubscriptionPlansRepository = Repository<MiSubscriptionPlan> & MiRepository<MiSubscriptionPlan>;
