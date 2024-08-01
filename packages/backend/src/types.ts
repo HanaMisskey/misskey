@@ -330,7 +330,7 @@ export type ModerationLogPayloads = {
 		recipient: any;
 	};
 	createSubscriptionPlan: {
-		planId: string;
+		subscriptionPlanId: string;
 		plan: any;
 	};
 	updateSubscriptionPlan: {
