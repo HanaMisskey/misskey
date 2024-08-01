@@ -50,37 +50,69 @@ export class StripeWebhookServerService {
 		);
 
 		fastify.post('/webhook', { config: { rawBody: true }, bodyLimit: 1024 * 64 }, async (request, reply) => {
+
+			//#region 定義
+			const supportedEvents = [
+				'customer.subscription.created',
+				'customer.subscription.updated',
+				'customer.subscription.deleted',
+			] as const satisfies (Stripe.Event['type'])[];
+
+			type SupportedEvent = Extract<Stripe.Event, { type: typeof supportedEvents[number] }>;
+
+			function assertIsSupportedEvent(event: Stripe.Event): event is SupportedEvent {
+				return (supportedEvents as string[]).includes(event.type);
+			}
+			//#endregion
+
 			const instance = await this.metaService.fetch(true);
+
+			if (!instance.enableSubscriptions) {
+				reply.code(503);
+				return;
+			}
 			if (!(this.config.stripe && this.config.stripe.secretKey && this.config.stripe.webhookSecret)) {
-				return reply.code(503);
+				reply.code(503);
+				return;
 			}
 
 			const body = request.rawBody;
 			if (!body) {
-				return reply.code(400);
+				reply.code(400);
+				return;
 			}
 
 			// Retrieve the event by verifying the signature using the raw body and secret.
 			const signature = request.headers['stripe-signature'];
 			if (!signature) { // Check if signature exists.
-				return reply.code(400);
+				reply.code(400);
+				return;
 			}
 
 			const stripe = new Stripe(this.config.stripe.secretKey);
-			let event;
+			let event: Stripe.Event;
 			try {
 				event = stripe.webhooks.constructEvent(body, signature, this.config.stripe.webhookSecret);
 			} catch (err) {
-				return reply.code(400);
+				reply.code(400);
+				return;
+			}
+
+			if (!assertIsSupportedEvent(event)) {
+				this.logger.info(`Unsupported event type: ${event.type}`);
+				// 処理できないイベントの場合は処理に入る前に返答してしまう
+				reply.code(204);
+				return;
 			}
 
 			// イベント処理前の共通処理（例：ユーザープロファイルの取得と初期応答の設定）
-			const preprocessEvent = async (eventData: any) => {
+			const preprocessEvent = async (eventData: SupportedEvent['data']['object']) => {
 				const customer = eventData.customer as string;
 				const userProfile = await this.userProfilesRepository.findOneBy({ stripeCustomerId: customer });
 
 				if (!userProfile) {
-					return reply.code(400);
+					reply.code(400);
+					return;
 				}
 				reply.code(204); // Stripeへの応答を設定
 				return { userProfile, subscription: eventData };
@@ -221,9 +253,11 @@ export class StripeWebhookServerService {
 					return;
 				}
 
-				default:
+				default: {
 					// Unhandled event type.
-					return reply.code(400);
+					reply.code(204);
+					return;
+				}
 			}
 		});
 
