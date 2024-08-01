@@ -492,6 +492,7 @@ import type {
 	ResetPasswordRequest,
 	ServerInfoResponse,
 	StatsResponse,
+	SubscriptionCreateRequest,
 	SubscriptionPlansListResponse,
 	SubscriptionPlansShowRequest,
 	SubscriptionPlansShowResponse,
@@ -917,6 +918,8 @@ export type Endpoints = {
 	'reset-password': { req: ResetPasswordRequest; res: EmptyResponse };
 	'server-info': { req: EmptyRequest; res: ServerInfoResponse };
 	'stats': { req: EmptyRequest; res: StatsResponse };
+	'subscription/create': { req: SubscriptionCreateRequest; res: EmptyResponse };
+	'subscription/manage': { req: EmptyRequest; res: EmptyResponse };
 	'subscription-plans/list': { req: EmptyRequest; res: SubscriptionPlansListResponse };
 	'subscription-plans/show': { req: SubscriptionPlansShowRequest; res: SubscriptionPlansShowResponse };
 	'sw/show-registration': { req: SwShowRegistrationRequest; res: SwShowRegistrationResponse };
@@ -1306,6 +1309,8 @@ export const endpointReqTypes: Record<keyof Endpoints, 'application/json' | 'mul
 	'reset-password': 'application/json',
 	'server-info': 'application/json',
 	'stats': 'application/json',
+	'subscription/create': 'application/json',
+	'subscription/manage': 'application/json',
 	'subscription-plans/list': 'application/json',
 	'subscription-plans/show': 'application/json',
 	'sw/show-registration': 'application/json',

@@ -341,6 +341,8 @@ import * as ep___resetDb from './endpoints/reset-db.js';
 import * as ep___resetPassword from './endpoints/reset-password.js';
 import * as ep___serverInfo from './endpoints/server-info.js';
 import * as ep___stats from './endpoints/stats.js';
+import * as ep___subscription_create from './endpoints/subscription/create.js';
+import * as ep___subscription_manage from './endpoints/subscription/manage.js';
 import * as ep___subscription_plans_list from './endpoints/subscription-plans/list.js';
 import * as ep___subscription_plans_show from './endpoints/subscription-plans/show.js';
 import * as ep___sw_show_registration from './endpoints/sw/show-registration.js';
@@ -731,6 +733,8 @@ const $resetDb: Provider = { provide: 'ep:reset-db', useClass: ep___resetDb.defa
 const $resetPassword: Provider = { provide: 'ep:reset-password', useClass: ep___resetPassword.default };
 const $serverInfo: Provider = { provide: 'ep:server-info', useClass: ep___serverInfo.default };
 const $stats: Provider = { provide: 'ep:stats', useClass: ep___stats.default };
+const $subscription_create: Provider = { provide: 'ep:subscription/create', useClass: ep___subscription_create.default };
+const $subscription_manage: Provider = { provide: 'ep:subscription/manage', useClass: ep___subscription_manage.default };
 const $subscription_plans_list: Provider = { provide: 'ep:subscription-plans/list', useClass: ep___subscription_plans_list.default };
 const $subscription_plans_show: Provider = { provide: 'ep:subscription-plans/show', useClass: ep___subscription_plans_show.default };
 const $sw_show_registration: Provider = { provide: 'ep:sw/show-registration', useClass: ep___sw_show_registration.default };
@@ -1125,6 +1129,8 @@ const $reversi_verify: Provider = { provide: 'ep:reversi/verify', useClass: ep__
 		$resetPassword,
 		$serverInfo,
 		$stats,
+		$subscription_create,
+		$subscription_manage,
 		$subscription_plans_list,
 		$subscription_plans_show,
 		$sw_show_registration,
@@ -1513,6 +1519,8 @@ const $reversi_verify: Provider = { provide: 'ep:reversi/verify', useClass: ep__
 		$resetPassword,
 		$serverInfo,
 		$stats,
+		$subscription_create,
+		$subscription_manage,
 		$subscription_plans_list,
 		$subscription_plans_show,
 		$sw_register,

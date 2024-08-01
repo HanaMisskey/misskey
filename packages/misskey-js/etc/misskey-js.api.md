@@ -1694,6 +1694,7 @@ declare namespace entities {
         ResetPasswordRequest,
         ServerInfoResponse,
         StatsResponse,
+        SubscriptionCreateRequest,
         SubscriptionPlansListResponse,
         SubscriptionPlansShowRequest,
         SubscriptionPlansShowResponse,
@@ -3021,6 +3022,9 @@ export class Stream extends EventEmitter<StreamEvents> {
     // (undocumented)
     useChannel<C extends keyof Channels>(channel: C, params?: Channels[C]['params'], name?: string): ChannelConnection<Channels[C]>;
 }
+
+// @public (undocumented)
+type SubscriptionCreateRequest = operations['subscription___create']['requestBody']['content']['application/json'];
 
 // @public (undocumented)
 type SubscriptionPlan = components['schemas']['SubscriptionPlan'];
