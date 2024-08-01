@@ -100,6 +100,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			}
 
 			const stripe = new Stripe(this.config.stripe.secretKey);
+			let customerId: string;
 			if (!userProfile.stripeCustomerId) {
 				const makeCustomer = await stripe.customers.create({
 					email: userProfile.email,
@@ -108,6 +109,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 					stripeCustomerId: makeCustomer.id,
 				});
 				userProfile = await this.userProfilesRepository.findOneByOrFail({ userId: user.id });
+				customerId = makeCustomer.id;
+			} else {
+				customerId = userProfile.stripeCustomerId;
 			}
 
 			const subscriptionStatus = user.subscriptionStatus;
@@ -115,7 +119,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				if (plan.id !== user.subscriptionPlanId) {
 					// Upgrade or downgrade subscription
 					const subscription = await stripe.subscriptions.list({
-						customer: userProfile.stripeCustomerId,
+						customer: customerId,
 					});
 					if (subscription.data.length === 0) {
 						throw new ApiError(meta.errors.accessDenied);
@@ -159,7 +163,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			} else if (subscriptionStatus === 'incomplete' || subscriptionStatus === 'past_due' || subscriptionStatus === 'unpaid') {
 				// 決済ができていない場合
 				const session = await stripe.checkout.sessions.create({
-					customer: userProfile.stripeCustomerId,
+					customer: customerId,
 					allow_promotion_codes: true,
 					return_url: `${this.config.url}/settings/subscription`,
 				}, {});
@@ -184,7 +188,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 					],
 					success_url: `${this.config.url}/settings/subscription`,
 					cancel_url: `${this.config.url}/settings/subscription`,
-					customer: userProfile.stripeCustomerId,
+					customer: customerId,
 				});
 
 				return {
