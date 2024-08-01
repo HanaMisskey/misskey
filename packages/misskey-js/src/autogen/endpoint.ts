@@ -108,6 +108,15 @@ import type {
 	AdminRolesUpdateDefaultPoliciesRequest,
 	AdminRolesUsersRequest,
 	AdminRolesUsersResponse,
+	AdminSystemWebhookCreateRequest,
+	AdminSystemWebhookCreateResponse,
+	AdminSystemWebhookDeleteRequest,
+	AdminSystemWebhookListRequest,
+	AdminSystemWebhookListResponse,
+	AdminSystemWebhookShowRequest,
+	AdminSystemWebhookShowResponse,
+	AdminSystemWebhookUpdateRequest,
+	AdminSystemWebhookUpdateResponse,
 	AdminSubscriptionPlansCreateRequest,
 	AdminSubscriptionPlansCreateResponse,
 	AdminSubscriptionPlansUpdateRequest,
@@ -654,6 +663,11 @@ export type Endpoints = {
 	'admin/roles/unassign': { req: AdminRolesUnassignRequest; res: EmptyResponse };
 	'admin/roles/update-default-policies': { req: AdminRolesUpdateDefaultPoliciesRequest; res: EmptyResponse };
 	'admin/roles/users': { req: AdminRolesUsersRequest; res: AdminRolesUsersResponse };
+	'admin/system-webhook/create': { req: AdminSystemWebhookCreateRequest; res: AdminSystemWebhookCreateResponse };
+	'admin/system-webhook/delete': { req: AdminSystemWebhookDeleteRequest; res: EmptyResponse };
+	'admin/system-webhook/list': { req: AdminSystemWebhookListRequest; res: AdminSystemWebhookListResponse };
+	'admin/system-webhook/show': { req: AdminSystemWebhookShowRequest; res: AdminSystemWebhookShowResponse };
+	'admin/system-webhook/update': { req: AdminSystemWebhookUpdateRequest; res: AdminSystemWebhookUpdateResponse };
 	'admin/subscription-plans/create': { req: AdminSubscriptionPlansCreateRequest; res: AdminSubscriptionPlansCreateResponse };
 	'admin/subscription-plans/update': { req: AdminSubscriptionPlansUpdateRequest; res: EmptyResponse };
 	'admin/subscription-plans/archive': { req: AdminSubscriptionPlansArchiveRequest; res: EmptyResponse };
@@ -1038,6 +1052,11 @@ export const endpointReqTypes: Record<keyof Endpoints, 'application/json' | 'mul
 	'admin/roles/unassign': 'application/json',
 	'admin/roles/update-default-policies': 'application/json',
 	'admin/roles/users': 'application/json',
+	'admin/system-webhook/create': 'application/json',
+	'admin/system-webhook/delete': 'application/json',
+	'admin/system-webhook/list': 'application/json',
+	'admin/system-webhook/show': 'application/json',
+	'admin/system-webhook/update': 'application/json',
 	'admin/subscription-plans/create': 'application/json',
 	'admin/subscription-plans/update': 'application/json',
 	'admin/subscription-plans/archive': 'application/json',
