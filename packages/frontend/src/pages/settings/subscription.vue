@@ -24,11 +24,15 @@
 							<template #value>{{ plan.price + ' ' + plan.currency }}</template>
 						</MkKeyValue>
 						<div>
-							<MkButton v-if="canSubscribe && !plan.isArchived" primary :class="$style.button" @click="subscribe(plan)"><i class="ti ti-plus"></i>{{ i18n.ts._subscription.subscribe }}</MkButton>
-							<MkButton v-else-if="plan.id === currentPlan" :class="$style.button" @click="manage()"><i class="ti ti-settings"></i>{{ i18n.ts._subscription.manage }}</MkButton>
-							<MkButton v-else-if="!plan.isArchived" :class="$style.button" @click="change(plan)"><i class="ti ti-reload"></i>{{ i18n.ts._subscription.changePlan }}</MkButton>
+							<MkButton v-if="canSubscribe && !plan.isArchived" primary :class="$style.button" @click="subscribe(plan)"><i class="ti ti-plus"></i> {{ i18n.ts._subscription.subscribe }}</MkButton>
+							<MkButton v-else-if="plan.id === currentPlan" :class="$style.button" @click="manage()"><i class="ti ti-settings"></i> {{ i18n.ts._subscription.manage }}</MkButton>
+							<MkButton v-else-if="!plan.isArchived" :class="$style.button" @click="change(plan)"><i class="ti ti-reload"></i> {{ i18n.ts._subscription.changePlan }}</MkButton>
 						</div>
 					</div>
+				</div>
+				<div class="_gaps_s">
+					<MkButton @click="refresh()"><i class="ti ti-reload"></i> {{ i18n.ts._subscription.refresh }}</MkButton>
+					<div :class="$style.caption">{{ i18n.ts._subscription.refreshDescription }}</div>
 				</div>
 			</div>
 		</template>
@@ -89,6 +93,10 @@ function change(plan) {
 	});
 }
 
+function refresh() {
+	os.apiWithDialog('subscription/refresh');
+}
+
 const headerActions = computed(() => []);
 
 const headerTabs = computed(() => []);
@@ -116,5 +124,10 @@ definePageMetadata({
 
 .button {
 	margin: 8px 0;
+}
+
+.caption {
+	font-size: 0.85em;
+	color: var(--fgTransparentWeak);
 }
 </style>

@@ -5149,6 +5149,14 @@ export interface Locale extends ILocale {
          * なし
          */
         "none": string;
+        /**
+         * サブスクリプションの状態を更新
+         */
+        "refresh": string;
+        /**
+         * サブスクリプションのプランを変更してから５分以上経っても反映されない場合、このボタンを押してください。
+         */
+        "refreshDescription": string;
     };
     "_delivery": {
         /**

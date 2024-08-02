@@ -1285,6 +1285,8 @@ _subscription:
   canceled: "キャンセル済み"
   unpaid: "未払い"
   none: "なし"
+  refresh: "サブスクリプションの状態を更新"
+  refreshDescription: "サブスクリプションのプランを変更してから５分以上経っても反映されない場合、このボタンを押してください。"
 
 _delivery:
   status: "配信状態"
