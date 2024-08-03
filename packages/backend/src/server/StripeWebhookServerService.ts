@@ -51,7 +51,6 @@ export class StripeWebhookServerService {
 		);
 
 		fastify.post('/webhook', { config: { rawBody: true }, bodyLimit: 1024 * 64 }, async (request, reply) => {
-
 			//#region 定義
 			const supportedEvents = [
 				'customer.subscription.created',

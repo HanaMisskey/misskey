@@ -81,7 +81,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			}
 
 			const user = await this.usersRepository.findOneByOrFail({ id: ps.userId });
-			let userProfile = await this.userProfilesRepository.findOneBy({ userId: ps.userId});
+			let userProfile = await this.userProfilesRepository.findOneBy({ userId: ps.userId });
 			if (!user || !userProfile) {
 				throw new ApiError(meta.errors.noSuchUser);
 			}
