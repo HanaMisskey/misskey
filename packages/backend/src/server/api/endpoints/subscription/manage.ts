@@ -13,6 +13,21 @@ export const meta = {
 	requireCredential: true,
 	kind: 'read:account',
 
+	res: {
+		type: 'object',
+		optional: false, nullable: false,
+		properties: {
+			redirect: {
+				type: 'object',
+				optional: false, nullable: false,
+				properties: {
+					permanent: { type: 'boolean', optional: false, nullable: false },
+					destination: { type: 'string', optional: false, nullable: false },
+				},
+			},
+		},
+	},
+
 	errors: {
 		noSuchUser: {
 			message: 'No such user.',
@@ -30,6 +45,12 @@ export const meta = {
 			message: 'Subscription unavailable.',
 			code: 'UNAVAILABLE',
 			id: 'ca50e7c1-2589-4360-a338-e729100af0c4',
+		},
+
+		sessionInvalid: {
+			message: 'Session is invalid.',
+			code: 'SESSION_INVALID',
+			id: '4cee5674-69de-474d-aea7-00ed3c4fc8d7',
 		},
 	},
 } as const;
@@ -75,6 +96,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				customer: userProfile.stripeCustomerId,
 				return_url: `${this.config.url}/settings/subscription`,
 			});
+
+			if (!session.url) {
+				throw new ApiError(meta.errors.sessionInvalid);
+			}
 
 			return {
 				redirect: {

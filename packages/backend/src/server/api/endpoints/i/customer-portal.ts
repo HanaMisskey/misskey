@@ -13,6 +13,21 @@ export const meta = {
 	requireCredential: true,
 	kind: 'read:account',
 
+	res: {
+		type: 'object',
+		optional: false, nullable: false,
+		properties: {
+			redirect: {
+				type: 'object',
+				optional: false, nullable: false,
+				properties: {
+					permanent: { type: 'boolean', optional: false, nullable: false },
+					destination: { type: 'string', optional: false, nullable: false },
+				},
+			},
+		},
+	},
+
 	errors: {
 		noSuchUser: {
 			message: 'No such user.',

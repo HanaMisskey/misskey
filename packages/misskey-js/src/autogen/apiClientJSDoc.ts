@@ -639,6 +639,17 @@ declare module '../api.js' {
     /**
      * No description provided.
      * 
+     * **Credential required**: *Yes* / **Permission**: *write:admin:refresh-user-subscription-status*
+     */
+    request<E extends 'admin/refresh-user-subscription-status', P extends Endpoints[E]['req']>(
+      endpoint: E,
+      params: P,
+      credential?: string | null,
+    ): Promise<SwitchCaseResponseType<E, P>>;
+
+    /**
+     * No description provided.
+     * 
      * **Credential required**: *Yes* / **Permission**: *write:admin:relays*
      */
     request<E extends 'admin/relays/add', P extends Endpoints[E]['req']>(
@@ -3754,17 +3765,6 @@ declare module '../api.js' {
      * **Credential required**: *Yes* / **Permission**: *read:account*
      */
     request<E extends 'subscription/manage', P extends Endpoints[E]['req']>(
-      endpoint: E,
-      params: P,
-      credential?: string | null,
-    ): Promise<SwitchCaseResponseType<E, P>>;
-
-    /**
-     * No description provided.
-     * 
-     * **Credential required**: *Yes* / **Permission**: *write:account*
-     */
-    request<E extends 'subscription/refresh', P extends Endpoints[E]['req']>(
       endpoint: E,
       params: P,
       credential?: string | null,

@@ -76,6 +76,7 @@ import type {
 	AdminQueueInboxDelayedResponse,
 	AdminQueuePromoteRequest,
 	AdminQueueStatsResponse,
+	AdminRefreshUserSubscriptionStatusRequest,
 	AdminRelaysAddRequest,
 	AdminRelaysAddResponse,
 	AdminRelaysListResponse,
@@ -324,6 +325,7 @@ import type {
 	IAuthorizedAppsResponse,
 	IClaimAchievementRequest,
 	IChangePasswordRequest,
+	ICustomerPortalResponse,
 	IDeleteAccountRequest,
 	IExportFollowingRequest,
 	IFavoritesRequest,
@@ -493,6 +495,8 @@ import type {
 	ServerInfoResponse,
 	StatsResponse,
 	SubscriptionCreateRequest,
+	SubscriptionCreateResponse,
+	SubscriptionManageResponse,
 	SubscriptionPlansListResponse,
 	SubscriptionPlansShowRequest,
 	SubscriptionPlansShowResponse,
@@ -640,6 +644,7 @@ export type Endpoints = {
 	'admin/queue/inbox-delayed': { req: EmptyRequest; res: AdminQueueInboxDelayedResponse };
 	'admin/queue/promote': { req: AdminQueuePromoteRequest; res: EmptyResponse };
 	'admin/queue/stats': { req: EmptyRequest; res: AdminQueueStatsResponse };
+	'admin/refresh-user-subscription-status': { req: AdminRefreshUserSubscriptionStatusRequest; res: EmptyResponse };
 	'admin/relays/add': { req: AdminRelaysAddRequest; res: AdminRelaysAddResponse };
 	'admin/relays/list': { req: EmptyRequest; res: AdminRelaysListResponse };
 	'admin/relays/remove': { req: AdminRelaysRemoveRequest; res: EmptyResponse };
@@ -794,7 +799,7 @@ export type Endpoints = {
 	'i/authorized-apps': { req: IAuthorizedAppsRequest; res: IAuthorizedAppsResponse };
 	'i/claim-achievement': { req: IClaimAchievementRequest; res: EmptyResponse };
 	'i/change-password': { req: IChangePasswordRequest; res: EmptyResponse };
-	'i/customer-portal': { req: EmptyRequest; res: EmptyResponse };
+	'i/customer-portal': { req: EmptyRequest; res: ICustomerPortalResponse };
 	'i/delete-account': { req: IDeleteAccountRequest; res: EmptyResponse };
 	'i/export-blocking': { req: EmptyRequest; res: EmptyResponse };
 	'i/export-following': { req: IExportFollowingRequest; res: EmptyResponse };
@@ -918,9 +923,8 @@ export type Endpoints = {
 	'reset-password': { req: ResetPasswordRequest; res: EmptyResponse };
 	'server-info': { req: EmptyRequest; res: ServerInfoResponse };
 	'stats': { req: EmptyRequest; res: StatsResponse };
-	'subscription/create': { req: SubscriptionCreateRequest; res: EmptyResponse };
-	'subscription/manage': { req: EmptyRequest; res: EmptyResponse };
-	'subscription/refresh': { req: EmptyRequest; res: EmptyResponse };
+	'subscription/create': { req: SubscriptionCreateRequest; res: SubscriptionCreateResponse };
+	'subscription/manage': { req: EmptyRequest; res: SubscriptionManageResponse };
 	'subscription-plans/list': { req: EmptyRequest; res: SubscriptionPlansListResponse };
 	'subscription-plans/show': { req: SubscriptionPlansShowRequest; res: SubscriptionPlansShowResponse };
 	'sw/show-registration': { req: SwShowRegistrationRequest; res: SwShowRegistrationResponse };
@@ -1032,6 +1036,7 @@ export const endpointReqTypes: Record<keyof Endpoints, 'application/json' | 'mul
 	'admin/queue/inbox-delayed': 'application/json',
 	'admin/queue/promote': 'application/json',
 	'admin/queue/stats': 'application/json',
+	'admin/refresh-user-subscription-status': 'application/json',
 	'admin/relays/add': 'application/json',
 	'admin/relays/list': 'application/json',
 	'admin/relays/remove': 'application/json',
@@ -1312,7 +1317,6 @@ export const endpointReqTypes: Record<keyof Endpoints, 'application/json' | 'mul
 	'stats': 'application/json',
 	'subscription/create': 'application/json',
 	'subscription/manage': 'application/json',
-	'subscription/refresh': 'application/json',
 	'subscription-plans/list': 'application/json',
 	'subscription-plans/show': 'application/json',
 	'sw/show-registration': 'application/json',

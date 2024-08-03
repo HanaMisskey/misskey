@@ -3,7 +3,7 @@
 	<div class="_gaps_s">
 		<MkKeyValue>
 			<template #key>{{ i18n.ts.subscriptionStatus }}</template>
-			<template #value>{{ i18n.t(`_subscription.${subscriptionStatus}`) }}</template>
+			<template #value>{{ i18n.ts._subscription[subscriptionStatus] }}</template>
 		</MkKeyValue>
 	</div>
 	<FormPagination ref="list" :pagination="pagination">
@@ -30,10 +30,6 @@
 						</div>
 					</div>
 				</div>
-				<div class="_gaps_s">
-					<MkButton @click="refresh()"><i class="ti ti-reload"></i> {{ i18n.ts._subscription.refresh }}</MkButton>
-					<div :class="$style.caption">{{ i18n.ts._subscription.refreshDescription }}</div>
-				</div>
 			</div>
 		</template>
 	</FormPagination>
@@ -53,8 +49,8 @@ import MkButton from '@/components/MkButton.vue';
 import { definePageMetadata } from '@/scripts/page-metadata.js';
 
 const list = ref<InstanceType<typeof FormPagination>>();
-const subscriptionStatus = computed(() => $i.subscriptionStatus);
-const currentPlan = computed(() => $i.subscriptionPlanId);
+const subscriptionStatus = computed(() => $i?.subscriptionStatus ?? 'none');
+const currentPlan = computed(() => $i?.subscriptionPlanId ?? null);
 const canSubscribe = computed(() => subscriptionStatus.value === 'incomplete_expired' || currentPlan.value === null);
 
 const pagination = {
@@ -91,10 +87,6 @@ function change(plan) {
 			location.reload();
 		}, 1000);
 	});
-}
-
-function refresh() {
-	os.apiWithDialog('subscription/refresh');
 }
 
 const headerActions = computed(() => []);

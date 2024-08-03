@@ -23,6 +23,21 @@ export const meta = {
 		minInterval: ms('1sec'),
 	},
 
+	res: {
+		type: 'object',
+		optional: false, nullable: false,
+		properties: {
+			redirect: {
+				type: 'object',
+				optional: false, nullable: false,
+				properties: {
+					permanent: { type: 'boolean', optional: false, nullable: false },
+					destination: { type: 'string', optional: false, nullable: false },
+				},
+			},
+		},
+	},
+
 	errors: {
 		noSuchUser: {
 			message: 'No such user.',
@@ -52,6 +67,12 @@ export const meta = {
 			message: 'Subscription unavailable.',
 			code: 'UNAVAILABLE',
 			id: 'ca50e7c1-2589-4360-a338-e729100af0c4',
+		},
+
+		sessionInvalid: {
+			message: 'Session is invalid.',
+			code: 'SESSION_INVALID',
+			id: '4cee5674-69de-474d-aea7-00ed3c4fc8d7',
 		},
 	},
 } as const;
@@ -126,6 +147,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 					const subscription = await stripe.subscriptions.list({
 						customer: customerId,
 					});
+
 					if (subscription.data.length === 0) {
 						throw new ApiError(meta.errors.accessDenied);
 					}
@@ -160,12 +182,13 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 							schema: 'MeDetailed',
 							includeSecrets: true,
 						}));
-						return;
+
+						throw new ApiError(meta.errors.accessDenied);
 					}
 
 					await stripe.subscriptionItems.update(subscriptionItem.id, { plan: plan.stripePriceId });
 
-					return;
+					throw new ApiError(meta.errors.accessDenied);
 				} else {
 					throw new ApiError(meta.errors.accessDenied);
 				}
@@ -176,6 +199,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 					allow_promotion_codes: true,
 					return_url: `${this.config.url}/settings/subscription`,
 				}, {});
+
+				if (!session.url) throw new ApiError(meta.errors.sessionInvalid);
 
 				return {
 					redirect: {
@@ -200,6 +225,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 					customer: customerId,
 				});
 
+				if (!session.url) throw new ApiError(meta.errors.sessionInvalid);
+
 				return {
 					redirect: {
 						permanent: false,
@@ -207,6 +234,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 					},
 				};
 			}
+
+			throw new ApiError(meta.errors.accessDenied);
 		});
 	}
 }

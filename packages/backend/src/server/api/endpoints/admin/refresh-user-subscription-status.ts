@@ -1,4 +1,3 @@
-import ms from 'ms';
 import { Stripe } from 'stripe';
 import { Inject, Injectable } from '@nestjs/common';
 import type { UsersRepository, UserProfilesRepository, SubscriptionPlansRepository } from '@/models/_.js';
@@ -16,13 +15,9 @@ export const meta = {
 	tags: ['subscription'],
 
 	requireCredential: true,
-	kind: 'write:account',
+	requireModerator: true,
 
-	limit: {
-		duration: ms('1hour'),
-		max: 10,
-		minInterval: ms('1sec'),
-	},
+	kind: 'write:admin:refresh-user-subscription-status',
 
 	errors: {
 		noSuchUser: {
@@ -54,8 +49,9 @@ export const meta = {
 export const paramDef = {
 	type: 'object',
 	properties: {
+		userId: { type: 'string', format: 'misskey:id' },
 	},
-	required: [],
+	required: ['userId'],
 } as const;
 
 @Injectable()
@@ -84,8 +80,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				throw new ApiError(meta.errors.unavailable);
 			}
 
-			const user = await this.usersRepository.findOneByOrFail({ id: me.id });
-			let userProfile = await this.userProfilesRepository.findOneBy({ userId: me.id });
+			const user = await this.usersRepository.findOneByOrFail({ id: ps.userId });
+			let userProfile = await this.userProfilesRepository.findOneBy({ userId: ps.userId});
 			if (!user || !userProfile) {
 				throw new ApiError(meta.errors.noSuchUser);
 			}

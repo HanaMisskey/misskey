@@ -531,6 +531,15 @@ export type paths = {
      */
     post: operations['admin___queue___stats'];
   };
+  '/admin/refresh-user-subscription-status': {
+    /**
+     * admin/refresh-user-subscription-status
+     * @description No description provided.
+     *
+     * **Credential required**: *Yes* / **Permission**: *write:admin:refresh-user-subscription-status*
+     */
+    post: operations['admin___refresh-user-subscription-status'];
+  };
   '/admin/relays/add': {
     /**
      * admin/relays/add
@@ -3241,15 +3250,6 @@ export type paths = {
      */
     post: operations['subscription___manage'];
   };
-  '/subscription/refresh': {
-    /**
-     * subscription/refresh
-     * @description No description provided.
-     *
-     * **Credential required**: *Yes* / **Permission**: *write:account*
-     */
-    post: operations['subscription___refresh'];
-  };
   '/subscription-plans/list': {
     /**
      * subscription-plans/list
@@ -3809,6 +3809,10 @@ export type components = {
           iconUrl: string | null;
           displayOrder: number;
         })[];
+      /** @enum {string} */
+      subscriptionStatus: 'incomplete' | 'incomplete_expired' | 'trialing' | 'active' | 'past_due' | 'paused' | 'canceled' | 'unpaid' | 'none';
+      /** Format: id */
+      subscriptionPlanId: string | null;
     };
     UserDetailedNotMeOnly: {
       /** Format: url */
@@ -8489,6 +8493,58 @@ export type operations = {
             objectStorage: components['schemas']['QueueCount'];
           };
         };
+      };
+      /** @description Client error */
+      400: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Authentication error */
+      401: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Forbidden error */
+      403: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description I'm Ai */
+      418: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  /**
+   * admin/refresh-user-subscription-status
+   * @description No description provided.
+   *
+   * **Credential required**: *Yes* / **Permission**: *write:admin:refresh-user-subscription-status*
+   */
+  'admin___refresh-user-subscription-status': {
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: misskey:id */
+          userId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description OK (without any results) */
+      204: {
+        content: never;
       };
       /** @description Client error */
       400: {
@@ -17779,9 +17835,16 @@ export type operations = {
    */
   'i___customer-portal': {
     responses: {
-      /** @description OK (without any results) */
-      204: {
-        content: never;
+      /** @description OK (with results) */
+      200: {
+        content: {
+          'application/json': {
+            redirect: {
+              permanent: boolean;
+              destination: string;
+            };
+          };
+        };
       };
       /** @description Client error */
       400: {
@@ -25044,9 +25107,16 @@ export type operations = {
       };
     };
     responses: {
-      /** @description OK (without any results) */
-      204: {
-        content: never;
+      /** @description OK (with results) */
+      200: {
+        content: {
+          'application/json': {
+            redirect: {
+              permanent: boolean;
+              destination: string;
+            };
+          };
+        };
       };
       /** @description Client error */
       400: {
@@ -25094,9 +25164,16 @@ export type operations = {
    */
   subscription___manage: {
     responses: {
-      /** @description OK (without any results) */
-      204: {
-        content: never;
+      /** @description OK (with results) */
+      200: {
+        content: {
+          'application/json': {
+            redirect: {
+              permanent: boolean;
+              destination: string;
+            };
+          };
+        };
       };
       /** @description Client error */
       400: {
@@ -25118,56 +25195,6 @@ export type operations = {
       };
       /** @description I'm Ai */
       418: {
-        content: {
-          'application/json': components['schemas']['Error'];
-        };
-      };
-      /** @description Internal server error */
-      500: {
-        content: {
-          'application/json': components['schemas']['Error'];
-        };
-      };
-    };
-  };
-  /**
-   * subscription/refresh
-   * @description No description provided.
-   *
-   * **Credential required**: *Yes* / **Permission**: *write:account*
-   */
-  subscription___refresh: {
-    responses: {
-      /** @description OK (without any results) */
-      204: {
-        content: never;
-      };
-      /** @description Client error */
-      400: {
-        content: {
-          'application/json': components['schemas']['Error'];
-        };
-      };
-      /** @description Authentication error */
-      401: {
-        content: {
-          'application/json': components['schemas']['Error'];
-        };
-      };
-      /** @description Forbidden error */
-      403: {
-        content: {
-          'application/json': components['schemas']['Error'];
-        };
-      };
-      /** @description I'm Ai */
-      418: {
-        content: {
-          'application/json': components['schemas']['Error'];
-        };
-      };
-      /** @description To many requests */
-      429: {
         content: {
           'application/json': components['schemas']['Error'];
         };
