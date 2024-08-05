@@ -41,7 +41,7 @@
 	</div>
 
 	<div :class="$style.featuresRoot">
-		<div :class="$style.feature" v-for="feature in features" :key="feature.title">
+		<div v-for="feature in features" :key="feature.title" :class="$style.feature">
 			<div :class="$style.featureRoot">
 				<div :class="[$style.featureImage, { [$style.noImage]: (feature.image == null) }]">
 					<img v-if="feature.image" :src="feature.image" alt=""/>
