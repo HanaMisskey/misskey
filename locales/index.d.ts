@@ -10233,7 +10233,7 @@ export interface Locale extends ILocale {
                      */
                     "title": string;
                     /**
-                     * 他のMisskeyサーバーなどからの移行が簡単になる機能を提供！過去の投稿などもすべてはなみすきー上に引き継ぐことができます。
+                     * 他のMisskeyサーバーなどからの移行が簡単になる機能を提供！過去の投稿もはなみすきー上に引き継ぐことができます。
                      */
                     "description": string;
                 };
