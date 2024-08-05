@@ -59,7 +59,7 @@
 
 	<div :class="$style.footerCtaRoot" class="_gaps">
 		<div :class="$style.footerCtaTitle">{{ i18n.ts._hana._welcome._cta.title }}</div>
-		<MkButton :class="[$style.mainAction, $style.footerButton]" rounded transparent data-cy-signup @click="signup()">
+		<MkButton :class="[$style.mainAction, $style.footerButton]" rounded transparent @click="signup()">
 			<span :class="$style.footerButtonText">{{ i18n.ts.joinThisServer }}</span>
 		</MkButton>
 		<div style="text-align: center;">
