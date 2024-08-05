@@ -10247,16 +10247,6 @@ export interface Locale extends ILocale {
                      */
                     "description": string;
                 };
-                "_lotsOfCustomEmojis": {
-                    /**
-                     * コミュニケーションがはかどる6,000以上のカスタム絵文字
-                     */
-                    "title": string;
-                    /**
-                     * ノートやリアクションでは6,000を超えるカスタム絵文字を利用可能。
-                     */
-                    "description": string;
-                };
             };
             "_cta": {
                 /**

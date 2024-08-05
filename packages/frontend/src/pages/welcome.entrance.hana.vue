@@ -101,20 +101,19 @@ const features: FeatureItem[] = [
 	{
 		title: i18n.ts._hana._welcome._features._hanaMode.title,
 		description: i18n.ts._hana._welcome._features._hanaMode.description,
+		image: 'https://static-assets.misskey.flowers/app-landing/feat-hana.webp',
 	},
 	{
 		title: i18n.ts._hana._welcome._features._easyMigration.title,
 		description: i18n.ts._hana._welcome._features._easyMigration.description,
 		isInDevelopment: true,
+		image: 'https://static-assets.misskey.flowers/app-landing/feat-migrate.png',
 	},
 	{
 		title: i18n.ts._hana._welcome._features._preciseSearching.title,
 		description: i18n.ts._hana._welcome._features._preciseSearching.description,
 		isInDevelopment: true,
-	},
-	{
-		title: i18n.ts._hana._welcome._features._lotsOfCustomEmojis.title,
-		description: i18n.ts._hana._welcome._features._lotsOfCustomEmojis.description,
+		image: 'https://static-assets.misskey.flowers/app-landing/feat-search.webp',
 	},
 ];
 
@@ -349,6 +348,13 @@ function upcomingFeatureDialog() {
 	width: 100%;
 	height: auto;
 	aspect-ratio: 3 / 2;
+
+	img {
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
+		border-radius: var(--radius);
+	}
 
 	&.noImage {
 		background-color: #aaa;
