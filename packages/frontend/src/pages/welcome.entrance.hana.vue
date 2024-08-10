@@ -1,7 +1,7 @@
 <template>
 <div :class="$style.root">
 	<div :class="$style.heroRoot">
-		<img :src="instance.backgroundImageUrl" :class="$style.backgroundImage" alt=""/>
+		<img v-if="instance.backgroundImageUrl" :src="instance.backgroundImageUrl" :class="$style.backgroundImage" alt=""/>
 		<div :class="$style.titleRoot">
 			<h1 :class="$style.logo">
 				<span :class="$style.visuallyHidden">はなみすきー</span>
@@ -57,13 +57,19 @@
 		</div>
 	</div>
 
-	<div :class="$style.footerCtaRoot" class="_gaps">
-		<div :class="$style.footerCtaTitle">{{ i18n.ts._hana._welcome._cta.title }}</div>
-		<MkButton :class="[$style.mainAction, $style.footerButton]" rounded transparent @click="signup()">
-			<span :class="$style.footerButtonText">{{ i18n.ts.joinThisServer }}</span>
-		</MkButton>
-		<div style="text-align: center;">
-			<button :class="$style.footerCtaSubButton" class="_textButton" @click="signin">{{ i18n.ts.login }}</button>
+	<div :class="$style.footerCtaRoot">
+		<img :class="[$style.footerCtaParticles, $style.left]" src="https://static-assets.misskey.flowers/misc/bg-particles/left_v1a.svg" alt=""/>
+		<img :class="[$style.footerCtaParticles, $style.right]" src="https://static-assets.misskey.flowers/misc/bg-particles/right_v1a.svg" alt=""/>
+		<img :class="[$style.footerCtaParticles, $style.neutral]" src="https://static-assets.misskey.flowers/misc/bg-particles/neutral_v1a.svg" alt=""/>
+
+		<div :class="$style.footerCtaWrapper" class="_gaps">
+			<div :class="$style.footerCtaTitle">{{ i18n.ts._hana._welcome._cta.title }}</div>
+			<MkButton :class="[$style.mainAction, $style.footerButton]" rounded transparent @click="signup()">
+				<span :class="$style.footerButtonText">{{ i18n.ts.joinThisServer }}</span>
+			</MkButton>
+			<div style="text-align: center;">
+				<button :class="$style.footerCtaSubButton" class="_textButton" @click="signin">{{ i18n.ts.login }}</button>
+			</div>
 		</div>
 	</div>
 
@@ -74,7 +80,7 @@
 			<a v-if="instance.impressumUrl" :href="instance.impressumUrl">{{ i18n.ts.impressum }}</a>
 			<a v-if="instance.tosUrl" :href="instance.tosUrl">{{ i18n.ts.termsOfService }}</a>
 			<a v-if="instance.privacyPolicyUrl" :href="instance.privacyPolicyUrl">{{ i18n.ts.privacyPolicy }}</a>
-			<a :href="instance.repositoryUrl">{{ i18n.ts.sourceCode }}</a>
+			<a v-if="instance.repositoryUrl" :href="instance.repositoryUrl" target="_blank" rel="noopener">{{ i18n.ts.sourceCode }}<i class="ti ti-external-link"></i></a>
 		</div>
 	</div>
 </div>
@@ -367,8 +373,51 @@ function upcomingFeatureDialog() {
 }
 
 .footerCtaRoot {
-	padding: 32px 16px;
+	position: relative;
+	overflow: hidden;
+	overflow: clip;
 	background: linear-gradient(45deg, var(--hana-theme), var(--hana-themeAlt));
+}
+
+.footerCtaParticles {
+	position: absolute;
+	pointer-events: none;
+	user-select: none;
+	-webkit-user-drag: none;
+
+	&.left,
+	&.right {
+		height: 200%;
+		width: auto;
+		min-width: 35%;
+		max-width: 50%;
+		object-fit: cover;
+
+		display: none;
+	}
+
+	&.left {
+		top: 0;
+		left: 0;
+	}
+
+	&.right {
+		bottom: 0;
+		right: 0;
+	}
+
+	&.neutral {
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+}
+
+.footerCtaWrapper {
+	position: relative;
+	padding: 48px 16px;
 }
 
 .footerCtaTitle {
@@ -472,13 +521,27 @@ function upcomingFeatureDialog() {
 		}
 
 		.featureRoot {
-			grid-template-columns: 2fr 1fr;
+			grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
 		}
 	}
 
 	.featuresRoot .feature:nth-child(even) {
 		.featureRoot {
-			grid-template-columns: 1fr 2fr;
+			grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+		}
+	}
+
+	.footerCtaParticles {
+		&.left {
+			display: block;
+		}
+
+		&.right {
+			display: block;
+		}
+
+		&.neutral {
+			display: none;
 		}
 	}
 }
