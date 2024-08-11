@@ -10172,6 +10172,20 @@ export interface Locale extends ILocale {
          */
         "native": string;
     };
+    "_hana": {
+        /**
+         * 激しい動きあり
+         */
+        "hasMovement": string;
+        /**
+         * 激しい動きを含むカスタム絵文字のアニメーションだけを止める
+         */
+        "stopAnimatingCustomEmojisWithMovement": string;
+        /**
+         * 激しい動きを含むとモデレーターが判断したものだけ、アニメーションを停止します。その他の絵文字（動きがゆるいもの等）は通常通りアニメーションされます。絵文字のアニメーションを完全に停止させたい場合は、「アニメーション画像を再生しない」を利用してください。
+         */
+        "stopAnimatingCustomEmojisWithMovementDescription": string;
+    };
 }
 declare const locales: {
     [lang: string]: Locale;

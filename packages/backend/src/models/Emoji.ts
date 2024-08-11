@@ -81,4 +81,9 @@ export class MiEmoji {
 		array: true, length: 128, default: '{}',
 	})
 	public roleIdsThatCanBeUsedThisEmojiAsReaction: string[];
+
+	@Column('boolean', {
+		default: false,
+	})
+	public hasMovement: boolean;
 }

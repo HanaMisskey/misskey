@@ -28,6 +28,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 import { computed, inject, ref } from 'vue';
 import { getProxiedImageUrl, getStaticImageUrl } from '@/scripts/media-proxy.js';
 import { defaultStore } from '@/store.js';
+import { hanaStore } from '@/hana/store.js';
 import { customEmojisMap } from '@/custom-emojis.js';
 import * as os from '@/os.js';
 import { misskeyApiGet } from '@/scripts/misskey-api.js';
@@ -63,6 +64,13 @@ const rawUrl = computed(() => {
 	return props.host ? `/emoji/${customEmojiName.value}@${props.host}.webp` : `/emoji/${customEmojiName.value}.webp`;
 });
 
+const shouldStopAnimatingByHanaHasMovement = computed(() => {
+	return (
+		hanaStore.reactiveState.stopAnimatingEmojisWithMovement.value &&
+		customEmojisMap.get(customEmojiName.value)?.hasMovement
+	);
+});
+
 const url = computed(() => {
 	if (rawUrl.value == null) return undefined;
 
@@ -75,7 +83,7 @@ const url = computed(() => {
 				false,
 				true,
 			);
-	return defaultStore.reactiveState.disableShowingAnimatedImages.value
+	return (defaultStore.reactiveState.disableShowingAnimatedImages.value || shouldStopAnimatingByHanaHasMovement.value)
 		? getStaticImageUrl(proxied)
 		: proxied;
 });
