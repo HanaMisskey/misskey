@@ -1740,6 +1740,7 @@ _role:
     canHideAds: "広告の非表示"
     canSearchNotes: "ノート検索の利用"
     canUseTranslator: "翻訳機能の利用"
+    canUseCustomTheme: "クライアントテーマのカスタマイズ"
     avatarDecorationLimit: "アイコンデコレーションの最大取付個数"
   _condition:
     roleAssignedTo: "マニュアルロールにアサイン済み"
@@ -2712,3 +2713,13 @@ _contextMenu:
   app: "アプリケーション"
   appWithShift: "Shiftキーでアプリケーション"
   native: "ブラウザのUI"
+
+_hana:
+  _premiumFunctions:
+    themeCustomize: "テーマのカスタマイズ"
+  _plans:
+    basic: "はなみすきープレミアム"
+  _paywallPanel:
+    title: "{func}を利用するには、{plan}以上のプランが必要です"
+    titleFallback: "この機能を利用するには、はなみすきープレミアムが必要です"
+    description: "はなみすきープレミアムに登録して、あなた色の花が咲き誇るSNS体験をしてみませんか。"

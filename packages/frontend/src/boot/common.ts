@@ -178,7 +178,7 @@ export async function common(createVue: () => App<Element>) {
 	//#endregion
 
 	fetchInstanceMetaPromise.then(() => {
-		if (defaultStore.state.themeInitial) {
+		if (defaultStore.state.themeInitial || !$i?.policies.canUseCustomTheme) {
 			if (instance.defaultLightTheme != null) ColdDeviceStorage.set('lightTheme', JSON.parse(instance.defaultLightTheme));
 			if (instance.defaultDarkTheme != null) ColdDeviceStorage.set('darkTheme', JSON.parse(instance.defaultDarkTheme));
 			defaultStore.set('themeInitial', false);
