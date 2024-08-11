@@ -137,6 +137,12 @@ SPDX-License-Identifier: AGPL-3.0-only
 				<MkSwitch v-model="enableSeasonalScreenEffect">{{ i18n.ts.seasonalScreenEffect }}</MkSwitch>
 				<MkSwitch v-model="useNativeUIForVideoAudioPlayer">{{ i18n.ts.useNativeUIForVideoAudioPlayer }}</MkSwitch>
 			</div>
+			<div class="_gaps_s">
+				<MkSwitch v-model="stopAnimatingEmojisWithMovement">
+					<template #label>{{ i18n.ts._hana.stopAnimatingEmojisWithMovement }}</template>
+					<template #caption>{{ i18n.ts._hana.stopAnimatingEmojisWithMovementDescription }}</template>
+				</MkSwitch>
+			</div>
 			<div>
 				<MkRadios v-model="emojiStyle">
 					<template #label>{{ i18n.ts.emojiStyle }}</template>
@@ -256,6 +262,7 @@ import MkLink from '@/components/MkLink.vue';
 import MkInfo from '@/components/MkInfo.vue';
 import { langs } from '@/config.js';
 import { defaultStore } from '@/store.js';
+import { hanaStore } from '@/hana/store.js';
 import * as os from '@/os.js';
 import { misskeyApi } from '@/scripts/misskey-api.js';
 import { unisonReload } from '@/scripts/unison-reload.js';
@@ -324,6 +331,8 @@ const useNativeUIForVideoAudioPlayer = computed(defaultStore.makeGetterSetter('u
 const alwaysConfirmFollow = computed(defaultStore.makeGetterSetter('alwaysConfirmFollow'));
 const confirmWhenRevealingSensitiveMedia = computed(defaultStore.makeGetterSetter('confirmWhenRevealingSensitiveMedia'));
 const contextMenu = computed(defaultStore.makeGetterSetter('contextMenu'));
+
+const stopAnimatingEmojisWithMovement = computed(hanaStore.makeGetterSetter('stopAnimatingEmojisWithMovement'));
 
 watch(lang, () => {
 	miLocalStorage.setItem('lang', lang.value as string);
