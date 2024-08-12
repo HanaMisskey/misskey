@@ -17,11 +17,11 @@ SPDX-License-Identifier: AGPL-3.0-only
 		</div>
 	</FormSlot>
 
-	<MkInput v-model="name" :max="30" manualSave>
+	<MkInput v-model="name" :max="30" manualSave data-cy-user-setup-user-name>
 		<template #label>{{ i18n.ts._profile.name }}</template>
 	</MkInput>
 
-	<MkTextarea v-model="description" :max="500" tall manualSave>
+	<MkTextarea v-model="description" :max="500" tall manualSave data-cy-user-setup-user-description>
 		<template #label>{{ i18n.ts._profile.description }}</template>
 	</MkTextarea>
 
@@ -40,6 +40,7 @@ import MkInfo from '@/components/MkInfo.vue';
 import { selectFile } from '@/scripts/select-file.js';
 import * as os from '@/os.js';
 import { signinRequired } from '@/account.js';
+import type { TutorialPageCommonExpose } from '@/components/MkTutorial.vue';
 
 const $i = signinRequired();
 
@@ -86,6 +87,10 @@ function setAvatar(ev: MouseEvent) {
 		$i.avatarUrl = i.avatarUrl;
 	});
 }
+
+defineExpose<TutorialPageCommonExpose>({
+	canContinue: true,
+});
 </script>
 
 <style lang="scss" module>

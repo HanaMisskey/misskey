@@ -51,7 +51,7 @@ describe('After setup instance', () => {
     cy.visitHome();
   });
 
-	it('signup', () => {
+	it('signup / onboarding', () => {
 		cy.visitHome();
 
 		cy.intercept('POST', '/api/signup').as('signup');
@@ -73,6 +73,60 @@ describe('After setup instance', () => {
 		cy.get('[data-cy-signup-submit]').click();
 
 		cy.wait('@signup');
+
+		// /onboarding にリダイレクトされる
+		cy.wait(5000);
+		cy.url().should('equal', Cypress.config().baseUrl + '/onboarding');
+
+		// 「始める」
+		// 最初にアニメーションがあるので待つ
+		cy.get('[data-cy-user-setup-start]', { timeout: 15000 }).click();
+
+		cy.wait(700);  // ← トランジション待ち（以下全てのページ遷移で待たせる）
+
+		// 【設定】プロフィール
+		cy.get('[data-cy-user-setup-user-name] input').type('ありす');
+		cy.get('[data-cy-user-setup-user-description] textarea').type('ほげ');
+
+		cy.get('[data-cy-user-setup-next]').click();
+		cy.wait(700);
+
+		// 【チュートリアル】ノートって何？
+		cy.get('[data-cy-user-setup-next]').click();
+		cy.wait(700);
+
+		// 【チュートリアル】リアクションって何？
+		// インタラクティブ要素があるが、テスト時は無視できるようになっている
+		cy.get('[data-cy-user-setup-next]').click();
+		cy.wait(700);
+
+		// 【チュートリアル】タイムラインのしくみ
+		cy.get('[data-cy-user-setup-next]').click();
+		cy.wait(700);
+
+		// 【設定】フォロー
+		cy.get('[data-cy-user-setup-next]').click();
+		cy.wait(700);
+
+		// 【チュートリアル】ノートの投稿設定
+		cy.get('[data-cy-user-setup-next]').click();
+		cy.wait(700);
+
+		// 【チュートリアル】添付ファイルをセンシティブにするには？
+		// インタラクティブ要素があるが、テスト時は無視できるようになっている
+		cy.get('[data-cy-user-setup-next]').click();
+		cy.wait(700);
+
+		// 【設定】プライバシー設定
+		cy.get('[data-cy-user-setup-next]').click();
+		cy.wait(700);
+
+		// 完了（「ホーム画面に進む」ボタン）
+		cy.get('[data-cy-user-setup-complete] a').click();
+
+		// ホームにリダイレクトされる
+		cy.wait(5000);
+		cy.url().should('equal', Cypress.config().baseUrl + '/');
   });
 
   it('signup with duplicated username', () => {
