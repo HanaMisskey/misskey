@@ -54,7 +54,7 @@ import { RoleService } from '@/core/RoleService.js';
 import { MetaService } from '@/core/MetaService.js';
 import { SearchService } from '@/core/SearchService.js';
 import { FeaturedService } from '@/core/FeaturedService.js';
-import { FanoutTimelineService } from '@/core/FanoutTimelineService.js';
+import { FanoutTimelineNamePrefix, FanoutTimelineService } from '@/core/FanoutTimelineService.js';
 import { UtilityService } from '@/core/UtilityService.js';
 import { UserBlockingService } from '@/core/UserBlockingService.js';
 import { isReply } from '@/misc/is-reply.js';
@@ -1120,16 +1120,25 @@ export class NoteCreateService implements OnApplicationShutdown {
 	}
 
 	@bindThis
-	private async pushToTl(note: MiNote, user: { id: MiUser['id']; host: MiUser['host']; }) {
+	private async pushToTl(note: MiNote, user: { id: MiUser['id']; host: MiUser['host']; }, notToPush?: FanoutTimelineNamePrefix[]) {
 		const meta = await this.metaService.fetch();
 		if (!meta.enableFanoutTimeline) return;
 
 		const r = this.redisForTimelines.pipeline();
 
-		if (note.channelId) {
-			this.fanoutTimelineService.push(`channelTimeline:${note.channelId}`, note.id, this.config.perChannelMaxNoteCacheCount, r);
+		const notToPushSet = notToPush ? new Set(notToPush) : null;
+		const shouldPush = (prefix: FanoutTimelineNamePrefix): boolean => {
+			return !notToPushSet || !notToPushSet.has(prefix);
+		};
 
-			this.fanoutTimelineService.push(`userTimelineWithChannel:${user.id}`, note.id, note.userHost == null ? meta.perLocalUserUserTimelineCacheMax : meta.perRemoteUserUserTimelineCacheMax, r);
+		if (note.channelId) {
+			if (shouldPush('channelTimeline')) {
+				this.fanoutTimelineService.push(`channelTimeline:${note.channelId}`, note.id, this.config.perChannelMaxNoteCacheCount, r);
+			}
+
+			if (shouldPush('userTimeline')) {
+				this.fanoutTimelineService.push(`userTimelineWithChannel:${user.id}`, note.id, note.userHost == null ? meta.perLocalUserUserTimelineCacheMax : meta.perRemoteUserUserTimelineCacheMax, r);
+			}
 
 			const channelFollowings = await this.channelFollowingsRepository.find({
 				where: {
@@ -1139,8 +1148,10 @@ export class NoteCreateService implements OnApplicationShutdown {
 			});
 
 			for (const channelFollowing of channelFollowings) {
-				this.fanoutTimelineService.push(`homeTimeline:${channelFollowing.followerId}`, note.id, meta.perUserHomeTimelineCacheMax, r);
-				if (note.fileIds.length > 0) {
+				if (shouldPush('homeTimeline')) {
+					this.fanoutTimelineService.push(`homeTimeline:${channelFollowing.followerId}`, note.id, meta.perUserHomeTimelineCacheMax, r);
+				}
+				if (note.fileIds.length > 0 && shouldPush('homeTimeline')) {
 					this.fanoutTimelineService.push(`homeTimelineWithFiles:${channelFollowing.followerId}`, note.id, meta.perUserHomeTimelineCacheMax / 2, r);
 				}
 			}
@@ -1165,7 +1176,6 @@ export class NoteCreateService implements OnApplicationShutdown {
 			]);
 
 			if (note.visibility === 'followers') {
-				// TODO: 重そうだから何とかしたい Set 使う？
 				userListMemberships = userListMemberships.filter(x => x.userListUserId === user.id || followings.some(f => f.followerId === x.userListUserId));
 			}
 
@@ -1179,27 +1189,29 @@ export class NoteCreateService implements OnApplicationShutdown {
 					if (!following.withReplies) continue;
 				}
 
-				this.fanoutTimelineService.push(`homeTimeline:${following.followerId}`, note.id, meta.perUserHomeTimelineCacheMax, r);
-				if (note.fileIds.length > 0) {
+				if (shouldPush('homeTimeline')) {
+					this.fanoutTimelineService.push(`homeTimeline:${following.followerId}`, note.id, meta.perUserHomeTimelineCacheMax, r);
+				}
+				if (note.fileIds.length > 0 && shouldPush('homeTimeline')) {
 					this.fanoutTimelineService.push(`homeTimelineWithFiles:${following.followerId}`, note.id, meta.perUserHomeTimelineCacheMax / 2, r);
 				}
 			}
 
 			for (const userListMembership of userListMemberships) {
 				// ダイレクトのとき、そのリストが対象外のユーザーの場合
-				if (
-					note.visibility === 'specified' &&
-					note.userId !== userListMembership.userListUserId &&
-					!note.visibleUserIds.some(v => v === userListMembership.userListUserId)
-				) continue;
-
 				// 「自分自身への返信 or そのリストの作成者への返信」のどちらでもない場合
+				if (note.visibility === 'specified' &&
+                note.userId !== userListMembership.userListUserId &&
+                !note.visibleUserIds.some(v => v === userListMembership.userListUserId)) continue;
+
 				if (isReply(note, userListMembership.userListUserId)) {
 					if (!userListMembership.withReplies) continue;
 				}
 
-				this.fanoutTimelineService.push(`userListTimeline:${userListMembership.userListId}`, note.id, meta.perUserListTimelineCacheMax, r);
-				if (note.fileIds.length > 0) {
+				if (shouldPush('userListTimeline')) {
+					this.fanoutTimelineService.push(`userListTimeline:${userListMembership.userListId}`, note.id, meta.perUserListTimelineCacheMax, r);
+				}
+				if (note.fileIds.length > 0 && shouldPush('userListTimeline')) {
 					this.fanoutTimelineService.push(`userListTimelineWithFiles:${userListMembership.userListId}`, note.id, meta.perUserListTimelineCacheMax / 2, r);
 				}
 			}
@@ -1207,8 +1219,10 @@ export class NoteCreateService implements OnApplicationShutdown {
 			// 自分自身のHTL
 			if (note.userHost == null) {
 				if (note.visibility !== 'specified' || !note.visibleUserIds.some(v => v === user.id)) {
-					this.fanoutTimelineService.push(`homeTimeline:${user.id}`, note.id, meta.perUserHomeTimelineCacheMax, r);
-					if (note.fileIds.length > 0) {
+					if (shouldPush('homeTimeline')) {
+						this.fanoutTimelineService.push(`homeTimeline:${user.id}`, note.id, meta.perUserHomeTimelineCacheMax, r);
+					}
+					if (note.fileIds.length > 0 && shouldPush('homeTimeline')) {
 						this.fanoutTimelineService.push(`homeTimelineWithFiles:${user.id}`, note.id, meta.perUserHomeTimelineCacheMax / 2, r);
 					}
 				}
@@ -1216,23 +1230,31 @@ export class NoteCreateService implements OnApplicationShutdown {
 
 			// 自分自身以外への返信
 			if (isReply(note)) {
-				this.fanoutTimelineService.push(`userTimelineWithReplies:${user.id}`, note.id, note.userHost == null ? meta.perLocalUserUserTimelineCacheMax : meta.perRemoteUserUserTimelineCacheMax, r);
+				if (shouldPush('userTimeline')) {
+					this.fanoutTimelineService.push(`userTimelineWithReplies:${user.id}`, note.id, note.userHost == null ? meta.perLocalUserUserTimelineCacheMax : meta.perRemoteUserUserTimelineCacheMax, r);
+				}
 
 				if (note.visibility === 'public' && note.userHost == null) {
-					this.fanoutTimelineService.push('localTimelineWithReplies', note.id, 300, r);
-					if (note.replyUserHost == null) {
+					if (shouldPush('localTimeline')) {
+						this.fanoutTimelineService.push('localTimelineWithReplies', note.id, 300, r);
+					}
+					if (note.replyUserHost == null && shouldPush('localTimeline')) {
 						this.fanoutTimelineService.push(`localTimelineWithReplyTo:${note.replyUserId}`, note.id, 300 / 10, r);
 					}
 				}
 			} else {
-				this.fanoutTimelineService.push(`userTimeline:${user.id}`, note.id, note.userHost == null ? meta.perLocalUserUserTimelineCacheMax : meta.perRemoteUserUserTimelineCacheMax, r);
-				if (note.fileIds.length > 0) {
+				if (shouldPush('userTimeline')) {
+					this.fanoutTimelineService.push(`userTimeline:${user.id}`, note.id, note.userHost == null ? meta.perLocalUserUserTimelineCacheMax : meta.perRemoteUserUserTimelineCacheMax, r);
+				}
+				if (note.fileIds.length > 0 && shouldPush('userTimeline')) {
 					this.fanoutTimelineService.push(`userTimelineWithFiles:${user.id}`, note.id, note.userHost == null ? meta.perLocalUserUserTimelineCacheMax / 2 : meta.perRemoteUserUserTimelineCacheMax / 2, r);
 				}
 
 				if (note.visibility === 'public' && note.userHost == null) {
-					this.fanoutTimelineService.push('localTimeline', note.id, 1000, r);
-					if (note.fileIds.length > 0) {
+					if (shouldPush('localTimeline')) {
+						this.fanoutTimelineService.push('localTimeline', note.id, 1000, r);
+					}
+					if (note.fileIds.length > 0 && shouldPush('localTimeline')) {
 						this.fanoutTimelineService.push('localTimelineWithFiles', note.id, 500, r);
 					}
 				}
