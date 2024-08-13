@@ -6647,11 +6647,11 @@ export interface Locale extends ILocale {
              */
             "mentionMax": string;
             /**
-             * サーバー招待コードの発行
+             * ノートのインポート
              */
             "canImportNotes": string;
             /**
-             * ノートのインポート
+             * サーバー招待コードの発行
              */
             "canInvite": string;
             /**
