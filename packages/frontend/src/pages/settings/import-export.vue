@@ -4,30 +4,30 @@ SPDX-License-Identifier: AGPL-3.0-only
 -->
 
 <template>
-	<div class="_gaps_m">
-		<FormSection first>
-			<template #label><i class="ti ti-pencil"></i> {{ i18n.ts._exportOrImport.allNotes }}</template>
-			<div class="_gaps_s">
-				<MkFolder>
-					<template #label>{{ i18n.ts.export }}</template>
-					<template #icon><i class="ti ti-download"></i></template>
-					<MkButton primary :class="$style.button" inline @click="exportNotes()"><i class="ti ti-download"></i> {{ i18n.ts.export }}</MkButton>
-				</MkFolder>
-				<MkFolder v-if="$i && $i.policies.canImportNotes">
-					<template #label>{{ i18n.ts.import }}</template>
-					<template #icon><i class="ti ti-upload"></i></template>
-					<MkRadios v-model="noteType" style="padding-bottom: 8px;" small>
-						<template #label>Origin</template>
-						<option value="Misskey">Misskey/Firefish</option>
-						<option value="Mastodon">Mastodon/Pleroma/Akkoma</option>
-						<option value="Twitter">Twitter</option>
-						<option value="Instagram">Instagram</option>
-						<option value="Facebook">Facebook</option>
-					</MkRadios>
-					<MkButton primary :class="$style.button" inline @click="importNotes($event)"><i class="ti ti-upload"></i> {{ i18n.ts.import }}</MkButton>
-				</MkFolder>
-			</div>
-		</FormSection>
+<div class="_gaps_m">
+	<FormSection first>
+		<template #label><i class="ti ti-pencil"></i> {{ i18n.ts._exportOrImport.allNotes }}</template>
+		<div class="_gaps_s">
+			<MkFolder>
+				<template #label>{{ i18n.ts.export }}</template>
+				<template #icon><i class="ti ti-download"></i></template>
+				<MkButton primary :class="$style.button" inline @click="exportNotes()"><i class="ti ti-download"></i> {{ i18n.ts.export }}</MkButton>
+			</MkFolder>
+			<MkFolder v-if="$i && $i.policies.canImportNotes">
+				<template #label>{{ i18n.ts.import }}</template>
+				<template #icon><i class="ti ti-upload"></i></template>
+				<MkRadios v-model="noteType" style="padding-bottom: 8px;" small>
+					<template #label>Origin</template>
+					<option value="Misskey">Misskey/Firefish</option>
+					<option value="Mastodon">Mastodon/Pleroma/Akkoma</option>
+					<option value="Twitter">Twitter</option>
+					<option value="Instagram">Instagram</option>
+					<option value="Facebook">Facebook</option>
+				</MkRadios>
+				<MkButton primary :class="$style.button" inline @click="importNotes($event)"><i class="ti ti-upload"></i> {{ i18n.ts.import }}</MkButton>
+			</MkFolder>
+		</div>
+	</FormSection>
 	<FormSection>
 		<template #label><i class="ti ti-star"></i> {{ i18n.ts._exportOrImport.favoritedNotes }}</template>
 		<MkFolder>
