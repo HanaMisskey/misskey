@@ -205,6 +205,7 @@ export class QueueProcessorService implements OnApplicationShutdown {
 				  case 'importIGToDb': return this.importNotesProcessorService.processIGDb(job);
 				  case 'importMastoToDb': return this.importNotesProcessorService.processMastoToDb(job);
 				  case 'importPleroToDb': return this.importNotesProcessorService.processPleroToDb(job);
+				  case 'importKeyNotesToDb': return this.importNotesProcessorService.processKeyNotesToDb(job);
 					case 'importMuting': return this.importMutingProcessorService.process(job);
 					case 'importBlocking': return this.importBlockingProcessorService.process(job);
 					case 'importBlockingToDb': return this.importBlockingProcessorService.processDb(job);
