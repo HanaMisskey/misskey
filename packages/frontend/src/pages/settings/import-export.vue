@@ -220,7 +220,7 @@ const importFollowing = async (ev) => {
 
 const importNotes = async (ev) => {
 	const file = await selectFile(ev.currentTarget ?? ev.target);
-	os.api('i/import-notes', {
+	misskeyApi('i/import-notes', {
 		fileId: file.id,
 		type: noteType.value,
 	}).then(onImportSuccess).catch(onError);
