@@ -364,7 +364,7 @@ export class ImportNotesProcessorService {
 		let title;
 		const files: MiDriveFile[] = [];
 
-		function decodeIGString(str: any) {
+		function decodeIGString(str: string) {
 			const arr = [];
 			for (let i = 0; i < str.length; i++) {
 				arr.push(str.charCodeAt(i));
@@ -426,9 +426,9 @@ export class ImportNotesProcessorService {
 		try {
 			const date = new Date(tweet.created_at);
 			const textReplaceURLs = tweet.entities.urls && tweet.entities.urls.length > 0 ? await replaceTwitterUrls(tweet.full_text, tweet.entities.urls) : tweet.full_text;
-			const text = tweet.entities.user_mentions && tweet.entities.user_mentions.length > 0 ? await replaceTwitterMentions(textReplaceURLs, tweet.entities.user_mentions) : textReplaceURLs; 
+			const text = tweet.entities.user_mentions && tweet.entities.user_mentions.length > 0 ? await replaceTwitterMentions(textReplaceURLs, tweet.entities.user_mentions) : textReplaceURLs;
 			const files: MiDriveFile[] = [];
-			
+
 			if (tweet.extended_entities && this.isIterable(tweet.extended_entities.media)) {
 				for await (const file of tweet.extended_entities.media) {
 					if (file.video_info) {
