@@ -1,6 +1,5 @@
 import * as fs from 'node:fs';
 import * as fsp from 'node:fs/promises';
-import * as vm from 'node:vm';
 import * as crypto from 'node:crypto';
 import { Inject, Injectable } from '@nestjs/common';
 import { ZipReader } from 'slacc';
@@ -17,10 +16,10 @@ import { MfmService } from '@/core/MfmService.js';
 import { ApNoteService } from '@/core/activitypub/models/ApNoteService.js';
 import { extractApHashtagObjects } from '@/core/activitypub/models/tag.js';
 import { IdService } from '@/core/IdService.js';
+import type { Config } from '@/config.js';
 import { QueueLoggerService } from '../QueueLoggerService.js';
 import type * as Bull from 'bullmq';
 import type { DbNoteImportToDbJobData, DbNoteImportJobData, DbNoteWithParentImportToDbJobData } from '../types.js';
-import type { Config } from '@/config.js';
 
 @Injectable()
 export class ImportNotesProcessorService {
@@ -431,7 +430,7 @@ export class ImportNotesProcessorService {
 					if (file.name) {
 						this.driveService.updateFile(exists, { comment: file.name }, user);
 					}
-					
+
 					files.push(exists);
 				}
 			}
