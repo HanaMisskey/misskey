@@ -6,7 +6,7 @@ services:
     image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
     ports:
       - "6379:6379"
-    command: ['--default_lua_flags=allow-undeclared-keys,disable-atomicity']
+    command: ['--default_lua_flags=allow-undeclared-keys','--lock_on_hashtags']
     ulimits:
       memlock: -1
     volumes:
