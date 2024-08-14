@@ -151,6 +151,7 @@ export const paramDef = {
 		replyId: { type: 'string', format: 'misskey:id', nullable: true },
 		renoteId: { type: 'string', format: 'misskey:id', nullable: true },
 		channelId: { type: 'string', format: 'misskey:id', nullable: true },
+		isNoteInHanaMode: { type: 'boolean', default: false },
 
 		// anyOf内にバリデーションを書いても最初の一つしかチェックされない
 		// See https://github.com/misskey-dev/misskey/pull/10082
@@ -377,6 +378,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 					renote,
 					cw: ps.cw,
 					localOnly: ps.localOnly,
+					isNoteInHanaMode: ps.isNoteInHanaMode,
 					reactionAcceptance: ps.reactionAcceptance,
 					visibility: ps.visibility,
 					visibleUsers,
