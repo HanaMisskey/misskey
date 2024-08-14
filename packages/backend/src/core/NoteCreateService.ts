@@ -573,6 +573,12 @@ export class NoteCreateService implements OnApplicationShutdown {
 
 	@bindThis
 	private async insertNote(user: { id: MiUser['id']; host: MiUser['host']; }, data: Option, tags: string[], emojis: string[], mentionedUsers: MinimumUser[]) {
+		if (data.createdAt) {
+			if (data.createdAt.getTime() > Date.now() + 1000 * 60 * 3 ) {
+				throw new Error('Invalid createdAt time: Time is more than 3 minutes ahead of the current time.');
+			}
+		};
+
 		const insert = new MiNote({
 			id: this.idService.gen(data.createdAt?.getTime()),
 			fileIds: data.files ? data.files.map(file => file.id) : [],
@@ -933,7 +939,7 @@ export class NoteCreateService implements OnApplicationShutdown {
 			this.incNotesCountOfUser(user);
 		}
 
-		this.pushToTl(note, user);
+		this.pushToTl(note, user, ['localTimeline', 'homeTimeline', 'userListTimeline', 'antennaTimeline']);
 
 		this.antennaService.addNoteToAntennas(note, user);
 
