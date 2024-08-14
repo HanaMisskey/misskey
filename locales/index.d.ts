@@ -5516,6 +5516,10 @@ export interface Locale extends ILocale {
     };
     "_timelineDescription": {
         /**
+         * はなみタイムラインでは、フォローしているアカウントの投稿に加えて、連合しているサーバーの人気な投稿も見られます。
+         */
+        "hanami": string;
+        /**
          * ホームタイムラインでは、あなたがフォローしているアカウントの投稿を見られます。
          */
         "home": string;
@@ -6672,6 +6676,10 @@ export interface Locale extends ILocale {
              * ローカルタイムラインの閲覧
              */
             "ltlAvailable": string;
+            /**
+             * はなみタイムラインの閲覧
+             */
+            "hanamiTlAvailable": string;
             /**
              * パブリック投稿の許可
              */

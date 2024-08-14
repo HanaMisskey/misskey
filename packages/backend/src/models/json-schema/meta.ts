@@ -280,6 +280,10 @@ export const packedMetaDetailedOnlySchema = {
 					type: 'boolean',
 					optional: false, nullable: false,
 				},
+				hanamiTimeline: {
+					type: 'boolean',
+					optional: false, nullable: false,
+				},
 				hcaptcha: {
 					type: 'boolean',
 					optional: false, nullable: false,

@@ -61,7 +61,7 @@ const rootEl = shallowRef<HTMLElement>();
 
 const queue = ref(0);
 const srcWhenNotSignin = ref<'local' | 'global'>(isAvailableBasicTimeline('local') ? 'local' : 'global');
-const src = computed<'home' | 'local' | 'social' | 'global' | `list:${string}`>({
+const src = computed<'hanami' | 'home' | 'local' | 'social' | 'global' | `list:${string}`>({
 	get: () => ($i ? defaultStore.reactiveState.tl.value.src : srcWhenNotSignin.value),
 	set: (x) => saveSrc(x),
 });
@@ -195,7 +195,7 @@ async function chooseChannel(ev: MouseEvent): Promise<void> {
 	os.popupMenu(items, ev.currentTarget ?? ev.target);
 }
 
-function saveSrc(newSrc: 'home' | 'local' | 'social' | 'global' | `list:${string}`): void {
+function saveSrc(newSrc: 'hanami' | 'home' | 'local' | 'social' | 'global' | `list:${string}`): void {
 	const out = deepMerge({ src: newSrc }, defaultStore.state.tl);
 
 	if (newSrc.startsWith('userList:')) {
