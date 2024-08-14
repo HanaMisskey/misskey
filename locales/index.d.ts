@@ -729,9 +729,17 @@ export interface Locale extends ILocale {
      */
     "flagAsCat": string;
     /**
+     * はなモードを有効にする
+     */
+    "flagAsHanaModeUser": string;
+    /**
      * にゃにゃにゃ？？
      */
     "flagAsCatDescription": string;
+    /**
+     * はなモードを有効にするとはなみタイムラインなど複数の独自機能が利用できるようになります。
+     */
+    "flagAsHanaModeUserDescription": string;
     /**
      * タイムラインにノートへの返信を表示する
      */
@@ -6054,6 +6062,16 @@ export interface Locale extends ILocale {
                  */
                 "flavor": string;
             };
+            "_markedAsHanaModeUser": {
+                /**
+                 * 菫ほどな小さき人に生まれたし
+                 */
+                "title": string;
+                /**
+                 * はなモードを有効にした
+                 */
+                "description": string;
+            };
             "_following1": {
                 /**
                  * はじめてのフォロー
@@ -6780,6 +6798,10 @@ export interface Locale extends ILocale {
              * botユーザー
              */
             "isBot": string;
+            /**
+             * はなモードが有効なユーザー
+             */
+            "isInHanaMode": string;
             /**
              * サスペンド済みユーザー
              */

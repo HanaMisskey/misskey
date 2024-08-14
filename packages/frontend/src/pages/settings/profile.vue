@@ -18,6 +18,10 @@ SPDX-License-Identifier: AGPL-3.0-only
 		</div>
 	</div>
 
+	<MkSwitch v-model="profile.isInHanaMode">
+		{{ i18n.ts.flagAsHanaModeUser }}<template #caption>{{ i18n.ts.flagAsHanaModeUserDescription }}</template>
+	</MkSwitch>
+
 	<MkInput v-model="profile.name" :max="30" manualSave :mfmAutocomplete="['emoji']">
 		<template #label>{{ i18n.ts._profile.name }}</template>
 	</MkInput>
@@ -143,6 +147,7 @@ const profile = reactive({
 	lang: $i.lang,
 	isBot: $i.isBot ?? false,
 	isCat: $i.isCat ?? false,
+	isInHanaMode: $i.isInHanaMode ?? false,
 });
 
 watch(() => profile, () => {
@@ -192,6 +197,7 @@ function save() {
 		lang: profile.lang || null,
 		isBot: !!profile.isBot,
 		isCat: !!profile.isCat,
+		isInHanaMode: !!profile.isInHanaMode,
 	});
 	globalEvents.emit('requestClearPageCache');
 	claimAchievement('profileFilled');
@@ -200,6 +206,9 @@ function save() {
 	}
 	if (profile.isCat) {
 		claimAchievement('markedAsCat');
+	}
+	if (profile.isInHanaMode) {
+		claimAchievement('markedAsHanaModeUser');
 	}
 }
 

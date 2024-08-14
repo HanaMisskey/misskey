@@ -178,7 +178,9 @@ cacheRemoteSensitiveFilesDescription: "この設定を無効にすると、リ�
 flagAsBot: "Botとして設定"
 flagAsBotDescription: "このアカウントがプログラムによって運用される場合は、このフラグをオンにします。オンにすると、反応の連鎖を防ぐためのフラグとして他の開発者に役立ったり、Misskeyのシステム上での扱いがBotに合ったものになります。"
 flagAsCat: "にゃああああああああああああああ！！！！！！！！！！！！"
+flagAsHanaModeUser: "はなモードを有効にする"
 flagAsCatDescription: "にゃにゃにゃ？？"
+flagAsHanaModeUserDescription: "はなモードを有効にするとはなみタイムラインなど複数の独自機能が利用できるようになります。"
 flagShowTimelineReplies: "タイムラインにノートへの返信を表示する"
 flagShowTimelineRepliesDescription: "オンにすると、タイムラインにユーザーのノート以外にもそのユーザーの他のノートへの返信を表示します。"
 autoAcceptFollowed: "フォロー中ユーザーからのフォロリクを自動承認"
@@ -1547,6 +1549,9 @@ _achievements:
       title: "吾輩は猫である"
       description: "アカウントをCatとして設定した"
       flavor: "名前はまだない。"
+    _markedAsHanaModeUser:
+      title: "菫ほどな小さき人に生まれたし"
+      description: "はなモードを有効にした"
     _following1:
       title: "はじめてのフォロー"
       description: "初めてフォローした"
@@ -1752,6 +1757,7 @@ _role:
     isRemote: "リモートユーザー"
     isCat: "猫ユーザー"
     isBot: "botユーザー"
+    isInHanaMode: "はなモードが有効なユーザー"
     isSuspended: "サスペンド済みユーザー"
     isLocked: "鍵アカウントユーザー"
     isExplorable: "「アカウントを見つけやすくする」が有効なユーザー"

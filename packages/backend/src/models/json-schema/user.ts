@@ -115,6 +115,10 @@ export const packedUserLiteSchema = {
 			type: 'boolean',
 			nullable: false, optional: true,
 		},
+		isInHanaMode: {
+			type: 'boolean',
+			nullable: false, optional: true,
+		},
 		instance: {
 			type: 'object',
 			nullable: false, optional: true,
