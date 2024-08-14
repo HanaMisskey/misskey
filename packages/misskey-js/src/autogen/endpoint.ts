@@ -330,6 +330,7 @@ import type {
 	IGalleryPostsResponse,
 	IImportBlockingRequest,
 	IImportFollowingRequest,
+	IImportNotesRequest,
 	IImportMutingRequest,
 	IImportUserListsRequest,
 	IImportAntennasRequest,
@@ -796,6 +797,7 @@ export type Endpoints = {
 	'i/gallery/posts': { req: IGalleryPostsRequest; res: IGalleryPostsResponse };
 	'i/import-blocking': { req: IImportBlockingRequest; res: EmptyResponse };
 	'i/import-following': { req: IImportFollowingRequest; res: EmptyResponse };
+	'i/import-notes': { req: IImportNotesRequest; res: EmptyResponse };
 	'i/import-muting': { req: IImportMutingRequest; res: EmptyResponse };
 	'i/import-user-lists': { req: IImportUserListsRequest; res: EmptyResponse };
 	'i/import-antennas': { req: IImportAntennasRequest; res: EmptyResponse };
@@ -1178,6 +1180,7 @@ export const endpointReqTypes: Record<keyof Endpoints, 'application/json' | 'mul
 	'i/gallery/posts': 'application/json',
 	'i/import-blocking': 'application/json',
 	'i/import-following': 'application/json',
+	'i/import-notes': 'application/json',
 	'i/import-muting': 'application/json',
 	'i/import-user-lists': 'application/json',
 	'i/import-antennas': 'application/json',

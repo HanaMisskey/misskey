@@ -2486,6 +2486,18 @@ declare module '../api.js' {
      * **Internal Endpoint**: This endpoint is an API for the misskey mainframe and is not intended for use by third parties.
      * **Credential required**: *Yes*
      */
+    request<E extends 'i/import-notes', P extends Endpoints[E]['req']>(
+      endpoint: E,
+      params: P,
+      credential?: string | null,
+    ): Promise<SwitchCaseResponseType<E, P>>;
+
+    /**
+     * No description provided.
+     * 
+     * **Internal Endpoint**: This endpoint is an API for the misskey mainframe and is not intended for use by third parties.
+     * **Credential required**: *Yes*
+     */
     request<E extends 'i/import-muting', P extends Endpoints[E]['req']>(
       endpoint: E,
       params: P,

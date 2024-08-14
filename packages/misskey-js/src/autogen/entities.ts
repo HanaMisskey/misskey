@@ -333,6 +333,7 @@ export type IGalleryPostsRequest = operations['i___gallery___posts']['requestBod
 export type IGalleryPostsResponse = operations['i___gallery___posts']['responses']['200']['content']['application/json'];
 export type IImportBlockingRequest = operations['i___import-blocking']['requestBody']['content']['application/json'];
 export type IImportFollowingRequest = operations['i___import-following']['requestBody']['content']['application/json'];
+export type IImportNotesRequest = operations['i___import-notes']['requestBody']['content']['application/json'];
 export type IImportMutingRequest = operations['i___import-muting']['requestBody']['content']['application/json'];
 export type IImportUserListsRequest = operations['i___import-user-lists']['requestBody']['content']['application/json'];
 export type IImportAntennasRequest = operations['i___import-antennas']['requestBody']['content']['application/json'];
