@@ -158,7 +158,7 @@ function upcomingFeatureDialog() {
 	--innerBorderSize: 3px;
 	--outerBorderSize: calc(var(--paddingSize) - var(--innerBorderSize));
 
-	--fullViewHeight: calc(100dvh - var(--paddingSize) * 2);
+	--fullViewHeight: calc(100svh - var(--paddingSize) * 2);
 
 	--hana-theme: #fd709a;
 	--hana-themeAlt: #f77062;
