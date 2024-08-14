@@ -16,8 +16,9 @@ SPDX-License-Identifier: AGPL-3.0-only
 			<MkFolder v-if="$i && $i.policies.canImportNotes">
 				<template #label>{{ i18n.ts.import }}</template>
 				<template #icon><i class="ti ti-upload"></i></template>
+				<FormInfo info style="margin-bottom: 1.5em;">{{ i18n.ts.importNoteInfo }}</FormInfo>
 				<MkRadios v-model="noteType" style="padding-bottom: 8px;" small>
-					<template #label>Origin</template>
+					<template #label>{{ i18n.ts.importOrigin }}</template>
 					<option value="Misskey">Misskey/Firefish</option>
 					<option value="Mastodon">Mastodon/Pleroma/Akkoma</option>
 					<option value="Twitter">Twitter</option>
@@ -25,6 +26,10 @@ SPDX-License-Identifier: AGPL-3.0-only
 					<option value="Facebook">Facebook</option>
 				</MkRadios>
 				<MkButton primary :class="$style.button" inline @click="importNotes($event)"><i class="ti ti-upload"></i> {{ i18n.ts.import }}</MkButton>
+				<div class="_gaps_s">
+					<FormInfo info style="margin-top: 1.5em;">{{ i18n.ts.importNoteDisclaimer }}</FormInfo>
+					<FormInfo warn>{{ i18n.ts.importNoteWarm }}</FormInfo>
+				</div>
 			</MkFolder>
 		</div>
 	</FormSection>
@@ -140,6 +145,7 @@ import FormSection from '@/components/form/section.vue';
 import MkFolder from '@/components/MkFolder.vue';
 import MkSwitch from '@/components/MkSwitch.vue';
 import MkRadios from '@/components/MkRadios.vue';
+import FormInfo from '@/components/MkInfo.vue';
 import * as os from '@/os.js';
 import { misskeyApi } from '@/scripts/misskey-api.js';
 import { selectFile } from '@/scripts/select-file.js';

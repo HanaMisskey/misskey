@@ -309,6 +309,22 @@ export interface Locale extends ILocale {
      */
     "import": string;
     /**
+     * インポート元
+     */
+    "importOrigin": string;
+    /**
+     * 他サービスでエクスポートしたノートなどをインポートすることができます。
+     */
+    "importNoteInfo": string;
+    /**
+     * すべてのノートがインポートできるわけではありません。改変のないMisskey以外では全くインポートできない場合もあります。
+     */
+    "importNoteDisclaimer": string;
+    /**
+     * インポートされたノートは、ユーザーページ以外には表示されない場合があります。
+     */
+    "importNoteWarm": string;
+    /**
      * エクスポート
      */
     "export": string;
