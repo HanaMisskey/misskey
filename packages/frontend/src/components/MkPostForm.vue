@@ -791,6 +791,7 @@ async function post(ev?: MouseEvent) {
 		visibility: visibility.value,
 		visibleUserIds: visibility.value === 'specified' ? visibleUsers.value.map(u => u.id) : undefined,
 		reactionAcceptance: reactionAcceptance.value,
+		isNoteInHanaMode: $i.isInHanaMode,
 	};
 
 	if (withHashtags.value && hashtags.value && hashtags.value.trim() !== '') {

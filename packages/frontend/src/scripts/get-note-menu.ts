@@ -541,6 +541,7 @@ export function getRenoteMenu(props: {
 					misskeyApi('notes/create', {
 						renoteId: appearNote.id,
 						channelId: appearNote.channelId,
+						isNoteInHanaMode: $i?.isInHanaMode ?? undefined,
 					}).then(() => {
 						os.toast(i18n.ts.renoted);
 					});
@@ -589,6 +590,7 @@ export function getRenoteMenu(props: {
 						localOnly,
 						visibility,
 						renoteId: appearNote.id,
+						isNoteInHanaMode: $i?.isInHanaMode ?? undefined,
 					}).then(() => {
 						os.toast(i18n.ts.renoted);
 					});
@@ -630,6 +632,7 @@ export function getRenoteMenu(props: {
 							misskeyApi('notes/create', {
 								renoteId: appearNote.id,
 								channelId: channel.id,
+								isNoteInHanaMode: $i?.isInHanaMode ?? undefined,
 							}).then(() => {
 								os.toast(i18n.tsx.renotedToX({ name: channel.name }));
 							});
