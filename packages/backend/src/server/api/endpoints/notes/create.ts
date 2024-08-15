@@ -377,7 +377,6 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 					renote,
 					cw: ps.cw,
 					localOnly: ps.localOnly,
-					isNoteInHanaMode: me.isInHanaMode,
 					reactionAcceptance: ps.reactionAcceptance,
 					visibility: ps.visibility,
 					visibleUsers,

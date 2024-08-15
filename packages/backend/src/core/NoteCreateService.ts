@@ -135,7 +135,7 @@ type Option = {
 	files?: MiDriveFile[] | null;
 	poll?: IPoll | null;
 	localOnly?: boolean | null;
-	isNoteInHanaMode: boolean;
+	isNoteInHanaMode?: boolean | null;
 	reactionAcceptance?: MiNote['reactionAcceptance'];
 	cw?: string | null;
 	visibility?: string;
@@ -230,6 +230,11 @@ export class NoteCreateService implements OnApplicationShutdown {
 		isCat: MiUser['isCat'];
 		isInHanaMode: MiUser['isInHanaMode'];
 	}, data: Option, silent = false): Promise<MiNote> {
+		// ノートのisNoteInHanaMode属性は投稿時のユーザーの属性に基本的に依存する
+		if (data.isNoteInHanaMode == null) {
+			data.isNoteInHanaMode = user.isInHanaMode;
+		}
+
 		// チャンネル外にリプライしたら対象のスコープに合わせる
 		// (クライアントサイドでやっても良い処理だと思うけどとりあえずサーバーサイドで)
 		if (data.reply && data.channel && data.reply.channelId !== data.channel.id) {
@@ -422,7 +427,9 @@ export class NoteCreateService implements OnApplicationShutdown {
 
 		if (data.isNoteInHanaMode) {
 			throw new IdentifiableError('cb4feb26-a6e8-44b4-8c9d-d21c48a73d93', 'Unable to re-import notes created in HanaMisskey.');
-		};
+		} else {
+			data.isNoteInHanaMode = false;
+		}
 
 		// チャンネル内にリプライしたら対象のスコープに合わせる
 		// (クライアントサイドでやっても良い処理だと思うけどとりあえずサーバーサイドで)
@@ -688,7 +695,6 @@ export class NoteCreateService implements OnApplicationShutdown {
 		username: MiUser['username'];
 		host: MiUser['host'];
 		isBot: MiUser['isBot'];
-		isInHanaMode: MiUser['isInHanaMode'];
 	}, data: Option, silent: boolean, tags: string[], mentionedUsers: MinimumUser[]) {
 		const meta = await this.metaService.fetch();
 
@@ -717,7 +723,7 @@ export class NoteCreateService implements OnApplicationShutdown {
 
 		// はなモードが有効なユーザーであることと、はなモード内でのノートであることは等価であることが保証されているので
 		// チャンネルに関してもこれでOK
-		if (user.isInHanaMode) {
+		if (note.isNoteInHanaMode) {
 			this.pushToTl(note, user, ['localTimeline']);
 		} else {
 			this.pushToTl(note, user);
