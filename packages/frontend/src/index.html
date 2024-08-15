@@ -16,7 +16,7 @@
 	<!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
 	<meta
 		http-equiv="Content-Security-Policy"
-		content="default-src 'self' https://newassets.hcaptcha.com/ https://challenges.cloudflare.com/ http://localhost:7493/;
+		content="default-src 'self' https://newassets.hcaptcha.com/ https://challenges.cloudflare.com/ http://localhost:7493/ static-assets.misskey.flowers;
 			worker-src 'self';
 			script-src 'self' 'unsafe-eval' https://*.hcaptcha.com https://challenges.cloudflare.com https://esm.sh;
 			style-src 'self' 'unsafe-inline' static-assets.misskey.flowers;
@@ -27,6 +27,7 @@
 	/>
 	<meta property="og:site_name" content="[DEV BUILD] Misskey" />
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="https://static-assets.misskey.flowers/fonts/hana-icons/font.css">
 </head>
 
 <body>
