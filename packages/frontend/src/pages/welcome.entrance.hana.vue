@@ -158,7 +158,7 @@ function upcomingFeatureDialog() {
 	--innerBorderSize: 3px;
 	--outerBorderSize: calc(var(--paddingSize) - var(--innerBorderSize));
 
-	--fullViewHeight: calc(100dvh - var(--paddingSize) * 2);
+	--fullViewHeight: calc(100svh - var(--paddingSize) * 2);
 
 	--hana-theme: #fd709a;
 	--hana-themeAlt: #f77062;
@@ -169,32 +169,28 @@ function upcomingFeatureDialog() {
 	padding: var(--paddingSize);
 	position: relative;
 
-	min-height: 100dvh;
+	min-height: 100svh;
 
 	&::before {
-		position: fixed;
-		display: block;
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: calc(100% - var(--outerBorderSize) * 2);
+		height: calc(100% - var(--outerBorderSize) * 2);
 		content: '';
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		width: calc(100% - calc(var(--outerBorderSize) * 2));
-		height: calc(100% - calc(var(--outerBorderSize) * 2));
-		border: calc(var(--outerBorderSize) * 4) solid var(--panel);
-		border-radius: calc(calc(var(--outerBorderSize) * 4) + 12px);
+		border: var(--outerBorderSize) solid var(--panel);
+		border-radius: calc(var(--outerBorderSize) + 12px);
 		z-index: 9999;
 		pointer-events: none;
 	}
 
 	&::after {
-		position: fixed;
-		display: block;
+		position: absolute;
+		top: var(--outerBorderSize);
+		left: var(--outerBorderSize);
+		width: calc(100% - var(--paddingSize) * 2);
+		height: calc(100% - var(--paddingSize) * 2);
 		content: '';
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		width: calc(100% - calc(var(--paddingSize) * 2));
-		height: calc(calc(100% - calc(var(--paddingSize) * 2)));
 		border: var(--innerBorderSize) solid var(--hana-theme);
 		border-radius: 12px;
 		z-index: 9999;
@@ -468,6 +464,32 @@ function upcomingFeatureDialog() {
 
 		&:hover {
 			text-decoration: underline;
+		}
+	}
+}
+
+@media (any-pointer: fine) and (min-width: 680px) {
+	.root {
+		&::before {
+			position: fixed;
+			display: block;
+			content: '';
+			top: calc(var(--outerBorderSize) * -3);
+			left: calc(var(--outerBorderSize) * -3);
+			width: calc(100% - calc(var(--outerBorderSize) * 2));
+			height: calc(100% - calc(var(--outerBorderSize) * 2));
+			border: calc(var(--outerBorderSize) * 4) solid var(--panel);
+		}
+
+		&::after {
+			position: fixed;
+			display: block;
+			content: '';
+			top: calc(var(--paddingSize) + var(--innerBorderSize) * -1);
+			left: calc(var(--paddingSize) + var(--innerBorderSize) * -1);
+			width: calc(100% - calc(var(--paddingSize) * 2));
+			height: calc(calc(100% - calc(var(--paddingSize) * 2)));
+			border: var(--innerBorderSize) solid var(--hana-theme);
 		}
 	}
 }
