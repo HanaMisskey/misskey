@@ -4802,6 +4802,7 @@ export type components = {
       canPublicNote: boolean;
       mentionLimit: number;
       canInvite: boolean;
+      canImportNotes: boolean;
       inviteLimit: number;
       inviteLimitCycle: number;
       inviteExpirationTime: number;
