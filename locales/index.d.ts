@@ -729,17 +729,9 @@ export interface Locale extends ILocale {
      */
     "flagAsCat": string;
     /**
-     * はなモードを有効にする
-     */
-    "flagAsHanaModeUser": string;
-    /**
      * にゃにゃにゃ？？
      */
     "flagAsCatDescription": string;
-    /**
-     * はなモードを有効にするとはなみタイムラインなど複数の独自機能が利用できるようになります。
-     */
-    "flagAsHanaModeUserDescription": string;
     /**
      * タイムラインにノートへの返信を表示する
      */
