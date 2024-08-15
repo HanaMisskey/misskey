@@ -2329,6 +2329,7 @@ _instanceCharts:
 
 _timelines:
   home: "ホーム"
+  hanami: "はなみ"
   local: "ローカル"
   social: "ソーシャル"
   global: "グローバル"
@@ -2727,6 +2728,8 @@ _contextMenu:
   native: "ブラウザのUI"
 
 _hana:
+  hanaSettings: "はなみすきー設定"
+  hanaMode: "はなモード"
   _inDevelopment:
     title: "この機能は開発中です"
     description: "はなみすきーは新規機能盛りだくさんで鋭意開発中です！\nどんな機能が実装されるかはお楽しみ。"
@@ -2751,3 +2754,14 @@ _hana:
         description: "機械学習や最新の学術研究をもとに、はなみすきーのためにチューニングされた高精度で高速な検索機能を利用できます。また、はなみすきーの検索機能そのものが学術研究プロジェクトとなっているため、検索精度は日進月歩となることが期待できます。"
     _cta:
       title: "「はな」のあるSNS体験を楽しもう"
+  _hanaModeSwitcher:
+    recomenddedFor: "こんな方におすすめ"
+    normal: "通常"
+    normal1: "LTLが使えます"
+    normal2: "公開範囲「パブリック」で投稿した内容はLTLに表示されます"
+    normalRecommend: "サーバー内のユーザーとの交流を重視したい方"
+    hana1: "LTLが使えません"
+    hana2: "公開範囲「パブリック」で投稿した内容はLTLに表示されません"
+    hana3: "フォロー中ユーザーの最新のノートとFediverseの人気の投稿をザッピングできる「はなみタイムライン」が使用できます"
+    hanaRecommend: "おひとりさまサーバーのような分散SNS体験をしたい方（内々での交流だけでなく、外部サーバーとの交流もしっかり重視したい方）"
+    saveConfirmDescription: "一定期間にモードを変更できる回数には制限があります。"

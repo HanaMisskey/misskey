@@ -8828,6 +8828,10 @@ export interface Locale extends ILocale {
          */
         "home": string;
         /**
+         * はなみ
+         */
+        "hanami": string;
+        /**
          * ローカル
          */
         "local": string;
@@ -10223,6 +10227,14 @@ export interface Locale extends ILocale {
         "native": string;
     };
     "_hana": {
+        /**
+         * はなみすきー設定
+         */
+        "hanaSettings": string;
+        /**
+         * はなモード
+         */
+        "hanaMode": string;
         "_inDevelopment": {
             /**
              * この機能は開発中です
@@ -10304,6 +10316,48 @@ export interface Locale extends ILocale {
                  */
                 "title": string;
             };
+        };
+        "_hanaModeSwitcher": {
+            /**
+             * こんな方におすすめ
+             */
+            "recomenddedFor": string;
+            /**
+             * 通常
+             */
+            "normal": string;
+            /**
+             * LTLが使えます
+             */
+            "normal1": string;
+            /**
+             * 公開範囲「パブリック」で投稿した内容はLTLに表示されます
+             */
+            "normal2": string;
+            /**
+             * サーバー内のユーザーとの交流を重視したい方
+             */
+            "normalRecommend": string;
+            /**
+             * LTLが使えません
+             */
+            "hana1": string;
+            /**
+             * 公開範囲「パブリック」で投稿した内容はLTLに表示されません
+             */
+            "hana2": string;
+            /**
+             * フォロー中ユーザーの最新のノートとFediverseの人気の投稿をザッピングできる「はなみタイムライン」が使用できます
+             */
+            "hana3": string;
+            /**
+             * おひとりさまサーバーのような分散SNS体験をしたい方（内々での交流だけでなく、外部サーバーとの交流もしっかり重視したい方）
+             */
+            "hanaRecommend": string;
+            /**
+             * 一定期間にモードを変更できる回数には制限があります。
+             */
+            "saveConfirmDescription": string;
         };
     };
 }
