@@ -10227,6 +10227,10 @@ export interface Locale extends ILocale {
          * はなモード
          */
         "hanaMode": string;
+        /**
+         * はな
+         */
+        "hanaModeShort": string;
         "_inDevelopment": {
             /**
              * この機能は開発中です
