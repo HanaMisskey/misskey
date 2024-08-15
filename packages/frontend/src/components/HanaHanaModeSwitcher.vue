@@ -1,7 +1,7 @@
 <template>
 <div class="_gaps">
 	<div class="_gaps_s">
-		<input id="hana" :class="$style.radio" v-model="mode" type="radio" name="hanamodeSwitcher" value="hana">
+		<input id="hana" v-model="mode" :class="$style.radio" type="radio" name="hanamodeSwitcher" value="hana">
 		<label :class="$style.radioRoot" class="_gaps_s" for="hana">
 			<div :class="$style.radioTitle">
 				<div :class="$style.tick">
@@ -19,7 +19,7 @@
 				<div>{{ i18n.ts._hana._hanaModeSwitcher.hanaRecommend }}</div>
 			</div>
 		</label>
-		<input id="normal" :class="$style.radio" v-model="mode" type="radio" name="hanamodeSwitcher" value="normal">
+		<input id="normal" v-model="mode" :class="$style.radio" type="radio" name="hanamodeSwitcher" value="normal">
 		<label :class="$style.radioRoot" class="_gaps_s" for="normal">
 			<div :class="$style.radioTitle">
 				<div :class="$style.tick">
