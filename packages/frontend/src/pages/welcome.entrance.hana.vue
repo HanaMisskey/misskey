@@ -479,6 +479,7 @@ function upcomingFeatureDialog() {
 			width: calc(100% - calc(var(--outerBorderSize) * 2));
 			height: calc(100% - calc(var(--outerBorderSize) * 2));
 			border: calc(var(--outerBorderSize) * 4) solid var(--panel);
+			border-radius: calc(calc(var(--outerBorderSize) * 4) + 12px);
 		}
 
 		&::after {
