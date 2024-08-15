@@ -34,7 +34,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 </template>
 
 <script lang="ts" setup>
-import { computed, watch, provide, shallowRef, ref } from 'vue';
+import { computed, watch, provide, shallowRef, ref, onActivated, onMounted } from 'vue';
 import type { Tab } from '@/components/global/MkPageHeader.tabs.vue';
 import MkTimeline from '@/components/MkTimeline.vue';
 import MkInfo from '@/components/MkInfo.vue';
@@ -235,6 +235,22 @@ function closeTutorial(): void {
 	before[src.value] = true;
 	defaultStore.set('timelineTutorials', before);
 }
+
+function switchTlIfNeeded() {
+	function isNotInList(src: 'hanami' | 'home' | 'local' | 'social' | 'global' | `list:${string}`): src is Exclude<typeof src, `list:${string}`> {
+		return !src.startsWith('list:');
+	}
+	if (isNotInList(src.value) && !availableBasicTimelines().includes(src.value)) {
+		src.value = availableBasicTimelines()[0];
+	}
+}
+
+onMounted(() => {
+	switchTlIfNeeded();
+});
+onActivated(() => {
+	switchTlIfNeeded();
+});
 
 const headerActions = computed(() => {
 	const tmp = [

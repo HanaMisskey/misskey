@@ -7,8 +7,8 @@ import { $i } from '@/account.js';
 import { instance } from '@/instance.js';
 
 export const basicTimelineTypes = [
-	'hanami',
 	'home',
+	'hanami',
 	'local',
 	'social',
 	'global',
@@ -40,9 +40,9 @@ export function isAvailableBasicTimeline(timeline: BasicTimelineType | undefined
 		case 'home':
 			return $i != null;
 		case 'hanami':
-			return $i != null && $i.policies.hanamiTlAvailable;
+			return $i != null && $i.policies.hanamiTlAvailable && $i.isInHanaMode === true;
 		case 'local':
-			return ($i == null && instance.policies.ltlAvailable) || ($i != null && $i.policies.ltlAvailable);
+			return ($i == null && instance.policies.ltlAvailable) || ($i != null && $i.policies.ltlAvailable && !$i.isInHanaMode);
 		case 'social':
 			return $i != null && $i.policies.ltlAvailable;
 		case 'global':
