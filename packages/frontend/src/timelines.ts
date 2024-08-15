@@ -40,9 +40,9 @@ export function isAvailableBasicTimeline(timeline: BasicTimelineType | undefined
 		case 'home':
 			return $i != null;
 		case 'hanami':
-			return $i != null && $i.policies.hanamiTlAvailable && $i.isInHanaMode === true;
+			return $i != null && $i.policies.hanamiTlAvailable;
 		case 'local':
-			return ($i == null && instance.policies.ltlAvailable) || ($i != null && $i.policies.ltlAvailable && !$i.isInHanaMode);
+			return ($i == null && instance.policies.ltlAvailable) || ($i != null && $i.policies.ltlAvailable);
 		case 'social':
 			return $i != null && $i.policies.ltlAvailable;
 		case 'global':
