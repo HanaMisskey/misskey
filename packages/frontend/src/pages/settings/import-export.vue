@@ -19,11 +19,9 @@ SPDX-License-Identifier: AGPL-3.0-only
 				<FormInfo info style="margin-bottom: 1.5em;">{{ i18n.ts.importNoteInfo }}</FormInfo>
 				<MkRadios v-model="noteType" style="padding-bottom: 8px;" small>
 					<template #label>{{ i18n.ts.importOrigin }}</template>
-					<option value="Misskey">Misskey/Firefish</option>
-					<option value="Mastodon">Mastodon/Pleroma/Akkoma</option>
+					<option value="Misskey">Misskey</option>
+					<option value="Mastodon">Mastodon</option>
 					<option value="Twitter">Twitter</option>
-					<option value="Instagram">Instagram</option>
-					<option value="Facebook">Facebook</option>
 				</MkRadios>
 				<MkButton primary :class="$style.button" inline @click="importNotes($event)"><i class="ti ti-upload"></i> {{ i18n.ts.import }}</MkButton>
 				<div class="_gaps_s">
