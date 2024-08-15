@@ -240,6 +240,7 @@ function switchTlIfNeeded() {
 	function isNotInList(src: 'hanami' | 'home' | 'local' | 'social' | 'global' | `list:${string}`): src is Exclude<typeof src, `list:${string}`> {
 		return !src.startsWith('list:');
 	}
+	
 	if (isNotInList(src.value) && !availableBasicTimelines().includes(src.value)) {
 		src.value = availableBasicTimelines()[0];
 	}
