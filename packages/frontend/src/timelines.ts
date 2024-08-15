@@ -25,7 +25,7 @@ export function basicTimelineIconClass(timeline: BasicTimelineType): string {
 		case 'home':
 			return 'ti ti-home';
 		case 'hanami':
-			return 'ti ti-flower';
+			return 'ti ti-hanamisskey-hanamode';
 		case 'local':
 			return 'ti ti-planet';
 		case 'social':
