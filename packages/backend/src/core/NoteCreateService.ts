@@ -135,7 +135,7 @@ type Option = {
 	files?: MiDriveFile[] | null;
 	poll?: IPoll | null;
 	localOnly?: boolean | null;
-	isNoteInHanaMode?: boolean | null;
+	isNoteInHanaMode: boolean;
 	reactionAcceptance?: MiNote['reactionAcceptance'];
 	cw?: string | null;
 	visibility?: string;
@@ -249,16 +249,9 @@ export class NoteCreateService implements OnApplicationShutdown {
 		if (data.createdAt == null) data.createdAt = new Date();
 		if (data.visibility == null) data.visibility = 'public';
 		if (data.localOnly == null) data.localOnly = false;
-		if (data.isNoteInHanaMode == null) data.isNoteInHanaMode = false;
 		if (data.channel != null) data.visibility = 'public';
 		if (data.channel != null) data.visibleUsers = [];
 		if (data.channel != null) data.localOnly = true;
-
-		// はなモードがオンなのにノートのはなモードがfalseの時はエラー
-		// はなモードがオフなのにノートのはなモードがtrueの時もエラー
-		if ((!data.isNoteInHanaMode && user.isInHanaMode) || (data.isNoteInHanaMode && !user.isInHanaMode)) {
-			throw new IdentifiableError('08cf23a3-0632-451f-a401-ceb661225ff1', 'Hana mode mismatch: The user is in Hana mode but the note is not, or vice versa.');
-		};
 
 		const meta = await this.metaService.fetch();
 
