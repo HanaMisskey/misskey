@@ -96,10 +96,6 @@ async function setMode() {
 		border-style: solid;
 		border-color: var(--accent);
 		color: var(--accent);
-
-		> i {
-			display: block;
-		}
 	}
 }
 
@@ -137,15 +133,14 @@ async function setMode() {
 		height: 2rem;
 		text-align: center;
 		font-size: 1rem;
+		line-height: 2rem;
+		color: var(--fgTransparent);
 		border-radius: 50%;
 		border: 1px dashed var(--fgTransparent);
-		display: flex;
-		justify-content: center;
-		align-items: center;
 
-		> :global(.ti) {
+		> i {
+			display: inline-block;
 			line-height: 2rem;
-			display: none;
 		}
 	}
 
