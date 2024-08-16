@@ -590,7 +590,7 @@ export class NoteCreateService implements OnApplicationShutdown {
 			if (data.createdAt.getTime() > Date.now() + 1000 * 60 * 3 ) {
 				throw new Error('Invalid createdAt time: Time is more than 3 minutes ahead of the current time.');
 			}
-		};
+		}
 
 		const insert = new MiNote({
 			id: this.idService.gen(data.createdAt?.getTime()),
