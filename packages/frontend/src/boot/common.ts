@@ -119,12 +119,12 @@ export async function common(createVue: () => App<Element>) {
 	await defaultStore.ready;
 	await deckStore.ready;
 
-	// 2024年10月1日JST以降に作成されたアカウントで、チュートリアルを完了していない通常ユーザーの場合、チュートリアルにリダイレクト
+	// 2024年8月17日JST以降に作成されたアカウントで、チュートリアルを完了していない通常ユーザーの場合、チュートリアルにリダイレクト
 	if (
 		!instance.canSkipInitialTutorial &&
 		$i &&
 		!iAmModerator &&
-		new Date($i.createdAt).getTime() >= 1727708400000 &&
+		new Date($i.createdAt).getTime() >= 1723820400000 &&
 		!claimedAchievements.includes('tutorialCompleted') &&
 		!location.pathname.startsWith('/onboarding') &&
 		!location.pathname.startsWith('/signup-complete')
