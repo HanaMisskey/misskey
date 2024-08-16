@@ -181,6 +181,10 @@ const routes: RouteDef[] = [{
 		name: 'other',
 		component: page(() => import('@/pages/settings/other.vue')),
 	}, {
+		path: '/hanamode',
+		name: 'hanamode',
+		component: page(() => import('@/pages/settings/hanamode.vue')),
+	}, {
 		path: '/',
 		component: page(() => import('@/pages/_empty_.vue')),
 	}],
@@ -244,7 +248,7 @@ const routes: RouteDef[] = [{
 		origin: 'origin',
 	},
 }, {
-	// Legacy Compatibility	
+	// Legacy Compatibility
 	path: '/authorize-follow',
 	redirect: '/lookup',
 	loginRequired: true,
