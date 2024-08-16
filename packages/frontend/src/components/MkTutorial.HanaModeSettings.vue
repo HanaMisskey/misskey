@@ -1,8 +1,3 @@
-<!--
-SPDX-FileCopyrightText: syuilo and misskey-project
-SPDX-License-Identifier: AGPL-3.0-only
--->
-
 <template>
 <div class="_gaps">
 	<div style="word-break: auto-phrase; text-align: center; padding: 0 16px;">{{ i18n.ts._hana.hanaModeTutorialDescription }}</div>
