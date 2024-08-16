@@ -131,7 +131,7 @@ export const tutorialBodyPagesDef = [{
 	type: 'setup',
 	title: i18n.ts._hana.hanaMode,
 }, {
-	icon: 'ti ti-user-add',
+	icon: 'ti ti-user',
 	type: 'setup',
 	title: i18n.ts.follow,
 }, {
@@ -197,7 +197,7 @@ type ComponentDef = {
  *
  * （メタデータは上の方で定義しています）
  */
-const componentsDef = [
+const componentsDef: Tuple<ComponentDef, typeof tutorialBodyPagesDef.length> = [
 	{ component: XProfileSettings },
 	{ component: XNote, props: { phase: 'aboutNote' } },
 	{ component: XNote, props: { phase: 'howToReact' } },
@@ -207,13 +207,13 @@ const componentsDef = [
 	{ component: XPostNote },
 	{ component: XSensitive },
 	{ component: XPrivacySettings },
-] as const satisfies Tuple<ComponentDef, typeof tutorialBodyPagesDef.length>;
+];
 
 // eslint-disable-next-line vue/no-setup-props-destructure
 const page = ref(props.initialPage ?? 0);
 
 const currentPageDef = computed(() => {
-	if (page.value > 0 && page.value < MAX_PAGE - 1) {
+	if (page.value > 0 && page.value < MAX_PAGE) {
 		return tutorialBodyPagesDef[page.value - 1] ?? null;
 	} else {
 		return null;
