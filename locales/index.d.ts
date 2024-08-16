@@ -5348,6 +5348,10 @@ export interface Locale extends ILocale {
              */
             "global": string;
             /**
+             * （はなモード利用者のみ）ホームタイムラインの投稿と、接続している他のサーバーにて人気の投稿があわせて表示されます。
+             */
+            "hanami": string;
+            /**
              * それぞれのタイムラインは、画面上部でいつでも切り替えられます。
              */
             "description2": string;
