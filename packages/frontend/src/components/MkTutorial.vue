@@ -127,6 +127,10 @@ export const tutorialBodyPagesDef = [{
 	type: 'tutorial',
 	title: i18n.ts._initialTutorial._timeline.title,
 }, {
+	icon: 'ti ti-hanamisskey-hanamode',
+	type: 'setup',
+	title: i18n.ts._hana.hanaMode,
+}, {
 	icon: 'ti ti-user-add',
 	type: 'setup',
 	title: i18n.ts.follow,
@@ -153,6 +157,7 @@ import MkButton from '@/components/MkButton.vue';
 import XProfileSettings from '@/components/MkTutorial.ProfileSettings.vue';
 import XNote from '@/components/MkTutorial.Note.vue';
 import XTimeline from '@/components/MkTutorial.Timeline.vue';
+import XHanaModeSettings from '@/components/MkTutorial.HanaModeSettings.vue';
 import XFollowUsers from '@/components/MkTutorial.FollowUsers.vue';
 import XPostNote from '@/components/MkTutorial.PostNote.vue';
 import XSensitive from '@/components/MkTutorial.Sensitive.vue';
@@ -197,6 +202,7 @@ const componentsDef = [
 	{ component: XNote, props: { phase: 'aboutNote' } },
 	{ component: XNote, props: { phase: 'howToReact' } },
 	{ component: XTimeline },
+	{ component: XHanaModeSettings },
 	{ component: XFollowUsers },
 	{ component: XPostNote },
 	{ component: XSensitive },

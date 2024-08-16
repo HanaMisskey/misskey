@@ -2746,6 +2746,7 @@ _hana:
   hanaSettings: "はなみすきー設定"
   hanaMode: "はなモード"
   hanaModeShort: "はな"
+  hanaModeTutorialDescription: "はなみすきーの主要な独自機能として「はなモード」があります。はなモードを有効にするかどうかで、はなみすきーでのSNS体験は大きく変わってきます。以下に主な違いとおすすめのユースケースを挙げますので、どちらか選択して進んでください。"
   _inDevelopment:
     title: "この機能は開発中です"
     description: "はなみすきーは新規機能盛りだくさんで鋭意開発中です！\nどんな機能が実装されるかはお楽しみ。"
