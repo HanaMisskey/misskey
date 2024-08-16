@@ -52,7 +52,8 @@ import { deviceKind } from '@/scripts/device-kind.js';
 import { deepMerge } from '@/scripts/merge.js';
 import { MenuItem } from '@/types/menu.js';
 import { miLocalStorage } from '@/local-storage.js';
-import { availableBasicTimelines, hasWithReplies, isAvailableBasicTimeline, isBasicTimeline, basicTimelineIconClass } from '@/timelines.js';
+import { availableBasicTimelines, hasWithReplies, isAvailableBasicTimeline, isBasicTimeline, basicTimelineIconClass, basicTimelineTypes } from '@/timelines.js';
+import type { BasicTimelineType } from '@/timelines.js';
 
 provide('shouldOmitHeaderTitle', true);
 
@@ -237,11 +238,7 @@ function closeTutorial(): void {
 }
 
 function switchTlIfNeeded() {
-	function isNotInList(src: 'hanami' | 'home' | 'local' | 'social' | 'global' | `list:${string}`): src is Exclude<typeof src, `list:${string}`> {
-		return !src.startsWith('list:');
-	}
-	
-	if (isNotInList(src.value) && !availableBasicTimelines().includes(src.value)) {
+	if (isBasicTimeline(src.value) && !availableBasicTimelines().includes(src.value)) {
 		src.value = availableBasicTimelines()[0];
 	}
 }
