@@ -100,7 +100,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 						</div>
 
 						<div>
-							<MkButton inline @click="refreshSubscriptionStatus"><i class="ti ti-refresh"></i> {{ i18n.ts._subscription.refresh }}</MkButton>
+							<MkButton inline @click="refreshSubscriptionStatus"><i class="ti ti-refresh"></i> {{ i18n.ts._hana._subscription.refresh }}</MkButton>
 						</div>
 
 						<MkFolder>

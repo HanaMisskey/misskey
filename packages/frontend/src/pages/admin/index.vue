@@ -118,7 +118,7 @@ const menuDef = computed(() => [{
 		active: currentPage.value?.route.name === 'roles',
 	}, {
 		icon: 'ti ti-credit-card',
-		text: i18n.ts.subscription,
+		text: i18n.ts._hana.subscription,
 		to: '/admin/subscription-plans',
 		active: currentPage.value?.route.name === 'subscription-plans',
 	}, {

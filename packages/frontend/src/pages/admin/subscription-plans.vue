@@ -23,16 +23,16 @@ SPDX-License-Identifier: AGPL-3.0-only
 						<template #label>{{ i18n.ts.name }}</template>
 					</MkInput>
 					<MkInput v-model="subscriptionPlan.price" type="number">
-						<template #label>{{ i18n.ts._subscription.price }}</template>
+						<template #label>{{ i18n.ts._hana._subscription.price }}</template>
 					</MkInput>
 					<MkInput v-model="subscriptionPlan.currency">
-						<template #label>{{ i18n.ts._subscription.currency }}</template>
+						<template #label>{{ i18n.ts._hana._subscription.currency }}</template>
 					</MkInput>
 					<MkTextarea v-model="subscriptionPlan.description">
 						<template #label>{{ i18n.ts.description }}</template>
 					</MkTextarea>
 					<MkInput v-model="subscriptionPlan.stripePriceId">
-						<template #label>{{ i18n.ts._subscription.stripePriceId }}</template>
+						<template #label>{{ i18n.ts._hana._subscription.stripePriceId }}</template>
 					</MkInput>
 					<MkInput v-model="subscriptionPlan.roleId">
 						<template #label>{{ i18n.ts.role }}</template>
@@ -137,7 +137,7 @@ const headerActions = computed(() => [{
 const headerTabs = computed(() => []);
 
 definePageMetadata({
-	title: i18n.ts.subscription,
+	title: i18n.ts._hana.subscription,
 	icon: 'ti ti-credit-card',
 });
 </script>

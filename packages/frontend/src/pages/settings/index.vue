@@ -107,7 +107,7 @@ const menuDef = computed(() => [{
 		active: currentPage.value?.route.name === 'hanamode',
 	}, ...(instance.enableSubscriptions ? [{
 		icon: 'ti ti-credit-card',
-		text: i18n.ts.subscription,
+		text: i18n.ts._hana.subscription,
 		to: '/settings/subscription',
 		active: currentPage.value?.route.name === 'subscription',
 	}] : [])],

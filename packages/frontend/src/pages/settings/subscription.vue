@@ -2,8 +2,8 @@
 <div class="_gaps_m">
 	<div class="_gaps_s">
 		<MkKeyValue>
-			<template #key>{{ i18n.ts.subscriptionStatus }}</template>
-			<template #value>{{ i18n.ts._subscription[subscriptionStatus] }}</template>
+			<template #key>{{ i18n.ts._hana.subscriptionStatus }}</template>
+			<template #value>{{ i18n.ts._hana._subscription[subscriptionStatus] }}</template>
 		</MkKeyValue>
 	</div>
 	<FormPagination ref="list" :pagination="pagination">
@@ -17,16 +17,16 @@
 			<div class="_gaps">
 				<div v-for="plan in items" :key="plan.id" class="_panel" :class="$style.plan">
 					<div :class="$style.planBody">
-						<div :class="$style.planName">{{ plan.name + (plan.id === currentPlan ? (' (' + i18n.ts._subscription.current + ')') : '') }}</div>
+						<div :class="$style.planName">{{ plan.name + (plan.id === currentPlan ? (' (' + i18n.ts._hana._subscription.current + ')') : '') }}</div>
 						<div>{{ plan.description }}</div>
 						<MkKeyValue oneline>
-							<template #key>{{ i18n.ts._subscription.price }}</template>
+							<template #key>{{ i18n.ts._hana._subscription.price }}</template>
 							<template #value>{{ plan.price + ' ' + plan.currency }}</template>
 						</MkKeyValue>
 						<div>
-							<MkButton v-if="canSubscribe && !plan.isArchived" primary :class="$style.button" @click="subscribe(plan)"><i class="ti ti-plus"></i> {{ i18n.ts._subscription.subscribe }}</MkButton>
-							<MkButton v-else-if="plan.id === currentPlan" :class="$style.button" @click="manage()"><i class="ti ti-settings"></i> {{ i18n.ts._subscription.manage }}</MkButton>
-							<MkButton v-else-if="!plan.isArchived" :class="$style.button" @click="change(plan)"><i class="ti ti-reload"></i> {{ i18n.ts._subscription.changePlan }}</MkButton>
+							<MkButton v-if="canSubscribe && !plan.isArchived" primary :class="$style.button" @click="subscribe(plan)"><i class="ti ti-plus"></i> {{ i18n.ts._hana._subscription.subscribe }}</MkButton>
+							<MkButton v-else-if="plan.id === currentPlan" :class="$style.button" @click="manage()"><i class="ti ti-settings"></i> {{ i18n.ts._hana._subscription.manage }}</MkButton>
+							<MkButton v-else-if="!plan.isArchived" :class="$style.button" @click="change(plan)"><i class="ti ti-reload"></i> {{ i18n.ts._hana._subscription.changePlan }}</MkButton>
 						</div>
 					</div>
 				</div>
@@ -75,7 +75,7 @@ async function manage() {
 
 function change(plan) {
 	os.confirm({
-		title: i18n.ts._subscription.confirmChangePlan,
+		title: i18n.ts._hana._subscription.confirmChangePlan,
 		type: 'question',
 	}).then((res) => {
 		if (res.canceled) return;
@@ -94,7 +94,7 @@ const headerActions = computed(() => []);
 const headerTabs = computed(() => []);
 
 definePageMetadata({
-	title: i18n.ts.subscription,
+	title: i18n.ts._hana.subscription,
 	icon: 'ti ti-credit-card',
 });
 </script>
