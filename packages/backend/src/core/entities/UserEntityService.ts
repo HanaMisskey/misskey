@@ -515,7 +515,10 @@ export class UserEntityService implements OnModuleInit {
 			...(isMe ? {
 				subscriptionStatus: user.subscriptionStatus,
 				subscriptionPlanId: user.subscriptionPlanId,
-			} : {}),
+			} : {
+				subscriptionStatus: null,
+				subscriptionPlanId: 'none',
+			}),
 
 			...(isDetailed ? {
 				url: profile!.url,
