@@ -190,7 +190,6 @@ export const packedUserLiteSchema = {
 		},
 		subscriptionPlanId: {
 			type: 'string',
-			format: 'id',
 			nullable: true, optional: false,
 		},
 	},

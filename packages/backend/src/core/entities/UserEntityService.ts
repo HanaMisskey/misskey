@@ -516,8 +516,8 @@ export class UserEntityService implements OnModuleInit {
 				subscriptionStatus: user.subscriptionStatus,
 				subscriptionPlanId: user.subscriptionPlanId,
 			} : {
-				subscriptionStatus: null,
-				subscriptionPlanId: 'none',
+				subscriptionStatus: 'none' as const,
+				subscriptionPlanId: null,
 			}),
 
 			...(isDetailed ? {
