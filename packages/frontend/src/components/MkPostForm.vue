@@ -553,6 +553,8 @@ function pushVisibleUser(user: Misskey.entities.UserDetailed) {
 }
 
 function addVisibleUser() {
+	if (props.mock) return;
+
 	os.selectUser().then(user => {
 		pushVisibleUser(user);
 
@@ -900,6 +902,8 @@ function cancel() {
 }
 
 function insertMention() {
+	if (props.mock) return;
+
 	os.selectUser({ localOnly: localOnly.value, includeSelf: true }).then(user => {
 		insertTextAtCursor(textareaEl.value, '@' + Misskey.acct.toString(user) + ' ');
 	});

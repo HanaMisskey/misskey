@@ -51,12 +51,29 @@ import * as os from '@/os.js';
 
 import MkButton from '@/components/MkButton.vue';
 
+const props = defineProps<{
+	specifyManually?: boolean;
+}>();
+
+const emit = defineEmits<{
+	(ev: 'set'): void;
+}>();
+
+const onceSet = ref(false);
+
 const $i = signinRequired();
 
-const originalMode = $i.isInHanaMode ? 'hana' : 'normal';
-const mode = ref<'normal' | 'hana'>(originalMode);
+const originalMode = computed(() => {
+	if (props.specifyManually && !onceSet.value) {
+		return null;
+	} else {
+		return $i.isInHanaMode ? 'hana' : 'normal';
+	}
+});
 
-const hasChanged = computed(() => mode.value !== originalMode);
+const mode = ref<'normal' | 'hana' | null>(originalMode.value);
+
+const hasChanged = computed(() => mode.value !== originalMode.value);
 
 async function setMode() {
 	const { canceled } = await os.confirm({
@@ -67,11 +84,19 @@ async function setMode() {
 
 	if (canceled) return;
 
-	os.apiWithDialog('i/update', {
-		isInHanaMode: mode.value === 'hana',
-	});
+	const isInHanaMode = mode.value === 'hana';
+
+	if ($i.isInHanaMode === isInHanaMode) {
+		await os.success();
+	} else {
+		os.apiWithDialog('i/update', {
+			isInHanaMode,
+		});
+	}
+	emit('set');
+	onceSet.value = true;
 	globalEvents.emit('requestClearPageCache');
-	if (mode.value === 'hana') {
+	if (isInHanaMode) {
 		claimAchievement('markedAsHanaModeUser');
 	}
 }
