@@ -79,6 +79,10 @@ export const packedMetaLiteSchema = {
 			type: 'boolean',
 			optional: false, nullable: false,
 		},
+		canSkipInitialTutorial: {
+			type: 'boolean',
+			optional: false, nullable: false,
+		},
 		enableHcaptcha: {
 			type: 'boolean',
 			optional: false, nullable: false,
@@ -277,6 +281,10 @@ export const packedMetaDetailedOnlySchema = {
 					optional: false, nullable: false,
 				},
 				globalTimeline: {
+					type: 'boolean',
+					optional: false, nullable: false,
+				},
+				hanamiTimeline: {
 					type: 'boolean',
 					optional: false, nullable: false,
 				},
