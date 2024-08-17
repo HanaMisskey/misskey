@@ -45,12 +45,12 @@ describe('ユーザー', () => {
 			emojis: user.emojis,
 			onlineStatus: user.onlineStatus,
 			badgeRoles: user.badgeRoles,
+			subscriptionPlanId: user.subscriptionPlanId ?? null,
+			subscriptionStatus: user.subscriptionStatus ?? 'none',
 
 			// BUG isAdmin/isModeratorはUserLiteではなくMeDetailedOnlyに含まれる。
 			isAdmin: undefined,
 			isModerator: undefined,
-			subscriptionPlanId: undefined,
-			subscriptionStatus: undefined,
 		});
 	};
 
