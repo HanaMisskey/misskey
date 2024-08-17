@@ -309,6 +309,22 @@ export interface Locale extends ILocale {
      */
     "import": string;
     /**
+     * インポート元
+     */
+    "importOrigin": string;
+    /**
+     * 他サービスでエクスポートしたノートなどをインポートすることができます。
+     */
+    "importNoteInfo": string;
+    /**
+     * すべてのノートがインポートできるわけではありません。改変のないMisskey以外では全くインポートできない場合もあります。
+     */
+    "importNoteDisclaimer": string;
+    /**
+     * インポートされたノートは、ユーザーページ以外には表示されない場合があります。
+     */
+    "importNoteWarm": string;
+    /**
      * エクスポート
      */
     "export": string;
@@ -5077,6 +5093,14 @@ export interface Locale extends ILocale {
      */
     "createdAntennas": string;
     /**
+     * チュートリアルをスキップできないようにする
+     */
+    "prohibitSkippingInitialTutorial": string;
+    /**
+     * 新規登録したユーザーに表示されるチュートリアルをスキップできないようにします。チュートリアルを完了しなかったりチュートリアルページを回避したりした場合でも、強制的にリダイレクトされます。
+     */
+    "prohibitSkippingInitialTutorialDescription": string;
+    /**
      * サブスクリプション
      */
     "subscription": string;
@@ -5290,68 +5314,6 @@ export interface Locale extends ILocale {
          */
         "silenceDescription": string;
     };
-    "_initialAccountSetting": {
-        /**
-         * アカウントの作成が完了しました！
-         */
-        "accountCreated": string;
-        /**
-         * さっそくアカウントの初期設定を行いましょう。
-         */
-        "letsStartAccountSetup": string;
-        /**
-         * まずはあなたのプロフィールを設定しましょう。
-         */
-        "letsFillYourProfile": string;
-        /**
-         * プロフィール設定
-         */
-        "profileSetting": string;
-        /**
-         * プライバシー設定
-         */
-        "privacySetting": string;
-        /**
-         * これらの設定は後から変更できます。
-         */
-        "theseSettingsCanEditLater": string;
-        /**
-         * この他にも様々な設定を「設定」ページから行えます。ぜひ後で確認してみてください。
-         */
-        "youCanEditMoreSettingsInSettingsPageLater": string;
-        /**
-         * タイムラインを構築するため、気になるユーザーをフォローしてみましょう。
-         */
-        "followUsers": string;
-        /**
-         * プッシュ通知を有効にすると{name}の通知をお使いのデバイスで受け取ることができます。
-         */
-        "pushNotificationDescription": ParameterizedString<"name">;
-        /**
-         * 初期設定が完了しました！
-         */
-        "initialAccountSettingCompleted": string;
-        /**
-         * {name}をお楽しみください！
-         */
-        "haveFun": ParameterizedString<"name">;
-        /**
-         * このまま{name}(Misskey)の使い方についてのチュートリアルに進むこともできますが、ここで中断してすぐに使い始めることもできます。
-         */
-        "youCanContinueTutorial": ParameterizedString<"name">;
-        /**
-         * チュートリアルを開始
-         */
-        "startTutorial": string;
-        /**
-         * 初期設定をスキップしますか？
-         */
-        "skipAreYouSure": string;
-        /**
-         * 初期設定をあとでやり直しますか？
-         */
-        "laterAreYouSure": string;
-    };
     "_initialTutorial": {
         /**
          * チュートリアルを見る
@@ -5378,6 +5340,21 @@ export interface Locale extends ILocale {
              * ここでは、Misskeyの基本的な使い方や機能を確認できます。
              */
             "description": string;
+        };
+        "_profileSettings": {
+            /**
+             * プロフィール設定
+             */
+            "title": string;
+            /**
+             * まずは基本的なプロフィールを設定して、ユーザーにあなたのことを知ってもらえるようにしましょう。
+             */
+            "description": string;
+            /**
+             * ここで設定した項目は後でいつでも変更できます。
+             * チュートリアル終了後には、更に多彩なプロフィール設定をご利用いただけます！
+             */
+            "youCanChangeThemLater": string;
         };
         "_note": {
             /**
@@ -5457,6 +5434,10 @@ export interface Locale extends ILocale {
              */
             "global": string;
             /**
+             * （はなモード利用者のみ）ホームタイムラインの投稿と、接続している他のサーバーにて人気の投稿があわせて表示されます。
+             */
+            "hanami": string;
+            /**
              * それぞれのタイムラインは、画面上部でいつでも切り替えられます。
              */
             "description2": string;
@@ -5464,6 +5445,16 @@ export interface Locale extends ILocale {
              * その他にも、リストタイムラインやチャンネルタイムラインなどがあります。詳しくは{link}をご覧ください。
              */
             "description3": ParameterizedString<"link">;
+        };
+        "_followUsers": {
+            /**
+             * 誰もフォローしていない状態だと、ホームタイムラインには何も表示されません。
+             */
+            "description1": string;
+            /**
+             * タイムラインを構築するため、気になるユーザーをフォローしてみましょう。
+             */
+            "description2": string;
         };
         "_postNote": {
             /**
@@ -5565,6 +5556,30 @@ export interface Locale extends ILocale {
              */
             "doItToContinue": string;
         };
+        "_pushNotification": {
+            /**
+             * プッシュ通知を有効にすると{name}の通知をお使いのデバイスで受け取ることができます。
+             */
+            "description": ParameterizedString<"name">;
+        };
+        "_privacySettings": {
+            /**
+             * プライバシー設定
+             */
+            "title": string;
+            /**
+             * 多くのユーザーが利用しているプライバシー関連の設定項目をリストアップしました。必要に応じて変更してください。
+             */
+            "description1": string;
+            /**
+             * これらの設定は後から変更できます。
+             */
+            "theseSettingsCanEditLater": string;
+            /**
+             * この他にも様々な設定を「設定」ページから行えます。ぜひ後で確認してみてください。
+             */
+            "youCanEditMoreSettingsInSettingsPageLater": string;
+        };
         "_done": {
             /**
              * チュートリアルは終了です🎉
@@ -5574,9 +5589,79 @@ export interface Locale extends ILocale {
              * ここで紹介した機能はほんの一部にすぎません。Misskeyの使い方をより詳しく知るには、{link}をご覧ください。
              */
             "description": ParameterizedString<"link">;
+            /**
+             * {name}をお楽しみください！
+             */
+            "haveFun": ParameterizedString<"name">;
+            /**
+             * このチュートリアルは、「もっと！」→「情報」→「チュートリアルを見る」からいつでも見返すことができます。
+             */
+            "youCanReferTutorialBy": string;
+        };
+        "_onboardingLanding": {
+            /**
+             * アカウントの作成が完了しました！
+             */
+            "accountCreated": string;
+            /**
+             * ようこそ、{name}へ！
+             */
+            "welcomeToX": ParameterizedString<"name">;
+            /**
+             * プロフィールを設定したり、{name}の基本的な使い方を学んだりして、すぐに使い始められるようにしましょう。
+             */
+            "description": ParameterizedString<"name">;
+            /**
+             * このチュートリアルの所要時間は{min}分程度です。
+             * チュートリアルを完了すると実績が解除されます。
+             */
+            "takesAbout": ParameterizedString<"min">;
+            /**
+             * このサーバーの管理者は新規ユーザーにチュートリアルを完了することを義務付けています。
+             * チュートリアルを完了するまでMisskeyを使い始めることはできません。
+             */
+            "adminForcesToTakeTutorial": string;
+        };
+        "_onboardingDone": {
+            /**
+             * お疲れ様でした！次のステップに進んで、{name}をもっと楽しめるようにしましょう。
+             */
+            "description": ParameterizedString<"name">;
+            /**
+             * 元のページに戻る
+             */
+            "backToOriginalPath": string;
+            /**
+             * あなたがアクセスしようとしていたページに戻ります。
+             */
+            "backToOriginalPathDescription": string;
+            /**
+             * プロフィール設定
+             */
+            "profile": string;
+            /**
+             * プロフィールをかんぺきにして、自分をアピールしましょう。
+             */
+            "profileDescription": string;
+            /**
+             * 人気のノートやユーザーを見つけて交流をはじめましょう。
+             */
+            "exploreDescription": string;
+            /**
+             * ホーム画面に進む
+             */
+            "goToTimeline": string;
+            /**
+             * 設定等を行わず、通常のホーム画面（タイムライン）に進みます。
+             */
+            "goToTimelineDescription": string;
         };
     };
     "_timelineDescription": {
+        /**
+         * はなみタイムラインでは、フォローしているアカウントの投稿に加えて、連合しているサーバーの人気な投稿も見られます。
+         */
+        "hanami": string;
         /**
          * ホームタイムラインでは、あなたがフォローしているアカウントの投稿を見られます。
          */
@@ -6123,6 +6208,16 @@ export interface Locale extends ILocale {
                  * 名前はまだない。
                  */
                 "flavor": string;
+            };
+            "_markedAsHanaModeUser": {
+                /**
+                 * 菫ほどな小さき人に生まれたし
+                 */
+                "title": string;
+                /**
+                 * はなモードを有効にした
+                 */
+                "description": string;
             };
             "_following1": {
                 /**
@@ -6725,6 +6820,10 @@ export interface Locale extends ILocale {
              */
             "ltlAvailable": string;
             /**
+             * はなみタイムラインの閲覧
+             */
+            "hanamiTlAvailable": string;
+            /**
              * パブリック投稿の許可
              */
             "canPublicNote": string;
@@ -6732,6 +6831,10 @@ export interface Locale extends ILocale {
              * ノート内の最大メンション数
              */
             "mentionMax": string;
+            /**
+             * ノートのインポート
+             */
+            "canImportNotes": string;
             /**
              * サーバー招待コードの発行
              */
@@ -6846,6 +6949,10 @@ export interface Locale extends ILocale {
              * botユーザー
              */
             "isBot": string;
+            /**
+             * はなモードが有効なユーザー
+             */
+            "isInHanaMode": string;
             /**
              * サスペンド済みユーザー
              */
@@ -8864,6 +8971,10 @@ export interface Locale extends ILocale {
          */
         "home": string;
         /**
+         * はなみ
+         */
+        "hanami": string;
+        /**
          * ローカル
          */
         "local": string;
@@ -9071,6 +9182,10 @@ export interface Locale extends ILocale {
          * ブロックを追加
          */
         "chooseBlock": string;
+        /**
+         * セクションタイトルを入力
+         */
+        "enterSectionTitle": string;
         /**
          * 種類を選択
          */
@@ -10259,6 +10374,22 @@ export interface Locale extends ILocale {
         "native": string;
     };
     "_hana": {
+        /**
+         * はなみすきー設定
+         */
+        "hanaSettings": string;
+        /**
+         * はなモード
+         */
+        "hanaMode": string;
+        /**
+         * はな
+         */
+        "hanaModeShort": string;
+        /**
+         * はなみすきーの主要な独自機能として「はなモード」があります。はなモードを有効にするかどうかで、はなみすきーでのSNS体験は大きく変わってきます。以下に主な違いとおすすめのユースケースを挙げますので、どちらか選択して進んでください。
+         */
+        "hanaModeTutorialDescription": string;
         "_inDevelopment": {
             /**
              * この機能は開発中です
@@ -10340,6 +10471,48 @@ export interface Locale extends ILocale {
                  */
                 "title": string;
             };
+        };
+        "_hanaModeSwitcher": {
+            /**
+             * こんな方におすすめ
+             */
+            "recomenddedFor": string;
+            /**
+             * 通常
+             */
+            "normal": string;
+            /**
+             * LTLが使えます
+             */
+            "normal1": string;
+            /**
+             * 公開範囲「パブリック」で投稿した内容はLTLに表示されます
+             */
+            "normal2": string;
+            /**
+             * サーバー内のユーザーとの交流を重視したい方
+             */
+            "normalRecommend": string;
+            /**
+             * LTLが使えません
+             */
+            "hana1": string;
+            /**
+             * 公開範囲「パブリック」で投稿した内容はLTLに表示されません
+             */
+            "hana2": string;
+            /**
+             * フォロー中ユーザーの最新のノートとFediverseの人気の投稿をザッピングできる「はなみタイムライン」が使用できます
+             */
+            "hana3": string;
+            /**
+             * おひとりさまサーバーのような分散SNS体験をしたい方（内々での交流だけでなく、外部サーバーとの交流もしっかり重視したい方）
+             */
+            "hanaRecommend": string;
+            /**
+             * 一定期間にモードを変更できる回数には制限があります。
+             */
+            "saveConfirmDescription": string;
         };
     };
 }

@@ -336,6 +336,7 @@ import type {
 	IGalleryPostsResponse,
 	IImportBlockingRequest,
 	IImportFollowingRequest,
+	IImportNotesRequest,
 	IImportMutingRequest,
 	IImportUserListsRequest,
 	IImportAntennasRequest,
@@ -426,6 +427,8 @@ import type {
 	NotesHybridTimelineResponse,
 	NotesLocalTimelineRequest,
 	NotesLocalTimelineResponse,
+	NotesHanamiTimelineRequest,
+	NotesHanamiTimelineResponse,
 	NotesMentionsRequest,
 	NotesMentionsResponse,
 	NotesPollsRecommendationRequest,
@@ -814,6 +817,7 @@ export type Endpoints = {
 	'i/gallery/posts': { req: IGalleryPostsRequest; res: IGalleryPostsResponse };
 	'i/import-blocking': { req: IImportBlockingRequest; res: EmptyResponse };
 	'i/import-following': { req: IImportFollowingRequest; res: EmptyResponse };
+	'i/import-notes': { req: IImportNotesRequest; res: EmptyResponse };
 	'i/import-muting': { req: IImportMutingRequest; res: EmptyResponse };
 	'i/import-user-lists': { req: IImportUserListsRequest; res: EmptyResponse };
 	'i/import-antennas': { req: IImportAntennasRequest; res: EmptyResponse };
@@ -872,6 +876,7 @@ export type Endpoints = {
 	'notes/global-timeline': { req: NotesGlobalTimelineRequest; res: NotesGlobalTimelineResponse };
 	'notes/hybrid-timeline': { req: NotesHybridTimelineRequest; res: NotesHybridTimelineResponse };
 	'notes/local-timeline': { req: NotesLocalTimelineRequest; res: NotesLocalTimelineResponse };
+	'notes/hanami-timeline': { req: NotesHanamiTimelineRequest; res: NotesHanamiTimelineResponse };
 	'notes/mentions': { req: NotesMentionsRequest; res: NotesMentionsResponse };
 	'notes/polls/recommendation': { req: NotesPollsRecommendationRequest; res: NotesPollsRecommendationResponse };
 	'notes/polls/vote': { req: NotesPollsVoteRequest; res: EmptyResponse };
@@ -1206,6 +1211,7 @@ export const endpointReqTypes: Record<keyof Endpoints, 'application/json' | 'mul
 	'i/gallery/posts': 'application/json',
 	'i/import-blocking': 'application/json',
 	'i/import-following': 'application/json',
+	'i/import-notes': 'application/json',
 	'i/import-muting': 'application/json',
 	'i/import-user-lists': 'application/json',
 	'i/import-antennas': 'application/json',
@@ -1264,6 +1270,7 @@ export const endpointReqTypes: Record<keyof Endpoints, 'application/json' | 'mul
 	'notes/global-timeline': 'application/json',
 	'notes/hybrid-timeline': 'application/json',
 	'notes/local-timeline': 'application/json',
+	'notes/hanami-timeline': 'application/json',
 	'notes/mentions': 'application/json',
 	'notes/polls/recommendation': 'application/json',
 	'notes/polls/vote': 'application/json',

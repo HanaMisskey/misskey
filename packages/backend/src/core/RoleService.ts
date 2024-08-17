@@ -34,6 +34,7 @@ import type { OnApplicationShutdown, OnModuleInit } from '@nestjs/common';
 export type RolePolicies = {
 	gtlAvailable: boolean;
 	ltlAvailable: boolean;
+	hanamiTlAvailable: boolean;
 	canPublicNote: boolean;
 	mentionLimit: number;
 	canInvite: boolean;
@@ -58,11 +59,13 @@ export type RolePolicies = {
 	userEachUserListsLimit: number;
 	rateLimitFactor: number;
 	avatarDecorationLimit: number;
+	canImportNotes: boolean;
 };
 
 export const DEFAULT_POLICIES: RolePolicies = {
 	gtlAvailable: true,
 	ltlAvailable: true,
+	hanamiTlAvailable: true,
 	canPublicNote: true,
 	mentionLimit: 20,
 	canInvite: false,
@@ -87,6 +90,7 @@ export const DEFAULT_POLICIES: RolePolicies = {
 	userEachUserListsLimit: 50,
 	rateLimitFactor: 1,
 	avatarDecorationLimit: 1,
+	canImportNotes: true,
 };
 
 @Injectable()
@@ -247,6 +251,10 @@ export class RoleService implements OnApplicationShutdown, OnModuleInit {
 				case 'isCat': {
 					return user.isCat;
 				}
+				// はなモードが有効
+				case 'isInHanaMode':{
+					return user.isInHanaMode;
+				}
 				// 「ユーザを見つけやすくする」が有効なアカウント
 				case 'isExplorable': {
 					return user.isExplorable;
@@ -365,6 +373,7 @@ export class RoleService implements OnApplicationShutdown, OnModuleInit {
 		return {
 			gtlAvailable: calc('gtlAvailable', vs => vs.some(v => v === true)),
 			ltlAvailable: calc('ltlAvailable', vs => vs.some(v => v === true)),
+			hanamiTlAvailable: calc('hanamiTlAvailable', vs => vs.some(v => v === true)),
 			canPublicNote: calc('canPublicNote', vs => vs.some(v => v === true)),
 			mentionLimit: calc('mentionLimit', vs => Math.max(...vs)),
 			canInvite: calc('canInvite', vs => vs.some(v => v === true)),
@@ -389,6 +398,7 @@ export class RoleService implements OnApplicationShutdown, OnModuleInit {
 			userEachUserListsLimit: calc('userEachUserListsLimit', vs => Math.max(...vs)),
 			rateLimitFactor: calc('rateLimitFactor', vs => Math.max(...vs)),
 			avatarDecorationLimit: calc('avatarDecorationLimit', vs => Math.max(...vs)),
+			canImportNotes: calc('canImportNotes', vs => vs.some(v => v === true)),
 		};
 	}
 

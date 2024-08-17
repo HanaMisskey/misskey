@@ -73,6 +73,10 @@ mentions: "あなた宛て"
 directNotes: "ダイレクト投稿"
 importAndExport: "インポートとエクスポート"
 import: "インポート"
+importOrigin: "インポート元"
+importNoteInfo: "他サービスでエクスポートしたノートなどをインポートすることができます。"
+importNoteDisclaimer: "すべてのノートがインポートできるわけではありません。改変のないMisskey以外では全くインポートできない場合もあります。"
+importNoteWarm: "インポートされたノートは、ユーザーページ以外には表示されない場合があります。"
 export: "エクスポート"
 files: "ファイル"
 download: "ダウンロード"
@@ -1265,6 +1269,8 @@ confirmWhenRevealingSensitiveMedia: "センシティブなメディアを表示�
 sensitiveMediaRevealConfirm: "センシティブなメディアです。表示しますか？"
 createdLists: "作成したリスト"
 createdAntennas: "作成したアンテナ"
+prohibitSkippingInitialTutorial: "チュートリアルをスキップできないようにする"
+prohibitSkippingInitialTutorialDescription: "新規登録したユーザーに表示されるチュートリアルをスキップできないようにします。チュートリアルを完了しなかったりチュートリアルページを回避したりした場合でも、強制的にリダイレクトされます。"
 subscription: "サブスクリプション"
 subscriptionStatus: "サブスクリプションの状態"
 
@@ -1327,23 +1333,6 @@ _announcement:
   silence: "非通知"
   silenceDescription: "オンにすると、このお知らせは通知されず、既読にする必要もなくなります。"
 
-_initialAccountSetting:
-  accountCreated: "アカウントの作成が完了しました！"
-  letsStartAccountSetup: "さっそくアカウントの初期設定を行いましょう。"
-  letsFillYourProfile: "まずはあなたのプロフィールを設定しましょう。"
-  profileSetting: "プロフィール設定"
-  privacySetting: "プライバシー設定"
-  theseSettingsCanEditLater: "これらの設定は後から変更できます。"
-  youCanEditMoreSettingsInSettingsPageLater: "この他にも様々な設定を「設定」ページから行えます。ぜひ後で確認してみてください。"
-  followUsers: "タイムラインを構築するため、気になるユーザーをフォローしてみましょう。"
-  pushNotificationDescription: "プッシュ通知を有効にすると{name}の通知をお使いのデバイスで受け取ることができます。"
-  initialAccountSettingCompleted: "初期設定が完了しました！"
-  haveFun: "{name}をお楽しみください！"
-  youCanContinueTutorial: "このまま{name}(Misskey)の使い方についてのチュートリアルに進むこともできますが、ここで中断してすぐに使い始めることもできます。"
-  startTutorial: "チュートリアルを開始"
-  skipAreYouSure: "初期設定をスキップしますか？"
-  laterAreYouSure: "初期設定をあとでやり直しますか？"
-
 _initialTutorial:
   launchTutorial: "チュートリアルを見る"
   title: "チュートリアル"
@@ -1352,6 +1341,10 @@ _initialTutorial:
   _landing:
     title: "チュートリアルへようこそ"
     description: "ここでは、Misskeyの基本的な使い方や機能を確認できます。"
+  _profileSettings:
+    title: "プロフィール設定"
+    description: "まずは基本的なプロフィールを設定して、ユーザーにあなたのことを知ってもらえるようにしましょう。"
+    youCanChangeThemLater: "ここで設定した項目は後でいつでも変更できます。\nチュートリアル終了後には、更に多彩なプロフィール設定をご利用いただけます！"
   _note:
     title: "ノートって何？"
     description: "Misskeyでの投稿は「ノート」と呼びます。ノートはタイムラインに時系列で並んでいて、リアルタイムで更新されていきます。"
@@ -1373,8 +1366,12 @@ _initialTutorial:
     local: "このサーバーにいるユーザー全員の投稿を見られます。"
     social: "ホームタイムラインとローカルタイムラインの投稿が両方表示されます。"
     global: "接続している他のすべてのサーバーからの投稿を見られます。"
+    hanami: "（はなモード利用者のみ）ホームタイムラインの投稿と、接続している他のサーバーにて人気の投稿があわせて表示されます。"
     description2: "それぞれのタイムラインは、画面上部でいつでも切り替えられます。"
     description3: "その他にも、リストタイムラインやチャンネルタイムラインなどがあります。詳しくは{link}をご覧ください。"
+  _followUsers:
+    description1: "誰もフォローしていない状態だと、ホームタイムラインには何も表示されません。"
+    description2: "タイムラインを構築するため、気になるユーザーをフォローしてみましょう。"
   _postNote:
     title: "ノートの投稿設定"
     description1: "Misskeyにノートを投稿する際には、様々なオプションの設定が可能です。投稿フォームはこのようになっています。"
@@ -1403,11 +1400,36 @@ _initialTutorial:
     method: "添付ファイルをセンシティブにする際は、そのファイルをクリックしてメニューを開き、「センシティブとして設定」をクリックします。"
     sensitiveSucceeded: "ファイルを添付する際は、サーバーのガイドラインに従ってセンシティブを適切に設定してください。"
     doItToContinue: "画像をセンシティブに設定すると先に進めるようになります。"
+  _pushNotification:
+    description: "プッシュ通知を有効にすると{name}の通知をお使いのデバイスで受け取ることができます。"
+  _privacySettings:
+    title: "プライバシー設定"
+    description1: "多くのユーザーが利用しているプライバシー関連の設定項目をリストアップしました。必要に応じて変更してください。"
+    theseSettingsCanEditLater: "これらの設定は後から変更できます。"
+    youCanEditMoreSettingsInSettingsPageLater: "この他にも様々な設定を「設定」ページから行えます。ぜひ後で確認してみてください。"
   _done:
     title: "チュートリアルは終了です🎉"
     description: "ここで紹介した機能はほんの一部にすぎません。Misskeyの使い方をより詳しく知るには、{link}をご覧ください。"
+    haveFun: "{name}をお楽しみください！"
+    youCanReferTutorialBy: "このチュートリアルは、「もっと！」→「情報」→「チュートリアルを見る」からいつでも見返すことができます。"
+  _onboardingLanding:
+    accountCreated: "アカウントの作成が完了しました！"
+    welcomeToX: "ようこそ、{name}へ！"
+    description: "プロフィールを設定したり、{name}の基本的な使い方を学んだりして、すぐに使い始められるようにしましょう。"
+    takesAbout: "このチュートリアルの所要時間は{min}分程度です。\nチュートリアルを完了すると実績が解除されます。"
+    adminForcesToTakeTutorial: "このサーバーの管理者は新規ユーザーにチュートリアルを完了することを義務付けています。\nチュートリアルを完了するまでMisskeyを使い始めることはできません。"
+  _onboardingDone:
+    description: "お疲れ様でした！次のステップに進んで、{name}をもっと楽しめるようにしましょう。"
+    backToOriginalPath: "元のページに戻る"
+    backToOriginalPathDescription: "あなたがアクセスしようとしていたページに戻ります。"
+    profile: "プロフィール設定"
+    profileDescription: "プロフィールをかんぺきにして、自分をアピールしましょう。"
+    exploreDescription: "人気のノートやユーザーを見つけて交流をはじめましょう。"
+    goToTimeline: "ホーム画面に進む"
+    goToTimelineDescription: "設定等を行わず、通常のホーム画面（タイムライン）に進みます。"
 
 _timelineDescription:
+  hanami: "はなみタイムラインでは、フォローしているアカウントの投稿に加えて、連合しているサーバーの人気な投稿も見られます。"
   home: "ホームタイムラインでは、あなたがフォローしているアカウントの投稿を見られます。"
   local: "ローカルタイムラインでは、このサーバーにいるユーザー全員の投稿を見られます。"
   social: "ソーシャルタイムラインには、ホームタイムラインとローカルタイムラインの投稿が両方表示されます。"
@@ -1566,6 +1588,9 @@ _achievements:
       title: "吾輩は猫である"
       description: "アカウントをCatとして設定した"
       flavor: "名前はまだない。"
+    _markedAsHanaModeUser:
+      title: "菫ほどな小さき人に生まれたし"
+      description: "はなモードを有効にした"
     _following1:
       title: "はじめてのフォロー"
       description: "初めてフォローした"
@@ -1739,8 +1764,10 @@ _role:
   _options:
     gtlAvailable: "グローバルタイムラインの閲覧"
     ltlAvailable: "ローカルタイムラインの閲覧"
+    hanamiTlAvailable: "はなみタイムラインの閲覧"
     canPublicNote: "パブリック投稿の許可"
     mentionMax: "ノート内の最大メンション数"
+    canImportNotes: "ノートのインポート"
     canInvite: "サーバー招待コードの発行"
     inviteLimit: "招待コードの作成可能数"
     inviteLimitCycle: "招待コードの発行間隔"
@@ -1770,6 +1797,7 @@ _role:
     isRemote: "リモートユーザー"
     isCat: "猫ユーザー"
     isBot: "botユーザー"
+    isInHanaMode: "はなモードが有効なユーザー"
     isSuspended: "サスペンド済みユーザー"
     isLocked: "鍵アカウントユーザー"
     isExplorable: "「アカウントを見つけやすくする」が有効なユーザー"
@@ -2339,6 +2367,7 @@ _instanceCharts:
 
 _timelines:
   home: "ホーム"
+  hanami: "はなみ"
   local: "ローカル"
   social: "ソーシャル"
   global: "グローバル"
@@ -2394,6 +2423,7 @@ _pages:
   eyeCatchingImageSet: "アイキャッチ画像を設定"
   eyeCatchingImageRemove: "アイキャッチ画像を削除"
   chooseBlock: "ブロックを追加"
+  enterSectionTitle: "セクションタイトルを入力"
   selectType: "種類を選択"
   contentBlocks: "コンテンツ"
   inputBlocks: "入力"
@@ -2737,6 +2767,10 @@ _contextMenu:
   native: "ブラウザのUI"
 
 _hana:
+  hanaSettings: "はなみすきー設定"
+  hanaMode: "はなモード"
+  hanaModeShort: "はな"
+  hanaModeTutorialDescription: "はなみすきーの主要な独自機能として「はなモード」があります。はなモードを有効にするかどうかで、はなみすきーでのSNS体験は大きく変わってきます。以下に主な違いとおすすめのユースケースを挙げますので、どちらか選択して進んでください。"
   _inDevelopment:
     title: "この機能は開発中です"
     description: "はなみすきーは新規機能盛りだくさんで鋭意開発中です！\nどんな機能が実装されるかはお楽しみ。"
@@ -2761,3 +2795,14 @@ _hana:
         description: "機械学習や最新の学術研究をもとに、はなみすきーのためにチューニングされた高精度で高速な検索機能を利用できます。また、はなみすきーの検索機能そのものが学術研究プロジェクトとなっているため、検索精度は日進月歩となることが期待できます。"
     _cta:
       title: "「はな」のあるSNS体験を楽しもう"
+  _hanaModeSwitcher:
+    recomenddedFor: "こんな方におすすめ"
+    normal: "通常"
+    normal1: "LTLが使えます"
+    normal2: "公開範囲「パブリック」で投稿した内容はLTLに表示されます"
+    normalRecommend: "サーバー内のユーザーとの交流を重視したい方"
+    hana1: "LTLが使えません"
+    hana2: "公開範囲「パブリック」で投稿した内容はLTLに表示されません"
+    hana3: "フォロー中ユーザーの最新のノートとFediverseの人気の投稿をザッピングできる「はなみタイムライン」が使用できます"
+    hanaRecommend: "おひとりさまサーバーのような分散SNS体験をしたい方（内々での交流だけでなく、外部サーバーとの交流もしっかり重視したい方）"
+    saveConfirmDescription: "一定期間にモードを変更できる回数には制限があります。"
