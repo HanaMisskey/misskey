@@ -105,7 +105,12 @@ const menuDef = computed(() => [{
 		text: i18n.ts._hana.hanaMode,
 		to: '/settings/hanamode',
 		active: currentPage.value?.route.name === 'hanamode',
-	}],
+	}, ...(instance.enableSubscriptions ? [{
+		icon: 'ti ti-credit-card',
+		text: i18n.ts.subscription,
+		to: '/settings/subscription',
+		active: currentPage.value?.route.name === 'subscription',
+	}] : [])],
 }, {
 	title: i18n.ts.clientSettings,
 	items: [{
@@ -141,12 +146,7 @@ const menuDef = computed(() => [{
 	}],
 }, {
 	title: i18n.ts.otherSettings,
-	items: [...(instance.enableSubscriptions ? [{
-		icon: 'ti ti-credit-card',
-		text: i18n.ts.subscription,
-		to: '/settings/subscription',
-		active: currentPage.value?.route.name === 'subscription',
-	}] : []), {
+	items: [{
 		icon: 'ti ti-badges',
 		text: i18n.ts.roles,
 		to: '/settings/roles',
