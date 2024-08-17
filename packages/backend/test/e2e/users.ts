@@ -49,6 +49,8 @@ describe('ユーザー', () => {
 			// BUG isAdmin/isModeratorはUserLiteではなくMeDetailedOnlyに含まれる。
 			isAdmin: undefined,
 			isModerator: undefined,
+			subscriptionPlanId: undefined,
+			subscriptionStatus: undefined,
 		});
 	};
 
