@@ -37,7 +37,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
+import { computed, ref, defineAsyncComponent } from 'vue';
 import { i18n } from '@/i18n.js';
 import { $i } from '@/account.js';
 import * as os from '@/os.js';
@@ -47,6 +47,7 @@ import MkKeyValue from '@/components/MkKeyValue.vue';
 import FormPagination from '@/components/MkPagination.vue';
 import MkButton from '@/components/MkButton.vue';
 import { definePageMetadata } from '@/scripts/page-metadata.js';
+import { misskeyApi } from '@/scripts/misskey-api.js';
 
 const list = ref<InstanceType<typeof FormPagination>>();
 const subscriptionStatus = computed(() => $i?.subscriptionStatus ?? 'none');
@@ -60,17 +61,35 @@ const pagination = {
 };
 
 async function subscribe(plan) {
-	const redirect = await os.apiWithDialog('subscription/create', { planId: plan.id });
-	if (redirect) {
-		location.href = redirect.redirect.destination;
-	}
+	const showing = ref(true);
+	const { dispose } = os.popup(defineAsyncComponent(() => import('@/components/MkWaitingDialog.vue')), {
+		success: false,
+		showing: showing,
+	}, {
+		closed: () => dispose(),
+	});
+
+	misskeyApi('subscription/create', { planId: plan.id }).then((res) => {
+		location.href = res.redirect.destination;
+	}).catch(() => {
+		showing.value = false;
+	});
 }
 
 async function manage() {
-	const redirect = await os.apiWithDialog('i/customer-portal');
-	if (redirect) {
-		location.href = redirect.redirect.destination;
-	}
+	const showing = ref(true);
+	const { dispose } = os.popup(defineAsyncComponent(() => import('@/components/MkWaitingDialog.vue')), {
+		success: false,
+		showing: showing,
+	}, {
+		closed: () => dispose(),
+	});
+
+	misskeyApi('i/customer-portal').then((res) => {
+		location.href = res.redirect.destination;
+	}).catch(() => {
+		showing.value = false;
+	});
 }
 
 function change(plan) {
