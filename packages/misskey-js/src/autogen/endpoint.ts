@@ -325,7 +325,6 @@ import type {
 	IAuthorizedAppsResponse,
 	IClaimAchievementRequest,
 	IChangePasswordRequest,
-	ICustomerPortalResponse,
 	IDeleteAccountRequest,
 	IExportFollowingRequest,
 	IFavoritesRequest,
@@ -352,7 +351,6 @@ import type {
 	IPinResponse,
 	IReadAnnouncementRequest,
 	IRegenerateTokenRequest,
-	IRegisterSubscriptionRequest,
 	IRegistryGetAllRequest,
 	IRegistryGetAllResponse,
 	IRegistryGetDetailRequest,
@@ -802,7 +800,6 @@ export type Endpoints = {
 	'i/authorized-apps': { req: IAuthorizedAppsRequest; res: IAuthorizedAppsResponse };
 	'i/claim-achievement': { req: IClaimAchievementRequest; res: EmptyResponse };
 	'i/change-password': { req: IChangePasswordRequest; res: EmptyResponse };
-	'i/customer-portal': { req: EmptyRequest; res: ICustomerPortalResponse };
 	'i/delete-account': { req: IDeleteAccountRequest; res: EmptyResponse };
 	'i/export-blocking': { req: EmptyRequest; res: EmptyResponse };
 	'i/export-following': { req: IExportFollowingRequest; res: EmptyResponse };
@@ -829,7 +826,6 @@ export type Endpoints = {
 	'i/read-all-unread-notes': { req: EmptyRequest; res: EmptyResponse };
 	'i/read-announcement': { req: IReadAnnouncementRequest; res: EmptyResponse };
 	'i/regenerate-token': { req: IRegenerateTokenRequest; res: EmptyResponse };
-	'i/register-subscription': { req: IRegisterSubscriptionRequest; res: EmptyResponse };
 	'i/registry/get-all': { req: IRegistryGetAllRequest; res: IRegistryGetAllResponse };
 	'i/registry/get-detail': { req: IRegistryGetDetailRequest; res: IRegistryGetDetailResponse };
 	'i/registry/get': { req: IRegistryGetRequest; res: IRegistryGetResponse };
@@ -1196,7 +1192,6 @@ export const endpointReqTypes: Record<keyof Endpoints, 'application/json' | 'mul
 	'i/authorized-apps': 'application/json',
 	'i/claim-achievement': 'application/json',
 	'i/change-password': 'application/json',
-	'i/customer-portal': 'application/json',
 	'i/delete-account': 'application/json',
 	'i/export-blocking': 'application/json',
 	'i/export-following': 'application/json',
@@ -1223,7 +1218,6 @@ export const endpointReqTypes: Record<keyof Endpoints, 'application/json' | 'mul
 	'i/read-all-unread-notes': 'application/json',
 	'i/read-announcement': 'application/json',
 	'i/regenerate-token': 'application/json',
-	'i/register-subscription': 'application/json',
 	'i/registry/get-all': 'application/json',
 	'i/registry/get-detail': 'application/json',
 	'i/registry/get': 'application/json',

@@ -2059,15 +2059,6 @@ export type paths = {
      */
     post: operations['i___change-password'];
   };
-  '/i/customer-portal': {
-    /**
-     * i/customer-portal
-     * @description No description provided.
-     *
-     * **Credential required**: *Yes* / **Permission**: *read:account*
-     */
-    post: operations['i___customer-portal'];
-  };
   '/i/delete-account': {
     /**
      * i/delete-account
@@ -2317,15 +2308,6 @@ export type paths = {
      * **Credential required**: *Yes*
      */
     post: operations['i___regenerate-token'];
-  };
-  '/i/register-subscription': {
-    /**
-     * i/register-subscription
-     * @description No description provided.
-     *
-     * **Credential required**: *Yes* / **Permission**: *write:account*
-     */
-    post: operations['i___register-subscription'];
   };
   '/i/registry/get-all': {
     /**
@@ -3831,7 +3813,6 @@ export type components = {
         })[];
       /** @enum {string} */
       subscriptionStatus: 'incomplete' | 'incomplete_expired' | 'trialing' | 'active' | 'past_due' | 'paused' | 'canceled' | 'unpaid' | 'none';
-      /** Format: id */
       subscriptionPlanId: string | null;
     };
     UserDetailedNotMeOnly: {
@@ -17857,57 +17838,6 @@ export type operations = {
     };
   };
   /**
-   * i/customer-portal
-   * @description No description provided.
-   *
-   * **Credential required**: *Yes* / **Permission**: *read:account*
-   */
-  'i___customer-portal': {
-    responses: {
-      /** @description OK (with results) */
-      200: {
-        content: {
-          'application/json': {
-            redirect: {
-              permanent: boolean;
-              destination: string;
-            };
-          };
-        };
-      };
-      /** @description Client error */
-      400: {
-        content: {
-          'application/json': components['schemas']['Error'];
-        };
-      };
-      /** @description Authentication error */
-      401: {
-        content: {
-          'application/json': components['schemas']['Error'];
-        };
-      };
-      /** @description Forbidden error */
-      403: {
-        content: {
-          'application/json': components['schemas']['Error'];
-        };
-      };
-      /** @description I'm Ai */
-      418: {
-        content: {
-          'application/json': components['schemas']['Error'];
-        };
-      };
-      /** @description Internal server error */
-      500: {
-        content: {
-          'application/json': components['schemas']['Error'];
-        };
-      };
-    };
-  };
-  /**
    * i/delete-account
    * @description No description provided.
    *
@@ -19358,64 +19288,6 @@ export type operations = {
       };
       /** @description I'm Ai */
       418: {
-        content: {
-          'application/json': components['schemas']['Error'];
-        };
-      };
-      /** @description Internal server error */
-      500: {
-        content: {
-          'application/json': components['schemas']['Error'];
-        };
-      };
-    };
-  };
-  /**
-   * i/register-subscription
-   * @description No description provided.
-   *
-   * **Credential required**: *Yes* / **Permission**: *write:account*
-   */
-  'i___register-subscription': {
-    requestBody: {
-      content: {
-        'application/json': {
-          /** Format: misskey:id */
-          planId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description OK (without any results) */
-      204: {
-        content: never;
-      };
-      /** @description Client error */
-      400: {
-        content: {
-          'application/json': components['schemas']['Error'];
-        };
-      };
-      /** @description Authentication error */
-      401: {
-        content: {
-          'application/json': components['schemas']['Error'];
-        };
-      };
-      /** @description Forbidden error */
-      403: {
-        content: {
-          'application/json': components['schemas']['Error'];
-        };
-      };
-      /** @description I'm Ai */
-      418: {
-        content: {
-          'application/json': components['schemas']['Error'];
-        };
-      };
-      /** @description To many requests */
-      429: {
         content: {
           'application/json': components['schemas']['Error'];
         };

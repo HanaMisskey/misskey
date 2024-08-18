@@ -1531,7 +1531,6 @@ declare namespace entities {
         IAuthorizedAppsResponse,
         IClaimAchievementRequest,
         IChangePasswordRequest,
-        ICustomerPortalResponse,
         IDeleteAccountRequest,
         IExportFollowingRequest,
         IFavoritesRequest,
@@ -1558,7 +1557,6 @@ declare namespace entities {
         IPinResponse,
         IReadAnnouncementRequest,
         IRegenerateTokenRequest,
-        IRegisterSubscriptionRequest,
         IRegistryGetAllRequest,
         IRegistryGetAllResponse,
         IRegistryGetDetailRequest,
@@ -2155,9 +2153,6 @@ type IChangePasswordRequest = operations['i___change-password']['requestBody']['
 type IClaimAchievementRequest = operations['i___claim-achievement']['requestBody']['content']['application/json'];
 
 // @public (undocumented)
-type ICustomerPortalResponse = operations['i___customer-portal']['responses']['200']['content']['application/json'];
-
-// @public (undocumented)
 type ID = string;
 
 // @public (undocumented)
@@ -2261,9 +2256,6 @@ type IReadAnnouncementRequest = operations['i___read-announcement']['requestBody
 
 // @public (undocumented)
 type IRegenerateTokenRequest = operations['i___regenerate-token']['requestBody']['content']['application/json'];
-
-// @public (undocumented)
-type IRegisterSubscriptionRequest = operations['i___register-subscription']['requestBody']['content']['application/json'];
 
 // @public (undocumented)
 type IRegistryGetAllRequest = operations['i___registry___get-all']['requestBody']['content']['application/json'];

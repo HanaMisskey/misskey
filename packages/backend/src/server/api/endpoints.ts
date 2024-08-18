@@ -224,7 +224,6 @@ import * as ep___i_apps from './endpoints/i/apps.js';
 import * as ep___i_authorizedApps from './endpoints/i/authorized-apps.js';
 import * as ep___i_claimAchievement from './endpoints/i/claim-achievement.js';
 import * as ep___i_changePassword from './endpoints/i/change-password.js';
-import * as ep___i_customerPortal from './endpoints/i/customer-portal.js';
 import * as ep___i_deleteAccount from './endpoints/i/delete-account.js';
 import * as ep___i_exportBlocking from './endpoints/i/export-blocking.js';
 import * as ep___i_exportFollowing from './endpoints/i/export-following.js';
@@ -251,7 +250,6 @@ import * as ep___i_pin from './endpoints/i/pin.js';
 import * as ep___i_readAllUnreadNotes from './endpoints/i/read-all-unread-notes.js';
 import * as ep___i_readAnnouncement from './endpoints/i/read-announcement.js';
 import * as ep___i_regenerateToken from './endpoints/i/regenerate-token.js';
-import * as ep___i_registerSubscription from './endpoints/i/register-subscription.js';
 import * as ep___i_registry_getAll from './endpoints/i/registry/get-all.js';
 import * as ep___i_registry_getDetail from './endpoints/i/registry/get-detail.js';
 import * as ep___i_registry_get from './endpoints/i/registry/get.js';
@@ -617,7 +615,6 @@ const eps = [
 	['i/authorized-apps', ep___i_authorizedApps],
 	['i/claim-achievement', ep___i_claimAchievement],
 	['i/change-password', ep___i_changePassword],
-	['i/customer-portal', ep___i_customerPortal],
 	['i/delete-account', ep___i_deleteAccount],
 	['i/export-blocking', ep___i_exportBlocking],
 	['i/export-following', ep___i_exportFollowing],
@@ -644,7 +641,6 @@ const eps = [
 	['i/read-all-unread-notes', ep___i_readAllUnreadNotes],
 	['i/read-announcement', ep___i_readAnnouncement],
 	['i/regenerate-token', ep___i_regenerateToken],
-	['i/register-subscription', ep___i_registerSubscription],
 	['i/registry/get-all', ep___i_registry_getAll],
 	['i/registry/get-detail', ep___i_registry_getDetail],
 	['i/registry/get', ep___i_registry_get],

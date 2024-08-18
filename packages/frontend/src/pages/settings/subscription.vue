@@ -85,7 +85,7 @@ async function manage() {
 		closed: () => dispose(),
 	});
 
-	misskeyApi('i/customer-portal').then((res) => {
+	misskeyApi('subscription/manage').then((res) => {
 		location.href = res.redirect.destination;
 	}).catch(() => {
 		showing.value = false;
@@ -98,7 +98,7 @@ function change(plan) {
 		type: 'question',
 	}).then((res) => {
 		if (res.canceled) return;
-		os.apiWithDialog('i/register-subscription', {
+		os.apiWithDialog('subscription/create', {
 			planId: plan.id,
 		});
 	}).then(() => {
