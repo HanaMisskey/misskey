@@ -14,6 +14,7 @@ import * as sound from '@/scripts/sound.js';
 import { $i, signout, updateAccount } from '@/account.js';
 import { instance } from '@/instance.js';
 import { ColdDeviceStorage, defaultStore } from '@/store.js';
+import { hanaStore } from '@/hana/store.js';
 import { reactionPicker } from '@/scripts/reaction-picker.js';
 import { miLocalStorage } from '@/local-storage.js';
 import { claimAchievement, claimedAchievements } from '@/scripts/achievements.js';
@@ -249,6 +250,17 @@ export async function mainBoot() {
 		const modifiedVersionMustProminentlyOfferInAgplV3Section13Read = miLocalStorage.getItem('modifiedVersionMustProminentlyOfferInAgplV3Section13Read');
 		if (modifiedVersionMustProminentlyOfferInAgplV3Section13Read !== 'true' && instance.repositoryUrl !== 'https://github.com/misskey-dev/misskey') {
 			const { dispose } = popup(defineAsyncComponent(() => import('@/components/MkSourceCodeAvailablePopup.vue')), {}, {
+				closed: () => dispose(),
+			});
+		}
+
+		if (
+			!hanaStore.state.neverShowWelcomeCardPopup &&
+			(Date.now() - createdAt.getTime()) < (1000 * 60 * 60 * 24 * 90) &&
+			(Date.now() - hanaStore.state.lastShowWelcomeCardPopup) > (1000 * 60 * 60 * 24)
+		) {
+			console.log('showing welcome card popup');
+			const { dispose } = popup(defineAsyncComponent(() => import('@/components/HanaWelcomeCardGeneratorPopup.vue')), {}, {
 				closed: () => dispose(),
 			});
 		}

@@ -10428,6 +10428,55 @@ export interface Locale extends ILocale {
              */
             "saveConfirmDescription": string;
         };
+        "_welcomeCardGen": {
+            /**
+             * はなみすきーはじめました！カード
+             */
+            "title": string;
+            /**
+             * 名前にMFMを使用していたり、文字数が多すぎたりした場合は、ここで上書きできます。
+             */
+            "nameDescription": string;
+            /**
+             * プレビューに反映
+             */
+            "applyToPreview": string;
+            /**
+             * 画像を出力
+             */
+            "generateImage": string;
+            /**
+             * はなみすきーはじめましたカードが完成しました
+             */
+            "imageGenerated": string;
+            /**
+             * このカードをダウンロードして、X (Twitter)などの既存のSNSでシェアしてください🎉
+             */
+            "imageGeneratedDescription": string;
+            /**
+             * 分散型SNS「はなみすきー」をはじめました！登録してフォローしてね！
+             * {url}
+             */
+            "shareText": ParameterizedString<"url">;
+            /**
+             * Xでポスト
+             */
+            "shareToX": string;
+        };
+        "_welcomeCardGenPopup": {
+            /**
+             * はなみすきーをはじめたことを知らせましょう！
+             */
+            "title": string;
+            /**
+             * このバナーが表示されている間限定！はなみすきーオリジナルのかわいいプロフィール画像を作ってシェアしてください！
+             */
+            "description": string;
+            /**
+             * 作ってみる
+             */
+            "create": string;
+        };
     };
 }
 declare const locales: {

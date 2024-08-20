@@ -2783,3 +2783,16 @@ _hana:
     hana3: "フォロー中ユーザーの最新のノートとFediverseの人気の投稿をザッピングできる「はなみタイムライン」が使用できます"
     hanaRecommend: "おひとりさまサーバーのような分散SNS体験をしたい方（内々での交流だけでなく、外部サーバーとの交流もしっかり重視したい方）"
     saveConfirmDescription: "一定期間にモードを変更できる回数には制限があります。"
+  _welcomeCardGen:
+    title: "はなみすきーはじめました！カード"
+    nameDescription: "名前にMFMを使用していたり、文字数が多すぎたりした場合は、ここで上書きできます。"
+    applyToPreview: "プレビューに反映"
+    generateImage: "画像を出力"
+    imageGenerated: "はなみすきーはじめましたカードが完成しました"
+    imageGeneratedDescription: "このカードをダウンロードして、X (Twitter)などの既存のSNSでシェアしてください🎉"
+    shareText: "分散型SNS「はなみすきー」をはじめました！登録してフォローしてね！\n{url}"
+    shareToX: "Xでポスト"
+  _welcomeCardGenPopup:
+    title: "はなみすきーをはじめたことを知らせましょう！"
+    description: "このバナーが表示されている間限定！はなみすきーオリジナルのかわいいプロフィール画像を作ってシェアしてください！"
+    create: "作ってみる"
