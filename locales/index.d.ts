@@ -10320,6 +10320,10 @@ export interface Locale extends ILocale {
          * はなみすきーの主要な独自機能として「はなモード」があります。はなモードを有効にするかどうかで、はなみすきーでのSNS体験は大きく変わってきます。以下に主な違いとおすすめのユースケースを挙げますので、どちらか選択して進んでください。
          */
         "hanaModeTutorialDescription": string;
+        /**
+         * いつでも花びらを降らせる
+         */
+        "flowerEffect": string;
         "_inDevelopment": {
             /**
              * この機能は開発中です

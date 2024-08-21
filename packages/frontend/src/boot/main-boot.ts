@@ -14,6 +14,7 @@ import * as sound from '@/scripts/sound.js';
 import { $i, signout, updateAccount } from '@/account.js';
 import { instance } from '@/instance.js';
 import { ColdDeviceStorage, defaultStore } from '@/store.js';
+import { hanaStore } from '@/hana/store.js';
 import { reactionPicker } from '@/scripts/reaction-picker.js';
 import { miLocalStorage } from '@/local-storage.js';
 import { claimAchievement, claimedAchievements } from '@/scripts/achievements.js';
@@ -71,7 +72,12 @@ export async function mainBoot() {
 	}
 
 	try {
-		if (defaultStore.state.enableSeasonalScreenEffect) {
+		if (hanaStore.state.flowerEffect) {
+			const SakuraEffect = (await import('@/scripts/snowfall-effect.js')).SnowfallEffect;
+			new SakuraEffect({
+				sakura: true,
+			}).render();
+		} else if (defaultStore.state.enableSeasonalScreenEffect) {
 			const month = new Date().getMonth() + 1;
 			if (defaultStore.state.hemisphere === 'S') {
 				// ▼南半球
