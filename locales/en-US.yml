@@ -2652,6 +2652,9 @@ _contextMenu:
 _hana:
   hanaSettings: "HanaMisskey Settings"
   hanaMode: "Hana Mode"
+  hanaModeShort: "Hana"
+  hanaModeTutorialDescription: "One of HanaMisskey's key unique features is Hana Mode, and your social networking experience with HanaMisskey will vary greatly depending on whether you enable Hana Mode or not. Below are the main differences and recommended use cases, so please select either one and proceed."
+  flowerEffect: "Show flurries all year round"
   _inDevelopment:
     title: "This feature is under development"
     description: "HanaMisskey is packed with new features currently in development! Stay tuned to see what exciting features will be implemented."

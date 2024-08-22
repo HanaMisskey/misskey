@@ -14,6 +14,7 @@ import { isDeviceDarkmode } from '@/scripts/is-device-darkmode.js';
 import { updateI18n } from '@/i18n.js';
 import { $i, iAmModerator, refreshAccount, login } from '@/account.js';
 import { defaultStore, ColdDeviceStorage } from '@/store.js';
+import { hanaStore } from '@/hana/store.js';
 import { fetchInstance, instance } from '@/instance.js';
 import { deviceKind } from '@/scripts/device-kind.js';
 import { reloadChannel } from '@/scripts/unison-reload.js';
@@ -118,6 +119,7 @@ export async function common(createVue: () => App<Element>) {
 
 	await defaultStore.ready;
 	await deckStore.ready;
+	await hanaStore.ready;
 
 	// チュートリアルを完了していない通常ユーザーの場合、チュートリアルにリダイレクト
 	if (
