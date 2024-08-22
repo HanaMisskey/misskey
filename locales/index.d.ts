@@ -10325,6 +10325,10 @@ export interface Locale extends ILocale {
          */
         "hanaModeTutorialDescription": string;
         /**
+         * いつでも花びらを降らせる
+         */
+        "flowerEffect": string;
+        /**
          * BackspaceKeyからの移行
          */
         "migrateFromBackspaceKey": string;

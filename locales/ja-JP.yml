@@ -2753,6 +2753,7 @@ _hana:
   hanaMode: "はなモード"
   hanaModeShort: "はな"
   hanaModeTutorialDescription: "はなみすきーの主要な独自機能として「はなモード」があります。はなモードを有効にするかどうかで、はなみすきーでのSNS体験は大きく変わってきます。以下に主な違いとおすすめのユースケースを挙げますので、どちらか選択して進んでください。"
+  flowerEffect: "いつでも花びらを降らせる"
   migrateFromBackspaceKey: "BackspaceKeyからの移行"
   _migrateFromBackspaceKey:
     about: "BackspaceKey上のコンテンツを簡単に移行できます。"
