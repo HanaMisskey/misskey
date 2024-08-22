@@ -10366,9 +10366,9 @@ export interface Locale extends ILocale {
              */
             "step4": string;
             /**
-             * {bsk}で移行先のアカウントを指定したあと、{hana}で移行元のアカウントを指定します。これにより、フォロワーが自動で引き継がれます。
+             * {hana}で移行元のアカウントを指定したあと、{bsk}で移行先のアカウントを指定します。これにより、フォロワーが自動で引き継がれます。
              */
-            "step4Description": ParameterizedString<"bsk" | "hana">;
+            "step4Description": ParameterizedString<"hana" | "bsk">;
             /**
              * この時点でBackspaceKeyのアカウントは利用できなくなります。必ずすべての移行が完了するまで待ってください。
              */

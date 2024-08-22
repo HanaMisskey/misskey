@@ -1,7 +1,7 @@
 <template>
 <div class="_gaps_m">
 	<FormSection first>
-		<template #label>{{ i18n.ts._hana._migrateFromBackspaceKey.step1 }}</template>
+		<template #label>1. {{ i18n.ts._hana._migrateFromBackspaceKey.step1 }}</template>
 
 		<div class="_gaps">
 			<div>{{ i18n.ts._hana._migrateFromBackspaceKey.step1Description }}</div>
@@ -11,7 +11,7 @@
 		</div>
 	</FormSection>
 	<FormSection>
-		<template #label>{{ i18n.ts._hana._migrateFromBackspaceKey.step2 }}</template>
+		<template #label>2. {{ i18n.ts._hana._migrateFromBackspaceKey.step2 }}</template>
 
 		<div class="_gaps">
 			<div>{{ i18n.ts._hana._migrateFromBackspaceKey.step2Description }}</div>
@@ -19,12 +19,12 @@
 		</div>
 	</FormSection>
 	<FormSection>
-		<template #label>{{ i18n.ts._hana._migrateFromBackspaceKey.step4 }}</template>
+		<template #label>3. {{ i18n.ts._hana._migrateFromBackspaceKey.step4 }}</template>
 
 		<div class="_gaps">
 			<I18n :src="i18n.ts._hana._migrateFromBackspaceKey.step4Description" tag="div">
-				<template #bsk><a href="https://misskey.backspace.fm/settings/migration">BackspaceKey</a></template>
-				<template #hana><MkA to="/settings/migration">{{ i18n.ts._hana.hanaMisskey }}</MkA></template>
+				<template #bsk><a class="_link" href="https://misskey.backspace.fm/settings/migration">BackspaceKey</a></template>
+				<template #hana><MkA class="_link" to="/settings/migration">{{ i18n.ts._hana.hanaMisskey }}</MkA></template>
 			</I18n>
 			<MkInfo warn>{{ i18n.ts._hana._migrateFromBackspaceKey.step4Description2 }}</MkInfo>
 		</div>
@@ -51,11 +51,17 @@ const props = defineProps<{
 const linked = ref(false);
 
 if (props.sessionId) {
-	os.apiWithDialog('i/bsk-migrate/verify').then(() => {
-		linked.value = true;
-	}).catch(async () => {
-		linked.value = (await misskeyApi('i/bsk-migrate/status')).linked;
+	const initialLoadPromise = new Promise<void>((resolve) => {
+		misskeyApi('i/bsk-migrate/verify').then(() => {
+			linked.value = true;
+			resolve();
+		}).catch(async (err) => {
+			linked.value = (await misskeyApi('i/bsk-migrate/status')).linked;
+			resolve();
+		});
 	});
+
+	os.promiseDialog(initialLoadPromise);
 } else {
 	linked.value = (await misskeyApi('i/bsk-migrate/status')).linked;
 }
