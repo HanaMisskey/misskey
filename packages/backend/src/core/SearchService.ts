@@ -214,7 +214,7 @@ export class SearchService {
 				tags: note.tags,
 			};
 			await this.elasticsearch.index({
-				index: this.elasticsearchNoteIndex + `-${new Date().toISOString().slice(0, 7).replace(/-/g, '')}` as string,
+				index: `${this.elasticsearchNoteIndex}-${createdAt.toISOString().slice(0, 7).replace(/-/g, '')}`,
 				id: note.id,
 				body: body,
 			}).catch((error) => {
@@ -229,6 +229,13 @@ export class SearchService {
 
 		if (this.meilisearch) {
 			this.meilisearchNoteIndex!.deleteDocument(note.id);
+		} else if (this.elasticsearch) {
+			await this.elasticsearch.delete({
+				index: `${this.elasticsearchNoteIndex}-${this.idService.parse(note.id).date.toISOString().slice(0, 7).replace(/-/g, '')}`,
+				id: note.id,
+			}).catch((error) => {
+				this.logger.error(error);
+			});
 		}
 	}
 
