@@ -67,6 +67,8 @@ export class BskMiAuthService {
 			throw new IdentifiableError('93ab6634-16b3-46b4-9ffb-b2d3cf3d5190', 'Failed to verify session');
 		}
 
+		this.redisClient.del(`bskAuthSession:${userId}`);
+
 		return {
 			bskUserId: data.user.id,
 			token: data.token,

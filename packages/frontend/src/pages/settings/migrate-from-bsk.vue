@@ -1,5 +1,5 @@
 <template>
-<div>
+<div class="_gaps_m">
 	<FormSection first>
 		<template #label>{{ i18n.ts._hana._migrateFromBackspaceKey.step1 }}</template>
 
@@ -53,6 +53,8 @@ const linked = ref(false);
 if (props.sessionId) {
 	os.apiWithDialog('i/bsk-migrate/verify').then(() => {
 		linked.value = true;
+	}).catch(async () => {
+		linked.value = (await misskeyApi('i/bsk-migrate/status')).linked;
 	});
 } else {
 	linked.value = (await misskeyApi('i/bsk-migrate/status')).linked;
@@ -60,6 +62,7 @@ if (props.sessionId) {
 
 function disconnect() {
 	os.apiWithDialog('i/bsk-migrate/remove');
+	linked.value = false;
 }
 
 function connect() {
@@ -74,10 +77,11 @@ function connect() {
 
 	misskeyApi('i/bsk-migrate/get-miauth-id').then(({ sessionId }) => {
 		const miAuthUrl = new URL(`https://misskey.backspace.fm/miauth/${sessionId}`);
-		miAuthUrl.searchParams.set('redirect', `${url}/settings/migrate-from-bsk`);
-		miAuthUrl.searchParams.set('permisson', 'read:account,write:notifications');
+		miAuthUrl.searchParams.set('callback', `${url}/settings/migrate-from-bsk`);
+		miAuthUrl.searchParams.set('name', i18n.ts._hana.hanaMisskey);
+		miAuthUrl.searchParams.set('permission', 'read:account,write:notifications');
 
-		location.href = url.toString();
+		location.href = miAuthUrl.toString();
 	}).catch(() => {
 		showing.value = false;
 	});

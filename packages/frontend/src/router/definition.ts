@@ -188,6 +188,9 @@ const routes: RouteDef[] = [{
 		path: '/migrate-from-bsk',
 		name: 'migrate-from-bsk',
 		component: page(() => import('@/pages/settings/migrate-from-bsk.vue')),
+		query: {
+			session: 'sessionId',
+		}
 	}, {
 		path: '/',
 		component: page(() => import('@/pages/_empty_.vue')),
