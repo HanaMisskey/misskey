@@ -214,6 +214,7 @@ import * as ep___i_apps from './endpoints/i/apps.js';
 import * as ep___i_authorizedApps from './endpoints/i/authorized-apps.js';
 import * as ep___i_bskMigrate_getMiauthId from './endpoints/i/bsk-migrate/get-miauth-id.js';
 import * as ep___i_bskMigrate_remove from './endpoints/i/bsk-migrate/remove.js';
+import * as ep___i_bskMigrate_status from './endpoints/i/bsk-migrate/status.js';
 import * as ep___i_bskMigrate_verify from './endpoints/i/bsk-migrate/verify.js';
 import * as ep___i_claimAchievement from './endpoints/i/claim-achievement.js';
 import * as ep___i_changePassword from './endpoints/i/change-password.js';
@@ -602,6 +603,7 @@ const $i_apps: Provider = { provide: 'ep:i/apps', useClass: ep___i_apps.default 
 const $i_authorizedApps: Provider = { provide: 'ep:i/authorized-apps', useClass: ep___i_authorizedApps.default };
 const $i_bskMigrate_getMiauthId: Provider = { provide: 'ep:i/bsk-migrate/get-miauth-id', useClass: ep___i_bskMigrate_getMiauthId.default };
 const $i_bskMigrate_remove: Provider = { provide: 'ep:i/bsk-migrate/remove', useClass: ep___i_bskMigrate_remove.default };
+const $i_bskMigrate_status: Provider = { provide: 'ep:i/bsk-migrate/status', useClass: ep___i_bskMigrate_status.default };
 const $i_bskMigrate_verify: Provider = { provide: 'ep:i/bsk-migrate/verify', useClass: ep___i_bskMigrate_verify.default };
 const $i_claimAchievement: Provider = { provide: 'ep:i/claim-achievement', useClass: ep___i_claimAchievement.default };
 const $i_changePassword: Provider = { provide: 'ep:i/change-password', useClass: ep___i_changePassword.default };
@@ -994,6 +996,7 @@ const $reversi_verify: Provider = { provide: 'ep:reversi/verify', useClass: ep__
 		$i_authorizedApps,
 		$i_bskMigrate_getMiauthId,
 		$i_bskMigrate_remove,
+		$i_bskMigrate_status,
 		$i_bskMigrate_verify,
 		$i_claimAchievement,
 		$i_changePassword,
@@ -1380,6 +1383,7 @@ const $reversi_verify: Provider = { provide: 'ep:reversi/verify', useClass: ep__
 		$i_authorizedApps,
 		$i_bskMigrate_getMiauthId,
 		$i_bskMigrate_remove,
+		$i_bskMigrate_status,
 		$i_bskMigrate_verify,
 		$i_claimAchievement,
 		$i_changePassword,

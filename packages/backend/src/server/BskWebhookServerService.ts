@@ -138,6 +138,10 @@ export class BskWebhookServerService {
 				case 'blocking':
 					this.queueService.createImportBlockingJob(user, file.id);
 					break;
+				default:
+					await this.driveFilesRepository.delete(file.id);
+					reply.code(204);
+					return;
 			}
 
 			// 6. ユーザーの状態を更新

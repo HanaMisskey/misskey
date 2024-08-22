@@ -220,6 +220,7 @@ import * as ep___i_apps from './endpoints/i/apps.js';
 import * as ep___i_authorizedApps from './endpoints/i/authorized-apps.js';
 import * as ep___i_bskMigrate_getMiauthId from './endpoints/i/bsk-migrate/get-miauth-id.js';
 import * as ep___i_bskMigrate_remove from './endpoints/i/bsk-migrate/remove.js';
+import * as ep___i_bskMigrate_status from './endpoints/i/bsk-migrate/status.js';
 import * as ep___i_bskMigrate_verify from './endpoints/i/bsk-migrate/verify.js';
 import * as ep___i_claimAchievement from './endpoints/i/claim-achievement.js';
 import * as ep___i_changePassword from './endpoints/i/change-password.js';
@@ -606,6 +607,7 @@ const eps = [
 	['i/authorized-apps', ep___i_authorizedApps],
 	['i/bsk-migrate/get-miauth-id', ep___i_bskMigrate_getMiauthId],
 	['i/bsk-migrate/remove', ep___i_bskMigrate_remove],
+	['i/bsk-migrate/status', ep___i_bskMigrate_status],
 	['i/bsk-migrate/verify', ep___i_bskMigrate_verify],
 	['i/claim-achievement', ep___i_claimAchievement],
 	['i/change-password', ep___i_changePassword],
