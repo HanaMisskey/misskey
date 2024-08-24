@@ -5053,6 +5053,7 @@ export type components = {
        * @enum {string}
        */
       noteSearchableScope: 'local' | 'global';
+      maxFileSize: number;
     };
     MetaDetailedOnly: {
       features?: {
