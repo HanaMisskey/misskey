@@ -9,4 +9,8 @@ export const hanaStore = markRaw(new Storage('hanaMain', {
 		where: 'device',
 		default: false,
 	},
+	stopAnimatingEmojisWithMovement: {
+		where: 'device',
+		default: true,
+  },
 }));

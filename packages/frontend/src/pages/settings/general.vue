@@ -138,6 +138,12 @@ SPDX-License-Identifier: AGPL-3.0-only
 				<MkSwitch v-model="flowerEffect">{{ i18n.ts._hana.flowerEffect }}</MkSwitch>
 				<MkSwitch v-model="useNativeUIForVideoAudioPlayer">{{ i18n.ts.useNativeUIForVideoAudioPlayer }}</MkSwitch>
 			</div>
+			<div class="_gaps_s">
+				<MkSwitch v-model="stopAnimatingEmojisWithMovement">
+					<template #label>{{ i18n.ts._hana.stopAnimatingEmojisWithMovement }}</template>
+					<template #caption>{{ i18n.ts._hana.stopAnimatingEmojisWithMovementDescription }}</template>
+				</MkSwitch>
+			</div>
 			<div>
 				<MkRadios v-model="emojiStyle">
 					<template #label>{{ i18n.ts.emojiStyle }}</template>
@@ -327,6 +333,8 @@ const alwaysConfirmFollow = computed(defaultStore.makeGetterSetter('alwaysConfir
 const confirmWhenRevealingSensitiveMedia = computed(defaultStore.makeGetterSetter('confirmWhenRevealingSensitiveMedia'));
 const contextMenu = computed(defaultStore.makeGetterSetter('contextMenu'));
 const flowerEffect = computed(hanaStore.makeGetterSetter('flowerEffect'));
+
+const stopAnimatingEmojisWithMovement = computed(hanaStore.makeGetterSetter('stopAnimatingEmojisWithMovement'));
 
 watch(lang, () => {
 	miLocalStorage.setItem('lang', lang.value as string);

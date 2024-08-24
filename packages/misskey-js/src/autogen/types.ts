@@ -4662,6 +4662,7 @@ export type components = {
       localOnly?: boolean;
       isSensitive?: boolean;
       roleIdsThatCanBeUsedThisEmojiAsReaction?: string[];
+      hasMovement?: boolean;
     };
     EmojiDetailed: {
       /** Format: id */
@@ -4676,6 +4677,7 @@ export type components = {
       isSensitive: boolean;
       localOnly: boolean;
       roleIdsThatCanBeUsedThisEmojiAsReaction: string[];
+      hasMovement?: boolean;
     };
     Flash: {
       /**
@@ -6983,6 +6985,7 @@ export type operations = {
           isSensitive?: boolean;
           localOnly?: boolean;
           roleIdsThatCanBeUsedThisEmojiAsReaction?: string[];
+          hasMovement?: boolean;
         };
       };
     };
@@ -7613,6 +7616,7 @@ export type operations = {
           isSensitive?: boolean;
           localOnly?: boolean;
           roleIdsThatCanBeUsedThisEmojiAsReaction?: string[];
+          hasMovement?: boolean;
         };
       };
     };

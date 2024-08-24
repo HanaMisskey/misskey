@@ -34,6 +34,8 @@ export class EmojiEntityService {
 			localOnly: emoji.localOnly ? true : undefined,
 			isSensitive: emoji.isSensitive ? true : undefined,
 			roleIdsThatCanBeUsedThisEmojiAsReaction: emoji.roleIdsThatCanBeUsedThisEmojiAsReaction.length > 0 ? emoji.roleIdsThatCanBeUsedThisEmojiAsReaction : undefined,
+
+			hasMovement: emoji.hasMovement,
 		};
 	}
 
@@ -62,6 +64,8 @@ export class EmojiEntityService {
 			isSensitive: emoji.isSensitive,
 			localOnly: emoji.localOnly,
 			roleIdsThatCanBeUsedThisEmojiAsReaction: emoji.roleIdsThatCanBeUsedThisEmojiAsReaction,
+
+			hasMovement: emoji.hasMovement,
 		};
 	}
 

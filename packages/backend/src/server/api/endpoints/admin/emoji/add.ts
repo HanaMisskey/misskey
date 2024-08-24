@@ -56,6 +56,7 @@ export const paramDef = {
 		roleIdsThatCanBeUsedThisEmojiAsReaction: { type: 'array', items: {
 			type: 'string',
 		} },
+		hasMovement: { type: 'boolean' },
 	},
 	required: ['name', 'fileId'],
 } as const;
@@ -88,6 +89,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				isSensitive: ps.isSensitive ?? false,
 				localOnly: ps.localOnly ?? false,
 				roleIdsThatCanBeUsedThisEmojiAsReaction: ps.roleIdsThatCanBeUsedThisEmojiAsReaction ?? [],
+				hasMovement: ps.hasMovement ?? false,
 			}, me);
 
 			return this.emojiEntityService.packDetailed(emoji);

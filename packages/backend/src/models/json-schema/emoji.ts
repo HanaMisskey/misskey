@@ -44,6 +44,11 @@ export const packedEmojiSimpleSchema = {
 				format: 'id',
 			},
 		},
+
+		hasMovement: {
+			type: 'boolean',
+			optional: true, nullable: false,
+		},
 	},
 } as const;
 
@@ -101,6 +106,11 @@ export const packedEmojiDetailedSchema = {
 				optional: false, nullable: false,
 				format: 'id',
 			},
+		},
+
+		hasMovement: {
+			type: 'boolean',
+			optional: true, nullable: false,
 		},
 	},
 } as const;
