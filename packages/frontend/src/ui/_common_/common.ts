@@ -104,7 +104,7 @@ export function openInstanceMenu(ev: MouseEvent) {
 		target: '_blank',
 	} : undefined, (instance.commerceDisclosureUrl) ? {
 		type: 'a',
-		text: i18n.ts.commerceDisclosure,
+		text: i18n.ts._hana.commerceDisclosure,
 		icon: 'ti ti-shopping-cart',
 		href: instance.commerceDisclosureUrl,
 		target: '_blank',

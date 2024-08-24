@@ -1211,8 +1211,6 @@ impressumDescription: "ドイツなどの一部の国と地域では表示が義
 privacyPolicy: "プライバシーポリシー"
 privacyPolicyUrl: "プライバシーポリシーURL"
 tosAndPrivacyPolicy: "利用規約・プライバシーポリシー"
-commerceDisclosure: "特定商取引法に基づく表記"
-commerceDisclosureUrl: "特定商取引法に基づく表記URL"
 avatarDecorations: "アイコンデコレーション"
 attach: "付ける"
 detach: "外す"
@@ -2756,6 +2754,8 @@ _hana:
   hanaModeShort: "はな"
   hanaModeTutorialDescription: "はなみすきーの主要な独自機能として「はなモード」があります。はなモードを有効にするかどうかで、はなみすきーでのSNS体験は大きく変わってきます。以下に主な違いとおすすめのユースケースを挙げますので、どちらか選択して進んでください。"
   flowerEffect: "いつでも花びらを降らせる"
+  commerceDisclosure: "特定商取引法に基づく表記"
+  commerceDisclosureUrl: "特定商取引法に基づく表記URL"
   subscription: "サブスクリプション"
   subscriptionStatus: "サブスクリプションの状態"
   _inDevelopment:

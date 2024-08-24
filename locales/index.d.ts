@@ -4861,14 +4861,6 @@ export interface Locale extends ILocale {
      */
     "tosAndPrivacyPolicy": string;
     /**
-     * 特定商取引法に基づく表記
-     */
-    "commerceDisclosure": string;
-    /**
-     * 特定商取引法に基づく表記URL
-     */
-    "commerceDisclosureUrl": string;
-    /**
      * アイコンデコレーション
      */
     "avatarDecorations": string;
@@ -5093,8 +5085,8 @@ export interface Locale extends ILocale {
      */
     "createdAntennas": string;
     /**
-    * これ以上このクリップにノートを追加できません。
-    */
+     * これ以上このクリップにノートを追加できません。
+     */
     "clipNoteLimitExceeded": string;
     /**
      * チュートリアルをスキップできないようにする
@@ -10336,6 +10328,14 @@ export interface Locale extends ILocale {
          * いつでも花びらを降らせる
          */
         "flowerEffect": string;
+        /**
+         * 特定商取引法に基づく表記
+         */
+        "commerceDisclosure": string;
+        /**
+         * 特定商取引法に基づく表記URL
+         */
+        "commerceDisclosureUrl": string;
         /**
          * サブスクリプション
          */

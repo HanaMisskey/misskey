@@ -43,7 +43,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 					<MkInput v-model="commerceDisclosureUrl" type="url">
 						<template #prefix><i class="ti ti-link"></i></template>
-						<template #label>{{ i18n.ts.commerceDisclosureUrl }}</template>
+						<template #label>{{ i18n.ts._hana.commerceDisclosureUrl }}</template>
 					</MkInput>
 
 					<MkTextarea v-model="preservedUsernames">
