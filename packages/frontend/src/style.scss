@@ -84,6 +84,7 @@ html {
 	&, * {
 		scrollbar-color: var(--scrollbarHandle) transparent;
 		scrollbar-width: thin;
+		font-feature-settings: 'calt' 0;
 
 		&::-webkit-scrollbar {
 			width: 6px;
