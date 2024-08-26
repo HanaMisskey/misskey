@@ -1,6 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { QueueService } from '@/core/QueueService.js';
 import { RoleService } from '@/core/RoleService.js';
+import { HttpRequestService } from '@/core/HttpRequestService.js';
+import { MetaService } from '@/core/MetaService.js';
 import { DriveService } from '@/core/DriveService.js';
 import type { Config } from '@/config.js';
 import type { DriveFilesRepository, UsersRepository } from '@/models/_.js';
@@ -15,6 +17,13 @@ export const supportedTypes = [
 	'blocking',
 ] as const;
 
+const supportedTypesFriendlyNames = {
+	notes: 'ノート',
+	following: 'フォロー',
+	muting: 'ミュート',
+	blocking: 'ブロック',
+} as const satisfies Record<typeof supportedTypes[number], string>;
+
 @Injectable()
 export class BskWebhookServerService {
 	constructor(
@@ -28,6 +37,8 @@ export class BskWebhookServerService {
 		private usersRepository: UsersRepository,
 
 		private driveService: DriveService,
+		private httpRequestService: HttpRequestService,
+		private metaService: MetaService,
 		private queueService: QueueService,
 		private roleService: RoleService,
 	) {}
@@ -99,6 +110,21 @@ export class BskWebhookServerService {
 
 			// 2. 同様のジョブを過去にやってないか確認
 			if (user.bskMigratedEntities.includes(body.body.type)) {
+				const meta = await this.metaService.fetch();
+
+				await this.httpRequestService.send(`https://${this.config.bskHost}/api/notifications/create`, {
+					method: 'POST',
+					body: JSON.stringify({
+						icon: meta.iconUrl,
+						header: `${supportedTypesFriendlyNames[body.body.type]}は一度BackspaceKeyからインポートされています`,
+						body: '自動インポートに失敗している場合は、お手数ですが手動でインポートしてください。',
+					}),
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					timeout: 3000,
+				}).catch(() => { });
+
 				reply.code(204);
 				return;
 			}
@@ -148,6 +174,21 @@ export class BskWebhookServerService {
 			await this.usersRepository.update(user.id, {
 				bskMigratedEntities: [...user.bskMigratedEntities, body.body.type],
 			});
+
+			// 7. 通知を送信
+			const meta = await this.metaService.fetch();
+			await this.httpRequestService.send(`https://${this.config.bskHost}/api/notifications/create`, {
+				method: 'POST',
+				body: JSON.stringify({
+					icon: meta.iconUrl,
+					header: `${supportedTypesFriendlyNames[body.body.type]}のインポートが開始されました`,
+					body: 'インポートには時間がかかります。',
+				}),
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				timeout: 3000,
+			}).catch(() => { });
 
 			reply.code(204);
 		});
