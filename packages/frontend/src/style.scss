@@ -6,6 +6,38 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+@font-face {
+	font-family: 'Inter___local';
+	font-style: normal;
+	font-weight: 100 900;
+	font-display: swap;
+	src: local('Inter');
+}
+
+@font-face {
+	font-family: 'Inter___local';
+	font-style: italic;
+	font-weight: 100 900;
+	font-display: swap;
+	src: local('Inter');
+}
+
+@font-face {
+	font-family: 'Biz UDGothic___local';
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: local('BIZ UDGothic');
+}
+
+@font-face {
+	font-family: 'Biz UDGothic___local';
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+	src: local('BIZ UDGothic Bold'), local('BIZ UDGothic');
+}
+
 :root {
 	--radius: 12px;
 	--marginFull: 16px;
@@ -34,30 +66,6 @@
 ::selection {
 	color: var(--fgOnAccent);
 	background-color: var(--accent);
-}
-
-@font-face {
-	font-family: 'Inter___local';
-	font-style: normal;
-	font-weight: 100 900;
-	font-display: swap;
-	src: local('Inter');
-}
-
-@font-face {
-	font-family: 'Biz UDGothic___local';
-	font-style: normal;
-	font-weight: 400;
-	font-display: swap;
-	src: local('BIZ UDGothic');
-}
-
-@font-face {
-	font-family: 'Biz UDGothic___local';
-	font-style: normal;
-	font-weight: 700;
-	font-display: swap;
-	src: local('BIZ UDGothic');
 }
 
 html {
