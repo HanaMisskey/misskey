@@ -45,6 +45,9 @@ SPDX-License-Identifier: AGPL-3.0-only
 						<MkSwitch v-model="events.userCreated" :disabled="disabledEvents.userCreated">
 							<template #label>{{ i18n.ts._webhookSettings._systemEvents.userCreated }}</template>
 						</MkSwitch>
+						<MkSwitch v-model="events.exportCompleted" :disabled="disabledEvents.exportCompleted">
+							<template #label>{{ i18n.ts._webhookSettings._systemEvents.exportCompleted }}</template>
+						</MkSwitch>
 					</div>
 				</MkFolder>
 
@@ -84,6 +87,7 @@ type EventType = {
 	abuseReport: boolean;
 	abuseReportResolved: boolean;
 	userCreated: boolean;
+	exportCompleted: boolean;
 }
 
 const emit = defineEmits<{
@@ -107,6 +111,7 @@ const events = ref<EventType>({
 	abuseReport: true,
 	abuseReportResolved: true,
 	userCreated: true,
+	exportCompleted: true,
 });
 const isActive = ref<boolean>(true);
 
@@ -114,6 +119,7 @@ const disabledEvents = ref<EventType>({
 	abuseReport: false,
 	abuseReportResolved: false,
 	userCreated: false,
+	exportCompleted: false,
 });
 
 const disableSubmitButton = computed(() => {

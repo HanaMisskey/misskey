@@ -20,6 +20,7 @@ import { Packed } from '@/misc/json-schema.js';
 import { IdService } from '@/core/IdService.js';
 import { JsonArrayStream } from '@/misc/JsonArrayStream.js';
 import { FileWriterStream } from '@/misc/FileWriterStream.js';
+import { UserContentsExporWebhookService } from '@/core/UserContentsExporWebhookService.js';
 import { QueueLoggerService } from '../QueueLoggerService.js';
 import type * as Bull from 'bullmq';
 import type { DbJobDataWithUser } from '../types.js';
@@ -112,6 +113,8 @@ export class ExportNotesProcessorService {
 		private queueLoggerService: QueueLoggerService,
 		private driveFileEntityService: DriveFileEntityService,
 		private idService: IdService,
+
+		private userContentsExporWebhookService: UserContentsExporWebhookService,
 	) {
 		this.logger = this.queueLoggerService.logger.createSubLogger('export-notes');
 	}
@@ -148,6 +151,7 @@ export class ExportNotesProcessorService {
 
 			const fileName = 'notes-' + dateFormat(new Date(), 'yyyy-MM-dd-HH-mm-ss') + '.json';
 			const driveFile = await this.driveService.addFile({ user, path, name: fileName, force: true, ext: 'json' });
+			await this.userContentsExporWebhookService.notifySystemWebhook(user, driveFile, 'notes');
 
 			this.logger.succ(`Exported to: ${driveFile.id}`);
 		} finally {

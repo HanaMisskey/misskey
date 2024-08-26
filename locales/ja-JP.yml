@@ -2508,6 +2508,7 @@ _webhookSettings:
     abuseReport: "ユーザーから通報があったとき"
     abuseReportResolved: "ユーザーからの通報を処理したとき"
     userCreated: "ユーザーが作成されたとき"
+    exportCompleted: "ユーザーがコンテンツをエクスポートしたとき"
   deleteConfirm: "Webhookを削除しますか？"
 
 _abuseReport:

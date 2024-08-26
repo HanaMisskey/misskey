@@ -9460,6 +9460,10 @@ export interface Locale extends ILocale {
              * ユーザーが作成されたとき
              */
             "userCreated": string;
+            /**
+             * ユーザーがコンテンツをエクスポートしたとき
+             */
+            "exportCompleted": string;
         };
         /**
          * Webhookを削除しますか？

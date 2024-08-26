@@ -14,6 +14,8 @@ export const systemWebhookEventTypes = [
 	'abuseReportResolved',
 	// ユーザが作成された時
 	'userCreated',
+	// 	ユーザーのエクスポートが完了した時
+	'exportCompleted',
 ] as const;
 export type SystemWebhookEventType = typeof systemWebhookEventTypes[number];
 
