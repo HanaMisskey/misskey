@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { Inject, Injectable } from '@nestjs/common';
 import * as Redis from 'ioredis';
 import { DI } from '@/di-symbols.js';
@@ -5,7 +6,6 @@ import type { Config } from '@/config.js';
 import type { MiUser } from '@/models/User.js';
 import { bindThis } from '@/decorators.js';
 import { IdentifiableError } from '@/misc/identifiable-error.js';
-import { IdService } from '@/core/IdService.js';
 import { HttpRequestService } from '@/core/HttpRequestService.js';
 
 @Injectable()
@@ -17,14 +17,13 @@ export class BskMiAuthService {
 		@Inject(DI.redis)
 		private redisClient: Redis.Redis,
 
-		private idService: IdService,
 		private httpRequestService: HttpRequestService,
 	) {
 	}
 
 	@bindThis
 	public async createAuthSession(userId: MiUser['id']): Promise<string> {
-		const sessionId = this.idService.gen();
+		const sessionId = randomUUID();
 
 		await this.redisClient.set(`bskAuthSession:${userId}`, sessionId, 'EX', 60 * 2); // 2m
 
