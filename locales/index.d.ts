@@ -5085,8 +5085,8 @@ export interface Locale extends ILocale {
      */
     "createdAntennas": string;
     /**
-    * これ以上このクリップにノートを追加できません。
-    */
+     * これ以上このクリップにノートを追加できません。
+     */
     "clipNoteLimitExceeded": string;
     /**
      * チュートリアルをスキップできないようにする
