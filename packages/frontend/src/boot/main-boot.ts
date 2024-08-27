@@ -72,7 +72,12 @@ export async function mainBoot() {
 	}
 
 	try {
-		if (defaultStore.state.enableSeasonalScreenEffect) {
+		if (hanaStore.state.flowerEffect) {
+			const SakuraEffect = (await import('@/scripts/snowfall-effect.js')).SnowfallEffect;
+			new SakuraEffect({
+				sakura: true,
+			}).render();
+		} else if (defaultStore.state.enableSeasonalScreenEffect) {
 			const month = new Date().getMonth() + 1;
 			if (defaultStore.state.hemisphere === 'S') {
 				// ▼南半球

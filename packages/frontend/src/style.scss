@@ -6,6 +6,38 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+@font-face {
+	font-family: 'Inter___local';
+	font-style: normal;
+	font-weight: 100 900;
+	font-display: swap;
+	src: local('Inter');
+}
+
+@font-face {
+	font-family: 'Inter___local';
+	font-style: italic;
+	font-weight: 100 900;
+	font-display: swap;
+	src: local('Inter');
+}
+
+@font-face {
+	font-family: 'Biz UDGothic___local';
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: local('BIZ UDGothic');
+}
+
+@font-face {
+	font-family: 'Biz UDGothic___local';
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+	src: local('BIZ UDGothic Bold'), local('BIZ UDGothic');
+}
+
 :root {
 	--radius: 12px;
 	--marginFull: 16px;
@@ -42,7 +74,7 @@ html {
 	accent-color: var(--accent);
 	overflow: auto;
 	overflow-wrap: break-word;
-	font-family: 'Hiragino Maru Gothic Pro', "BIZ UDGothic", Roboto, HelveticaNeue, Arial, sans-serif;
+	font-family: 'Inter___local', 'Inter', 'Biz UDGothic___local', "BIZ UDGothic", Roboto, HelveticaNeue, Arial, sans-serif;
 	font-size: 14px;
 	line-height: 1.35;
 	text-size-adjust: 100%;
@@ -52,6 +84,7 @@ html {
 	&, * {
 		scrollbar-color: var(--scrollbarHandle) transparent;
 		scrollbar-width: thin;
+		font-feature-settings: 'calt' 0;
 
 		&::-webkit-scrollbar {
 			width: 6px;
@@ -255,11 +288,11 @@ rt {
 	background: var(--accent);
 
 	&:not(:disabled):hover {
-		background: var(--X8);
+		background: hsl(from var(--accent) h s calc(l + 5));
 	}
 
 	&:not(:disabled):active {
-		background: var(--X9);
+		background: hsl(from var(--accent) h s calc(l - 5));
 	}
 }
 
@@ -269,11 +302,11 @@ rt {
 	background: linear-gradient(90deg, var(--buttonGradateA), var(--buttonGradateB));
 
 	&:not(:disabled):hover {
-		background: linear-gradient(90deg, var(--X8), var(--X8));
+		background: linear-gradient(90deg, hsl(from var(--accent) h s calc(l + 5)), hsl(from var(--accent) h s calc(l + 5)));
 	}
 
 	&:not(:disabled):active {
-		background: linear-gradient(90deg, var(--X8), var(--X8));
+		background: linear-gradient(90deg, hsl(from var(--accent) h s calc(l + 5)), hsl(from var(--accent) h s calc(l + 5)));
 	}
 }
 

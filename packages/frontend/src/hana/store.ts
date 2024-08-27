@@ -13,4 +13,8 @@ export const hanaStore = markRaw(new Storage('hanaMain', {
 		where: 'deviceAccount',
 		default: 0,
 	},
+	flowerEffect: {
+		where: 'device',
+		default: false,
+	},
 }));
