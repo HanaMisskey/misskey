@@ -118,6 +118,7 @@ export class BskWebhookServerService {
 						icon: meta.iconUrl,
 						header: `${supportedTypesFriendlyNames[body.body.type]}は一度BackspaceKeyからインポートされています`,
 						body: '自動インポートに失敗している場合は、お手数ですが手動でインポートしてください。',
+						i: user.bskAccessToken,
 					}),
 					headers: {
 						'Content-Type': 'application/json',
@@ -183,6 +184,7 @@ export class BskWebhookServerService {
 					icon: meta.iconUrl,
 					header: `${supportedTypesFriendlyNames[body.body.type]}のインポートが開始されました`,
 					body: 'インポートには時間がかかります。',
+					i: user.bskAccessToken,
 				}),
 				headers: {
 					'Content-Type': 'application/json',
