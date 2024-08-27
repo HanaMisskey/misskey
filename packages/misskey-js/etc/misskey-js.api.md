@@ -1509,6 +1509,8 @@ declare namespace entities {
         IAppsResponse,
         IAuthorizedAppsRequest,
         IAuthorizedAppsResponse,
+        IBskMigrateGetMiauthIdResponse,
+        IBskMigrateStatusResponse,
         IClaimAchievementRequest,
         IChangePasswordRequest,
         IDeleteAccountRequest,
@@ -2118,6 +2120,12 @@ type IAuthorizedAppsRequest = operations['i___authorized-apps']['requestBody']['
 
 // @public (undocumented)
 type IAuthorizedAppsResponse = operations['i___authorized-apps']['responses']['200']['content']['application/json'];
+
+// @public (undocumented)
+type IBskMigrateGetMiauthIdResponse = operations['i___bsk-migrate___get-miauth-id']['responses']['200']['content']['application/json'];
+
+// @public (undocumented)
+type IBskMigrateStatusResponse = operations['i___bsk-migrate___status']['responses']['200']['content']['application/json'];
 
 // @public (undocumented)
 type IChangePasswordRequest = operations['i___change-password']['requestBody']['content']['application/json'];
