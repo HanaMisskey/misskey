@@ -52,17 +52,17 @@ export class BskWebhookServerService {
 	public createServer(fastify: FastifyInstance, options: FastifyPluginOptions, done: (err?: Error) => void) {
 		fastify.post('/', async (request, reply) => {
 			if (request.headers['content-type'] !== 'application/json') {
-				reply.code(400);
+				reply.code(400).send('Content-Type must be application/json');
 				return;
 			}
 
 			if (request.headers['x-misskey-host'] !== this.config.bskHost) {
-				reply.code(400);
+				reply.code(400).send('Invalid host');
 				return;
 			}
 
 			if (request.headers['x-misskey-hook-secret'] !== this.config.bskSystemWebhookSecret) {
-				reply.code(400);
+				reply.code(400).send('Invalid secret');
 				return;
 			}
 
@@ -76,7 +76,7 @@ export class BskWebhookServerService {
 				body.body == null ||
 				typeof body.body !== 'object'
 			) {
-				reply.code(400);
+				reply.code(400).send('Invalid body (1)');
 				return;
 			}
 
@@ -96,7 +96,7 @@ export class BskWebhookServerService {
 				'userId' in body.body === false ||
 				typeof body.body.userId !== 'string'
 			) {
-				reply.code(400);
+				reply.code(400).send('Invalid body (2)');
 				return;
 			}
 
