@@ -55,6 +55,7 @@
 						<MkButton rounded @click="download"><i class="ti ti-download"></i> {{ i18n.ts.download }}</MkButton>
 						<MkButton rounded @click="postToX"><i class="ti ti-brand-x"></i> {{ i18n.ts._hana._welcomeCardGen.shareToX }}</MkButton>
 					</div>
+					<div :class="$style.hanaWelcomeCardGenResultWarning">{{ i18n.ts._hana._welcomeCardGen.shareWarning }}</div>
 					<div class="_buttonsCenter">
 						<MkButton rounded transparent @click="returnToInput"><i class="ti ti-arrow-left"></i> {{ i18n.ts.goBack }}</MkButton>
 						<MkButton rounded transparent @click="closeAndNotShowAgain">{{ i18n.ts.close }}</MkButton>
@@ -245,8 +246,9 @@ async function generate() {
 }
 
 function postToX() {
-	const url = new URL('https://x.com/share');
+	const url = new URL('https://x.com/intent/tweet');
 	url.searchParams.set('text', i18n.tsx._hana._welcomeCardGen.shareText({ url: `https://${host}/@${$i.username}` }));
+	url.searchParams.set('url', '');
 
 	window.open(url.toString(), '_blank', 'noopener,noreferrer');
 }
@@ -432,6 +434,13 @@ onDeactivated(() => {
 	height: auto;
 	min-height: 0;
 	object-fit: contain;
+}
+
+.hanaWelcomeCardGenResultWarning {
+	text-align: center;
+	font-size: 0.8em;
+	opacity: 0.7;
+	white-space: pre-wrap;
 }
 
 @container (max-width: 800px) {

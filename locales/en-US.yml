@@ -2712,6 +2712,7 @@ _hana:
     imageGeneratedDescription: "Download this card and share it on existing social media platforms like X (formerly Twitter) 🎉"
     shareText: "Just joined the decentralized social media \"HanaMisskey\"! Sign up and follow me!\n{url}"
     shareToX: "Post on X"
+    shareWarning: "Due to technical limitations, the \"Just Joined HanaMisskey!\" card will not be attached automatically when posting on X.\nPlease save the image manually and upload it to the post form."
   _welcomeCardGenPopup:
     title: "Let's announce your start with HanaMisskey!"
     description: "Limited time only while this banner is displayed! Create and share a cute, exclusive digital profile card for HanaMisskey!"

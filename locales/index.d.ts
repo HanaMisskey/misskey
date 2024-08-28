@@ -10540,6 +10540,11 @@ export interface Locale extends ILocale {
              * Xでポスト
              */
             "shareToX": string;
+            /**
+             * 技術的制約により、Xにポストする際、はじめましたカード自動では添付されません。
+             * お手数ですが、手動で画像を保存して、Xの投稿フォームにアップロードしていただきますようお願いします。
+             */
+            "shareWarning": string;
         };
         "_welcomeCardGenPopup": {
             /**
