@@ -10313,6 +10313,10 @@ export interface Locale extends ILocale {
          */
         "hanaSettings": string;
         /**
+         * はなみすきー
+         */
+        "hanaMisskey": string;
+        /**
          * はなモード
          */
         "hanaMode": string;
@@ -10328,6 +10332,10 @@ export interface Locale extends ILocale {
          * いつでも花びらを降らせる
          */
         "flowerEffect": string;
+        /**
+         * BackspaceKeyからの移行
+         */
+        "migrateFromBackspaceKey": string;
         "_inDevelopment": {
             /**
              * この機能は開発中です
@@ -10451,6 +10459,52 @@ export interface Locale extends ILocale {
              * 一定期間にモードを変更できる回数には制限があります。
              */
             "saveConfirmDescription": string;
+        };
+        "_migrateFromBackspaceKey": {
+            /**
+             * BackspaceKey上のコンテンツを簡単に移行できます。
+             */
+            "about": string;
+            /**
+             * BackspaceKeyとこのアカウントを連携する
+             */
+            "step1": string;
+            /**
+             * 以下のボタンを押して、移行元のBackspaceKeyアカウントを連携してください。
+             */
+            "step1Description": string;
+            /**
+             * 移行したいコンテンツをエクスポートする
+             */
+            "step2": string;
+            /**
+             * BackspaceKey側で移行したいコンテンツの「エクスポート」ボタンを押してください。
+             */
+            "step2Description": string;
+            /**
+             * 連携中は、BackspaceKeyでエクスポートしたものすべてがはなみすきーにインポートされます。エクスポートだけしたい場合は、はなみすきー連携前に行ってください。
+             */
+            "step2Description2": string;
+            /**
+             * 通知を待つ
+             */
+            "step3": string;
+            /**
+             * コンテンツの移行が完了すると、それぞれに対して通知が送信されます。すべての移行が完了するまでしばらくお待ちください。
+             */
+            "step3Description": string;
+            /**
+             * アカウントの移行を行う
+             */
+            "step4": string;
+            /**
+             * {hana}で移行元のアカウントを指定したあと、{bsk}で移行先のアカウントを指定します。これにより、フォロワーが自動で引き継がれます。
+             */
+            "step4Description": ParameterizedString<"hana" | "bsk">;
+            /**
+             * この時点でBackspaceKeyのアカウントは利用できなくなります。必ずすべての移行が完了するまで待ってください。
+             */
+            "step4Description2": string;
         };
         "_welcomeCardGen": {
             /**
