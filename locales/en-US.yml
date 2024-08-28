@@ -2703,3 +2703,18 @@ _hana:
     step4: "Migrate the account"
     step4Description: "After specifying the source account in {hana}, specify the destination account in {bsk}. This will automatically transfer your followers."
     step4Description2: "At this point, the BackspaceKey account will no longer be available. Be sure to wait until all migrations are complete."
+  _welcomeCardGen:
+    title: "\"Just Joined HanaMisskey!\" Card"
+    nameDescription: "If your name uses MFM or is too long, you can overwrite it here."
+    applyToPreview: "Apply to Preview"
+    generateImage: "Generate Image"
+    imageGenerated: "Your \"Just Joined HanaMisskey!\" card is ready!"
+    imageGeneratedDescription: "Download this card and share it on existing social media platforms like X (formerly Twitter) 🎉"
+    shareText: "Just joined the brand-new social media \"HanaMisskey\"! Sign up and follow me!\n{url}"
+    shareTextForX: "Just joined a new Misskey-based social media \"HanaMisskey\"! Sign up and follow me!\n{url}"
+    shareToX: "Post on X"
+    shareWarning: "Due to technical limitations, the \"Just Joined HanaMisskey!\" card will not be attached automatically when posting on X.\nPlease save the image manually and upload it to the post form."
+  _welcomeCardGenPopup:
+    title: "Let's announce your start with HanaMisskey!"
+    description: "Limited time only while this banner is displayed! Create and share a cute, exclusive digital profile card for HanaMisskey!"
+    create: "Give it a try"

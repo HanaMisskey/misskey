@@ -2803,3 +2803,18 @@ _hana:
     step4: "アカウントの移行を行う"
     step4Description: "{hana}で移行元のアカウントを指定したあと、{bsk}で移行先のアカウントを指定します。これにより、フォロワーが自動で引き継がれます。"
     step4Description2: "この時点でBackspaceKeyのアカウントは利用できなくなります。必ずすべての移行が完了するまで待ってください。"
+  _welcomeCardGen:
+    title: "はなみすきーはじめました！カード"
+    nameDescription: "名前にMFMを使用していたり、文字数が多すぎたりした場合は、ここで上書きできます。"
+    applyToPreview: "プレビューに反映"
+    generateImage: "画像を出力"
+    imageGenerated: "はなみすきーはじめましたカードが完成しました"
+    imageGeneratedDescription: "このカードをダウンロードして、X (Twitter)などの既存のSNSでシェアしてください🎉"
+    shareText: "あたらしいSNS「はなみすきー」をはじめました！登録してフォローしてね！\n{url}"
+    shareTextForX: "あたらしいMisskey系SNS「はなみすきー」をはじめました！登録してフォローしてね！\n{url}"
+    shareToX: "Xでポスト"
+    shareWarning: "技術的制約により、Xにポストする際、はじめましたカード自動では添付されません。\nお手数ですが、手動で画像を保存して、Xの投稿フォームにアップロードしていただきますようお願いします。"
+  _welcomeCardGenPopup:
+    title: "はなみすきーをはじめたことを知らせましょう！"
+    description: "このバナーが表示されている間限定！はなみすきーオリジナルのかわいいプロフィール画像を作ってシェアしてください！"
+    create: "作ってみる"

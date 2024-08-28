@@ -10506,6 +10506,65 @@ export interface Locale extends ILocale {
              */
             "step4Description2": string;
         };
+        "_welcomeCardGen": {
+            /**
+             * はなみすきーはじめました！カード
+             */
+            "title": string;
+            /**
+             * 名前にMFMを使用していたり、文字数が多すぎたりした場合は、ここで上書きできます。
+             */
+            "nameDescription": string;
+            /**
+             * プレビューに反映
+             */
+            "applyToPreview": string;
+            /**
+             * 画像を出力
+             */
+            "generateImage": string;
+            /**
+             * はなみすきーはじめましたカードが完成しました
+             */
+            "imageGenerated": string;
+            /**
+             * このカードをダウンロードして、X (Twitter)などの既存のSNSでシェアしてください🎉
+             */
+            "imageGeneratedDescription": string;
+            /**
+             * あたらしいSNS「はなみすきー」をはじめました！登録してフォローしてね！
+             * {url}
+             */
+            "shareText": ParameterizedString<"url">;
+            /**
+             * あたらしいMisskey系SNS「はなみすきー」をはじめました！登録してフォローしてね！
+             * {url}
+             */
+            "shareTextForX": ParameterizedString<"url">;
+            /**
+             * Xでポスト
+             */
+            "shareToX": string;
+            /**
+             * 技術的制約により、Xにポストする際、はじめましたカード自動では添付されません。
+             * お手数ですが、手動で画像を保存して、Xの投稿フォームにアップロードしていただきますようお願いします。
+             */
+            "shareWarning": string;
+        };
+        "_welcomeCardGenPopup": {
+            /**
+             * はなみすきーをはじめたことを知らせましょう！
+             */
+            "title": string;
+            /**
+             * このバナーが表示されている間限定！はなみすきーオリジナルのかわいいプロフィール画像を作ってシェアしてください！
+             */
+            "description": string;
+            /**
+             * 作ってみる
+             */
+            "create": string;
+        };
     };
 }
 declare const locales: {
