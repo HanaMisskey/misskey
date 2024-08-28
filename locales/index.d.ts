@@ -10537,6 +10537,11 @@ export interface Locale extends ILocale {
              */
             "shareText": ParameterizedString<"url">;
             /**
+             * あたらしいMisskey系SNS「はなみすきー」をはじめました！登録してフォローしてね！
+             * {url}
+             */
+            "shareTextForX": ParameterizedString<"url">;
+            /**
              * Xでポスト
              */
             "shareToX": string;

@@ -247,7 +247,7 @@ async function generate() {
 
 function postToX() {
 	const url = new URL('https://x.com/intent/tweet');
-	url.searchParams.set('text', i18n.tsx._hana._welcomeCardGen.shareText({ url: `https://${host}/@${$i.username}` }));
+	url.searchParams.set('text', i18n.tsx._hana._welcomeCardGen.shareTextForX({ url: `https://${host}/@${$i.username}` }));
 	url.searchParams.set('url', '');
 
 	window.open(url.toString(), '_blank', 'noopener,noreferrer');
