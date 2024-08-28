@@ -2810,7 +2810,7 @@ _hana:
     generateImage: "画像を出力"
     imageGenerated: "はなみすきーはじめましたカードが完成しました"
     imageGeneratedDescription: "このカードをダウンロードして、X (Twitter)などの既存のSNSでシェアしてください🎉"
-    shareText: "分散型SNS「はなみすきー」をはじめました！登録してフォローしてね！\n{url}"
+    shareText: "あたらしいSNS「はなみすきー」をはじめました！登録してフォローしてね！\n{url}"
     shareTextForX: "あたらしいMisskey系SNS「はなみすきー」をはじめました！登録してフォローしてね！\n{url}"
     shareToX: "Xでポスト"
     shareWarning: "技術的制約により、Xにポストする際、はじめましたカード自動では添付されません。\nお手数ですが、手動で画像を保存して、Xの投稿フォームにアップロードしていただきますようお願いします。"

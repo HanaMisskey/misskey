@@ -10532,7 +10532,7 @@ export interface Locale extends ILocale {
              */
             "imageGeneratedDescription": string;
             /**
-             * 分散型SNS「はなみすきー」をはじめました！登録してフォローしてね！
+             * あたらしいSNS「はなみすきー」をはじめました！登録してフォローしてね！
              * {url}
              */
             "shareText": ParameterizedString<"url">;
