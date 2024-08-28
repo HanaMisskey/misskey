@@ -261,10 +261,9 @@ export async function mainBoot() {
 
 		if (
 			!hanaStore.state.neverShowWelcomeCardPopup &&
-			(Date.now() - createdAt.getTime()) < (1000 * 60 * 60 * 24 * 90) &&
+			(Date.now() - createdAt.getTime()) < (1000 * 60 * 60 * 24 * 7) &&
 			(Date.now() - hanaStore.state.lastShowWelcomeCardPopup) > (1000 * 60 * 60 * 24)
 		) {
-			console.log('showing welcome card popup');
 			const { dispose } = popup(defineAsyncComponent(() => import('@/components/HanaWelcomeCardGeneratorPopup.vue')), {}, {
 				closed: () => dispose(),
 			});
