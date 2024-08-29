@@ -185,6 +185,13 @@ const routes: RouteDef[] = [{
 		name: 'hanamode',
 		component: page(() => import('@/pages/settings/hanamode.vue')),
 	}, {
+		path: '/migrate-from-bsk',
+		name: 'migrate-from-bsk',
+		component: page(() => import('@/pages/settings/migrate-from-bsk.vue')),
+		query: {
+			session: 'sessionId',
+		}
+	}, {
 		path: '/',
 		component: page(() => import('@/pages/_empty_.vue')),
 	}],
@@ -214,6 +221,9 @@ const routes: RouteDef[] = [{
 }, {
 	path: '/about-misskey',
 	component: page(() => import('@/pages/about-misskey.vue')),
+}, {
+	path: '/about-hanamisskey',
+	component: page(() => import('@/pages/about-hanamisskey.vue')),
 }, {
 	path: '/invite',
 	name: 'invite',

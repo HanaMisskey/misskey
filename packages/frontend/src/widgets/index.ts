@@ -23,7 +23,6 @@ export default function(app: App) {
 	app.component('WidgetFederation', defineAsyncComponent(() => import('./WidgetFederation.vue')));
 	app.component('WidgetPostForm', defineAsyncComponent(() => import('./WidgetPostForm.vue')));
 	app.component('WidgetSlideshow', defineAsyncComponent(() => import('./WidgetSlideshow.vue')));
-	app.component('WidgetServerMetric', defineAsyncComponent(() => import('./server-metric/index.vue')));
 	app.component('WidgetOnlineUsers', defineAsyncComponent(() => import('./WidgetOnlineUsers.vue')));
 	app.component('WidgetJobQueue', defineAsyncComponent(() => import('./WidgetJobQueue.vue')));
 	app.component('WidgetInstanceCloud', defineAsyncComponent(() => import('./WidgetInstanceCloud.vue')));
@@ -55,7 +54,6 @@ export const widgets = [
 	'instanceCloud',
 	'postForm',
 	'slideshow',
-	'serverMetric',
 	'onlineUsers',
 	'jobQueue',
 	'button',
