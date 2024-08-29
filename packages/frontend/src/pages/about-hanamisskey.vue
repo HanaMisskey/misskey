@@ -116,7 +116,7 @@ const patrons = [
 const clickCount = ref(0);
 // イースターエッグでない方のアイコン
 // TODO: APPICONに変更
-const imageSource = ref(instance.iconUrl);
+const imageSource = ref('https://static-assets.misskey.flowers/brand-assets/icons/app_v1_192x192.png');
 const isFadingOut = ref(false);
 const imageChanged = ref(false);
 const isAchivementClaimable = ref($i && !claimedAchievements.includes('foundLegacy'));
