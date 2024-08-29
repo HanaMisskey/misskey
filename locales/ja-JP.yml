@@ -1624,7 +1624,7 @@ _achievements:
       description: "隠されたお宝を発見した"
     _foundLegacy:
       title: "遺跡めぐり"
-      description: "隠された当時の当時のロゴを発見した"
+      description: "隠された当時のロゴを発見した"
       flavor: "すべてはいつかは過去になる？"
     _client30min:
       title: "ひとやすみ"
