@@ -110,6 +110,11 @@ const features: FeatureItem[] = [
 		image: 'https://static-assets.misskey.flowers/app-landing/feat-hana.webp',
 	},
 	{
+		title: i18n.ts._hana._welcome._features._reactionAbundance.title,
+		description: i18n.ts._hana._welcome._features._reactionAbundance.description,
+		image: 'https://static-assets.misskey.flowers/app-landing/feat-reaction.png',
+	},
+	{
 		title: i18n.ts._hana._welcome._features._easyMigration.title,
 		description: i18n.ts._hana._welcome._features._easyMigration.description,
 		image: 'https://static-assets.misskey.flowers/app-landing/feat-migrate.png',
@@ -350,10 +355,15 @@ function upcomingFeatureDialog() {
 	height: auto;
 	aspect-ratio: 3 / 2;
 
+	position: relative;
+
 	img {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
 		width: 100%;
-		height: 100%;
-		object-fit: contain;
+		height: auto;
 		border-radius: var(--radius);
 	}
 
