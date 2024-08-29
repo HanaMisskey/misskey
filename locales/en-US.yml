@@ -1586,9 +1586,17 @@ _achievements:
       title: "I Love Misskey"
       description: "Post \"I ❤ #Misskey\""
       flavor: "Misskey's development team greatly appreciates your support!"
+    _iLoveHanaMisskey:
+      title: "I Love HanaMisskey"
+      description: "Posted \"I 💛 #HanaMisskey\""
+      flavor: "Thank you for using HanaMisskey!"
     _foundTreasure:
       title: "Treasure Hunt"
       description: "You've found the hidden treasure"
+    _foundLegacy:
+      title: "Legacy Explorer"
+      description: "Discovered the hidden logo from that time"
+      flavor: "Will everything eventually become a part of the past?"
     _client30min:
       title: "Short break"
       description: "Keep Misskey opened for at least 30 minutes"
@@ -2718,3 +2726,13 @@ _hana:
     title: "Let's announce your start with HanaMisskey!"
     description: "Limited time only while this banner is displayed! Create and share a cute, exclusive digital profile card for HanaMisskey!"
     create: "Give it a try"
+  aboutHanaMisskey: "About HanaMisskey"
+  _aboutHanaMisskey:
+    about: "HanaMisskey is a microblogging platform based on Misskey, operated by misskey.flowers."
+    documentation: "Documentation"
+    serviceStatus: "Service Status"
+    bskArchives: "BackspaceKey Archives (Coming Soon)"
+    teamMembers: "Team Members"
+    bskPatrons: "BackspaceKey Era Patrons"
+    bskDescription: "The predecessor of HanaMisskey was a Misskey server called BackspaceKey. We appreciate the longstanding support 😊"
+    morePatrons: "We have received support from many others as well. Thank you 😊"

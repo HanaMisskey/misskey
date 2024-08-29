@@ -1615,9 +1615,17 @@ _achievements:
       title: "I Love Misskey"
       description: "\"I ❤ #Misskey\"を投稿した"
       flavor: "Misskeyを使ってくださりありがとうございます！ by 開発チーム"
+    _iLoveHanaMisskey:
+      title: "I Love HanaMisskey"
+      description: "\"I 💛 #HanaMisskey\"を投稿した"
+      flavor: "はなみすきーを使ってくださりありがとうございます！"
     _foundTreasure:
       title: "宝探し"
       description: "隠されたお宝を発見した"
+    _foundLegacy:
+      title: "遺跡めぐり"
+      description: "隠された当時の当時のロゴを発見した"
+      flavor: "すべてはいつかは過去になる？"
     _client30min:
       title: "ひとやすみ"
       description: "クライアントを起動してから30分以上経過した"
@@ -2818,3 +2826,13 @@ _hana:
     title: "はなみすきーをはじめたことを知らせましょう！"
     description: "このバナーが表示されている間限定！はなみすきーオリジナルのかわいいプロフィール画像を作ってシェアしてください！"
     create: "作ってみる"
+  aboutHanaMisskey: "はなみすきーについて"
+  _aboutHanaMisskey:
+    about: "はなみすきーはmisskey.flowersによって運営されている、Misskeyをベースにしたマイクロブログプラットフォームです。"
+    documentation: "ドキュメント"
+    serviceStatus: "サービス状況"
+    bskArchives: "BackspaceKeyアーカイブ（準備中）"
+    teamMembers: "運営メンバー"
+    bskPatrons: "BackspaceKey時代の支援者"
+    bskDescription: "はなみすきーの前身はBackspaceKeyというMisskeyサーバーでした。古くからのご支援に感謝します😊"
+    morePatrons: "ほかにも多くの方にご支援いただきました。ありがとうございます😊"

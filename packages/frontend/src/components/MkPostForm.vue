@@ -855,8 +855,11 @@ async function post(ev?: MouseEvent) {
 
 			const text = postData.text ?? '';
 			const lowerCase = text.toLowerCase();
-			if ((lowerCase.includes('love') || lowerCase.includes('❤')) && lowerCase.includes('misskey')) {
+			if ((lowerCase.includes('love') || lowerCase.includes('❤')) && lowerCase.includes('misskey') && !lowerCase.includes('hanamisskey')) {
 				claimAchievement('iLoveMisskey');
+			}
+			if ((lowerCase.includes('love') || lowerCase.includes('❤')) && lowerCase.includes('hanamisskey')) {
+				claimAchievement('iLoveHanaMisskey');
 			}
 			if ([
 				'https://youtu.be/Efrlqw8ytg4',
@@ -896,9 +899,9 @@ async function post(ev?: MouseEvent) {
 			type: 'error',
 			text: err.message + '\n' + (err as any).id,
 		});
-		emit("postError");
+		emit('postError');
 	});
-	emit("posting");
+	emit('posting');
 }
 
 function cancel() {

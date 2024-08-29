@@ -6291,6 +6291,20 @@ export interface Locale extends ILocale {
                  */
                 "flavor": string;
             };
+            "_iLoveHanaMisskey": {
+                /**
+                 * I Love HanaMisskey
+                 */
+                "title": string;
+                /**
+                 * "I 💛 #HanaMisskey"を投稿した
+                 */
+                "description": string;
+                /**
+                 * はなみすきーを使ってくださりありがとうございます！
+                 */
+                "flavor": string;
+            };
             "_foundTreasure": {
                 /**
                  * 宝探し
@@ -6300,6 +6314,20 @@ export interface Locale extends ILocale {
                  * 隠されたお宝を発見した
                  */
                 "description": string;
+            };
+            "_foundLegacy": {
+                /**
+                 * 遺跡めぐり
+                 */
+                "title": string;
+                /**
+                 * 隠された当時の当時のロゴを発見した
+                 */
+                "description": string;
+                /**
+                 * すべてはいつかは過去になる？
+                 */
+                "flavor": string;
             };
             "_client30min": {
                 /**
@@ -10564,6 +10592,44 @@ export interface Locale extends ILocale {
              * 作ってみる
              */
             "create": string;
+        };
+        /**
+         * はなみすきーについて
+         */
+        "aboutHanaMisskey": string;
+        "_aboutHanaMisskey": {
+            /**
+             * はなみすきーはmisskey.flowersによって運営されている、Misskeyをベースにしたマイクロブログプラットフォームです。
+             */
+            "about": string;
+            /**
+             * ドキュメント
+             */
+            "documentation": string;
+            /**
+             * サービス状況
+             */
+            "serviceStatus": string;
+            /**
+             * BackspaceKeyアーカイブ（準備中）
+             */
+            "bskArchives": string;
+            /**
+             * 運営メンバー
+             */
+            "teamMembers": string;
+            /**
+             * BackspaceKey時代の支援者
+             */
+            "bskPatrons": string;
+            /**
+             * はなみすきーの前身はBackspaceKeyというMisskeyサーバーでした。古くからのご支援に感謝します😊
+             */
+            "bskDescription": string;
+            /**
+             * ほかにも多くの方にご支援いただきました。ありがとうございます😊
+             */
+            "morePatrons": string;
         };
     };
 }
