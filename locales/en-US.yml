@@ -2682,7 +2682,7 @@ _hana:
         description: "When you enable HanaMisskey's unique 'Hana Mode,' your posts won't appear in the Local Timeline (LTL). However, unlike 'Home' posts, they can still be re-noted to LTL and will be delivered as standard public posts to external servers. This feature allows you to create a decentralized SNS experience similar to a private server with just one click."
       _reactionAbundance:
         title: "Express Yourself with Boundless Reactions"
-        description: "Hearts and likes are just the beginning. With Hanamisskey, dive into a world of diverse reactions—from charming characters to expressive text. Turn simple replies into something special, or stick to your favorites by setting it to receive only hearts. The choice is yours!"
+        description: "Hearts and likes are just the beginning. With HanaMisskey, dive into a world of diverse reactions—from charming characters to expressive text. Turn simple replies into something special, or stick to your favorites by setting it to receive only hearts. The choice is yours!"
       _easyMigration:
         title: "Easy Migration from Other Services"
         description: "We offer a feature that makes it easy to migrate from other Misskey servers! You can even carry over your past posts to HanaMisskey."
