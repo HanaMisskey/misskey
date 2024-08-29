@@ -10418,6 +10418,16 @@ export interface Locale extends ILocale {
                      */
                     "description": string;
                 };
+                "_reactionAbundance": {
+                    /**
+                     * 多彩なリアクション、自由自在です
+                     */
+                    "title": string;
+                    /**
+                     * 多くのSNSで用いられる投稿へのリアクションとしてのハートやいいね。はなみすきーならもっと楽しめます。多彩なキャラクターから文字列まである豊富なリアクションで、簡単な返信の代わりとすることも。ハートがお好みなら、ハートだけを受け取るようにも設定できます。
+                     */
+                    "description": string;
+                };
                 "_easyMigration": {
                     /**
                      * 他サービスから簡単移行

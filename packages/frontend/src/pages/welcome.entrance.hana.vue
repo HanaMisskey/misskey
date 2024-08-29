@@ -110,6 +110,11 @@ const features: FeatureItem[] = [
 		image: 'https://static-assets.misskey.flowers/app-landing/feat-hana.webp',
 	},
 	{
+		title: i18n.ts._hana._welcome._features._reactionAbundance.title,
+		description: i18n.ts._hana._welcome._features._reactionAbundance.description,
+		image: 'https://static-assets.misskey.flowers/app-landing/feat-migrate.png',
+	},
+	{
 		title: i18n.ts._hana._welcome._features._easyMigration.title,
 		description: i18n.ts._hana._welcome._features._easyMigration.description,
 		image: 'https://static-assets.misskey.flowers/app-landing/feat-migrate.png',
