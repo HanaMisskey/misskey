@@ -5,7 +5,7 @@
 		<div :class="$style.titleRoot">
 			<h1 :class="$style.logo">
 				<span :class="$style.visuallyHidden">はなみすきー</span>
-				<img :class="$style.logoImage" src="https://static-assets.misskey.flowers/brand-assets/logotype/logotype_temp.png"/>
+				<img :class="$style.logoImage" src="https://static-assets.misskey.flowers/brand-assets/logotype/logotype_v1.png"/>
 			</h1>
 			<div :class="$style.cta">
 				<div :class="$style.actions">
