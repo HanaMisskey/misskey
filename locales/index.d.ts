@@ -6321,7 +6321,7 @@ export interface Locale extends ILocale {
                  */
                 "title": string;
                 /**
-                 * 隠された当時の当時のロゴを発見した
+                 * 隠された当時のロゴを発見した
                  */
                 "description": string;
                 /**
