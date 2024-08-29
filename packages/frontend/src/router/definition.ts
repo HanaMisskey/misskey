@@ -222,6 +222,9 @@ const routes: RouteDef[] = [{
 	path: '/about-misskey',
 	component: page(() => import('@/pages/about-misskey.vue')),
 }, {
+	path: '/about-hanamisskey',
+	component: page(() => import('@/pages/about-hanamisskey.vue')),
+}, {
 	path: '/invite',
 	name: 'invite',
 	component: page(() => import('@/pages/invite.vue')),
