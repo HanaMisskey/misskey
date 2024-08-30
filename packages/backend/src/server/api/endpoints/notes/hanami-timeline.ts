@@ -207,28 +207,39 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				return true;
 			});
 
-			// 取得した中で最古のホームタイムラインのnoteIDを抽出する
-			const minHomeTimelineId = packedHomeTimelineNotes.length > 0 ? packedHomeTimelineNotes[packedHomeTimelineNotes.length - 1].id : null;
-			// 結果を一意にした上で最古のnoteIdがホームタイムライン由来にする
-			const filteredFeaturedNotes = feauturedNotes.filter(note => {
-				if (!minHomeTimelineId) return true;
-				return note.id < minHomeTimelineId;
-			});
-
-			if (filteredFeaturedNotes.length === 0) {
+			if (feauturedNotes.length === 0) {
 				return packedHomeTimelineNotes;
 			}
 
-			const packedFeauturedNotes = await this.noteEntityService.packMany(filteredFeaturedNotes, me);
+			const packedFeauturedNotes = await this.noteEntityService.packMany(feauturedNotes, me);
 
-			const allNotes = [...packedHomeTimelineNotes, ...packedFeauturedNotes]
-				.sort((a, b) => a.id > b.id ? -1 : 1)
+			if (packedHomeTimelineNotes.length === 0) {
+				return packedFeauturedNotes;
+			}
+
+			const allNotes = [
+				...packedHomeTimelineNotes,
+				...packedFeauturedNotes,
+			].sort((a, b) => a.id > b.id ? -1 : 1)
 				.filter((note, index, self) =>
 					index === self.findIndex(n => n.id === note.id), // 一意にする
-				)
-				.slice(0, ps.limit); // ps.limitでトリム
+				);
 
-			return allNotes;
+			// リミットを適用(リミットはあくまで最大であってそれより少なくなってもいいため)
+			const limitedNotes = allNotes.slice(0, ps.limit);
+			const homeTimelineIds = packedHomeTimelineNotes.map(note => note.id);
+
+			// ホームタイムラインからのノートが存在し、かつリミット適用後の最小IDがホームタイムラインに由来しない場合
+			let minNoteId: string | null = limitedNotes.length > 0 ? limitedNotes[limitedNotes.length - 1].id : null;
+			if (homeTimelineIds.length > 0 && minNoteId && !homeTimelineIds.includes(minNoteId)) {
+				// 最小IDがホームタイムラインに由来しない場合、最小のノートを削除していく
+				// これによってホームタイムラインの取得漏れが消える
+				while (minNoteId && !homeTimelineIds.includes(minNoteId)) {
+					limitedNotes.pop();
+					minNoteId = limitedNotes.length > 0 ? limitedNotes[limitedNotes.length - 1].id : null;
+				}
+			}
+			return limitedNotes;
 		});
 	}
 
