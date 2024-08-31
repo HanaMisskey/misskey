@@ -55,7 +55,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 					</MkA>
 					<span v-if="appearNote.user.isBot" :class="$style.isBot">bot</span>
 					<div :class="$style.noteHeaderInfo">
-						<span v-if="note.visibility === 'public' && note.channel == null && note.isNoteInHanaMode === true" style="margin-left: 0.5em;" :title="`${i18n.ts._visibility[note.visibility]} (${i18n.ts._hana.hanaMode})`"><i class="ti ti-hanamisskey-hanamode"></i></span>
+						<span v-if="appearNote.visibility === 'public' && appearNote.channel == null && appearNote.isNoteInHanaMode === true" style="margin-left: 0.5em;" :title="`${i18n.ts._visibility[note.visibility]} (${i18n.ts._hana.hanaMode})`"><i class="ti ti-hanamisskey-hanamode"></i></span>
 						<span v-if="appearNote.visibility !== 'public'" style="margin-left: 0.5em;" :title="i18n.ts._visibility[appearNote.visibility]">
 							<i v-if="appearNote.visibility === 'home'" class="ti ti-home"></i>
 							<i v-else-if="appearNote.visibility === 'followers'" class="ti ti-lock"></i>
