@@ -221,13 +221,34 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				return packedFeauturedNotes;
 			}
 
-			const allNotes = [
-				...packedHomeTimelineNotes,
-				...packedFeauturedNotes,
-			].sort((a, b) => a.id > b.id ? -1 : 1)
-				.filter((note, index, self) =>
-					index === self.findIndex(n => n.id === note.id), // 一意にする
-				);
+			let allNotes;
+
+			if (!ps.sinceId && !ps.untilId) {
+				// 最初の読み込みのトップに人気投稿を入れる
+				const sortedFeaturedNotes = packedFeauturedNotes
+					.slice(0, 5)
+					.sort((a, b) => a.id > b.id ? -1 : 1);
+
+				const remainingNotes = [
+					...packedFeauturedNotes.slice(5),
+					...packedHomeTimelineNotes,
+				].sort((a, b) => a.id > b.id ? -1 : 1);
+
+				allNotes = [
+					...sortedFeaturedNotes, // 先頭5件を追加
+					...remainingNotes,
+				];
+			} else {
+				allNotes = [
+					...packedHomeTimelineNotes,
+					...packedFeauturedNotes,
+				].sort((a, b) => a.id > b.id ? -1 : 1);
+			}
+
+			// 重複を排除
+			allNotes = allNotes.filter((note, index, self) =>
+				index === self.findIndex(n => n.id === note.id),
+			);
 
 			// リミットを適用(リミットはあくまで最大であってそれより少なくなってもいいため)
 			const limitedNotes = allNotes.slice(0, ps.limit);
