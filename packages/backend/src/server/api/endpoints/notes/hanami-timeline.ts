@@ -25,6 +25,7 @@ import { MetaService } from '@/core/MetaService.js';
 import { FanoutTimelineEndpointService } from '@/core/FanoutTimelineEndpointService.js';
 import { FeaturedService } from '@/core/FeaturedService.js';
 import { isUserRelated } from '@/misc/is-user-related.js';
+import { isInstanceMuted } from '@/misc/is-instance-muted.js';
 import { ApiError } from '../../error.js';
 
 export const meta = {
@@ -186,9 +187,11 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			const [
 				userIdsWhoMeMuting,
 				userIdsWhoBlockingMe,
+				userMutedInstances,
 			] = await Promise.all([
 				this.cacheService.userMutingsCache.fetch(me.id),
 				this.cacheService.userBlockedCache.fetch(me.id),
+				this.cacheService.userProfileCache.fetch(me.id).then(p => new Set(p.mutedInstances)),
 			]);
 
 			const query = this.queryService.makePaginationQuery(this.notesRepository.createQueryBuilder('note'), ps.sinceId, ps.untilId)
@@ -203,6 +206,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			const feauturedNotes = (await query.getMany()).filter(note => {
 				if (isUserRelated(note, userIdsWhoBlockingMe)) return false;
 				if (isUserRelated(note, userIdsWhoMeMuting)) return false;
+				if (isInstanceMuted(note, userMutedInstances)) return false;
 
 				return true;
 			});
@@ -217,13 +221,34 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				return packedFeauturedNotes;
 			}
 
-			const allNotes = [
-				...packedHomeTimelineNotes,
-				...packedFeauturedNotes,
-			].sort((a, b) => a.id > b.id ? -1 : 1)
-				.filter((note, index, self) =>
-					index === self.findIndex(n => n.id === note.id), // 一意にする
-				);
+			let allNotes;
+
+			if (!ps.sinceId && !ps.untilId) {
+				// 最初の読み込みのトップに人気投稿を入れる
+				const sortedFeaturedNotes = packedFeauturedNotes
+					.slice(0, 5)
+					.sort((a, b) => a.id > b.id ? -1 : 1);
+
+				const remainingNotes = [
+					...packedFeauturedNotes.slice(5),
+					...packedHomeTimelineNotes,
+				].sort((a, b) => a.id > b.id ? -1 : 1);
+
+				allNotes = [
+					...sortedFeaturedNotes, // 先頭5件を追加
+					...remainingNotes,
+				];
+			} else {
+				allNotes = [
+					...packedHomeTimelineNotes,
+					...packedFeauturedNotes,
+				].sort((a, b) => a.id > b.id ? -1 : 1);
+			}
+
+			// 重複を排除
+			allNotes = allNotes.filter((note, index, self) =>
+				index === self.findIndex(n => n.id === note.id),
+			);
 
 			// リミットを適用(リミットはあくまで最大であってそれより少なくなってもいいため)
 			const limitedNotes = allNotes.slice(0, ps.limit);
