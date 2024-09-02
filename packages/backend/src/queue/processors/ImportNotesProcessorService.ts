@@ -141,7 +141,7 @@ export class ImportNotesProcessorService {
 
 	@bindThis
 	private parseTwitterFile(str : string) : { tweet: object }[] {
-		const jsonStr = str.replace(/^\s*window\.YTD\.tweets\.part0\s*=\s*/, '');
+		const jsonStr = str.replace(/^\s*window\.YTD\.tweets\.part\d+\s*=\s*/, '');
 
 		try {
 			return JSON.parse(jsonStr);
@@ -197,8 +197,17 @@ export class ImportNotesProcessorService {
 			try {
 				this.logger.succ(`Unzipping to ${outputPath}`);
 				ZipReader.withDestinationPath(outputPath).viaBuffer(await fsp.readFile(destPath));
-
+				this.logger.succ('processing ' + outputPath + '/data/tweets.js');
 				const unprocessedTweets = this.parseTwitterFile(await fsp.readFile(outputPath + '/data/tweets.js', 'utf-8'));
+
+				const files = await fsp.readdir(outputPath + '/data/');
+				const additionalTweetFiles = files.filter((file) => /tweets-part\d+?\.js/.test(file));
+				for await (const file of additionalTweetFiles) {
+					this.logger.succ('processing ' + outputPath + '/data/' + file);
+					const additionalUnprocessedTweet = this.parseTwitterFile(
+						await fsp.readFile(outputPath + '/data/' + file, 'utf-8'));
+					unprocessedTweets.push(...additionalUnprocessedTweet);
+				}
 
 				const tweets = unprocessedTweets.map(e => e.tweet);
 				const processedTweets = await this.recreateChain(['id_str'], ['in_reply_to_status_id_str'], tweets, false);
@@ -587,22 +596,33 @@ export class ImportNotesProcessorService {
 			return full_textedit;
 		}
 
-		async function replaceTwitterMentions(full_text: string, mentions: any) {
+		async function replaceTwitterMentions(full_text: string, mentions: any, isRetweet: boolean) {
 			let full_textedit = full_text;
 			mentions.forEach((mention: any) => {
-				full_textedit = full_textedit.replaceAll(`@${mention.screen_name}`, `[@${mention.screen_name}](https://twitter.com/${mention.screen_name})`);
+				full_textedit = full_textedit.replaceAll(`@${mention.screen_name}`, `${isRetweet ? '?' : ''}[@${mention.screen_name}](https://twitter.com/${mention.screen_name})`);
 			});
 			return full_textedit;
 		}
 
+		async function replaceAllMentions(full_text: string) {
+			return full_text.replaceAll(/(?<!https?:\/\/\S*)@([A-Za-z0-9_\.]+)/g, '<plain>@$1</plain>');
+		}
+
+		async function replaceRetweet(full_text: string, isRetweet: boolean) {
+			if (!isRetweet) return full_text;
+			return '[RT](https://x.com/i/status/' + tweet.id_str + ')' + full_text.substring(2);
+		}
+
 		try {
 			const date = new Date(tweet.created_at);
+			const isRetweet = tweet.full_text.startsWith('RT @');
 			const decodedText = tweet.full_text.replaceAll('&gt;', '>').replaceAll('&lt;', '<').replaceAll('&amp;', '&');
 			const textReplaceURLs = tweet.entities.urls && tweet.entities.urls.length > 0 ? await replaceTwitterUrls(decodedText, tweet.entities.urls) : decodedText;
-			const text = tweet.entities.user_mentions && tweet.entities.user_mentions.length > 0 ? await replaceTwitterMentions(textReplaceURLs, tweet.entities.user_mentions) : textReplaceURLs;
+			const mentionReplaceURLs = tweet.entities.user_mentions && tweet.entities.user_mentions.length > 0 ? await replaceTwitterMentions(textReplaceURLs, tweet.entities.user_mentions, isRetweet) : textReplaceURLs;
+			const text = await replaceRetweet(await replaceAllMentions(mentionReplaceURLs), isRetweet);
 			const files: MiDriveFile[] = [];
 
-			if (tweet.extended_entities && this.isIterable(tweet.extended_entities.media)) {
+			if (!isRetweet && tweet.extended_entities && this.isIterable(tweet.extended_entities.media)) {
 				let twitFolder = await this.driveFoldersRepository.findOneBy({ name: 'Twitter', userId: job.data.user.id, parentId: folder.id });
 				if (twitFolder == null) {
 					await this.driveFoldersRepository.insert({ id: this.idService.gen(), name: 'Twitter', userId: job.data.user.id, parentId: folder.id });
