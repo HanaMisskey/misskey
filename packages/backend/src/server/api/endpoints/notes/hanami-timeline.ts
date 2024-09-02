@@ -25,6 +25,7 @@ import { MetaService } from '@/core/MetaService.js';
 import { FanoutTimelineEndpointService } from '@/core/FanoutTimelineEndpointService.js';
 import { FeaturedService } from '@/core/FeaturedService.js';
 import { isUserRelated } from '@/misc/is-user-related.js';
+import { isInstanceMuted } from '@/misc/is-instance-muted.js';
 import { ApiError } from '../../error.js';
 
 export const meta = {
@@ -186,9 +187,11 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			const [
 				userIdsWhoMeMuting,
 				userIdsWhoBlockingMe,
+				userMutedInstances,
 			] = await Promise.all([
 				this.cacheService.userMutingsCache.fetch(me.id),
 				this.cacheService.userBlockedCache.fetch(me.id),
+				this.cacheService.userProfileCache.fetch(me.id).then(p => new Set(p.mutedInstances)),
 			]);
 
 			const query = this.queryService.makePaginationQuery(this.notesRepository.createQueryBuilder('note'), ps.sinceId, ps.untilId)
@@ -203,6 +206,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			const feauturedNotes = (await query.getMany()).filter(note => {
 				if (isUserRelated(note, userIdsWhoBlockingMe)) return false;
 				if (isUserRelated(note, userIdsWhoMeMuting)) return false;
+				if (isInstanceMuted(note, userMutedInstances)) return false;
 
 				return true;
 			});
