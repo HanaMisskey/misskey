@@ -5,7 +5,7 @@
 		<div :class="$style.titleRoot">
 			<h1 :class="$style.logo">
 				<span :class="$style.visuallyHidden">はなみすきー</span>
-				<img :class="$style.logoImage" src="https://static-assets.misskey.flowers/brand-assets/logotype/logotype_temp.png"/>
+				<img :class="$style.logoImage" src="https://static-assets.misskey.flowers/brand-assets/logotype/logotype_v1.png"/>
 			</h1>
 			<div :class="$style.cta">
 				<div :class="$style.actions">
@@ -109,6 +109,11 @@ const features: FeatureItem[] = [
 		title: i18n.ts._hana._welcome._features._hanaMode.title,
 		description: i18n.ts._hana._welcome._features._hanaMode.description,
 		image: 'https://static-assets.misskey.flowers/app-landing/feat-hana.webp',
+	},
+	{
+		title: i18n.ts._hana._welcome._features._reactionAbundance.title,
+		description: i18n.ts._hana._welcome._features._reactionAbundance.description,
+		image: 'https://static-assets.misskey.flowers/app-landing/feat-reaction.png',
 	},
 	{
 		title: i18n.ts._hana._welcome._features._easyMigration.title,
@@ -351,10 +356,15 @@ function upcomingFeatureDialog() {
 	height: auto;
 	aspect-ratio: 3 / 2;
 
+	position: relative;
+
 	img {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
 		width: 100%;
-		height: 100%;
-		object-fit: contain;
+		height: auto;
 		border-radius: var(--radius);
 	}
 

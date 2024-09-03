@@ -323,6 +323,8 @@ import type {
 	IAppsResponse,
 	IAuthorizedAppsRequest,
 	IAuthorizedAppsResponse,
+	IBskMigrateGetMiauthIdResponse,
+	IBskMigrateStatusResponse,
 	IClaimAchievementRequest,
 	IChangePasswordRequest,
 	IDeleteAccountRequest,
@@ -798,6 +800,10 @@ export type Endpoints = {
 	'i/2fa/unregister': { req: I2faUnregisterRequest; res: EmptyResponse };
 	'i/apps': { req: IAppsRequest; res: IAppsResponse };
 	'i/authorized-apps': { req: IAuthorizedAppsRequest; res: IAuthorizedAppsResponse };
+	'i/bsk-migrate/get-miauth-id': { req: EmptyRequest; res: IBskMigrateGetMiauthIdResponse };
+	'i/bsk-migrate/remove': { req: EmptyRequest; res: EmptyResponse };
+	'i/bsk-migrate/status': { req: EmptyRequest; res: IBskMigrateStatusResponse };
+	'i/bsk-migrate/verify': { req: EmptyRequest; res: EmptyResponse };
 	'i/claim-achievement': { req: IClaimAchievementRequest; res: EmptyResponse };
 	'i/change-password': { req: IChangePasswordRequest; res: EmptyResponse };
 	'i/delete-account': { req: IDeleteAccountRequest; res: EmptyResponse };
@@ -1190,6 +1196,10 @@ export const endpointReqTypes: Record<keyof Endpoints, 'application/json' | 'mul
 	'i/2fa/unregister': 'application/json',
 	'i/apps': 'application/json',
 	'i/authorized-apps': 'application/json',
+	'i/bsk-migrate/get-miauth-id': 'application/json',
+	'i/bsk-migrate/remove': 'application/json',
+	'i/bsk-migrate/status': 'application/json',
+	'i/bsk-migrate/verify': 'application/json',
 	'i/claim-achievement': 'application/json',
 	'i/change-password': 'application/json',
 	'i/delete-account': 'application/json',

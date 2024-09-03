@@ -118,7 +118,7 @@ export const defaultStore = markRaw(new Storage('base', {
 	},
 	reactions: {
 		where: 'account',
-		default: ['👍', '❤️', '😆', '🤔', '😮', '🎉', '💢', '😥', '😇', '🍮'],
+		default: ['👍', '❤️', '😆', '🤔', '😮', '🎉', '💢', '😇', '🤯', '🍮'],
 	},
 	pinnedEmojis: {
 		where: 'account',
@@ -144,8 +144,6 @@ export const defaultStore = markRaw(new Storage('base', {
 			'explore',
 			'announcements',
 			'search',
-			'-',
-			'ui',
 		],
 	},
 	visibility: {
@@ -256,11 +254,11 @@ export const defaultStore = markRaw(new Storage('base', {
 	},
 	useBlurEffectForModal: {
 		where: 'device',
-		default: !/mobile|iphone|android/.test(navigator.userAgent.toLowerCase()), // 循環参照するのでdevice-kind.tsは参照できない
+		default: false,
 	},
 	useBlurEffect: {
 		where: 'device',
-		default: !/mobile|iphone|android/.test(navigator.userAgent.toLowerCase()), // 循環参照するのでdevice-kind.tsは参照できない
+		default: false,
 	},
 	showFixedPostForm: {
 		where: 'device',

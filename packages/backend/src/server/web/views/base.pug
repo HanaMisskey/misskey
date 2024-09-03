@@ -36,10 +36,16 @@ html
 		link(rel='prefetch' href=serverErrorImageUrl)
 		link(rel='prefetch' href=infoImageUrl)
 		link(rel='prefetch' href=notFoundImageUrl)
-		//- https://github.com/misskey-dev/misskey/issues/9842
-		link(rel='stylesheet' href='/assets/tabler-icons/tabler-icons.min.css?v3.3.0')
-		link(rel='stylesheet' href='https://static-assets.misskey.flowers/fonts/hana-icons/font.css')
 		link(rel='modulepreload' href=`/vite/${clientEntry.file}`)
+
+		link(rel='preconnect' href='https://static-assets.misskey.flowers')
+		link(rel='preconnect' href='https://fonts.googleapis.com')
+		link(rel='preconnect' href='https://fonts.gstatic.com' crossorigin)
+		link(rel='stylesheet' href='https://static-assets.misskey.flowers/fonts/hana-icons/font.css')
+		link(rel='stylesheet' href='https://fonts.googleapis.com/css2?family=BIZ+UDGothic:wght@400;700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap')
+
+		if icon
+			link(rel='prefetch' as='image' href=icon)
 
 		if !config.clientManifestExists
 				script(type="module" src="/vite/@vite/client")

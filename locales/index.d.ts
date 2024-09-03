@@ -6291,6 +6291,20 @@ export interface Locale extends ILocale {
                  */
                 "flavor": string;
             };
+            "_iLoveHanaMisskey": {
+                /**
+                 * I Love HanaMisskey
+                 */
+                "title": string;
+                /**
+                 * "I 💛 #HanaMisskey"を投稿した
+                 */
+                "description": string;
+                /**
+                 * はなみすきーを使ってくださりありがとうございます！
+                 */
+                "flavor": string;
+            };
             "_foundTreasure": {
                 /**
                  * 宝探し
@@ -6300,6 +6314,20 @@ export interface Locale extends ILocale {
                  * 隠されたお宝を発見した
                  */
                 "description": string;
+            };
+            "_foundLegacy": {
+                /**
+                 * 遺跡めぐり
+                 */
+                "title": string;
+                /**
+                 * 隠された当時のロゴを発見した
+                 */
+                "description": string;
+                /**
+                 * すべてはいつかは過去になる？
+                 */
+                "flavor": string;
             };
             "_client30min": {
                 /**
@@ -10313,6 +10341,10 @@ export interface Locale extends ILocale {
          */
         "hanaSettings": string;
         /**
+         * はなみすきー
+         */
+        "hanaMisskey": string;
+        /**
          * はなモード
          */
         "hanaMode": string;
@@ -10328,6 +10360,10 @@ export interface Locale extends ILocale {
          * いつでも花びらを降らせる
          */
         "flowerEffect": string;
+        /**
+         * BackspaceKeyからの移行
+         */
+        "migrateFromBackspaceKey": string;
         /**
          * 特定商取引法に基づく表記
          */
@@ -10395,6 +10431,16 @@ export interface Locale extends ILocale {
                     /**
                      * はなみすきー独自機能「はなモード」をオンにすると、投稿内容がローカルタイムライン（LTL）に流れないようになります。ただし、「ホーム」投稿とは違い、LTLへのリノートが可能なほか、外部サーバーには通常のパブリックの投稿として配信されます。
                      * これにより、おひとりさまサーバーに近い分散SNS体験をワンクリックで構築することができます。
+                     */
+                    "description": string;
+                };
+                "_reactionAbundance": {
+                    /**
+                     * リアクションで、もっと気軽につながろう
+                     */
+                    "title": string;
+                    /**
+                     * はなみすきーではユーザー同士の交流をより楽しめる「リアクション」機能を搭載。ユーザーの投稿に「いいね」ではなく絵文字を送ることができます。はなみすきーに標準搭載の豊富なリアクション絵文字で、リプライを送るよりも気軽に自分の気持ちを伝えられます。もちろん、リアクションよりいいねボタンがお好みならそのように設定することも可能です。
                      */
                     "description": string;
                 };
@@ -10468,6 +10514,52 @@ export interface Locale extends ILocale {
              */
             "saveConfirmDescription": string;
         };
+        "_migrateFromBackspaceKey": {
+            /**
+             * BackspaceKey上のコンテンツを簡単に移行できます。
+             */
+            "about": string;
+            /**
+             * BackspaceKeyとこのアカウントを連携する
+             */
+            "step1": string;
+            /**
+             * 以下のボタンを押して、移行元のBackspaceKeyアカウントを連携してください。
+             */
+            "step1Description": string;
+            /**
+             * 移行したいコンテンツをエクスポートする
+             */
+            "step2": string;
+            /**
+             * BackspaceKey側で移行したいコンテンツの「エクスポート」ボタンを押してください。
+             */
+            "step2Description": string;
+            /**
+             * 連携中は、BackspaceKeyでエクスポートしたものすべてがはなみすきーにインポートされます。エクスポートだけしたい場合は、はなみすきー連携前に行ってください。
+             */
+            "step2Description2": string;
+            /**
+             * 通知を待つ
+             */
+            "step3": string;
+            /**
+             * コンテンツの移行が完了すると、それぞれに対して通知が送信されます。すべての移行が完了するまでしばらくお待ちください。
+             */
+            "step3Description": string;
+            /**
+             * アカウントの移行を行う
+             */
+            "step4": string;
+            /**
+             * {hana}で移行元のアカウントを指定したあと、{bsk}で移行先のアカウントを指定します。これにより、フォロワーが自動で引き継がれます。
+             */
+            "step4Description": ParameterizedString<"hana" | "bsk">;
+            /**
+             * この時点でBackspaceKeyのアカウントは利用できなくなります。必ずすべての移行が完了するまで待ってください。
+             */
+            "step4Description2": string;
+        };
         "_subscription": {
             /**
              * 現在のプラン
@@ -10537,6 +10629,103 @@ export interface Locale extends ILocale {
              * サブスクリプションの状態を更新
              */
             "refresh": string;
+        };
+        "_welcomeCardGen": {
+            /**
+             * はなみすきーはじめました！カード
+             */
+            "title": string;
+            /**
+             * 名前にMFMを使用していたり、文字数が多すぎたりした場合は、ここで上書きできます。
+             */
+            "nameDescription": string;
+            /**
+             * プレビューに反映
+             */
+            "applyToPreview": string;
+            /**
+             * 画像を出力
+             */
+            "generateImage": string;
+            /**
+             * はなみすきーはじめましたカードが完成しました
+             */
+            "imageGenerated": string;
+            /**
+             * このカードをダウンロードして、X (Twitter)などの既存のSNSでシェアしてください🎉
+             */
+            "imageGeneratedDescription": string;
+            /**
+             * あたらしいSNS「はなみすきー」をはじめました！登録してフォローしてね！
+             * {url}
+             */
+            "shareText": ParameterizedString<"url">;
+            /**
+             * あたらしいMisskey系SNS「はなみすきー」をはじめました！登録してフォローしてね！
+             * {url}
+             */
+            "shareTextForX": ParameterizedString<"url">;
+            /**
+             * Xでポスト
+             */
+            "shareToX": string;
+            /**
+             * 技術的制約により、Xにポストする際、はじめましたカード自動では添付されません。
+             * お手数ですが、手動で画像を保存して、Xの投稿フォームにアップロードしていただきますようお願いします。
+             */
+            "shareWarning": string;
+        };
+        "_welcomeCardGenPopup": {
+            /**
+             * はなみすきーをはじめたことを知らせましょう！
+             */
+            "title": string;
+            /**
+             * このバナーが表示されている間限定！はなみすきーオリジナルのかわいいプロフィール画像を作ってシェアしてください！
+             */
+            "description": string;
+            /**
+             * 作ってみる
+             */
+            "create": string;
+        };
+        /**
+         * はなみすきーについて
+         */
+        "aboutHanaMisskey": string;
+        "_aboutHanaMisskey": {
+            /**
+             * はなみすきーはmisskey.flowersによって運営されている、Misskeyをベースにしたマイクロブログプラットフォームです。
+             */
+            "about": string;
+            /**
+             * ドキュメント
+             */
+            "documentation": string;
+            /**
+             * サービス状況
+             */
+            "serviceStatus": string;
+            /**
+             * BackspaceKeyアーカイブ（準備中）
+             */
+            "bskArchives": string;
+            /**
+             * 運営メンバー
+             */
+            "teamMembers": string;
+            /**
+             * BackspaceKey時代の支援者
+             */
+            "bskPatrons": string;
+            /**
+             * はなみすきーの前身はBackspaceKeyというMisskeyサーバーでした。古くからのご支援に感謝します😊
+             */
+            "bskDescription": string;
+            /**
+             * ほかにも多くの方にご支援いただきました。ありがとうございます😊
+             */
+            "morePatrons": string;
         };
     };
 }

@@ -107,6 +107,9 @@ type Source = {
 	};
 
 	pidFile: string;
+
+	bskHost?: string;
+	bskSystemWebhookSecret: string;
 };
 
 export type Config = {
@@ -196,6 +199,9 @@ export type Config = {
 	} | undefined;
 
 	pidFile: string;
+
+	bskHost: string;
+	bskSystemWebhookSecret: string;
 };
 
 const _filename = fileURLToPath(import.meta.url);
@@ -299,6 +305,8 @@ export function loadConfig(): Config {
 		deactivateAntennaThreshold: config.deactivateAntennaThreshold ?? (1000 * 60 * 60 * 24 * 7),
 		import: config.import,
 		pidFile: config.pidFile,
+		bskHost: config.bskHost ?? 'misskey.backspace.fm',
+		bskSystemWebhookSecret: config.bskSystemWebhookSecret,
 	};
 }
 

@@ -4,7 +4,7 @@
  */
 
 import { misskeyApi } from '@/scripts/misskey-api.js';
-import { $i } from '@/account.js';
+import { $i, refreshAccount } from '@/account.js';
 
 export const ACHIEVEMENT_TYPES = [
 	'notes1',
@@ -64,7 +64,9 @@ export const ACHIEVEMENT_TYPES = [
 	'collectAchievements30',
 	'viewAchievements3min',
 	'iLoveMisskey',
+	'iLoveHanaMisskey',
 	'foundTreasure',
+	'foundLegacy',
 	'client30min',
 	'client60min',
 	'noteDeletedWithin1min',
@@ -349,9 +351,19 @@ export const ACHIEVEMENT_BADGES = {
 		bg: 'linear-gradient(0deg, rgb(255 77 77), rgb(247 155 214))',
 		frame: 'silver',
 	},
+	'iLoveHanaMisskey': {
+		img: '/fluent-emoji/2764.png',
+		bg: 'linear-gradient(270deg, rgba(175,238,174,1) 0%, rgba(233,224,148,1) 100%)',
+		frame: 'silver',
+	},
 	'foundTreasure': {
 		img: '/fluent-emoji/1f3c6.png',
 		bg: 'linear-gradient(0deg, rgb(197 69 192), rgb(2 112 155))',
+		frame: 'gold',
+	},
+	'foundLegacy': {
+		img: '/fluent-emoji/1f3de.png',
+		bg: 'linear-gradient(180deg, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%)',
 		frame: 'gold',
 	},
 	'client30min': {
@@ -506,6 +518,10 @@ export async function claimAchievement(type: typeof ACHIEVEMENT_TYPES[number]) {
 	await new Promise(resolve => setTimeout(resolve, (claimingQueue.size - 1) * 500));
 	window.setTimeout(() => {
 		claimingQueue.delete(type);
+
+		if (claimingQueue.size === 0) {
+			refreshAccount();
+		}
 	}, 500);
 	misskeyApi('i/claim-achievement', { name: type });
 }

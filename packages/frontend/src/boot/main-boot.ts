@@ -259,6 +259,16 @@ export async function mainBoot() {
 			});
 		}
 
+		if (
+			!hanaStore.state.neverShowWelcomeCardPopup &&
+			(Date.now() - createdAt.getTime()) < (1000 * 60 * 60 * 24 * 7) &&
+			(Date.now() - hanaStore.state.lastShowWelcomeCardPopup) > (1000 * 60 * 60 * 24)
+		) {
+			const { dispose } = popup(defineAsyncComponent(() => import('@/components/HanaWelcomeCardGeneratorPopup.vue')), {}, {
+				closed: () => dispose(),
+			});
+		}
+
 		if ('Notification' in window) {
 			// 許可を得ていなかったらリクエスト
 			if (Notification.permission === 'default') {

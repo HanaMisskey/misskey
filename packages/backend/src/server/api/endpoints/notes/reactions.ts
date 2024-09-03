@@ -11,6 +11,8 @@ import { Endpoint } from '@/server/api/endpoint-base.js';
 import { NoteReactionEntityService } from '@/core/entities/NoteReactionEntityService.js';
 import { DI } from '@/di-symbols.js';
 import { QueryService } from '@/core/QueryService.js';
+import { isThisReactionUserRelated } from '@/misc/is-user-related.js';
+import { CacheService } from '@/core/CacheService.js';
 
 export const meta = {
 	tags: ['notes', 'reactions'],
@@ -57,10 +59,15 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		@Inject(DI.noteReactionsRepository)
 		private noteReactionsRepository: NoteReactionsRepository,
 
+		private cacheService: CacheService,
 		private noteReactionEntityService: NoteReactionEntityService,
 		private queryService: QueryService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
+			const [userIdsWhoMeMuting] = me ? await Promise.all([
+				this.cacheService.userMutingsCache.fetch(me.id),
+			]) : [new Set<string>()];
+
 			const query = this.queryService.makePaginationQuery(this.noteReactionsRepository.createQueryBuilder('reaction'), ps.sinceId, ps.untilId)
 				.andWhere('reaction.noteId = :noteId', { noteId: ps.noteId })
 				.leftJoinAndSelect('reaction.user', 'user')
@@ -74,7 +81,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				query.andWhere('reaction.reaction = :type', { type });
 			}
 
-			const reactions = await query.limit(ps.limit).getMany();
+			const reactions = (await query.limit(ps.limit).getMany()).filter(reactions => {
+				if (me && isThisReactionUserRelated(reactions, userIdsWhoMeMuting)) return false;
+				return true;
+			});
 
 			return await this.noteReactionEntityService.packMany(reactions, me);
 		});

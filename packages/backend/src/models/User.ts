@@ -7,6 +7,7 @@ import { Entity, Column, Index, OneToOne, JoinColumn, PrimaryColumn } from 'type
 import { subscriptionStatus } from '@/types.js';
 import { id } from './util/id.js';
 import { MiDriveFile } from './DriveFile.js';
+import { supportedTypes } from '@/server/BskWebhookServerService.js';
 import { MiSubscriptionPlan } from './SubscriptionPlan.js';
 
 @Entity('user')
@@ -280,6 +281,23 @@ export class MiUser {
 		comment: 'The native access token of the User. It will be null if the origin of the user is local.',
 	})
 	public token: string | null;
+
+	@Index()
+	@Column({
+		...id(),
+		nullable: true,
+	})
+	public bskUserId: string | null;
+
+	@Column('varchar', {
+		length: 128, nullable: true,
+	})
+	public bskAccessToken: string | null;
+
+	@Column('varchar', {
+		length: 16, array: true, default: '{}',
+	})
+	public bskMigratedEntities: (typeof supportedTypes[number])[];
 
 	constructor(data: Partial<MiUser>) {
 		if (data == null) return;

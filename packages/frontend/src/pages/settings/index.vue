@@ -105,6 +105,11 @@ const menuDef = computed(() => [{
 		text: i18n.ts._hana.hanaMode,
 		to: '/settings/hanamode',
 		active: currentPage.value?.route.name === 'hanamode',
+	}, {
+		icon: 'ti ti-plane',
+		text: i18n.ts._hana.migrateFromBackspaceKey,
+		to: '/settings/migrate-from-bsk',
+		active: currentPage.value?.route.name === 'migrate-from-bsk',
 	}, ...(instance.enableSubscriptions ? [{
 		icon: 'ti ti-credit-card',
 		text: i18n.ts._hana.subscription,

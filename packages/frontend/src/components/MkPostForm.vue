@@ -165,7 +165,9 @@ const props = withDefaults(defineProps<{
 provide('mock', props.mock);
 
 const emit = defineEmits<{
+	(ev: 'posting'): void;
 	(ev: 'posted'): void;
+	(ev: 'postError'): void;
 	(ev: 'cancel'): void;
 	(ev: 'esc'): void;
 
@@ -248,7 +250,7 @@ const submitText = computed((): string => {
 });
 
 const textLength = computed((): number => {
-	return (text.value + imeText.value).trim().length;
+	return (text.value + imeText.value).length;
 });
 
 const maxTextLength = computed((): number => {
@@ -853,8 +855,11 @@ async function post(ev?: MouseEvent) {
 
 			const text = postData.text ?? '';
 			const lowerCase = text.toLowerCase();
-			if ((lowerCase.includes('love') || lowerCase.includes('❤')) && lowerCase.includes('misskey')) {
+			if ((lowerCase.includes('love') || lowerCase.includes('❤')) && lowerCase.includes('misskey') && !lowerCase.includes('hanamisskey')) {
 				claimAchievement('iLoveMisskey');
+			}
+			if ((lowerCase.includes('love') || lowerCase.includes('❤')) && lowerCase.includes('hanamisskey')) {
+				claimAchievement('iLoveHanaMisskey');
 			}
 			if ([
 				'https://youtu.be/Efrlqw8ytg4',
@@ -894,7 +899,9 @@ async function post(ev?: MouseEvent) {
 			type: 'error',
 			text: err.message + '\n' + (err as any).id,
 		});
+		emit('postError');
 	});
+	emit('posting');
 }
 
 function cancel() {
