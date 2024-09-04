@@ -2790,7 +2790,7 @@ _hana:
         title: "最新技術を活用した高精度な検索"
         description: "機械学習や最新の学術研究をもとに、はなみすきーのためにチューニングされた高精度で高速な検索機能を利用できます。また、はなみすきーの検索機能そのものが学術研究プロジェクトとなっているため、検索精度は日進月歩となることが期待できます。"
     _cta:
-      title: "「はな」のあるSNS体験を楽しもう"
+      title: "はなみすきーで、かわいいSNS体験を"
   _hanaModeSwitcher:
     recomenddedFor: "こんな方におすすめ"
     normal: "通常"
@@ -2839,3 +2839,6 @@ _hana:
     bskPatrons: "BackspaceKey時代の支援者"
     bskDescription: "はなみすきーの前身はBackspaceKeyというMisskeyサーバーでした。古くからのご支援に感謝します😊"
     morePatrons: "ほかにも多くの方にご支援いただきました。ありがとうございます😊"
+  _visitorLoginPopup:
+    title: "はなみすきーで、かわいいSNS体験を"
+    description: "リアクションで楽しく。はなモードであなたらしく。あたらしいSNSをあなたも体験してみませんか。"

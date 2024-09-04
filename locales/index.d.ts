@@ -10451,7 +10451,7 @@ export interface Locale extends ILocale {
             };
             "_cta": {
                 /**
-                 * 「はな」のあるSNS体験を楽しもう
+                 * はなみすきーで、かわいいSNS体験を
                  */
                 "title": string;
             };
@@ -10640,6 +10640,16 @@ export interface Locale extends ILocale {
              * ほかにも多くの方にご支援いただきました。ありがとうございます😊
              */
             "morePatrons": string;
+        };
+        "_visitorLoginPopup": {
+            /**
+             * はなみすきーで、かわいいSNS体験を
+             */
+            "title": string;
+            /**
+             * リアクションで楽しく。はなモードであなたらしく。あたらしいSNSをあなたも体験してみませんか。
+             */
+            "description": string;
         };
     };
 }
