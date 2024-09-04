@@ -61,6 +61,22 @@
 					</div>
 				</FormSection>
 				<FormSection>
+					<template #label>Special Thanks</template>
+					<div class="_gaps">
+						<MkKeyValue>
+							<template #key>Branding Supervisor</template>
+							<template #value>
+								<div :class="[$style.creditKvValue, $style.patronsWithIcon]">
+									<div :class="$style.patronWithIcon">
+										<img src="https://static-assets.misskey.flowers/misc/patrons/f1c3a3b1-18c0-4b31-8409-22938bd1173f.png" :class="$style.patronIcon">
+										<span :class="$style.patronName">桜川七帆</span>
+									</div>
+								</div>
+							</template>
+						</MkKeyValue>
+					</div>
+				</FormSection>
+				<FormSection>
 					<template #label><Mfm text="$[jelly 💛]"/> {{ i18n.ts._hana._aboutHanaMisskey.bskPatrons }}</template>
 					<div>
 						<p>{{ i18n.ts._hana._aboutHanaMisskey.bskDescription }}</p>
@@ -86,13 +102,13 @@
 import { ref, computed } from 'vue';
 import FormLink from '@/components/form/link.vue';
 import FormSection from '@/components/form/section.vue';
+import MkKeyValue from '@/components/MkKeyValue.vue';
 import MkButton from '@/components/MkButton.vue';
 import { i18n } from '@/i18n.js';
 import * as os from '@/os.js';
 import { definePageMetadata } from '@/scripts/page-metadata.js';
 import { $i } from '@/account.js';
 import { claimAchievement, claimedAchievements } from '@/scripts/achievements.js';
-import { instance } from '@/instance.js';
 
 const patronsWithIcon = [{
 	name: 'masnolia',
@@ -150,110 +166,114 @@ const headerTabs = computed(() => []);
 
 definePageMetadata(() => ({
 	title: i18n.ts._hana.aboutHanaMisskey,
-	icon: null,
+	icon: 'ti ti-hanamisskey-hanamode',
 }));
 </script>
 
-	<style lang="scss" scoped>
-	.znqjceqz {
-		> .about {
+<style lang="scss" scoped>
+.znqjceqz {
+	> .about {
+		position: relative;
+		border-radius: var(--radius);
+
+		> .container {
 			position: relative;
-			border-radius: var(--radius);
+			text-align: center;
+			padding: 16px;
 
-			> .container {
+			> .icon {
+				display: block;
+				width: 80px;
+				margin: 0 auto;
+				border-radius: 16px;
 				position: relative;
-				text-align: center;
-				padding: 16px;
+				z-index: 1;
+				opacity: 1;
+				transition: opacity 0.5s ease-in-out;
+			}
 
-				> .icon {
-					display: block;
-					width: 80px;
-					margin: 0 auto;
-					border-radius: 16px;
-					position: relative;
-					z-index: 1;
-					opacity: 1;
-					transition: opacity 0.5s ease-in-out;
-				}
+			> .icon.fadeOut {
+				opacity: 0;
+				transition: opacity 0.5s ease-in-out;
+			}
 
-				> .icon.fadeOut {
-					opacity: 0;
-					transition: opacity 0.5s ease-in-out;
-				}
+			> .misskey {
+				margin: 0.75em auto 0 auto;
+				width: max-content;
+				position: relative;
+				z-index: 1;
+			}
 
-				> .misskey {
-					margin: 0.75em auto 0 auto;
-					width: max-content;
-					position: relative;
-					z-index: 1;
-				}
-
-				> .version {
-					margin: 0 auto;
-					width: max-content;
-					opacity: 0.5;
-					position: relative;
-					z-index: 1;
-				}
+			> .version {
+				margin: 0 auto;
+				width: max-content;
+				opacity: 0.5;
+				position: relative;
+				z-index: 1;
 			}
 		}
 	}
-	</style>
+}
+</style>
 
-	<style lang="scss" module>
-	.contributors {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-		grid-gap: 12px;
+<style lang="scss" module>
+.creditKvValue {
+	margin-top: calc(var(--marginHalf) / 2);
+}
+
+.contributors {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+	grid-gap: 12px;
+}
+
+.contributor {
+	display: flex;
+	align-items: center;
+	padding: 12px;
+	background: var(--buttonBg);
+	border-radius: 6px;
+
+	&:hover {
+		text-decoration: none;
+		background: var(--buttonHoverBg);
 	}
 
-	.contributor {
-		display: flex;
-		align-items: center;
-		padding: 12px;
-		background: var(--buttonBg);
-		border-radius: 6px;
-
-		&:hover {
-			text-decoration: none;
-			background: var(--buttonHoverBg);
-		}
-
-		&.active {
-			color: var(--accent);
-			background: var(--buttonHoverBg);
-		}
+	&.active {
+		color: var(--accent);
+		background: var(--buttonHoverBg);
 	}
+}
 
-	.contributorAvatar {
-		width: 30px;
-		border-radius: 100%;
-	}
+.contributorAvatar {
+	width: 30px;
+	border-radius: 100%;
+}
 
-	.contributorUsername {
-		margin-left: 12px;
-	}
+.contributorUsername {
+	margin-left: 12px;
+}
 
-	.patronsWithIcon {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-		grid-gap: 12px;
-	}
+.patronsWithIcon {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+	grid-gap: 12px;
+}
 
-	.patronWithIcon {
-		display: flex;
-		align-items: center;
-		padding: 12px;
-		background: var(--buttonBg);
-		border-radius: 6px;
-	}
+.patronWithIcon {
+	display: flex;
+	align-items: center;
+	padding: 12px;
+	background: var(--buttonBg);
+	border-radius: 6px;
+}
 
-	.patronIcon {
-		width: 24px;
-		border-radius: 100%;
-	}
+.patronIcon {
+	width: 24px;
+	border-radius: 100%;
+}
 
-	.patronName {
-		margin-left: 12px;
-	}
-	</style>
+.patronName {
+	margin-left: 12px;
+}
+</style>
