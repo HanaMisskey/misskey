@@ -2721,8 +2721,8 @@ _hana:
     generateImage: "Generate Image"
     imageGenerated: "Your \"Just Joined HanaMisskey!\" card is ready!"
     imageGeneratedDescription: "Download this card and share it on existing social media platforms like X (formerly Twitter) 🎉"
-    shareText: "Just joined the brand-new social media \"HanaMisskey\"! Sign up and follow me!\n{url}"
-    shareTextForX: "Just joined a new Misskey-based social media \"HanaMisskey\"! Sign up and follow me!\n{url}"
+    shareText: "Just joined the brand-new social media \"HanaMisskey\"! Sign up and follow me! #はなみすきー #はなみすきーはじめましたカード\n{url}"
+    shareTextForX: "Just joined a new Misskey-based social media \"HanaMisskey\"! Sign up and follow me! #はなみすきー #はなみすきーはじめましたカード\n{url}"
     shareToX: "Post on X"
     shareWarning: "Due to technical limitations, the \"Just Joined HanaMisskey!\" card will not be attached automatically when posting on X.\nPlease save the image manually and upload it to the post form."
   _welcomeCardGenPopup:

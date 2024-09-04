@@ -10570,12 +10570,12 @@ export interface Locale extends ILocale {
              */
             "imageGeneratedDescription": string;
             /**
-             * あたらしいSNS「はなみすきー」をはじめました！登録してフォローしてね！
+             * あたらしいSNS「 #はなみすきー 」をはじめました！登録してフォローしてね！ #はなみすきーはじめましたカード
              * {url}
              */
             "shareText": ParameterizedString<"url">;
             /**
-             * あたらしいMisskey系SNS「はなみすきー」をはじめました！登録してフォローしてね！
+             * あたらしいMisskey系SNS「 #はなみすきー 」をはじめました！登録してフォローしてね！ #はなみすきーはじめましたカード
              * {url}
              */
             "shareTextForX": ParameterizedString<"url">;
