@@ -958,8 +958,6 @@ export class NoteCreateService implements OnApplicationShutdown {
 
 		this.pushToTl(note, user, ['localTimeline', 'homeTimeline', 'userListTimeline', 'antennaTimeline']);
 
-		this.antennaService.addNoteToAntennas(note, user);
-
 		if (data.reply) {
 			this.saveReply(data.reply, note);
 		}
