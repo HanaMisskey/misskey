@@ -242,9 +242,14 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			}
 
 			// 重複を排除
-			allNotes = allNotes.filter((note, index, self) =>
-				index === self.findIndex(n => n.id === note.id),
-			);
+			const seenIds = new Set();
+			allNotes = allNotes.filter(note => {
+				if (seenIds.has(note.id)) {
+					return false;
+				}
+				seenIds.add(note.id);
+				return true;
+			});
 
 			// リミットを適用(リミットはあくまで最大であってそれより少なくなってもいいため)
 			const limitedNotes = allNotes.slice(0, ps.limit);
