@@ -316,7 +316,7 @@ body {
 }
 
 .rootIsMobile {
-	padding-bottom: 100px;
+	padding-bottom: calc(32px + max(12px, env(safe-area-inset-bottom, 0px)));
 }
 
 .main {
@@ -422,10 +422,8 @@ body {
 	z-index: 1000;
 	bottom: 0;
 	left: 0;
-	padding: 12px 12px max(12px, env(safe-area-inset-bottom, 0px)) 12px;
 	display: grid;
 	grid-template-columns: 1fr 1fr 1fr 1fr;
-	grid-gap: 8px;
 	width: 100%;
 	box-sizing: border-box;
 	-webkit-backdrop-filter: var(--blur, blur(32px));
@@ -436,12 +434,8 @@ body {
 
 .navButton {
 	position: relative;
-	padding: 0;
-	aspect-ratio: 1;
+	padding: 12px 12px max(12px, env(safe-area-inset-bottom, 0px)) 12px;
 	width: 100%;
-	max-width: 60px;
-	margin: auto;
-	border-radius: 100%;
 	background: var(--panel);
 	color: var(--fg);
 
@@ -459,6 +453,10 @@ body {
 	background: linear-gradient(90deg, var(--buttonGradateA), var(--buttonGradateB));
 	color: var(--fgOnAccent);
 
+	padding-left: 16px;
+	border-top-left-radius: 12px 50%;
+	border-bottom-left-radius: 12px 50%;
+
 	&:hover {
 		background: linear-gradient(90deg, hsl(from var(--accent) h s calc(l + 5)), hsl(from var(--accent) h s calc(l + 5)));
 	}
@@ -469,7 +467,7 @@ body {
 }
 
 .navButtonIcon {
-	font-size: 18px;
+	font-size: 16px;
 	vertical-align: middle;
 }
 
