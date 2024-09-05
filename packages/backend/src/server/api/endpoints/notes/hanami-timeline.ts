@@ -159,10 +159,6 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				}, me),
 			});
 
-			process.nextTick(() => {
-				this.activeUsersChart.read(me);
-			});
-
 			// 3日経っていないことを確認
 			if (ps.untilId) {
 				if (this.idService.parse(ps.untilId).date.getTime() < Date.now() - 1000 * 60 * 60 * 24 * 3 ) {
@@ -218,7 +214,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			const packedFeauturedNotes = await this.noteEntityService.packMany(feauturedNotes, me);
 
 			if (packedHomeTimelineNotes.length === 0) {
-				return packedFeauturedNotes;
+				return packedFeauturedNotes.sort((a, b) => a.id > b.id ? -1 : 1).slice(0, ps.limit); ;
 			}
 
 			let allNotes;
@@ -246,20 +242,26 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			}
 
 			// 重複を排除
-			allNotes = allNotes.filter((note, index, self) =>
-				index === self.findIndex(n => n.id === note.id),
-			);
+			const seenIds = new Set();
+			allNotes = allNotes.filter(note => {
+				if (seenIds.has(note.id)) {
+					return false;
+				}
+				seenIds.add(note.id);
+				return true;
+			});
 
 			// リミットを適用(リミットはあくまで最大であってそれより少なくなってもいいため)
 			const limitedNotes = allNotes.slice(0, ps.limit);
-			const homeTimelineIds = packedHomeTimelineNotes.map(note => note.id);
+			const homeTimelineIdsSet = new Set(packedHomeTimelineNotes.map(note => note.id));
 
 			// ホームタイムラインからのノートが存在し、かつリミット適用後の最小IDがホームタイムラインに由来しない場合
 			let minNoteId: string | null = limitedNotes.length > 0 ? limitedNotes[limitedNotes.length - 1].id : null;
-			if (homeTimelineIds.length > 0 && minNoteId && !homeTimelineIds.includes(minNoteId)) {
+
+			if (homeTimelineIdsSet.size > 0 && limitedNotes.some(note => homeTimelineIdsSet.has(note.id))) {
 				// 最小IDがホームタイムラインに由来しない場合、最小のノートを削除していく
 				// これによってホームタイムラインの取得漏れが消える
-				while (minNoteId && !homeTimelineIds.includes(minNoteId)) {
+				while (minNoteId && !homeTimelineIdsSet.has(minNoteId)) {
 					limitedNotes.pop();
 					minNoteId = limitedNotes.length > 0 ? limitedNotes[limitedNotes.length - 1].id : null;
 				}
