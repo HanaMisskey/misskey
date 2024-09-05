@@ -159,10 +159,6 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				}, me),
 			});
 
-			process.nextTick(() => {
-				this.activeUsersChart.read(me);
-			});
-
 			// 3日経っていないことを確認
 			if (ps.untilId) {
 				if (this.idService.parse(ps.untilId).date.getTime() < Date.now() - 1000 * 60 * 60 * 24 * 3 ) {
