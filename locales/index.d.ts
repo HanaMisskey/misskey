@@ -10625,7 +10625,7 @@ export interface Locale extends ILocale {
              */
             "bskArchives": string;
             /**
-             * 運営メンバー
+             * チームメンバー
              */
             "teamMembers": string;
             /**
