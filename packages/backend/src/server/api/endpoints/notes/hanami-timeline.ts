@@ -50,6 +50,11 @@ export const meta = {
 			code: 'HanamiTL_DISABLED',
 			id: 'ffa57e0f-d14e-48d6-a64c-8fbcba5635ab',
 		},
+		FttDisabled: {
+			message: 'Fanout timeline has been disabled.',
+			code: 'FTT_DISABLED',
+			id: '31f4d555-f46a-cae8-8e45-9a17740748e8',
+		},
 	},
 } as const;
 
@@ -106,22 +111,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			const serverSettings = await this.metaService.fetch();
 
 			if (!serverSettings.enableFanoutTimeline) {
-				const timeline = await this.getFromDb({
-					untilId,
-					sinceId,
-					limit: ps.limit,
-					includeMyRenotes: ps.includeMyRenotes,
-					includeRenotedMyNotes: ps.includeRenotedMyNotes,
-					includeLocalRenotes: ps.includeLocalRenotes,
-					withFiles: ps.withFiles,
-					withRenotes: ps.withRenotes,
-				}, me);
-
-				process.nextTick(() => {
-					this.activeUsersChart.read(me);
-				});
-
-				return await this.noteEntityService.packMany(timeline, me);
+				throw new ApiError(meta.errors.FttDisabled);
 			}
 
 			const [
