@@ -114,93 +114,48 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				throw new ApiError(meta.errors.FttDisabled);
 			}
 
-			const [
-				followings,
-			] = await Promise.all([
-				this.cacheService.userFollowingsCache.fetch(me.id),
-			]);
-
-			const packedHomeTimelineNotes = await this.fanoutTimelineEndpointService.timeline({
-				untilId,
-				sinceId,
-				limit: ps.limit,
-				allowPartial: ps.allowPartial,
-				me,
-				useDbFallback: serverSettings.enableFanoutTimelineDbFallback,
-				redisTimelines: ps.withFiles ? [`homeTimelineWithFiles:${me.id}`] : [`homeTimeline:${me.id}`],
-				alwaysIncludeMyNotes: true,
-				excludePureRenotes: !ps.withRenotes,
-				noteFilter: note => {
-					if (note.reply && note.reply.visibility === 'followers') {
-						if (!Object.hasOwn(followings, note.reply.userId) && note.reply.userId !== me.id) return false;
-					}
-
-					return true;
-				},
-				dbFallback: async (untilId, sinceId, limit) => await this.getFromDb({
+			const followingsPromise = this.cacheService.userFollowingsCache.fetch(me.id);
+			const [packedHomeTimelineNotes, feauturedNotes] = await Promise.all([
+				(async () => {
+					const followings = await followingsPromise;
+					return this.fanoutTimelineEndpointService.timeline({
+						untilId,
+						sinceId,
+						limit: ps.limit,
+						allowPartial: ps.allowPartial,
+						me,
+						useDbFallback: serverSettings.enableFanoutTimelineDbFallback,
+						redisTimelines: ps.withFiles ? [`homeTimelineWithFiles:${me.id}`] : [`homeTimeline:${me.id}`],
+						alwaysIncludeMyNotes: true,
+						excludePureRenotes: !ps.withRenotes,
+						noteFilter: note => {
+							if (note.reply && note.reply.visibility === 'followers') {
+								if (!Object.hasOwn(followings, note.reply.userId) && note.reply.userId !== me.id) return false;
+							}
+							return true;
+						},
+						dbFallback: async (untilId, sinceId, limit) => await this.getFromDb({
+							untilId,
+							sinceId,
+							limit,
+							includeMyRenotes: ps.includeMyRenotes,
+							includeRenotedMyNotes: ps.includeRenotedMyNotes,
+							includeLocalRenotes: ps.includeLocalRenotes,
+							withFiles: ps.withFiles,
+							withRenotes: ps.withRenotes,
+						}, me),
+					});
+				})(),
+				this.getFeaturedNotes({
 					untilId,
 					sinceId,
-					limit,
-					includeMyRenotes: ps.includeMyRenotes,
-					includeRenotedMyNotes: ps.includeRenotedMyNotes,
-					includeLocalRenotes: ps.includeLocalRenotes,
-					withFiles: ps.withFiles,
-					withRenotes: ps.withRenotes,
+					limit: ps.limit,
 				}, me),
-			});
-
-			// 3日経っていないことを確認
-			if (ps.untilId) {
-				if (this.idService.parse(ps.untilId).date.getTime() < Date.now() - 1000 * 60 * 60 * 24 * 3 ) {
-					return packedHomeTimelineNotes;
-				}
-			}
-
-			let feauturedNoteIds: string[];
-			if (this.globalNotesRankingCacheLastFetchedAt !== 0 && (Date.now() - this.globalNotesRankingCacheLastFetchedAt < 1000 * 60 * 30)) {
-				feauturedNoteIds = this.globalNotesRankingCache;
-			} else {
-				feauturedNoteIds = await this.featuredService.getGlobalNotesRanking(100);
-				this.globalNotesRankingCache = feauturedNoteIds;
-				this.globalNotesRankingCacheLastFetchedAt = Date.now();
-			}
-
-			// feauturedのノート数が0でないことを確認
-			if (feauturedNoteIds.length === 0) {
-				return packedHomeTimelineNotes;
-			}
-
-			const [
-				userIdsWhoMeMuting,
-				userIdsWhoBlockingMe,
-				userMutedInstances,
-			] = await Promise.all([
-				this.cacheService.userMutingsCache.fetch(me.id),
-				this.cacheService.userBlockedCache.fetch(me.id),
-				this.cacheService.userProfileCache.fetch(me.id).then(p => new Set(p.mutedInstances)),
 			]);
-
-			const query = this.queryService.makePaginationQuery(this.notesRepository.createQueryBuilder('note'), ps.sinceId, ps.untilId)
-				.where('note.id IN (:...noteIds)', { noteIds: feauturedNoteIds })
-				.innerJoinAndSelect('note.user', 'user')
-				.leftJoinAndSelect('note.reply', 'reply')
-				.leftJoinAndSelect('note.renote', 'renote')
-				.leftJoinAndSelect('reply.user', 'replyUser')
-				.leftJoinAndSelect('renote.user', 'renoteUser')
-				.leftJoinAndSelect('note.channel', 'channel');
-
-			const feauturedNotes = (await query.getMany()).filter(note => {
-				if (isUserRelated(note, userIdsWhoBlockingMe)) return false;
-				if (isUserRelated(note, userIdsWhoMeMuting)) return false;
-				if (isInstanceMuted(note, userMutedInstances)) return false;
-
-				return true;
-			});
 
 			if (feauturedNotes.length === 0) {
 				return packedHomeTimelineNotes;
 			}
-
 			const packedFeauturedNotes = await this.noteEntityService.packMany(feauturedNotes, me);
 
 			if (packedHomeTimelineNotes.length === 0) {
@@ -258,6 +213,50 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			}
 			return limitedNotes;
 		});
+	}
+
+	private async getFeaturedNotes(ps: { untilId: string | null; sinceId: string | null; limit: number; }, me: MiLocalUser) {
+		let feauturedNoteIds: string[];
+		if (this.globalNotesRankingCacheLastFetchedAt !== 0 && (Date.now() - this.globalNotesRankingCacheLastFetchedAt < 1000 * 60 * 30)) {
+			feauturedNoteIds = this.globalNotesRankingCache;
+		} else {
+			feauturedNoteIds = await this.featuredService.getGlobalNotesRanking(100);
+			this.globalNotesRankingCache = feauturedNoteIds;
+			this.globalNotesRankingCacheLastFetchedAt = Date.now();
+		}
+
+		if (feauturedNoteIds.length === 0) {
+			return [];
+		}
+
+		const [
+			userIdsWhoMeMuting,
+			userIdsWhoBlockingMe,
+			userMutedInstances,
+		] = await Promise.all([
+			this.cacheService.userMutingsCache.fetch(me.id),
+			this.cacheService.userBlockedCache.fetch(me.id),
+			this.cacheService.userProfileCache.fetch(me.id).then(p => new Set(p.mutedInstances)),
+		]);
+
+		const query = this.queryService.makePaginationQuery(this.notesRepository.createQueryBuilder('note'), ps.sinceId, ps.untilId)
+			.where('note.id IN (:...noteIds)', { noteIds: feauturedNoteIds })
+			.innerJoinAndSelect('note.user', 'user')
+			.leftJoinAndSelect('note.reply', 'reply')
+			.leftJoinAndSelect('note.renote', 'renote')
+			.leftJoinAndSelect('reply.user', 'replyUser')
+			.leftJoinAndSelect('renote.user', 'renoteUser')
+			.leftJoinAndSelect('note.channel', 'channel');
+
+		const feauturedNotes = (await query.getMany()).filter(note => {
+			if (isUserRelated(note, userIdsWhoBlockingMe)) return false;
+			if (isUserRelated(note, userIdsWhoMeMuting)) return false;
+			if (isInstanceMuted(note, userMutedInstances)) return false;
+
+			return true;
+		});
+
+		return feauturedNotes;
 	}
 
 	private async getFromDb(ps: { untilId: string | null; sinceId: string | null; limit: number; includeMyRenotes: boolean; includeRenotedMyNotes: boolean; includeLocalRenotes: boolean; withFiles: boolean; withRenotes: boolean; }, me: MiLocalUser) {
