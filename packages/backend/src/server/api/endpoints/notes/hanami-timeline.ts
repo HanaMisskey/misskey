@@ -162,28 +162,41 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				return packedFeauturedNotes.sort((a, b) => a.id > b.id ? -1 : 1).slice(0, ps.limit); ;
 			}
 
+			// TODO 重複の考慮
 			let allNotes;
-
 			if (!ps.sinceId && !ps.untilId) {
-				// 最初の読み込みのトップに人気投稿を入れる
-				const sortedFeaturedNotes = packedFeauturedNotes
-					.slice(0, 5)
-					.sort((a, b) => a.id > b.id ? -1 : 1);
+				// フィーチャーされた投稿の上位20件をシャッフル
+				const top20FeaturedNotes = packedFeauturedNotes.slice(0, 20);
+				for (let i = top20FeaturedNotes.length - 1; i > 0; i--) {
+					const j = Math.floor(Math.random() * (i + 1));
+					[top20FeaturedNotes[i], top20FeaturedNotes[j]] = [top20FeaturedNotes[j], top20FeaturedNotes[i]];
+				}
+
+				const [
+					featuredTop,
+					remainingFeaturedNotes,
+					homeTimelineTop2,
+					remainingHomeTimelineNotes,
+					remainingFeaturedNotesFromFullList,
+				  ] = await Promise.all([
+					(async () => top20FeaturedNotes.slice(0, 4))(),
+					(async () => top20FeaturedNotes.slice(4))(),
+					(async () => packedHomeTimelineNotes.slice(0, 2))(),
+					(async () => packedHomeTimelineNotes.slice(2))(),
+					(async () => packedFeauturedNotes.slice(20))(),
+				]);
+
+				const mixedTop = [...featuredTop, ...homeTimelineTop2];
 
 				const remainingNotes = [
-					...packedFeauturedNotes.slice(5),
-					...packedHomeTimelineNotes,
+					...remainingFeaturedNotes,
+					...remainingHomeTimelineNotes,
+					...remainingFeaturedNotesFromFullList,
 				].sort((a, b) => a.id > b.id ? -1 : 1);
 
-				allNotes = [
-					...sortedFeaturedNotes, // 先頭5件を追加
-					...remainingNotes,
-				];
+				allNotes = [...mixedTop, ...remainingNotes];
 			} else {
-				allNotes = [
-					...packedHomeTimelineNotes,
-					...packedFeauturedNotes,
-				].sort((a, b) => a.id > b.id ? -1 : 1);
+				allNotes = [...packedHomeTimelineNotes, ...packedFeauturedNotes].sort((a, b) => a.id > b.id ? -1 : 1);
 			}
 
 			// 重複を排除
