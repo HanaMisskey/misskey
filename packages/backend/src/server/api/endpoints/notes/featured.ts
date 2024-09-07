@@ -15,8 +15,10 @@ import { CacheService } from '@/core/CacheService.js';
 export const meta = {
 	tags: ['notes'],
 
-	requireCredential: false,
-	allowGet: true,
+	requireCredential: true,
+	kind: 'read:account',
+
+	allowGet: false,
 	cacheSec: 3600,
 
 	res: {
@@ -61,7 +63,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				if (this.globalNotesRankingCacheLastFetchedAt !== 0 && (Date.now() - this.globalNotesRankingCacheLastFetchedAt < 1000 * 60 * 30)) {
 					noteIds = this.globalNotesRankingCache;
 				} else {
-					noteIds = await this.featuredService.getGlobalNotesRanking(100);
+					noteIds = await this.featuredService.getGlobalNotesRanking(500);
 					this.globalNotesRankingCache = noteIds;
 					this.globalNotesRankingCacheLastFetchedAt = Date.now();
 				}
@@ -80,10 +82,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			const [
 				userIdsWhoMeMuting,
 				userIdsWhoBlockingMe,
-			] = me ? await Promise.all([
+			] = await Promise.all([
 				this.cacheService.userMutingsCache.fetch(me.id),
 				this.cacheService.userBlockedCache.fetch(me.id),
-			]) : [new Set<string>(), new Set<string>()];
+			]);
 
 			const query = this.notesRepository.createQueryBuilder('note')
 				.where('note.id IN (:...noteIds)', { noteIds: noteIds })
@@ -96,8 +98,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				.leftJoinAndSelect('note.channel', 'channel');
 
 			const notes = (await query.getMany()).filter(note => {
-				if (me && isUserRelated(note, userIdsWhoBlockingMe)) return false;
-				if (me && isUserRelated(note, userIdsWhoMeMuting)) return false;
+				if (isUserRelated(note, userIdsWhoBlockingMe)) return false;
+				if (isUserRelated(note, userIdsWhoMeMuting)) return false;
 
 				return true;
 			});
