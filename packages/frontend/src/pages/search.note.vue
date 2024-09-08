@@ -6,6 +6,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 <template>
 <div class="_gaps">
 	<div class="_gaps">
+		<MkInfo>{{ i18n.ts._hana.searchIsInBeta }}</MkInfo>
+
 		<MkInput v-model="searchQuery" :large="true" :autofocus="true" type="search" @enter.prevent="search">
 			<template #prefix><i class="ti ti-search"></i></template>
 		</MkInput>
@@ -67,6 +69,8 @@ import MkUserCardMini from '@/components/MkUserCardMini.vue';
 import MkRadios from '@/components/MkRadios.vue';
 import { $i } from '@/account.js';
 import { instance } from '@/instance.js';
+
+import MkInfo from '@/components/MkInfo.vue';
 
 const props = withDefaults(defineProps<{
 	query?: string;
