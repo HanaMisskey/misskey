@@ -62,6 +62,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private roleService: RoleService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
+			// 一時的な対応
 			if (ps.type == null || ps.type !== 'Misskey') throw new ApiError(meta.errors.thisServiceIsTemporarilyUnavailable);
 
 			const file = await this.driveFilesRepository.findOneBy({ id: ps.fileId });
@@ -69,6 +70,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			if (file == null) throw new ApiError(meta.errors.noSuchFile);
 
 			if (file.size === 0) throw new ApiError(meta.errors.emptyFile);
+
+			// 一時的な対応
+			if (!file.name.startsWith('notes-') || !file.name.endsWith('.json')) throw new ApiError(meta.errors.thisServiceIsTemporarilyUnavailable);
 
 			if ((await this.roleService.getUserPolicies(me.id)).canImportNotes === false) {
 				throw new ApiError(meta.errors.notPermitted);
