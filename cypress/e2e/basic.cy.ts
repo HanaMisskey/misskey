@@ -125,6 +125,10 @@ describe('After setup instance', () => {
 		cy.get('[data-cy-user-setup-next]').click();
 		cy.wait(1000);
 
+		// 【設定】センシティブなメディアに関する設定
+		cy.get('[data-cy-user-setup-next]').click();
+		cy.wait(1000);
+
 		// 完了（「ホーム画面に進む」ボタン）
 		cy.get('[data-cy-user-setup-complete] a').click();
 
