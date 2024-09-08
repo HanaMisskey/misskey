@@ -10364,6 +10364,10 @@ export interface Locale extends ILocale {
          * BackspaceKeyからの移行
          */
         "migrateFromBackspaceKey": string;
+        /**
+         * Misskey系サーバー以外からのノートインポートは、試験運用で得られたフィードバックをもとに改修中です。ご理解の程よろしくお願い致します。
+         */
+        "noteImportIsInBeta": string;
         "_inDevelopment": {
             /**
              * この機能は開発中です

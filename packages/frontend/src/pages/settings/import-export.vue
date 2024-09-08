@@ -16,12 +16,11 @@ SPDX-License-Identifier: AGPL-3.0-only
 			<MkFolder v-if="$i && $i.policies.canImportNotes">
 				<template #label>{{ i18n.ts.import }}</template>
 				<template #icon><i class="ti ti-upload"></i></template>
-				<FormInfo info style="margin-bottom: 1.5em;">{{ i18n.ts.importNoteInfo }}</FormInfo>
+				<FormInfo info style="margin-bottom: 1.5em;">{{ i18n.ts.importNoteInfo }}<br>{{ i18n.ts._hana.noteImportIsInBeta }}</FormInfo>
 				<MkRadios v-model="noteType" style="padding-bottom: 8px;" small>
 					<template #label>{{ i18n.ts.importOrigin }}</template>
 					<option value="Misskey">Misskey</option>
-					<option value="Mastodon">Mastodon</option>
-					<option value="Twitter">Twitter</option>
+					<!-- TODO: Twitter, Mastodonを復活させる -->
 				</MkRadios>
 				<MkButton primary :class="$style.button" inline @click="importNotes($event)"><i class="ti ti-upload"></i> {{ i18n.ts.import }}</MkButton>
 				<div class="_gaps_s">
