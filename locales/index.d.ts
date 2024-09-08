@@ -10655,6 +10655,32 @@ export interface Locale extends ILocale {
              */
             "description": string;
         };
+        "_tutorialMinorSettings": {
+            /**
+             * センシティブなコンテンツに関する設定
+             */
+            "title": string;
+            /**
+             * センシティブなコンテンツをどのように表示するかを設定できます。
+             */
+            "descriotion": string;
+            /**
+             * センシティブなメディアを含むノートをミュート
+             */
+            "muteSensitive": string;
+            /**
+             * センシティブな画像・動画・音声などを含むノートをすべて最小化した状態で表示します。クリックすると開いて中身を見ることができますが、開いたとしてもファイル自体にはぼかしがかかった状態で表示されます。
+             */
+            "muteSensitiveDescription": string;
+            /**
+             * センシティブなコンテンツはぼかしがかかった状態で表示されますが、誤操作防止のために、中身をクリックして開く際に追加で確認ダイアログを表示させることができます。
+             */
+            "confirmWhenRevealingSensitiveMediaDescription": string;
+            /**
+             * 未成年の方は、おうちの方といっしょに確認してください。この設定は後からいつでも変更できます。
+             */
+            "forMinor": string;
+        };
     };
 }
 declare const locales: {
