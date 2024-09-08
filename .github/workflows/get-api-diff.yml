@@ -4,8 +4,7 @@ name: Get api.json from Misskey
 on:
   pull_request:
     branches:
-      - master
-      - develop
+      - hanami
     paths:
       - packages/backend/**
       - .github/workflows/get-api-diff.yml
