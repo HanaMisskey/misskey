@@ -2764,6 +2764,7 @@ _hana:
   hanaModeTutorialDescription: "はなみすきーの主要な独自機能として「はなモード」があります。はなモードを有効にするかどうかで、はなみすきーでのSNS体験は大きく変わってきます。以下に主な違いとおすすめのユースケースを挙げますので、どちらか選択して進んでください。"
   flowerEffect: "いつでも花びらを降らせる"
   migrateFromBackspaceKey: "BackspaceKeyからの移行"
+  searchIsInBeta: "独自検索エンジンは現在開発中です。今ご利用いただけるのは通常のMisskeyと同じ検索エンジン（Meilisearch）です。今後の進化にご期待ください！"
   noteImportIsInBeta: "Misskey系サーバー以外からのノートインポートは、試験運用で得られたフィードバックをもとに改修中です。ご理解の程よろしくお願い致します。"
   _inDevelopment:
     title: "この機能は開発中です"

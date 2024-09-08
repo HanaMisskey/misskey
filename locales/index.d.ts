@@ -10365,6 +10365,10 @@ export interface Locale extends ILocale {
          */
         "migrateFromBackspaceKey": string;
         /**
+         * 独自検索エンジンは現在開発中です。今ご利用いただけるのは通常のMisskeyと同じ検索エンジン（Meilisearch）です。今後の進化にご期待ください！
+         */
+        "searchIsInBeta": string;
+        /**
          * Misskey系サーバー以外からのノートインポートは、試験運用で得られたフィードバックをもとに改修中です。ご理解の程よろしくお願い致します。
          */
         "noteImportIsInBeta": string;
