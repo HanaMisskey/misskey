@@ -82,10 +82,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			const [
 				userIdsWhoMeMuting,
 				userIdsWhoBlockingMe,
-			] = await Promise.all([
+			] = me ? await Promise.all([
 				this.cacheService.userMutingsCache.fetch(me.id),
 				this.cacheService.userBlockedCache.fetch(me.id),
-			]);
+			]) : [new Set<string>(), new Set<string>()];
 
 			const query = this.notesRepository.createQueryBuilder('note')
 				.where('note.id IN (:...noteIds)', { noteIds: noteIds })
@@ -98,8 +98,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				.leftJoinAndSelect('note.channel', 'channel');
 
 			const notes = (await query.getMany()).filter(note => {
-				if (isUserRelated(note, userIdsWhoBlockingMe)) return false;
-				if (isUserRelated(note, userIdsWhoMeMuting)) return false;
+				if (me && isUserRelated(note, userIdsWhoBlockingMe)) return false;
+				if (me && isUserRelated(note, userIdsWhoMeMuting)) return false;
 
 				return true;
 			});
