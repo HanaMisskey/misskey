@@ -15,8 +15,10 @@ import { CacheService } from '@/core/CacheService.js';
 export const meta = {
 	tags: ['notes'],
 
-	requireCredential: false,
-	allowGet: true,
+	requireCredential: true,
+	kind: 'read:account',
+
+	allowGet: false,
 	cacheSec: 3600,
 
 	res: {
@@ -61,7 +63,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				if (this.globalNotesRankingCacheLastFetchedAt !== 0 && (Date.now() - this.globalNotesRankingCacheLastFetchedAt < 1000 * 60 * 30)) {
 					noteIds = this.globalNotesRankingCache;
 				} else {
-					noteIds = await this.featuredService.getGlobalNotesRanking(100);
+					noteIds = await this.featuredService.getGlobalNotesRanking(500);
 					this.globalNotesRankingCache = noteIds;
 					this.globalNotesRankingCacheLastFetchedAt = Date.now();
 				}
