@@ -186,7 +186,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 					(async () => packedFeauturedNotes.slice(20))(),
 				]);
 
-				const mixedTop = [...featuredTop, ...homeTimelineTop2];
+				const mixedTop = [...homeTimelineTop2, ...featuredTop];
 
 				const remainingNotes = [
 					...remainingFeaturedNotes,
