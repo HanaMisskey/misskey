@@ -75,7 +75,7 @@ class HanamiTimelineChannel extends Channel {
 			}
 			// 1% の確率でタイムラインに表示
 			const randomChance = Math.random();
-			if (randomChance > 0.01) {
+			if (randomChance > 0.2) {
 				return;
 			}
 		} else {
