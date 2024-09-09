@@ -51,7 +51,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 </template>
 
 <script lang="ts" setup>
-import { onUnmounted, reactive, computed } from 'vue';
+import { onUnmounted, reactive, ref } from 'vue';
 import { useWidgetPropsManager, WidgetComponentEmits, WidgetComponentExpose, WidgetComponentProps } from './widget.js';
 import { GetFormResultType } from '@/scripts/form.js';
 import { useStream } from '@/stream.js';
@@ -72,8 +72,11 @@ type WidgetProps = GetFormResultType<typeof widgetPropsDef>;
 const props = defineProps<WidgetComponentProps<WidgetProps>>();
 const emit = defineEmits<WidgetComponentEmits<WidgetProps>>();
 
-const { widgetProps, configure } = useWidgetPropsManager(name, widgetPropsDef, props, emit);
-const widgetId = computed(() => props.widget ? props.widget.id : null);
+const { widgetProps, configure } = useWidgetPropsManager(name,
+	widgetPropsDef,
+	props,
+	emit,
+);
 
 const connection = useStream().useChannel('queueStats');
 const current = reactive({
@@ -129,7 +132,7 @@ onUnmounted(() => {
 defineExpose<WidgetComponentExpose>({
 	name,
 	configure,
-	id: widgetId.value ? widgetId.value : null,
+	id: props.widget ? props.widget.id : null,
 });
 </script>
 
