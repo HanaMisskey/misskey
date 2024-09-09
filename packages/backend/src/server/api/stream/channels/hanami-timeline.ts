@@ -20,8 +20,8 @@ class HanamiTimelineChannel extends Channel {
 	public static kind = 'read:account';
 	private withRenotes: boolean;
 	private withFiles: boolean;
-	private featuredNoteIds: string[];
 
+	private featuredNoteIds: string[];
 	private globalNotesRankingCache: string[] = [];
 	private globalNotesRankingCacheLastFetchedAt = 0;
 
