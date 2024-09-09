@@ -20,8 +20,8 @@ class HanamiTimelineChannel extends Channel {
 	public static kind = 'read:account';
 	private withRenotes: boolean;
 	private withFiles: boolean;
-	private featuredNoteIds: string[];
 
+	private featuredNoteIds: string[];
 	private globalNotesRankingCache: string[] = [];
 	private globalNotesRankingCacheLastFetchedAt = 0;
 
@@ -73,9 +73,9 @@ class HanamiTimelineChannel extends Channel {
 			if (note.userId === note.renote?.userId) {
 				return;
 			}
-			// 1% の確率でタイムラインに表示
+			// 20% の確率でタイムラインに表示
 			const randomChance = Math.random();
-			if (randomChance > 0.01) {
+			if (randomChance > 0.2) {
 				return;
 			}
 		} else {
