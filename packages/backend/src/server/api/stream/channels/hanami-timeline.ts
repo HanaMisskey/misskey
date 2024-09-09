@@ -73,7 +73,7 @@ class HanamiTimelineChannel extends Channel {
 			if (note.userId === note.renote?.userId) {
 				return;
 			}
-			// 1% の確率でタイムラインに表示
+			// 20% の確率でタイムラインに表示
 			const randomChance = Math.random();
 			if (randomChance > 0.2) {
 				return;
