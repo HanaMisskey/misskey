@@ -28,6 +28,7 @@ export type RelationshipQueue = Bull.Queue<RelationshipJobData>;
 export type ObjectStorageQueue = Bull.Queue;
 export type UserWebhookDeliverQueue = Bull.Queue<UserWebhookDeliverJobData>;
 export type SystemWebhookDeliverQueue = Bull.Queue<SystemWebhookDeliverJobData>;
+export type HanamiDbQueue = Bull.Queue;
 
 const $system: Provider = {
 	provide: 'queue:system',
@@ -83,6 +84,12 @@ const $systemWebhookDeliver: Provider = {
 	inject: [DI.config],
 };
 
+const $hanamiDb: Provider = {
+	provide: 'queue:hanamiDb',
+	useFactory: (config: Config) => new Bull.Queue(QUEUE.HANAMI_DB, baseQueueOptions(config, QUEUE.HANAMI_DB)),
+	inject: [DI.config],
+};
+
 @Module({
 	imports: [
 	],
@@ -96,6 +103,7 @@ const $systemWebhookDeliver: Provider = {
 		$objectStorage,
 		$userWebhookDeliver,
 		$systemWebhookDeliver,
+		$hanamiDb,
 	],
 	exports: [
 		$system,
@@ -107,6 +115,7 @@ const $systemWebhookDeliver: Provider = {
 		$objectStorage,
 		$userWebhookDeliver,
 		$systemWebhookDeliver,
+		$hanamiDb,
 	],
 })
 export class QueueModule implements OnApplicationShutdown {
@@ -120,6 +129,7 @@ export class QueueModule implements OnApplicationShutdown {
 		@Inject('queue:objectStorage') public objectStorageQueue: ObjectStorageQueue,
 		@Inject('queue:userWebhookDeliver') public userWebhookDeliverQueue: UserWebhookDeliverQueue,
 		@Inject('queue:systemWebhookDeliver') public systemWebhookDeliverQueue: SystemWebhookDeliverQueue,
+		@Inject('queue:hanamiDb') public hanamiDbQueue: HanamiDbQueue,
 	) {}
 
 	public async dispose(): Promise<void> {
@@ -136,6 +146,7 @@ export class QueueModule implements OnApplicationShutdown {
 			this.objectStorageQueue.close(),
 			this.userWebhookDeliverQueue.close(),
 			this.systemWebhookDeliverQueue.close(),
+			this.hanamiDbQueue.close(),
 		]);
 	}
 

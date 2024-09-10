@@ -83,6 +83,7 @@ export class QueueProcessorService implements OnApplicationShutdown {
 	private relationshipQueueWorker: Bull.Worker;
 	private objectStorageQueueWorker: Bull.Worker;
 	private endedPollNotificationQueueWorker: Bull.Worker;
+	private hanamiDbQueueWorker: Bull.Worker;
 
 	constructor(
 		@Inject(DI.config)
@@ -510,6 +511,51 @@ export class QueueProcessorService implements OnApplicationShutdown {
 			});
 		}
 		//#endregion
+
+		//#region hanami db
+		{
+			const processer = (job: Bull.Job) => {
+				switch (job.name) {
+					case 'importNotes': return this.importNotesProcessorService.process(job);
+					case 'importTweetsToDb': return this.importNotesProcessorService.processTwitterDb(job);
+					case 'importIGToDb': return this.importNotesProcessorService.processIGDb(job);
+					case 'importMastoToDb': return this.importNotesProcessorService.processMastoToDb(job);
+					case 'importPleroToDb': return this.importNotesProcessorService.processPleroToDb(job);
+					case 'importKeyNotesToDb': return this.importNotesProcessorService.processKeyNotesToDb(job);
+					default: throw new Error(`unrecognized job type ${job.name} for hanami db`);
+				}
+			};
+
+			this.hanamiDbQueueWorker = new Bull.Worker(QUEUE.HANAMI_DB, (job) => {
+				if (this.config.sentryForBackend) {
+					return Sentry.startSpan({ name: 'Queue: DB: ' + job.name }, () => processer(job));
+				} else {
+					return processer(job);
+				}
+			}, {
+				...baseQueueOptions(this.config, QUEUE.HANAMI_DB),
+				concurrency: 10,
+				autorun: false,
+			});
+
+			const logger = this.logger.createSubLogger('HanamiDb');
+
+			this.hanamiDbQueueWorker
+				.on('active', (job) => logger.debug(`active id=${job.id}`))
+				.on('completed', (job, result) => logger.debug(`completed(${result}) id=${job.id}`))
+				.on('failed', (job, err) => {
+					logger.error(`failed(${err.stack}) id=${job ? job.id : '-'}`, { job, e: renderError(err) });
+					if (config.sentryForBackend) {
+						Sentry.captureMessage(`Queue: HANAMI DB: ${job?.name ?? '?'}: ${err.message}`, {
+							level: 'error',
+							extra: { job, err },
+						});
+					}
+				})
+				.on('error', (err: Error) => logger.error(`error ${err.stack}`, { e: renderError(err) }))
+				.on('stalled', (jobId) => logger.warn(`stalled id=${jobId}`));
+		}
+		//#endregion
 	}
 
 	@bindThis
@@ -524,6 +570,7 @@ export class QueueProcessorService implements OnApplicationShutdown {
 			this.relationshipQueueWorker.run(),
 			this.objectStorageQueueWorker.run(),
 			this.endedPollNotificationQueueWorker.run(),
+			this.hanamiDbQueueWorker.run(),
 		]);
 	}
 
@@ -539,6 +586,7 @@ export class QueueProcessorService implements OnApplicationShutdown {
 			this.relationshipQueueWorker.close(),
 			this.objectStorageQueueWorker.close(),
 			this.endedPollNotificationQueueWorker.close(),
+			this.hanamiDbQueueWorker.close(),
 		]);
 	}
 

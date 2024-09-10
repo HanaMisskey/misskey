@@ -14,9 +14,11 @@ import { DI } from '@/di-symbols.js';
 import { bindThis } from '@/decorators.js';
 import type { Antenna } from '@/server/api/endpoints/i/import-antennas.js';
 import { ApRequestCreator } from '@/core/activitypub/ApRequestService.js';
+import { MiNote } from '@/models/Note.js';
 import type {
 	DbJobData,
 	DeliverJobData,
+	HanamiDbJobData,
 	RelationshipJobData,
 	SystemWebhookDeliverJobData,
 	ThinUser,
@@ -32,10 +34,10 @@ import type {
 	SystemQueue,
 	UserWebhookDeliverQueue,
 	SystemWebhookDeliverQueue,
+	HanamiDbQueue,
 } from './QueueModule.js';
 import type httpSignature from '@peertube/http-signature';
 import type * as Bull from 'bullmq';
-import { MiNote } from '@/models/Note.js';
 
 @Injectable()
 export class QueueService {
@@ -52,6 +54,7 @@ export class QueueService {
 		@Inject('queue:objectStorage') public objectStorageQueue: ObjectStorageQueue,
 		@Inject('queue:userWebhookDeliver') public userWebhookDeliverQueue: UserWebhookDeliverQueue,
 		@Inject('queue:systemWebhookDeliver') public systemWebhookDeliverQueue: SystemWebhookDeliverQueue,
+		@Inject('queue:hanamiDb') public hanamiDbQueue: HanamiDbQueue,
 	) {
 		this.systemQueue.add('tickCharts', {
 		}, {
@@ -287,51 +290,53 @@ export class QueueService {
 	}
 
 	@bindThis
-	public createImportNotesJob(user: ThinUser, fileId: MiDriveFile['id'], type: string | null | undefined) {
-		return this.dbQueue.add('importNotes', {
+	public createImportNotesJob(user: ThinUser, fileId: MiDriveFile['id'], type: string | null | undefined, originUsernameAndHost: string) {
+		return this.hanamiDbQueue.add('importNotes', {
 			user: { id: user.id },
 			fileId: fileId,
 			type: type,
+			originUsernameAndHost: originUsernameAndHost,
 		}, {
 			removeOnComplete: true,
 			removeOnFail: true,
+			priority: 2,
 		});
 	}
 
 	@bindThis
 	public createImportTweetsToDbJob(user: ThinUser, targets: string[], note: MiNote['id'] | null) {
-		const jobs = targets.map(rel => this.generateToDbJobData('importTweetsToDb', { user, target: rel, note }));
-		return this.dbQueue.addBulk(jobs);
+		const jobs = targets.map(rel => this.generateToHanamiDbJobData('importTweetsToDb', { user, target: rel, note }));
+		return this.hanamiDbQueue.addBulk(jobs);
 	}
 
 	@bindThis
 	public createImportMastoToDbJob(user: ThinUser, targets: string[], note: MiNote['id'] | null) {
-		const jobs = targets.map(rel => this.generateToDbJobData('importMastoToDb', { user, target: rel, note }));
-		return this.dbQueue.addBulk(jobs);
+		const jobs = targets.map(rel => this.generateToHanamiDbJobData('importMastoToDb', { user, target: rel, note }));
+		return this.hanamiDbQueue.addBulk(jobs);
 	}
 
 	@bindThis
 	public createImportPleroToDbJob(user: ThinUser, targets: string[], note: MiNote['id'] | null) {
-		const jobs = targets.map(rel => this.generateToDbJobData('importPleroToDb', { user, target: rel, note }));
-		return this.dbQueue.addBulk(jobs);
+		const jobs = targets.map(rel => this.generateToHanamiDbJobData('importPleroToDb', { user, target: rel, note }));
+		return this.hanamiDbQueue.addBulk(jobs);
 	}
 
 	@bindThis
 	public createImportKeyNotesToDbJob(user: ThinUser, targets: string[], note: MiNote['id'] | null) {
-		const jobs = targets.map(rel => this.generateToDbJobData('importKeyNotesToDb', { user, target: rel, note }));
-		return this.dbQueue.addBulk(jobs);
+		const jobs = targets.map(rel => this.generateToHanamiDbJobData('importKeyNotesToDb', { user, target: rel, note }));
+		return this.hanamiDbQueue.addBulk(jobs);
 	}
 
 	@bindThis
 	public createImportIGToDbJob(user: ThinUser, targets: string[]) {
-		const jobs = targets.map(rel => this.generateToDbJobData('importIGToDb', { user, target: rel }));
-		return this.dbQueue.addBulk(jobs);
+		const jobs = targets.map(rel => this.generateToHanamiDbJobData('importIGToDb', { user, target: rel }));
+		return this.hanamiDbQueue.addBulk(jobs);
 	}
 
 	@bindThis
 	public createImportFBToDbJob(user: ThinUser, targets: string[]) {
-		const jobs = targets.map(rel => this.generateToDbJobData('importFBToDb', { user, target: rel }));
-		return this.dbQueue.addBulk(jobs);
+		const jobs = targets.map(rel => this.generateToHanamiDbJobData('importFBToDb', { user, target: rel }));
+		return this.hanamiDbQueue.addBulk(jobs);
 	}
 
 	@bindThis
@@ -369,7 +374,7 @@ export class QueueService {
 	}
 
 	@bindThis
-	private generateToDbJobData<T extends 'importFollowingToDb' | 'importBlockingToDb' | 'importTweetsToDb' | 'importIGToDb' | 'importFBToDb' | 'importMastoToDb' | 'importPleroToDb' | 'importKeyNotesToDb', D extends DbJobData<T>>(name: T, data: D): {
+	private generateToDbJobData<T extends 'importFollowingToDb' | 'importBlockingToDb', D extends DbJobData<T>>(name: T, data: D): {
 		name: string,
 		data: D,
 		opts: Bull.JobsOptions,
@@ -380,6 +385,23 @@ export class QueueService {
 			opts: {
 				removeOnComplete: true,
 				removeOnFail: true,
+			},
+		};
+	}
+
+	@bindThis
+	private generateToHanamiDbJobData<T extends 'importTweetsToDb' | 'importIGToDb' | 'importFBToDb' | 'importMastoToDb' | 'importPleroToDb' | 'importKeyNotesToDb', D extends HanamiDbJobData<T>>(name: T, data: D): {
+		name: string,
+		data: D,
+		opts: Bull.JobsOptions,
+	} {
+		return {
+			name,
+			data,
+			opts: {
+				removeOnComplete: true,
+				removeOnFail: true,
+				priority: 1,
 			},
 		};
 	}

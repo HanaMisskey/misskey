@@ -41,9 +41,10 @@ export const paramDef = {
 	type: 'object',
 	properties: {
 		fileId: { type: 'string', format: 'misskey:id' },
-		type: { type: 'string', nullable: true },
+		type: { type: 'string', nullable: false },
+		originUsernameAndHost: { type: 'string', nullable: false },
 	},
-	required: ['fileId'],
+	required: ['fileId', 'type', 'originUsernameAndHost'],
 } as const;
 
 @Injectable()
@@ -59,14 +60,14 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			const file = await this.driveFilesRepository.findOneBy({ id: ps.fileId });
 
 			if (file == null) throw new ApiError(meta.errors.noSuchFile);
-			
+
 			if (file.size === 0) throw new ApiError(meta.errors.emptyFile);
 
 			if ((await this.roleService.getUserPolicies(me.id)).canImportNotes === false) {
 				throw new ApiError(meta.errors.notPermitted);
 			}
 
-			this.queueService.createImportNotesJob(me, file.id, ps.type);
+			this.queueService.createImportNotesJob(me, file.id, ps.type, ps.originUsernameAndHost);
 		});
 	}
 }

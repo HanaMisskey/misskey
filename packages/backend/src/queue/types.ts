@@ -38,6 +38,7 @@ export type RelationshipJobData = {
 }
 
 export type DbJobData<T extends keyof DbJobMap> = DbJobMap[T];
+export type HanamiDbJobData<T extends keyof HanamiDbJobMap> = HanamiDbJobMap[T];
 
 export type DbJobMap = {
 	deleteDriveFiles: DbJobDataWithUser;
@@ -50,13 +51,6 @@ export type DbJobMap = {
 	exportBlocking: DbJobDataWithUser;
 	exportUserLists: DbJobDataWithUser;
 	importAntennas: DBAntennaImportJobData;
-	importNotes: DbNoteImportJobData;
-	importTweetsToDb: DbNoteWithParentImportToDbJobData;
-	importIGToDb: DbNoteImportToDbJobData;
-	importFBToDb: DbNoteImportToDbJobData;
-	importMastoToDb: DbNoteWithParentImportToDbJobData;
-	importPleroToDb: DbNoteWithParentImportToDbJobData;
-	importKeyNotesToDb: DbNoteWithParentImportToDbJobData;
 	importFollowing: DbUserImportJobData;
 	importFollowingToDb: DbUserImportToDbJobData;
 	importMuting: DbUserImportJobData;
@@ -92,10 +86,11 @@ export type DbUserImportJobData = {
 	withReplies?: boolean;
 };
 
-export type DbNoteImportJobData = {
+export type HanamiDbNoteImportJobData = {
 	user: ThinUser;
 	fileId: MiDriveFile['id'];
-	type?: string;
+	type: string;
+	originUsernameAndHost: string;
 };
 
 export type DBAntennaImportJobData = {
@@ -109,12 +104,12 @@ export type DbUserImportToDbJobData = {
 	withReplies?: boolean;
 };
 
-export type DbNoteImportToDbJobData = {
+export type HanamiDbNoteImportToDbJobData = {
 	user: ThinUser;
 	target: any;
 };
 
-export type DbNoteWithParentImportToDbJobData = {
+export type HanamiDbNoteWithParentImportToDbJobData = {
 	user: ThinUser;
 	target: any;
 	note: MiNote['id'] | null;
@@ -153,4 +148,14 @@ export type UserWebhookDeliverJobData = {
 
 export type ThinUser = {
 	id: MiUser['id'];
+};
+
+export type HanamiDbJobMap = {
+	importNotes: HanamiDbNoteImportJobData;
+	importTweetsToDb: HanamiDbNoteWithParentImportToDbJobData;
+	importIGToDb: HanamiDbNoteImportToDbJobData;
+	importFBToDb: HanamiDbNoteImportToDbJobData;
+	importMastoToDb: HanamiDbNoteWithParentImportToDbJobData;
+	importPleroToDb: HanamiDbNoteWithParentImportToDbJobData;
+	importKeyNotesToDb: HanamiDbNoteWithParentImportToDbJobData;
 };

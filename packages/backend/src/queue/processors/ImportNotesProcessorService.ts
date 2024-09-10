@@ -20,7 +20,7 @@ import type { Config } from '@/config.js';
 import { IdentifiableError } from '@/misc/identifiable-error.js';
 import { QueueLoggerService } from '../QueueLoggerService.js';
 import type * as Bull from 'bullmq';
-import type { DbNoteImportToDbJobData, DbNoteImportJobData, DbNoteWithParentImportToDbJobData } from '../types.js';
+import type { HanamiDbNoteImportToDbJobData, HanamiDbNoteImportJobData, HanamiDbNoteWithParentImportToDbJobData } from '../types.js';
 
 @Injectable()
 export class ImportNotesProcessorService {
@@ -154,7 +154,132 @@ export class ImportNotesProcessorService {
 	}
 
 	@bindThis
-	public async process(job: Bull.Job<DbNoteImportJobData>): Promise<void> {
+	private async validateKeyJson(username: string, jsonString: string, user: MiUser) {
+		// JSON文字列をオブジェクトにパース
+		let notes: Array<any>;
+		try {
+			notes = JSON.parse(jsonString);
+		} catch (error) {
+			throw new Error('Invalid JSON format for notes');
+		}
+
+		const regex = /^@([^@]+)@(.+)$/;
+		const match = username.match(regex);
+
+		if (!match) {
+			throw new Error('Invalid username format');
+		}
+
+		const [_, localPart, domainPart] = match;
+		const domain = `https://${domainPart}`;
+		console.log(localPart, domain);
+
+		const apiUrl = `${domain}/api/users/show`;
+		const data = { username: localPart };
+
+		try {
+			const response = await fetch(apiUrl, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(data),
+			});
+
+			if (!response.ok) {
+				throw new Error(`API Error: ${response.status} ${response.statusText}`);
+			}
+
+			const result = await response.json();
+			const userId = result.id;
+
+			console.log('API Response:', result);
+
+			// "fields" の中で、valueがuser.usernameでかつホストネームが一致するものを確認
+			const expectedHost = this.config.url.replace(/^https?:\/\//, '');
+			const matchingField = result.fields.some((field: { name: string, value: string }) => {
+				const fieldValueMatch = field.value.match(/^@([^@]+)@(.+)$/);
+				return fieldValueMatch && fieldValueMatch[1] === user.username && fieldValueMatch[2] === expectedHost;
+			});
+
+			if (!matchingField) {
+				throw new Error(`No matching field found for @${user.username}@${expectedHost} in user fields.`);
+			}
+
+			console.log(`Matching field found for @${user.username}@${expectedHost}`);
+
+			// isSilenced, isLimited, isSuspendedを確認
+			const { isSilenced = false, isLimited = false, isSuspended = false } = result;
+
+			if (!(isSilenced === false && isLimited === false && isSuspended === false)) {
+				throw new Error('User status does not meet the expected conditions (not silenced, limited, or suspended).');
+			}
+
+			// notesCountとJSONの件数を10%の幅で比較
+			const notesCount = result.notesCount;
+			const noteItemsCount = notes.length;
+			const lowerBound = notesCount * 0.9;
+			const upperBound = notesCount * 1.1;
+
+			if (noteItemsCount < lowerBound || noteItemsCount > upperBound) {
+				throw new Error(`Notes count is not within 10%. Expected: ${notesCount}, Actual: ${noteItemsCount}`);
+			}
+
+			console.log(`Notes count is within 10% of the response count. (${noteItemsCount}/${notesCount})`);
+
+			// visibilityが"public"または"home"のエントリを抽出し、ランダムサンプリング
+			const filteredNotes = notes.filter(note => ['public', 'home'].includes(note.visibility));
+			const randomSample = filteredNotes
+				.sort(() => Math.random() - 0.5)
+				.slice(0, 100);
+
+			console.log('Randomly sampled notes:', randomSample);
+
+			// サーバーに負担をかけないように1件ずつPOSTリクエストを送信
+			for (let i = 0; i < randomSample.length; i++) {
+				await new Promise(resolve => setTimeout(resolve, i * 1000)); // 1秒間隔でリクエスト送信
+
+				const noteApiUrl = `${domain}/api/notes/show`;
+				const noteData = { noteId: randomSample[i].id };
+
+				try {
+					const noteResponse = await fetch(noteApiUrl, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify(noteData),
+					});
+
+					if (!noteResponse.ok) {
+						throw new Error(`Error fetching note: ${noteResponse.statusText}`);
+					}
+
+					const noteResult = await noteResponse.json();
+					console.log('Note API Response:', noteResult);
+
+					// 得られたuserIdが一致するか確認
+					if (noteResult.userId !== userId) {
+						throw new Error(`UserId mismatch! Note userId: ${noteResult.userId}, Expected userId: ${userId}`);
+					}
+
+					// 元のJSONのtextとAPIの結果のtextが一致するか確認
+					if (noteResult.text !== randomSample[i].text) {
+						throw new Error(`Text mismatch! Expected: "${randomSample[i].text}", Actual: "${noteResult.text}"`);
+					}
+				} catch (error) {
+					throw new Error('Error during note API call: ');
+				}
+			}
+
+			return 'Validation successfully completed.';
+		} catch (error) {
+			throw new Error('User validation failed: ');
+		}
+	}
+
+	@bindThis
+	public async process(job: Bull.Job<HanamiDbNoteImportJobData>): Promise<void> {
 		this.logger.info(`Starting note import of ${job.data.user.id} ...`);
 
 		const user = await this.usersRepository.findOneBy({ id: job.data.user.id });
@@ -267,6 +392,7 @@ export class ImportNotesProcessorService {
 			}
 
 			const notesJson = await fsp.readFile(path, 'utf-8');
+			await this.validateKeyJson(job.data.originUsernameAndHost, notesJson, user);
 			const notes = JSON.parse(notesJson);
 			const processedNotes = await this.recreateChain(['id'], ['replyId'], notes, false);
 			this.queueService.createImportKeyNotesToDbJob(job.data.user, processedNotes, null);
@@ -277,7 +403,7 @@ export class ImportNotesProcessorService {
 	}
 
 	@bindThis
-	public async processKeyNotesToDb(job: Bull.Job<DbNoteWithParentImportToDbJobData>): Promise<void> {
+	public async processKeyNotesToDb(job: Bull.Job<HanamiDbNoteWithParentImportToDbJobData>): Promise<void> {
 		const note = job.data.target;
 		const user = await this.usersRepository.findOneBy({ id: job.data.user.id });
 		if (user == null) {
@@ -334,7 +460,7 @@ export class ImportNotesProcessorService {
 	}
 
 	@bindThis
-	public async processMastoToDb(job: Bull.Job<DbNoteWithParentImportToDbJobData>): Promise<void> {
+	public async processMastoToDb(job: Bull.Job<HanamiDbNoteWithParentImportToDbJobData>): Promise<void> {
 		const toot = job.data.target;
 		const user = await this.usersRepository.findOneBy({ id: job.data.user.id });
 		if (user == null) {
@@ -393,7 +519,7 @@ export class ImportNotesProcessorService {
 	}
 
 	@bindThis
-	public async processPleroToDb(job: Bull.Job<DbNoteWithParentImportToDbJobData>): Promise<void> {
+	public async processPleroToDb(job: Bull.Job<HanamiDbNoteWithParentImportToDbJobData>): Promise<void> {
 		const post = job.data.target;
 		const user = await this.usersRepository.findOneBy({ id: job.data.user.id });
 		if (user == null) {
@@ -474,7 +600,7 @@ export class ImportNotesProcessorService {
 	}
 
 	@bindThis
-	public async processIGDb(job: Bull.Job<DbNoteImportToDbJobData>): Promise<void> {
+	public async processIGDb(job: Bull.Job<HanamiDbNoteImportToDbJobData>): Promise<void> {
 		const post = job.data.target;
 		const user = await this.usersRepository.findOneBy({ id: job.data.user.id });
 		if (user == null) {
@@ -519,7 +645,7 @@ export class ImportNotesProcessorService {
 	}
 
 	@bindThis
-	public async processTwitterDb(job: Bull.Job<DbNoteWithParentImportToDbJobData>): Promise<void> {
+	public async processTwitterDb(job: Bull.Job<HanamiDbNoteWithParentImportToDbJobData>): Promise<void> {
 		const tweet = job.data.target;
 		const user = await this.usersRepository.findOneBy({ id: job.data.user.id });
 		if (user == null) {
@@ -636,7 +762,7 @@ export class ImportNotesProcessorService {
 	}
 
 	@bindThis
-	public async processFBDb(job: Bull.Job<DbNoteImportToDbJobData>): Promise<void> {
+	public async processFBDb(job: Bull.Job<HanamiDbNoteImportToDbJobData>): Promise<void> {
 		const post = job.data.target;
 		const user = await this.usersRepository.findOneBy({ id: job.data.user.id });
 		if (user == null) {
