@@ -17,6 +17,7 @@ import { ApNoteService } from '@/core/activitypub/models/ApNoteService.js';
 import { extractApHashtagObjects } from '@/core/activitypub/models/tag.js';
 import { IdService } from '@/core/IdService.js';
 import type { Config } from '@/config.js';
+import { IdentifiableError } from '@/misc/identifiable-error.js';
 import { QueueLoggerService } from '../QueueLoggerService.js';
 import type * as Bull from 'bullmq';
 import type { DbNoteImportToDbJobData, DbNoteImportJobData, DbNoteWithParentImportToDbJobData } from '../types.js';
@@ -249,65 +250,7 @@ export class ImportNotesProcessorService {
 				cleanup();
 			}
 		} else if (file.name.endsWith('.zip')) {
-			const [path, cleanup] = await createTempDir();
-
-			this.logger.info(`Temp dir is ${path}`);
-
-			const destPath = path + '/unknown.zip';
-
-			try {
-				await fsp.writeFile(destPath, '', 'binary');
-				await this.downloadUrl(file.url, destPath);
-			} catch (e) { // TODO: 何度か再試行
-				if (e instanceof Error || typeof e === 'string') {
-					this.logger.error(e);
-				}
-				throw e;
-			}
-
-			const outputPath = path + '/unknown';
-			try {
-				this.logger.succ(`Unzipping to ${outputPath}`);
-				ZipReader.withDestinationPath(outputPath).viaBuffer(await fsp.readFile(destPath));
-				const isInstagram = type === 'Instagram' || fs.existsSync(outputPath + '/instagram_live') || fs.existsSync(outputPath + '/instagram_ads_and_businesses');
-				const isOutbox = type === 'Mastodon' || fs.existsSync(outputPath + '/outbox.json');
-				if (isInstagram) {
-					const postsJson = await fsp.readFile(outputPath + '/content/posts_1.json', 'utf-8');
-					const posts = JSON.parse(postsJson);
-					const igFolder = await this.driveFoldersRepository.findOneBy({ name: 'Instagram', userId: job.data.user.id, parentId: folder?.id });
-					if (igFolder == null && folder) {
-						await this.driveFoldersRepository.insert({ id: this.idService.gen(), name: 'Instagram', userId: job.data.user.id, parentId: folder.id });
-						const createdFolder = await this.driveFoldersRepository.findOneBy({ name: 'Instagram', userId: job.data.user.id, parentId: folder.id });
-						if (createdFolder) await this.uploadFiles(outputPath + '/media/posts', user, createdFolder.id);
-					}
-					this.queueService.createImportIGToDbJob(job.data.user, posts);
-				} else if (isOutbox) {
-					const actorJson = await fsp.readFile(outputPath + '/actor.json', 'utf-8');
-					const actor = JSON.parse(actorJson);
-					const isPleroma = actor['@context'].some((v: any) => typeof v === 'string' && v.match(/litepub(.*)/));
-					if (isPleroma) {
-						const outboxJson = await fsp.readFile(outputPath + '/outbox.json', 'utf-8');
-						const outbox = JSON.parse(outboxJson);
-						const processedToots = await this.recreateChain(['object', 'id'], ['object', 'inReplyTo'], outbox.orderedItems.filter((x: any) => x.type === 'Create' && x.object.type === 'Note'), true);
-						this.queueService.createImportPleroToDbJob(job.data.user, processedToots, null);
-					} else {
-						const outboxJson = await fsp.readFile(outputPath + '/outbox.json', 'utf-8');
-						const outbox = JSON.parse(outboxJson);
-						let mastoFolder = await this.driveFoldersRepository.findOneBy({ name: 'Mastodon', userId: job.data.user.id, parentId: folder?.id });
-						if (mastoFolder == null && folder) {
-							await this.driveFoldersRepository.insert({ id: this.idService.gen(), name: 'Mastodon', userId: job.data.user.id, parentId: folder.id });
-							mastoFolder = await this.driveFoldersRepository.findOneBy({ name: 'Mastodon', userId: job.data.user.id, parentId: folder.id });
-						}
-						if (fs.existsSync(outputPath + '/media_attachments/files') && mastoFolder) {
-							await this.uploadFiles(outputPath + '/media_attachments/files', user, mastoFolder.id);
-						}
-						const processedToots = await this.recreateChain(['object', 'id'], ['object', 'inReplyTo'], outbox.orderedItems.filter((x: any) => x.type === 'Create' && x.object.type === 'Note'), true);
-						this.queueService.createImportMastoToDbJob(job.data.user, processedToots, null);
-					}
-				}
-			} finally {
-				cleanup();
-			}
+			throw new IdentifiableError('e50b584b-beeb-413d-ab5e-f768a47a9f13', 'Zip file is not currently supported');
 		} else if (job.data.type === 'Misskey' || file.name.startsWith('notes-') && file.name.endsWith('.json')) {
 			const [path, cleanup] = await createTemp();
 
