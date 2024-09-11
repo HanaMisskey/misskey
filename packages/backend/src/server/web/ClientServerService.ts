@@ -35,6 +35,7 @@ import type {
 	UserWebhookDeliverQueue,
 	SystemWebhookDeliverQueue,
 	HanamiDbQueue,
+	HanamiNoteImportQueue,
 } from '@/core/QueueModule.js';
 import { UserEntityService } from '@/core/entities/UserEntityService.js';
 import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
@@ -124,6 +125,7 @@ export class ClientServerService {
 		@Inject('queue:userWebhookDeliver') public userWebhookDeliverQueue: UserWebhookDeliverQueue,
 		@Inject('queue:systemWebhookDeliver') public systemWebhookDeliverQueue: SystemWebhookDeliverQueue,
 		@Inject('queue:hanamiDb') public hanamiDbQueue: HanamiDbQueue,
+		@Inject('queue:hanamiNoteImport') public hanamiNoteImportQueue: HanamiNoteImportQueue,
 	) {
 		//this.createServer = this.createServer.bind(this);
 	}
@@ -254,6 +256,7 @@ export class ClientServerService {
 				this.userWebhookDeliverQueue,
 				this.systemWebhookDeliverQueue,
 				this.hanamiDbQueue,
+				this.hanamiNoteImportQueue,
 			].map(q => new BullMQAdapter(q)),
 			serverAdapter,
 		});

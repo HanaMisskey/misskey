@@ -17,6 +17,7 @@ export const QUEUE = {
 	USER_WEBHOOK_DELIVER: 'userWebhookDeliver',
 	SYSTEM_WEBHOOK_DELIVER: 'systemWebhookDeliver',
 	HANAMI_DB: 'hanamiDb',
+	HANAMI_NOTE_IMPORT: 'hanamiNoteImport',
 };
 
 export function baseQueueOptions(config: Config, queueName: typeof QUEUE[keyof typeof QUEUE]): Bull.QueueOptions {

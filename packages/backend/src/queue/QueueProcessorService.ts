@@ -84,6 +84,7 @@ export class QueueProcessorService implements OnApplicationShutdown {
 	private objectStorageQueueWorker: Bull.Worker;
 	private endedPollNotificationQueueWorker: Bull.Worker;
 	private hanamiDbQueueWorker: Bull.Worker;
+	private hanamiNoteImportQueueWorker: Bull.Worker;
 
 	constructor(
 		@Inject(DI.config)
@@ -556,6 +557,50 @@ export class QueueProcessorService implements OnApplicationShutdown {
 				.on('stalled', (jobId) => logger.warn(`stalled id=${jobId}`));
 		}
 		//#endregion
+
+		//#region hanami note import
+		{
+			const processer = (job: Bull.Job) => {
+				switch (job.name) {
+					case 'importNotes': return this.importNotesProcessorService.process(job);
+					default: throw new Error(`unrecognized job type ${job.name} for hanami note import`);
+				}
+			};
+
+			this.hanamiNoteImportQueueWorker = new Bull.Worker(QUEUE.HANAMI_NOTE_IMPORT, (job) => {
+				if (this.config.sentryForBackend) {
+					return Sentry.startSpan({ name: 'Queue: HANAMI NOTE IMPORT: ' + job.name }, () => processer(job));
+				} else {
+					return processer(job);
+				}
+			}, {
+				...baseQueueOptions(this.config, QUEUE.HANAMI_NOTE_IMPORT),
+				concurrency: 2,
+				autorun: false,
+				rateLimiter: {
+					max: 5,
+					duration: 60 * 60 * 1000,
+				},
+			});
+
+			const logger = this.logger.createSubLogger('HanamiNoteImport');
+
+			this.hanamiNoteImportQueueWorker
+				.on('active', (job) => logger.debug(`active id=${job.id}`))
+				.on('completed', (job, result) => logger.debug(`completed(${result}) id=${job.id}`))
+				.on('failed', (job, err) => {
+					logger.error(`failed(${err.stack}) id=${job ? job.id : '-'}`, { job, e: renderError(err) });
+					if (config.sentryForBackend) {
+						Sentry.captureMessage(`Queue: HANAMI NOTE IMPORT: ${job?.name ?? '?'}: ${err.message}`, {
+							level: 'error',
+							extra: { job, err },
+						});
+					}
+				})
+				.on('error', (err: Error) => logger.error(`error ${err.stack}`, { e: renderError(err) }))
+				.on('stalled', (jobId) => logger.warn(`stalled id=${jobId}`));
+		}
+		//#endregion
 	}
 
 	@bindThis
@@ -571,6 +616,7 @@ export class QueueProcessorService implements OnApplicationShutdown {
 			this.objectStorageQueueWorker.run(),
 			this.endedPollNotificationQueueWorker.run(),
 			this.hanamiDbQueueWorker.run(),
+			this.hanamiNoteImportQueueWorker.run(),
 		]);
 	}
 
@@ -587,6 +633,7 @@ export class QueueProcessorService implements OnApplicationShutdown {
 			this.objectStorageQueueWorker.close(),
 			this.endedPollNotificationQueueWorker.close(),
 			this.hanamiDbQueueWorker.close(),
+			this.hanamiNoteImportQueueWorker.close(),
 		]);
 	}
 

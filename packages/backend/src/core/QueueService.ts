@@ -35,6 +35,7 @@ import type {
 	UserWebhookDeliverQueue,
 	SystemWebhookDeliverQueue,
 	HanamiDbQueue,
+	HanamiNoteImportQueue,
 } from './QueueModule.js';
 import type httpSignature from '@peertube/http-signature';
 import type * as Bull from 'bullmq';
@@ -55,6 +56,7 @@ export class QueueService {
 		@Inject('queue:userWebhookDeliver') public userWebhookDeliverQueue: UserWebhookDeliverQueue,
 		@Inject('queue:systemWebhookDeliver') public systemWebhookDeliverQueue: SystemWebhookDeliverQueue,
 		@Inject('queue:hanamiDb') public hanamiDbQueue: HanamiDbQueue,
+		@Inject('queue:hanamiNoteImport') public hanamiNoteImportQueue: HanamiNoteImportQueue,
 	) {
 		this.systemQueue.add('tickCharts', {
 		}, {
@@ -290,8 +292,8 @@ export class QueueService {
 	}
 
 	@bindThis
-	public createImportNotesJob(user: ThinUser, fileId: MiDriveFile['id'], type: string | null | undefined, originUsernameAndHost: string) {
-		return this.hanamiDbQueue.add('importNotes', {
+	public createImportNotesJob(user: ThinUser, fileId: MiDriveFile['id'], type: string, originUsernameAndHost: string) {
+		return this.hanamiNoteImportQueue.add('importNotes', {
 			user: { id: user.id },
 			fileId: fileId,
 			type: type,

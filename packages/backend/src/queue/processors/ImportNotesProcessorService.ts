@@ -20,7 +20,7 @@ import type { Config } from '@/config.js';
 import { IdentifiableError } from '@/misc/identifiable-error.js';
 import { QueueLoggerService } from '../QueueLoggerService.js';
 import type * as Bull from 'bullmq';
-import type { HanamiDbNoteImportToDbJobData, HanamiDbNoteImportJobData, HanamiDbNoteWithParentImportToDbJobData } from '../types.js';
+import type { HanamiDbNoteImportToDbJobData, HanamiNoteImportJobData, HanamiDbNoteWithParentImportToDbJobData } from '../types.js';
 
 @Injectable()
 export class ImportNotesProcessorService {
@@ -279,7 +279,7 @@ export class ImportNotesProcessorService {
 	}
 
 	@bindThis
-	public async process(job: Bull.Job<HanamiDbNoteImportJobData>): Promise<void> {
+	public async process(job: Bull.Job<HanamiNoteImportJobData>): Promise<void> {
 		this.logger.info(`Starting note import of ${job.data.user.id} ...`);
 
 		const user = await this.usersRepository.findOneBy({ id: job.data.user.id });

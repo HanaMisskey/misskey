@@ -16,6 +16,7 @@ import {
 	RelationshipJobData,
 	UserWebhookDeliverJobData,
 	SystemWebhookDeliverJobData,
+	HanamiNoteImportJobData,
 } from '../queue/types.js';
 import type { Provider } from '@nestjs/common';
 
@@ -29,6 +30,7 @@ export type ObjectStorageQueue = Bull.Queue;
 export type UserWebhookDeliverQueue = Bull.Queue<UserWebhookDeliverJobData>;
 export type SystemWebhookDeliverQueue = Bull.Queue<SystemWebhookDeliverJobData>;
 export type HanamiDbQueue = Bull.Queue;
+export type HanamiNoteImportQueue = Bull.Queue<HanamiNoteImportJobData>;
 
 const $system: Provider = {
 	provide: 'queue:system',
@@ -90,6 +92,12 @@ const $hanamiDb: Provider = {
 	inject: [DI.config],
 };
 
+const $hanamiNoteImport: Provider = {
+	provide: 'queue:hanamiNoteImport',
+	useFactory: (config: Config) => new Bull.Queue(QUEUE.HANAMI_NOTE_IMPORT, baseQueueOptions(config, QUEUE.HANAMI_NOTE_IMPORT)),
+	inject: [DI.config],
+};
+
 @Module({
 	imports: [
 	],
@@ -104,6 +112,7 @@ const $hanamiDb: Provider = {
 		$userWebhookDeliver,
 		$systemWebhookDeliver,
 		$hanamiDb,
+		$hanamiNoteImport,
 	],
 	exports: [
 		$system,
@@ -116,6 +125,7 @@ const $hanamiDb: Provider = {
 		$userWebhookDeliver,
 		$systemWebhookDeliver,
 		$hanamiDb,
+		$hanamiNoteImport,
 	],
 })
 export class QueueModule implements OnApplicationShutdown {
@@ -130,6 +140,7 @@ export class QueueModule implements OnApplicationShutdown {
 		@Inject('queue:userWebhookDeliver') public userWebhookDeliverQueue: UserWebhookDeliverQueue,
 		@Inject('queue:systemWebhookDeliver') public systemWebhookDeliverQueue: SystemWebhookDeliverQueue,
 		@Inject('queue:hanamiDb') public hanamiDbQueue: HanamiDbQueue,
+		@Inject('queue:hanamiNoteImport') public hanamiNoteImportQueue: HanamiNoteImportQueue,
 	) {}
 
 	public async dispose(): Promise<void> {
@@ -147,6 +158,7 @@ export class QueueModule implements OnApplicationShutdown {
 			this.userWebhookDeliverQueue.close(),
 			this.systemWebhookDeliverQueue.close(),
 			this.hanamiDbQueue.close(),
+			this.hanamiNoteImportQueue.close(),
 		]);
 	}
 

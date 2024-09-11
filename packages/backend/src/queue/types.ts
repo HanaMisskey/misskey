@@ -86,7 +86,7 @@ export type DbUserImportJobData = {
 	withReplies?: boolean;
 };
 
-export type HanamiDbNoteImportJobData = {
+export type HanamiNoteImportJobData = {
 	user: ThinUser;
 	fileId: MiDriveFile['id'];
 	type: string;
@@ -151,7 +151,6 @@ export type ThinUser = {
 };
 
 export type HanamiDbJobMap = {
-	importNotes: HanamiDbNoteImportJobData;
 	importTweetsToDb: HanamiDbNoteWithParentImportToDbJobData;
 	importIGToDb: HanamiDbNoteImportToDbJobData;
 	importFBToDb: HanamiDbNoteImportToDbJobData;
