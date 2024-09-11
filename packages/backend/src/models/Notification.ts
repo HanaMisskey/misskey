@@ -107,6 +107,16 @@ export type MiNotification = {
 	type: 'test';
 	id: string;
 	createdAt: string;
+} | {
+	type: 'noteImportStarted';
+	id: string;
+	createdAt: string;
+
+} | {
+	type: 'noteImportFailed';
+	id: string;
+	createdAt: string;
+	massage: string;
 };
 
 export type MiGroupedNotification = MiNotification | {
