@@ -67,7 +67,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 					</div>
 				</MkFolder>
 				<MkInput v-model="remarks" :mfmAutocomplete="true">
-					<template #label>{{ i18n.ts._hana.emojiNote }}</template>
+					<template #label>{{ i18n.ts._hana.emojiRemarks }}</template>
 				</MkInput>
 				<MkSwitch v-model="isSensitive">isSensitive</MkSwitch>
 				<MkSwitch v-model="localOnly">{{ i18n.ts.localOnly }}</MkSwitch>
