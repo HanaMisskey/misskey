@@ -49,6 +49,10 @@ SPDX-License-Identifier: AGPL-3.0-only
 						<MkLink :url="emoji.url" target="_blank">{{ emoji.url }}</MkLink>
 					</template>
 				</MkKeyValue>
+				<MkKeyValue>
+					<template #key>{{ i18n.ts._hana.emojiNote }}</template>
+					<template #value><Mfm :text="emoji.note ?? i18n.ts.none"/></template>
+				</MkKeyValue>
 			</div>
 		</MkSpacer>
 	</template>

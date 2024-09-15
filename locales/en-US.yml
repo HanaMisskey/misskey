@@ -2658,6 +2658,7 @@ _contextMenu:
   appWithShift: "Application with shift key"
   native: "Native"
 _hana:
+  emojiNote: "note"
   hanaSettings: "HanaMisskey Settings"
   hanaMode: "Hana Mode"
   hanaModeShort: "Hana"

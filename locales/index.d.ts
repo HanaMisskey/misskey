@@ -10337,6 +10337,10 @@ export interface Locale extends ILocale {
     };
     "_hana": {
         /**
+         * 備考
+         */
+        "emojiNote": string;
+        /**
          * はなみすきー設定
          */
         "hanaSettings": string;

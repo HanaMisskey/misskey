@@ -95,6 +95,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				isSensitive: emoji.isSensitive,
 				localOnly: emoji.localOnly,
 				roleIdsThatCanBeUsedThisEmojiAsReaction: emoji.roleIdsThatCanBeUsedThisEmojiAsReaction,
+				note: null,
 			}, me);
 
 			return this.emojiEntityService.packDetailed(addedEmoji);

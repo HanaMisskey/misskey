@@ -4696,6 +4696,7 @@ export type components = {
       localOnly?: boolean;
       isSensitive?: boolean;
       roleIdsThatCanBeUsedThisEmojiAsReaction?: string[];
+      note?: string;
     };
     EmojiDetailed: {
       /** Format: id */
@@ -4710,6 +4711,7 @@ export type components = {
       isSensitive: boolean;
       localOnly: boolean;
       roleIdsThatCanBeUsedThisEmojiAsReaction: string[];
+      note: string | null;
     };
     Flash: {
       /**
