@@ -2757,6 +2757,7 @@ _contextMenu:
   native: "ブラウザのUI"
 
 _hana:
+  emojiRemarks: "備考"
   hanaSettings: "はなみすきー設定"
   hanaMisskey: "はなみすきー"
   hanaMode: "はなモード"
