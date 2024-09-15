@@ -51,7 +51,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 				</MkKeyValue>
 				<MkKeyValue>
 					<template #key>{{ i18n.ts._hana.emojiRemarks }}</template>
-					<template #value><Mfm :text="emoji.emojiRemarks ?? i18n.ts.none"/></template>
+					<template #value><Mfm :text="emoji.remarks ?? i18n.ts.none"/></template>
 				</MkKeyValue>
 			</div>
 		</MkSpacer>
