@@ -10339,7 +10339,7 @@ export interface Locale extends ILocale {
         /**
          * 備考
          */
-        "emojiNote": string;
+        "emojiRemarks": string;
         /**
          * はなみすきー設定
          */
