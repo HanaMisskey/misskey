@@ -66,9 +66,9 @@ SPDX-License-Identifier: AGPL-3.0-only
 						<MkInfo warn>{{ i18n.ts.rolesThatCanBeUsedThisEmojiAsReactionPublicRoleWarn }}</MkInfo>
 					</div>
 				</MkFolder>
-				<MkInput v-model="remarks" :mfmAutocomplete="true">
+				<MkTextarea v-model="remarks" :mfmAutocomplete="true">
 					<template #label>{{ i18n.ts._hana.emojiRemarks }}</template>
-				</MkInput>
+				</MkTextarea>
 				<MkSwitch v-model="isSensitive">isSensitive</MkSwitch>
 				<MkSwitch v-model="localOnly">{{ i18n.ts.localOnly }}</MkSwitch>
 				<MkButton v-if="emoji" danger @click="del()"><i class="ti ti-trash"></i> {{ i18n.ts.delete }}</MkButton>
@@ -96,6 +96,7 @@ import { customEmojiCategories } from '@/custom-emojis.js';
 import MkSwitch from '@/components/MkSwitch.vue';
 import { selectFile } from '@/scripts/select-file.js';
 import MkRolePreview from '@/components/MkRolePreview.vue';
+import MkTextarea from '@/components/MkTextarea.vue';
 
 const props = defineProps<{
 	emoji?: any,
