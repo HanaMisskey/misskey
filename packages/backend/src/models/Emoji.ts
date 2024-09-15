@@ -85,5 +85,5 @@ export class MiEmoji {
 	@Column('varchar', {
 		length: 1024, nullable: true,
 	})
-	public note: string | null;
+	public remarks: string | null;
 }

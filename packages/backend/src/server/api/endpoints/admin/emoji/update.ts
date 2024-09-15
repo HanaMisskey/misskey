@@ -51,7 +51,7 @@ export const paramDef = {
 			type: 'string',
 		} },
 		license: { type: 'string', nullable: true },
-		note: { type: 'string', nullable: true },
+		remarks: { type: 'string', nullable: true },
 		isSensitive: { type: 'boolean' },
 		localOnly: { type: 'boolean' },
 		roleIdsThatCanBeUsedThisEmojiAsReaction: { type: 'array', items: {
@@ -104,7 +104,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				isSensitive: ps.isSensitive,
 				localOnly: ps.localOnly,
 				roleIdsThatCanBeUsedThisEmojiAsReaction: ps.roleIdsThatCanBeUsedThisEmojiAsReaction,
-				note: ps.note,
+				remarks: ps.remarks,
 			}, me);
 		});
 	}

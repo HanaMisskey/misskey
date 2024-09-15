@@ -50,8 +50,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 					</template>
 				</MkKeyValue>
 				<MkKeyValue>
-					<template #key>{{ i18n.ts._hana.emojiNote }}</template>
-					<template #value><Mfm :text="emoji.note ?? i18n.ts.none"/></template>
+					<template #key>{{ i18n.ts._hana.emojiRemarks }}</template>
+					<template #value><Mfm :text="emoji.emojiRemarks ?? i18n.ts.none"/></template>
 				</MkKeyValue>
 			</div>
 		</MkSpacer>

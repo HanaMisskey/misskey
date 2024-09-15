@@ -66,7 +66,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 						<MkInfo warn>{{ i18n.ts.rolesThatCanBeUsedThisEmojiAsReactionPublicRoleWarn }}</MkInfo>
 					</div>
 				</MkFolder>
-				<MkInput v-model="note" :mfmAutocomplete="true">
+				<MkInput v-model="remarks" :mfmAutocomplete="true">
 					<template #label>{{ i18n.ts._hana.emojiNote }}</template>
 				</MkInput>
 				<MkSwitch v-model="isSensitive">isSensitive</MkSwitch>
@@ -111,7 +111,7 @@ const localOnly = ref(props.emoji ? props.emoji.localOnly : false);
 const roleIdsThatCanBeUsedThisEmojiAsReaction = ref(props.emoji ? props.emoji.roleIdsThatCanBeUsedThisEmojiAsReaction : []);
 const rolesThatCanBeUsedThisEmojiAsReaction = ref<Misskey.entities.Role[]>([]);
 const file = ref<Misskey.entities.DriveFile>();
-const note = ref<string>(props.emoji ? props.emoji.note : '');
+const remarks = ref<string>(props.emoji ? props.emoji.remarks : '');
 
 watch(roleIdsThatCanBeUsedThisEmojiAsReaction, async () => {
 	rolesThatCanBeUsedThisEmojiAsReaction.value = (await Promise.all(roleIdsThatCanBeUsedThisEmojiAsReaction.value.map((id) => misskeyApi('admin/roles/show', { roleId: id }).catch(() => null)))).filter(x => x != null);
@@ -157,7 +157,7 @@ async function done() {
 		isSensitive: isSensitive.value,
 		localOnly: localOnly.value,
 		roleIdsThatCanBeUsedThisEmojiAsReaction: rolesThatCanBeUsedThisEmojiAsReaction.value.map(x => x.id),
-		note: note.value === '' ? null : note.value,
+		remarks: remarks.value === '' ? null : remarks.value,
 	};
 
 	if (file.value) {

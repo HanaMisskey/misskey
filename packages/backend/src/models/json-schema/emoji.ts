@@ -102,7 +102,7 @@ export const packedEmojiDetailedSchema = {
 				format: 'id',
 			},
 		},
-		note: {
+		remarks: {
 			type: 'string',
 			optional: false, nullable: true,
 		},
