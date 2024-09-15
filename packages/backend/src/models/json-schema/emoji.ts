@@ -102,5 +102,9 @@ export const packedEmojiDetailedSchema = {
 				format: 'id',
 			},
 		},
+		note: {
+			type: 'string',
+			optional: false, nullable: true,
+		},
 	},
 } as const;
