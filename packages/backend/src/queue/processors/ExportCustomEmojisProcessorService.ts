@@ -85,8 +85,6 @@ export class ExportCustomEmojisProcessorService {
 		});
 
 		// job.data.categoriesに指定がある場合はそのカテゴリのみをエクスポート
-		// 指定がない場合は全てのカスタム絵文字をエクスポート
-		// ただし、hostがnullのもののみを対象とする
 		const categories = job.data.categories;
 		this.logger.info(`Exporting categories: ${categories}`);
 		if (categories) {
