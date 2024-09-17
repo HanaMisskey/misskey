@@ -41,7 +41,7 @@ export type DbJobData<T extends keyof DbJobMap> = DbJobMap[T];
 
 export type DbJobMap = {
 	deleteDriveFiles: DbJobDataWithUser;
-	exportCustomEmojis: DbJobDataWithUser;
+	exportCustomEmojis: DbExportCustomEmojisJobData;
 	exportAntennas: DBExportAntennasData;
 	exportNotes: DbJobDataWithUser;
 	exportFavorites: DbJobDataWithUser;
@@ -70,6 +70,12 @@ export type DbJobMap = {
 export type DbJobDataWithUser = {
 	user: ThinUser;
 }
+
+export type DbExportCustomEmojisJobData = {
+	user: ThinUser;
+	categories?: string[]
+}
+
 
 export type DbExportFollowingData = {
 	user: ThinUser;

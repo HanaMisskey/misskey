@@ -75,7 +75,7 @@ export class ExportCustomEmojisProcessorService {
 
 		await writeMeta(`{"metaVersion":2,"host":"${this.config.host}","exportedAt":"${new Date().toString()}","emojis":[`);
 
-		const customEmojis = await this.emojisRepository.find({
+		let customEmojis = await this.emojisRepository.find({
 			where: {
 				host: IsNull(),
 			},
@@ -83,6 +83,15 @@ export class ExportCustomEmojisProcessorService {
 				id: 'ASC',
 			},
 		});
+
+		// job.data.categoriesに指定がある場合はそのカテゴリのみをエクスポート
+		// 指定がない場合は全てのカスタム絵文字をエクスポート
+		// ただし、hostがnullのもののみを対象とする
+		const categories = job.data.categories;
+		this.logger.info(`Exporting categories: ${categories}`);
+		if (categories) {
+			customEmojis = customEmojis.filter(emoji => categories.includes(emoji.category));
+		}
 
 		for (const emoji of customEmojis) {
 			if (!/^[a-zA-Z0-9_]+$/.test(emoji.name)) {

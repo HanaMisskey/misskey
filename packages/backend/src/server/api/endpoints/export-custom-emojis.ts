@@ -19,7 +19,14 @@ export const meta = {
 
 export const paramDef = {
 	type: 'object',
-	properties: {},
+	properties: {
+		categories: {
+			type: 'array',
+			items: {
+				type: 'string',
+			},
+		},
+	},
 	required: [],
 } as const;
 
@@ -29,7 +36,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private queueService: QueueService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
-			this.queueService.createExportCustomEmojisJob(me);
+			this.queueService.createExportCustomEmojisJob(me, { categories: ps.categories ?? [] });
 		});
 	}
 }
