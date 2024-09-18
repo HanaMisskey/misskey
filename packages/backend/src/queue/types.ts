@@ -76,7 +76,6 @@ export type DbExportCustomEmojisJobData = {
 	categories?: string[]
 }
 
-
 export type DbExportFollowingData = {
 	user: ThinUser;
 	excludeMuting: boolean;
