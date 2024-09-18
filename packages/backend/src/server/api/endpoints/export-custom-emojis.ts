@@ -25,6 +25,7 @@ export const paramDef = {
 			items: {
 				type: 'string',
 			},
+			description: 'If null is provided, all emojis will be exported.',
 		},
 	},
 	required: [],
