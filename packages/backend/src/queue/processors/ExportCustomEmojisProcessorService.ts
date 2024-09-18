@@ -90,6 +90,8 @@ export class ExportCustomEmojisProcessorService {
 		if (categories) {
 			customEmojis = customEmojis.filter(emoji => categories.includes(emoji.category));
 		}
+		// エクスポート対象がない場合はエラー
+		if (!customEmojis.length) throw new Error('No emojis found for the specified categories.');
 
 		for (const emoji of customEmojis) {
 			if (!/^[a-zA-Z0-9_]+$/.test(emoji.name)) {
