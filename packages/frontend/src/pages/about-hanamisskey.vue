@@ -21,17 +21,14 @@
 						<FormLink to="https://docs.misskey.flowers" external>
 							<template #icon><i class="ti ti-notebook"></i></template>
 							{{ i18n.ts._hana._aboutHanaMisskey.documentation }}
-							<template #suffix>Notion</template>
 						</FormLink>
 						<FormLink to="https://stats.uptimerobot.com/cyfsDKVzjx" external>
 							<template #icon><i class="ti ti-health-recognition"></i></template>
 							{{ i18n.ts._hana._aboutHanaMisskey.serviceStatus }}
-							<template #suffix>UptimeRobot</template>
 						</FormLink>
 						<FormLink to="https://legacy.misskey.flowers" external>
 							<template #icon><i class="ti ti-archive"></i></template>
 							{{ i18n.ts._hana._aboutHanaMisskey.bskArchives }}
-							<template #suffix>Backspacekey Archives</template>
 						</FormLink>
 					</div>
 				</FormSection>
