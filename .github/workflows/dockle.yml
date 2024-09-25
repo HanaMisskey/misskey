@@ -4,8 +4,7 @@ name: Dockle
 on:
   push:
     branches:
-      - master
-      - develop
+      - hanami
   pull_request:
 
 jobs:

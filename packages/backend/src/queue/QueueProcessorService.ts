@@ -225,6 +225,7 @@ export class QueueProcessorService implements OnApplicationShutdown {
 				}
 			}, {
 				...baseQueueOptions(this.config, QUEUE.DB),
+				concurrency: 10,
 				autorun: false,
 			});
 

@@ -10337,6 +10337,10 @@ export interface Locale extends ILocale {
     };
     "_hana": {
         /**
+         * 備考
+         */
+        "emojiRemarks": string;
+        /**
          * はなみすきー設定
          */
         "hanaSettings": string;
@@ -10364,6 +10368,10 @@ export interface Locale extends ILocale {
          * BackspaceKeyからの移行
          */
         "migrateFromBackspaceKey": string;
+        /**
+         * 独自検索エンジンは現在開発中です。今ご利用いただけるのは通常のMisskeyと同じ検索エンジン（Meilisearch）です。今後の進化にご期待ください！
+         */
+        "searchIsInBeta": string;
         /**
          * 特定商取引法に基づく表記
          */
@@ -10467,7 +10475,7 @@ export interface Locale extends ILocale {
             };
             "_cta": {
                 /**
-                 * 「はな」のあるSNS体験を楽しもう
+                 * はなみすきーで、かわいいSNS体験を
                  */
                 "title": string;
             };
@@ -10656,12 +10664,12 @@ export interface Locale extends ILocale {
              */
             "imageGeneratedDescription": string;
             /**
-             * あたらしいSNS「はなみすきー」をはじめました！登録してフォローしてね！
+             * あたらしいSNS「 #はなみすきー 」をはじめました！登録してフォローしてね！ #はなみすきーはじめましたカード
              * {url}
              */
             "shareText": ParameterizedString<"url">;
             /**
-             * あたらしいMisskey系SNS「はなみすきー」をはじめました！登録してフォローしてね！
+             * あたらしいMisskey系SNS「 #はなみすきー 」をはじめました！登録してフォローしてね！ #はなみすきーはじめましたカード
              * {url}
              */
             "shareTextForX": ParameterizedString<"url">;
@@ -10711,7 +10719,7 @@ export interface Locale extends ILocale {
              */
             "bskArchives": string;
             /**
-             * 運営メンバー
+             * チームメンバー
              */
             "teamMembers": string;
             /**
@@ -10726,6 +10734,42 @@ export interface Locale extends ILocale {
              * ほかにも多くの方にご支援いただきました。ありがとうございます😊
              */
             "morePatrons": string;
+        };
+        "_visitorLoginPopup": {
+            /**
+             * はなみすきーで、かわいいSNS体験を
+             */
+            "title": string;
+            /**
+             * リアクションで楽しく。はなモードであなたらしく。あたらしいSNSをあなたも体験してみませんか。
+             */
+            "description": string;
+        };
+        "_tutorialMinorSettings": {
+            /**
+             * センシティブなコンテンツに関する設定
+             */
+            "title": string;
+            /**
+             * センシティブなコンテンツをどのように表示するかを設定できます。
+             */
+            "descriotion": string;
+            /**
+             * センシティブなメディアを含むノートをミュート
+             */
+            "muteSensitive": string;
+            /**
+             * センシティブな画像・動画・音声などを含むノートをすべて最小化した状態で表示します。クリックすると開いて中身を見ることができますが、開いたとしてもファイル自体にはぼかしがかかった状態で表示されます。
+             */
+            "muteSensitiveDescription": string;
+            /**
+             * センシティブなコンテンツはぼかしがかかった状態で表示されますが、誤操作防止のために、中身をクリックして開く際に追加で確認ダイアログを表示させることができます。
+             */
+            "confirmWhenRevealingSensitiveMediaDescription": string;
+            /**
+             * 未成年の方は、おうちの方といっしょに確認してください。この設定は後からいつでも変更できます。
+             */
+            "forMinor": string;
         };
     };
 }

@@ -2658,12 +2658,14 @@ _contextMenu:
   appWithShift: "Application with shift key"
   native: "Native"
 _hana:
+  emojiRemakrs: "remarks"
   hanaSettings: "HanaMisskey Settings"
   hanaMode: "Hana Mode"
   hanaModeShort: "Hana"
   hanaModeTutorialDescription: "One of HanaMisskey's key unique features is Hana Mode, and your social networking experience with HanaMisskey will vary greatly depending on whether you enable Hana Mode or not. Below are the main differences and recommended use cases, so please select either one and proceed."
   flowerEffect: "Show flurries all year round"
   migrateFromBackspaceKey: "Migrate from BackspaceKey"
+  searchIsInBeta: "Our own search engine is currently under development. Currently you are using the same search engine (Meilisearch) as regular Misskey. Stay tuned to see how the search is optimized in the future!"
   _inDevelopment:
     title: "This feature is under development"
     description: "HanaMisskey is packed with new features currently in development! Stay tuned to see what exciting features will be implemented."
@@ -2721,8 +2723,8 @@ _hana:
     generateImage: "Generate Image"
     imageGenerated: "Your \"Just Joined HanaMisskey!\" card is ready!"
     imageGeneratedDescription: "Download this card and share it on existing social media platforms like X (formerly Twitter) 🎉"
-    shareText: "Just joined the brand-new social media \"HanaMisskey\"! Sign up and follow me!\n{url}"
-    shareTextForX: "Just joined a new Misskey-based social media \"HanaMisskey\"! Sign up and follow me!\n{url}"
+    shareText: "Just joined the brand-new social media \"HanaMisskey\"! Sign up and follow me! #はなみすきー #はなみすきーはじめましたカード\n{url}"
+    shareTextForX: "Just joined a new Misskey-based social media \"HanaMisskey\"! Sign up and follow me! #はなみすきー #はなみすきーはじめましたカード\n{url}"
     shareToX: "Post on X"
     shareWarning: "Due to technical limitations, the \"Just Joined HanaMisskey!\" card will not be attached automatically when posting on X.\nPlease save the image manually and upload it to the post form."
   _welcomeCardGenPopup:

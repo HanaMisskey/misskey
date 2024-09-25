@@ -2757,6 +2757,7 @@ _contextMenu:
   native: "ブラウザのUI"
 
 _hana:
+  emojiRemarks: "備考"
   hanaSettings: "はなみすきー設定"
   hanaMisskey: "はなみすきー"
   hanaMode: "はなモード"
@@ -2764,6 +2765,7 @@ _hana:
   hanaModeTutorialDescription: "はなみすきーの主要な独自機能として「はなモード」があります。はなモードを有効にするかどうかで、はなみすきーでのSNS体験は大きく変わってきます。以下に主な違いとおすすめのユースケースを挙げますので、どちらか選択して進んでください。"
   flowerEffect: "いつでも花びらを降らせる"
   migrateFromBackspaceKey: "BackspaceKeyからの移行"
+  searchIsInBeta: "独自検索エンジンは現在開発中です。今ご利用いただけるのは通常のMisskeyと同じ検索エンジン（Meilisearch）です。今後の進化にご期待ください！"
   commerceDisclosure: "特定商取引法に基づく表記"
   commerceDisclosureUrl: "特定商取引法に基づく表記URL"
   subscription: "サブスクリプション"
@@ -2794,7 +2796,7 @@ _hana:
         title: "最新技術を活用した高精度な検索"
         description: "機械学習や最新の学術研究をもとに、はなみすきーのためにチューニングされた高精度で高速な検索機能を利用できます。また、はなみすきーの検索機能そのものが学術研究プロジェクトとなっているため、検索精度は日進月歩となることが期待できます。"
     _cta:
-      title: "「はな」のあるSNS体験を楽しもう"
+      title: "はなみすきーで、かわいいSNS体験を"
   _hanaModeSwitcher:
     recomenddedFor: "こんな方におすすめ"
     normal: "通常"
@@ -2843,8 +2845,8 @@ _hana:
     generateImage: "画像を出力"
     imageGenerated: "はなみすきーはじめましたカードが完成しました"
     imageGeneratedDescription: "このカードをダウンロードして、X (Twitter)などの既存のSNSでシェアしてください🎉"
-    shareText: "あたらしいSNS「はなみすきー」をはじめました！登録してフォローしてね！\n{url}"
-    shareTextForX: "あたらしいMisskey系SNS「はなみすきー」をはじめました！登録してフォローしてね！\n{url}"
+    shareText: "あたらしいSNS「 #はなみすきー 」をはじめました！登録してフォローしてね！ #はなみすきーはじめましたカード\n{url}"
+    shareTextForX: "あたらしいMisskey系SNS「 #はなみすきー 」をはじめました！登録してフォローしてね！ #はなみすきーはじめましたカード\n{url}"
     shareToX: "Xでポスト"
     shareWarning: "技術的制約により、Xにポストする際、はじめましたカード自動では添付されません。\nお手数ですが、手動で画像を保存して、Xの投稿フォームにアップロードしていただきますようお願いします。"
   _welcomeCardGenPopup:
@@ -2857,7 +2859,17 @@ _hana:
     documentation: "ドキュメント"
     serviceStatus: "サービス状況"
     bskArchives: "BackspaceKeyアーカイブ（準備中）"
-    teamMembers: "運営メンバー"
+    teamMembers: "チームメンバー"
     bskPatrons: "BackspaceKey時代の支援者"
     bskDescription: "はなみすきーの前身はBackspaceKeyというMisskeyサーバーでした。古くからのご支援に感謝します😊"
     morePatrons: "ほかにも多くの方にご支援いただきました。ありがとうございます😊"
+  _visitorLoginPopup:
+    title: "はなみすきーで、かわいいSNS体験を"
+    description: "リアクションで楽しく。はなモードであなたらしく。あたらしいSNSをあなたも体験してみませんか。"
+  _tutorialMinorSettings:
+    title: "センシティブなコンテンツに関する設定"
+    descriotion: "センシティブなコンテンツをどのように表示するかを設定できます。"
+    muteSensitive: "センシティブなメディアを含むノートをミュート"
+    muteSensitiveDescription: "センシティブな画像・動画・音声などを含むノートをすべて最小化した状態で表示します。クリックすると開いて中身を見ることができますが、開いたとしてもファイル自体にはぼかしがかかった状態で表示されます。"
+    confirmWhenRevealingSensitiveMediaDescription: "センシティブなコンテンツはぼかしがかかった状態で表示されますが、誤操作防止のために、中身をクリックして開く際に追加で確認ダイアログを表示させることができます。"
+    forMinor: "未成年の方は、おうちの方といっしょに確認してください。この設定は後からいつでも変更できます。"

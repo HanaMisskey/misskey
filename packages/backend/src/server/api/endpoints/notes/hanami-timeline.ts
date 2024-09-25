@@ -50,6 +50,11 @@ export const meta = {
 			code: 'HanamiTL_DISABLED',
 			id: 'ffa57e0f-d14e-48d6-a64c-8fbcba5635ab',
 		},
+		FttDisabled: {
+			message: 'Fanout timeline has been disabled.',
+			code: 'FTT_DISABLED',
+			id: '31f4d555-f46a-cae8-8e45-9a17740748e8',
+		},
 	},
 } as const;
 
@@ -106,166 +111,165 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			const serverSettings = await this.metaService.fetch();
 
 			if (!serverSettings.enableFanoutTimeline) {
-				const timeline = await this.getFromDb({
+				throw new ApiError(meta.errors.FttDisabled);
+			}
+
+			const followingsPromise = this.cacheService.userFollowingsCache.fetch(me.id);
+			const [packedHomeTimelineNotes, feauturedNotes] = await Promise.all([
+				(async () => {
+					const followings = await followingsPromise;
+					return this.fanoutTimelineEndpointService.timeline({
+						untilId,
+						sinceId,
+						limit: ps.limit,
+						allowPartial: ps.allowPartial,
+						me,
+						useDbFallback: serverSettings.enableFanoutTimelineDbFallback,
+						redisTimelines: ps.withFiles ? [`homeTimelineWithFiles:${me.id}`] : [`homeTimeline:${me.id}`],
+						alwaysIncludeMyNotes: true,
+						excludePureRenotes: !ps.withRenotes,
+						noteFilter: note => {
+							if (note.reply && note.reply.visibility === 'followers') {
+								if (!Object.hasOwn(followings, note.reply.userId) && note.reply.userId !== me.id) return false;
+							}
+							return true;
+						},
+						dbFallback: async (untilId, sinceId, limit) => await this.getFromDb({
+							untilId,
+							sinceId,
+							limit,
+							includeMyRenotes: ps.includeMyRenotes,
+							includeRenotedMyNotes: ps.includeRenotedMyNotes,
+							includeLocalRenotes: ps.includeLocalRenotes,
+							withFiles: ps.withFiles,
+							withRenotes: ps.withRenotes,
+						}, me),
+					});
+				})(),
+				this.getFeaturedNotes({
 					untilId,
 					sinceId,
 					limit: ps.limit,
-					includeMyRenotes: ps.includeMyRenotes,
-					includeRenotedMyNotes: ps.includeRenotedMyNotes,
-					includeLocalRenotes: ps.includeLocalRenotes,
-					withFiles: ps.withFiles,
-					withRenotes: ps.withRenotes,
-				}, me);
-
-				process.nextTick(() => {
-					this.activeUsersChart.read(me);
-				});
-
-				return await this.noteEntityService.packMany(timeline, me);
-			}
-
-			const [
-				followings,
-			] = await Promise.all([
-				this.cacheService.userFollowingsCache.fetch(me.id),
-			]);
-
-			const packedHomeTimelineNotes = await this.fanoutTimelineEndpointService.timeline({
-				untilId,
-				sinceId,
-				limit: ps.limit,
-				allowPartial: ps.allowPartial,
-				me,
-				useDbFallback: serverSettings.enableFanoutTimelineDbFallback,
-				redisTimelines: ps.withFiles ? [`homeTimelineWithFiles:${me.id}`] : [`homeTimeline:${me.id}`],
-				alwaysIncludeMyNotes: true,
-				excludePureRenotes: !ps.withRenotes,
-				noteFilter: note => {
-					if (note.reply && note.reply.visibility === 'followers') {
-						if (!Object.hasOwn(followings, note.reply.userId) && note.reply.userId !== me.id) return false;
-					}
-
-					return true;
-				},
-				dbFallback: async (untilId, sinceId, limit) => await this.getFromDb({
-					untilId,
-					sinceId,
-					limit,
-					includeMyRenotes: ps.includeMyRenotes,
-					includeRenotedMyNotes: ps.includeRenotedMyNotes,
-					includeLocalRenotes: ps.includeLocalRenotes,
-					withFiles: ps.withFiles,
-					withRenotes: ps.withRenotes,
 				}, me),
-			});
-
-			process.nextTick(() => {
-				this.activeUsersChart.read(me);
-			});
-
-			// 3日経っていないことを確認
-			if (ps.untilId) {
-				if (this.idService.parse(ps.untilId).date.getTime() < Date.now() - 1000 * 60 * 60 * 24 * 3 ) {
-					return packedHomeTimelineNotes;
-				}
-			}
-
-			let feauturedNoteIds: string[];
-			if (this.globalNotesRankingCacheLastFetchedAt !== 0 && (Date.now() - this.globalNotesRankingCacheLastFetchedAt < 1000 * 60 * 30)) {
-				feauturedNoteIds = this.globalNotesRankingCache;
-			} else {
-				feauturedNoteIds = await this.featuredService.getGlobalNotesRanking(100);
-				this.globalNotesRankingCache = feauturedNoteIds;
-				this.globalNotesRankingCacheLastFetchedAt = Date.now();
-			}
-
-			// feauturedのノート数が0でないことを確認
-			if (feauturedNoteIds.length === 0) {
-				return packedHomeTimelineNotes;
-			}
-
-			const [
-				userIdsWhoMeMuting,
-				userIdsWhoBlockingMe,
-				userMutedInstances,
-			] = await Promise.all([
-				this.cacheService.userMutingsCache.fetch(me.id),
-				this.cacheService.userBlockedCache.fetch(me.id),
-				this.cacheService.userProfileCache.fetch(me.id).then(p => new Set(p.mutedInstances)),
 			]);
-
-			const query = this.queryService.makePaginationQuery(this.notesRepository.createQueryBuilder('note'), ps.sinceId, ps.untilId)
-				.where('note.id IN (:...noteIds)', { noteIds: feauturedNoteIds })
-				.innerJoinAndSelect('note.user', 'user')
-				.leftJoinAndSelect('note.reply', 'reply')
-				.leftJoinAndSelect('note.renote', 'renote')
-				.leftJoinAndSelect('reply.user', 'replyUser')
-				.leftJoinAndSelect('renote.user', 'renoteUser')
-				.leftJoinAndSelect('note.channel', 'channel');
-
-			const feauturedNotes = (await query.getMany()).filter(note => {
-				if (isUserRelated(note, userIdsWhoBlockingMe)) return false;
-				if (isUserRelated(note, userIdsWhoMeMuting)) return false;
-				if (isInstanceMuted(note, userMutedInstances)) return false;
-
-				return true;
-			});
 
 			if (feauturedNotes.length === 0) {
 				return packedHomeTimelineNotes;
 			}
-
 			const packedFeauturedNotes = await this.noteEntityService.packMany(feauturedNotes, me);
 
 			if (packedHomeTimelineNotes.length === 0) {
-				return packedFeauturedNotes;
+				return packedFeauturedNotes.sort((a, b) => a.id > b.id ? -1 : 1).slice(0, ps.limit); ;
 			}
 
+			// TODO 重複の考慮
 			let allNotes;
-
 			if (!ps.sinceId && !ps.untilId) {
-				// 最初の読み込みのトップに人気投稿を入れる
-				const sortedFeaturedNotes = packedFeauturedNotes
-					.slice(0, 5)
-					.sort((a, b) => a.id > b.id ? -1 : 1);
+				// フィーチャーされた投稿の上位20件をシャッフル
+				const top20FeaturedNotes = packedFeauturedNotes.slice(0, 20);
+				for (let i = top20FeaturedNotes.length - 1; i > 0; i--) {
+					const j = Math.floor(Math.random() * (i + 1));
+					[top20FeaturedNotes[i], top20FeaturedNotes[j]] = [top20FeaturedNotes[j], top20FeaturedNotes[i]];
+				}
+
+				const [
+					featuredTop,
+					remainingFeaturedNotes,
+					homeTimelineTop2,
+					remainingHomeTimelineNotes,
+					remainingFeaturedNotesFromFullList,
+				  ] = await Promise.all([
+					(async () => top20FeaturedNotes.slice(0, 4))(),
+					(async () => top20FeaturedNotes.slice(4))(),
+					(async () => packedHomeTimelineNotes.slice(0, 2))(),
+					(async () => packedHomeTimelineNotes.slice(2))(),
+					(async () => packedFeauturedNotes.slice(20))(),
+				]);
+
+				const mixedTop = [...homeTimelineTop2, ...featuredTop];
 
 				const remainingNotes = [
-					...packedFeauturedNotes.slice(5),
-					...packedHomeTimelineNotes,
+					...remainingFeaturedNotes,
+					...remainingHomeTimelineNotes,
+					...remainingFeaturedNotesFromFullList,
 				].sort((a, b) => a.id > b.id ? -1 : 1);
 
-				allNotes = [
-					...sortedFeaturedNotes, // 先頭5件を追加
-					...remainingNotes,
-				];
+				allNotes = [...mixedTop, ...remainingNotes];
 			} else {
-				allNotes = [
-					...packedHomeTimelineNotes,
-					...packedFeauturedNotes,
-				].sort((a, b) => a.id > b.id ? -1 : 1);
+				allNotes = [...packedHomeTimelineNotes, ...packedFeauturedNotes].sort((a, b) => a.id > b.id ? -1 : 1);
 			}
 
 			// 重複を排除
-			allNotes = allNotes.filter((note, index, self) =>
-				index === self.findIndex(n => n.id === note.id),
-			);
+			const seenIds = new Set();
+			allNotes = allNotes.filter(note => {
+				if (seenIds.has(note.id)) {
+					return false;
+				}
+				seenIds.add(note.id);
+				return true;
+			});
 
 			// リミットを適用(リミットはあくまで最大であってそれより少なくなってもいいため)
 			const limitedNotes = allNotes.slice(0, ps.limit);
-			const homeTimelineIds = packedHomeTimelineNotes.map(note => note.id);
+			const homeTimelineIdsSet = new Set(packedHomeTimelineNotes.map(note => note.id));
 
 			// ホームタイムラインからのノートが存在し、かつリミット適用後の最小IDがホームタイムラインに由来しない場合
 			let minNoteId: string | null = limitedNotes.length > 0 ? limitedNotes[limitedNotes.length - 1].id : null;
-			if (homeTimelineIds.length > 0 && minNoteId && !homeTimelineIds.includes(minNoteId)) {
+
+			if (homeTimelineIdsSet.size > 0 && limitedNotes.some(note => homeTimelineIdsSet.has(note.id))) {
 				// 最小IDがホームタイムラインに由来しない場合、最小のノートを削除していく
 				// これによってホームタイムラインの取得漏れが消える
-				while (minNoteId && !homeTimelineIds.includes(minNoteId)) {
+				while (minNoteId && !homeTimelineIdsSet.has(minNoteId)) {
 					limitedNotes.pop();
 					minNoteId = limitedNotes.length > 0 ? limitedNotes[limitedNotes.length - 1].id : null;
 				}
 			}
 			return limitedNotes;
 		});
+	}
+
+	private async getFeaturedNotes(ps: { untilId: string | null; sinceId: string | null; limit: number; }, me: MiLocalUser) {
+		let feauturedNoteIds: string[];
+		if (this.globalNotesRankingCacheLastFetchedAt !== 0 && (Date.now() - this.globalNotesRankingCacheLastFetchedAt < 1000 * 60 * 30)) {
+			feauturedNoteIds = this.globalNotesRankingCache;
+		} else {
+			feauturedNoteIds = await this.featuredService.getGlobalNotesRanking(100);
+			this.globalNotesRankingCache = feauturedNoteIds;
+			this.globalNotesRankingCacheLastFetchedAt = Date.now();
+		}
+
+		if (feauturedNoteIds.length === 0) {
+			return [];
+		}
+
+		const [
+			userIdsWhoMeMuting,
+			userIdsWhoBlockingMe,
+			userMutedInstances,
+		] = await Promise.all([
+			this.cacheService.userMutingsCache.fetch(me.id),
+			this.cacheService.userBlockedCache.fetch(me.id),
+			this.cacheService.userProfileCache.fetch(me.id).then(p => new Set(p.mutedInstances)),
+		]);
+
+		const query = this.queryService.makePaginationQuery(this.notesRepository.createQueryBuilder('note'), ps.sinceId, ps.untilId)
+			.where('note.id IN (:...noteIds)', { noteIds: feauturedNoteIds })
+			.innerJoinAndSelect('note.user', 'user')
+			.leftJoinAndSelect('note.reply', 'reply')
+			.leftJoinAndSelect('note.renote', 'renote')
+			.leftJoinAndSelect('reply.user', 'replyUser')
+			.leftJoinAndSelect('renote.user', 'renoteUser')
+			.leftJoinAndSelect('note.channel', 'channel');
+
+		const feauturedNotes = (await query.getMany()).filter(note => {
+			if (isUserRelated(note, userIdsWhoBlockingMe)) return false;
+			if (isUserRelated(note, userIdsWhoMeMuting)) return false;
+			if (isInstanceMuted(note, userMutedInstances)) return false;
+
+			return true;
+		});
+
+		return feauturedNotes;
 	}
 
 	private async getFromDb(ps: { untilId: string | null; sinceId: string | null; limit: number; includeMyRenotes: boolean; includeRenotedMyNotes: boolean; includeLocalRenotes: boolean; withFiles: boolean; withRenotes: boolean; }, me: MiLocalUser) {
