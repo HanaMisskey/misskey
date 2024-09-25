@@ -14905,6 +14905,14 @@ export type operations = {
    * **Credential required**: *Yes*
    */
   'export-custom-emojis': {
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @description If null is provided, all emojis will be exported. */
+          categories?: string[];
+        };
+      };
+    };
     responses: {
       /** @description OK (without any results) */
       204: {

@@ -1439,6 +1439,7 @@ declare namespace entities {
         EndpointRequest,
         EndpointResponse,
         EndpointsResponse,
+        ExportCustomEmojisRequest,
         FederationFollowersRequest,
         FederationFollowersResponse,
         FederationFollowingRequest,
@@ -1827,6 +1828,9 @@ export { entities }
 
 // @public (undocumented)
 type Error_2 = components['schemas']['Error'];
+
+// @public (undocumented)
+type ExportCustomEmojisRequest = operations['export-custom-emojis']['requestBody']['content']['application/json'];
 
 // @public (undocumented)
 type FederationFollowersRequest = operations['federation___followers']['requestBody']['content']['application/json'];

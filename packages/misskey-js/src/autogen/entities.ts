@@ -251,6 +251,7 @@ export type EmailAddressAvailableResponse = operations['email-address___availabl
 export type EndpointRequest = operations['endpoint']['requestBody']['content']['application/json'];
 export type EndpointResponse = operations['endpoint']['responses']['200']['content']['application/json'];
 export type EndpointsResponse = operations['endpoints']['responses']['200']['content']['application/json'];
+export type ExportCustomEmojisRequest = operations['export-custom-emojis']['requestBody']['content']['application/json'];
 export type FederationFollowersRequest = operations['federation___followers']['requestBody']['content']['application/json'];
 export type FederationFollowersResponse = operations['federation___followers']['responses']['200']['content']['application/json'];
 export type FederationFollowingRequest = operations['federation___following']['requestBody']['content']['application/json'];
