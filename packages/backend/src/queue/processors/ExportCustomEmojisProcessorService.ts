@@ -90,7 +90,7 @@ export class ExportCustomEmojisProcessorService {
 		if (categories) {
 			customEmojis = customEmojis.filter(emoji => {
 				if (emoji.category == null || emoji.category === 'null') {
-					return categories.includes(null);
+					return categories.includes(null) || categories.includes('null');
 				} else {
 					return categories.includes(emoji.category);
 				}
