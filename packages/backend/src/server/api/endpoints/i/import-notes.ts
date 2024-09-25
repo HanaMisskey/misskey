@@ -11,6 +11,7 @@ export const meta = {
 	requireCredential: true,
 	requireRolePolicy: 'canImportNotes',
 	prohibitMoved: true,
+
 	limit: {
 		duration: ms('1hour'),
 		max: 2,
