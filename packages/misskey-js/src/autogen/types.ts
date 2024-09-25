@@ -14908,8 +14908,8 @@ export type operations = {
     requestBody: {
       content: {
         'application/json': {
-          /** @description If null is provided, all emojis will be exported. */
-          categories?: string[];
+          /** @description If null is provided instead of array, all emojis will be exported. If null is provided as an element of the array, emojis without category will be exported. */
+          categories?: ((string | null)[]) | null;
         };
       };
     };

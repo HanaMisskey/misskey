@@ -24,8 +24,10 @@ export const paramDef = {
 			type: 'array',
 			items: {
 				type: 'string',
+				nullable: true,
 			},
-			description: 'If null is provided, all emojis will be exported.',
+			description: 'If null is provided instead of array, all emojis will be exported. If null is provided as an element of the array, emojis without category will be exported.',
+			nullable: true,
 		},
 	},
 	required: [],

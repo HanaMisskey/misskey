@@ -85,13 +85,17 @@ export class ExportCustomEmojisProcessorService {
 		});
 
 		// job.data.categoriesに指定がある場合はそのカテゴリのみをエクスポート
-		const categories = job.data.categories;
+		const categories = job.data.categories as (string | null)[] | null;
 		this.logger.info(`Exporting categories: ${categories}`);
 		if (categories) {
-			customEmojis = customEmojis.filter(emoji => categories.includes(emoji.category));
+			customEmojis = customEmojis.filter(emoji => {
+				if (emoji.category == null || emoji.category === 'null') {
+					return categories.includes(null);
+				} else {
+					return categories.includes(emoji.category);
+				}
+			});
 		}
-		// エクスポート対象がない場合はエラー
-		if (!customEmojis.length) throw new Error('No emojis found for the specified categories.');
 
 		for (const emoji of customEmojis) {
 			if (!/^[a-zA-Z0-9_]+$/.test(emoji.name)) {

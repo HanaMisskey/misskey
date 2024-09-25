@@ -183,7 +183,7 @@ export class QueueService {
 	}
 
 	@bindThis
-	public createExportCustomEmojisJob(user: ThinUser, opts: { categories?: string[]; } = {}) {
+	public createExportCustomEmojisJob(user: ThinUser, opts: { categories?: (string | null)[]; } = {}) {
 		return this.dbQueue.add('exportCustomEmojis', {
 			user: { id: user.id },
 			categories: opts.categories,
