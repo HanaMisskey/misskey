@@ -146,6 +146,10 @@ export const tutorialBodyPagesDef = [{
 	icon: 'ti ti-lock',
 	type: 'setup',
 	title: i18n.ts._initialTutorial._privacySettings.title,
+}, {
+	icon: 'ti ti-shield-checkered',
+	type: 'setup',
+	title: i18n.ts._hana._tutorialMinorSettings.title,
 }] as const satisfies TutorialPage[];
 
 export const MAX_PAGE = tutorialBodyPagesDef.length + 1; // 0始まりにするために +2 - 1 = +1
@@ -162,6 +166,7 @@ import XFollowUsers from '@/components/MkTutorial.FollowUsers.vue';
 import XPostNote from '@/components/MkTutorial.PostNote.vue';
 import XSensitive from '@/components/MkTutorial.Sensitive.vue';
 import XPrivacySettings from '@/components/MkTutorial.PrivacySettings.vue';
+import XMinorSettings from '@/components/MkTutorial.MinorSettings.vue';
 import MkAnimBg from '@/components/MkAnimBg.vue';
 import { instance } from '@/instance.js';
 import { host } from '@/config.js';
@@ -207,6 +212,7 @@ const componentsDef: Tuple<ComponentDef, typeof tutorialBodyPagesDef.length> = [
 	{ component: XPostNote },
 	{ component: XSensitive },
 	{ component: XPrivacySettings },
+	{ component: XMinorSettings },
 ];
 
 // eslint-disable-next-line vue/no-setup-props-destructure

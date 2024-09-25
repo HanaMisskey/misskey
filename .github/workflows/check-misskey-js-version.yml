@@ -2,13 +2,13 @@ name: Check Misskey JS version
 
 on:
   push:
-    branches: [ develop ]
+    branches: [ hanami ]
     paths:
       - packages/misskey-js/package.json
       - package.json
       - .github/workflows/check-misskey-js-version.yml
   pull_request:
-    branches: [ develop ]
+    branches: [ hanami ]
     paths:
       - packages/misskey-js/package.json
       - package.json

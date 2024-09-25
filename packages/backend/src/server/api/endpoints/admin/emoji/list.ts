@@ -102,7 +102,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 					emojis = emojis.filter(emoji =>
 						emoji.name.includes(ps.query!) ||
 						emoji.aliases.some(a => a.includes(ps.query!)) ||
-						emoji.category?.includes(ps.query!));
+						emoji.category?.includes(ps.query!) ||
+						emoji.license?.includes(ps.query!));
 				}
 				emojis.splice(ps.limit + 1);
 			} else {

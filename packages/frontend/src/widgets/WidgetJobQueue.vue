@@ -6,7 +6,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 <template>
 <div data-cy-mkw-jobQueue class="mkw-jobQueue _monospace" :class="{ _panel: !widgetProps.transparent }">
 	<div class="inbox">
-		<div class="label">Inbox queue<i v-if="current.inbox.waiting > 0" class="ti ti-alert-triangle icon"></i></div>
+		<div class="label">Inbox queue</div>
 		<div class="values">
 			<div>
 				<div>Process</div>
@@ -27,7 +27,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 		</div>
 	</div>
 	<div class="deliver">
-		<div class="label">Deliver queue<i v-if="current.deliver.waiting > 0" class="ti ti-alert-triangle icon"></i></div>
+		<div class="label">Deliver queue</div>
 		<div class="values">
 			<div>
 				<div>Process</div>
@@ -56,18 +56,12 @@ import { useWidgetPropsManager, WidgetComponentEmits, WidgetComponentExpose, Wid
 import { GetFormResultType } from '@/scripts/form.js';
 import { useStream } from '@/stream.js';
 import kmg from '@/filters/kmg.js';
-import * as sound from '@/scripts/sound.js';
 import { deepClone } from '@/scripts/clone.js';
-import { defaultStore } from '@/store.js';
 
 const name = 'jobQueue';
 
 const widgetPropsDef = {
 	transparent: {
-		type: 'boolean' as const,
-		default: false,
-	},
-	sound: {
 		type: 'boolean' as const,
 		default: false,
 	},
@@ -100,15 +94,6 @@ const current = reactive({
 	},
 });
 const prev = reactive({} as typeof current);
-const jammedAudioBuffer = ref<AudioBuffer | null>(null);
-const jammedSoundNodePlaying = ref<boolean>(false);
-
-if (defaultStore.state.sound_masterVolume) {
-	sound.loadAudio('/client-assets/sounds/syuilo/queue-jammed.mp3').then(buf => {
-		if (!buf) throw new Error('[WidgetJobQueue] Failed to initialize AudioBuffer');
-		jammedAudioBuffer.value = buf;
-	});
-}
 
 for (const domain of ['inbox', 'deliver']) {
 	prev[domain] = deepClone(current[domain]);
@@ -121,15 +106,6 @@ const onStats = (stats) => {
 		current[domain].active = stats[domain].active;
 		current[domain].waiting = stats[domain].waiting;
 		current[domain].delayed = stats[domain].delayed;
-
-		if (current[domain].waiting > 0 && widgetProps.sound && jammedAudioBuffer.value && !jammedSoundNodePlaying.value) {
-			const soundNode = sound.createSourceNode(jammedAudioBuffer.value, {}).soundSource;
-			if (soundNode) {
-				jammedSoundNodePlaying.value = true;
-				soundNode.onended = () => jammedSoundNodePlaying.value = false;
-				soundNode.start();
-			}
-		}
 	}
 };
 
@@ -178,12 +154,6 @@ defineExpose<WidgetComponentExpose>({
 
 		> .label {
 			display: flex;
-
-			> .icon {
-				color: var(--warn);
-				margin-left: auto;
-				animation: warnBlink 1s infinite;
-			}
 		}
 
 		> .values {
