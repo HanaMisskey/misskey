@@ -87,9 +87,10 @@ export class ExportCustomEmojisProcessorService {
 		// job.data.categoriesに指定がある場合はそのカテゴリのみをエクスポート
 		const categories = job.data.categories as (string | null)[] | null;
 		this.logger.info(`Exporting categories: ${categories}`);
-		if (categories) {
+		if (categories != null) {
 			customEmojis = customEmojis.filter(emoji => {
 				if (emoji.category == null || emoji.category === 'null') {
+					// カテゴリがnull、つまりカテゴリなしのもの
 					return categories.includes(null) || categories.includes('null');
 				} else {
 					return categories.includes(emoji.category);
