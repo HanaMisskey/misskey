@@ -226,6 +226,10 @@ export const packedRolePoliciesSchema = {
 			type: 'boolean',
 			optional: false, nullable: false,
 		},
+		canUseDriveFileInSoundSettings: {
+			type: 'boolean',
+			optional: false, nullable: false,
+		},
 		canHideAds: {
 			type: 'boolean',
 			optional: false, nullable: false,

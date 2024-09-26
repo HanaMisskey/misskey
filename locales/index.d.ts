@@ -6870,6 +6870,10 @@ export interface Locale extends ILocale {
              */
             "canUseTranslator": string;
             /**
+             * サウンド設定でドライブのファイルを利用
+             */
+            "canUseDriveFileInSoundSettings": string;
+            /**
              * アイコンデコレーションの最大取付個数
              */
             "avatarDecorationLimit": string;
