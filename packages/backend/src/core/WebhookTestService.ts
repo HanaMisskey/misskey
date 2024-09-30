@@ -76,6 +76,10 @@ function generateDummyUser(override?: Partial<MiUser>): MiUser {
 		uri: null,
 		followersUri: null,
 		token: null,
+		isInHanaMode: false,
+		bskUserId: null,
+		bskAccessToken: null,
+		bskMigratedEntities: [],
 		...override,
 	};
 }
@@ -118,6 +122,7 @@ function generateDummyNote(override?: Partial<MiNote>): MiNote {
 		replyUserHost: null,
 		renoteUserId: null,
 		renoteUserHost: null,
+		isNoteInHanaMode: false,
 		...override,
 	};
 }
