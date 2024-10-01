@@ -18,7 +18,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 						<template #label>{{ i18n.ts.emailRequiredForSignup }}</template>
 					</MkSwitch>
 
-					<MkSwitch v-model="prohibitSkippingInitialTutorial">
+					<MkSwitch v-model="prohibitSkippingInitialTutorial" @change="onChange_prohibitSkippingInitialTutorial">
 						<template #label>{{ i18n.ts.prohibitSkippingInitialTutorial }}</template>
 						<template #caption>{{ i18n.ts.prohibitSkippingInitialTutorialDescription }}</template>
 					</MkSwitch>
@@ -167,6 +167,14 @@ function onChange_enableRegistration(value: boolean) {
 function onChange_emailRequiredForSignup(value: boolean) {
 	os.apiWithDialog('admin/update-meta', {
 		emailRequiredForSignup: value,
+	}).then(() => {
+		fetchInstance(true);
+	});
+}
+
+function onChange_prohibitSkippingInitialTutorial(value: boolean) {
+	os.apiWithDialog('admin/update-meta', {
+		canSkipInitialTutorial: !value,
 	}).then(() => {
 		fetchInstance(true);
 	});
