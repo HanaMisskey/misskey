@@ -96,10 +96,25 @@ export const moderationLogTypes = [
 	'createAbuseReportNotificationRecipient',
 	'updateAbuseReportNotificationRecipient',
 	'deleteAbuseReportNotificationRecipient',
-	'deleteAccount',
+  'deleteAccount',
 	'deletePage',
 	'deleteFlash',
 	'deleteGalleryPost',
+	'createSubscriptionPlan',
+	'updateSubscriptionPlan',
+	'archiveSubscriptionPlan',
+] as const;
+
+export const subscriptionStatus = [
+	'incomplete',
+	'incomplete_expired',
+	'trialing',
+	'active',
+	'past_due',
+	'paused',
+	'canceled',
+	'unpaid',
+	'none',
 ] as const;
 
 export type ModerationLogPayloads = {
@@ -340,6 +355,18 @@ export type ModerationLogPayloads = {
 		postUserId: string;
 		postUserUsername: string;
 		post: any;
+  };
+	createSubscriptionPlan: {
+		subscriptionPlanId: string;
+		subscriptionPlan: any;
+	};
+	updateSubscriptionPlan: {
+		subscriptionPlanId: string;
+		before: any;
+		after: any;
+	};
+	archiveSubscriptionPlan: {
+		subscriptionPlanId: string;
 	};
 };
 

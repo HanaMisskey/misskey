@@ -45,6 +45,8 @@ describe('ユーザー', () => {
 			emojis: user.emojis,
 			onlineStatus: user.onlineStatus,
 			badgeRoles: user.badgeRoles,
+			subscriptionPlanId: user.subscriptionPlanId,
+			subscriptionStatus: user.subscriptionStatus,
 
 			// BUG isAdmin/isModeratorはUserLiteではなくMeDetailedOnlyに含まれる。
 			isAdmin: undefined,
@@ -152,6 +154,8 @@ describe('ユーザー', () => {
 				email: user.email,
 				emailVerified: user.emailVerified,
 				securityKeysList: user.securityKeysList,
+				stripeSubscriptionId: user.stripeSubscriptionId,
+				stripeCustomerId: user.stripeCustomerId,
 			} : {}),
 		});
 	};

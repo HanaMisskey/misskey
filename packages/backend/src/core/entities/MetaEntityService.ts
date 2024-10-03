@@ -131,6 +131,9 @@ export class MetaEntityService {
 			enableUrlPreview: instance.urlPreviewEnabled,
 			noteSearchableScope: (this.config.meilisearch == null || this.config.meilisearch.scope !== 'local') ? 'global' : 'local',
 			maxFileSize: this.config.maxFileSize,
+
+			enableSubscriptions: instance.enableSubscriptions,
+			commerceDisclosureUrl: instance.commerceDisclosureUrl,
 		};
 
 		return packed;
@@ -172,4 +175,3 @@ export class MetaEntityService {
 		return packDetailed;
 	}
 }
-

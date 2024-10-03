@@ -215,6 +215,10 @@ export const packedMetaLiteSchema = {
 			type: 'boolean',
 			optional: false, nullable: false,
 		},
+		enableSubscriptions: {
+			type: 'boolean',
+			optional: false, nullable: false,
+		},
 		backgroundImageUrl: {
 			type: 'string',
 			optional: false, nullable: true,
@@ -228,6 +232,10 @@ export const packedMetaLiteSchema = {
 			optional: false, nullable: true,
 		},
 		privacyPolicyUrl: {
+			type: 'string',
+			optional: false, nullable: true,
+		},
+		commerceDisclosureUrl: {
 			type: 'string',
 			optional: false, nullable: true,
 		},

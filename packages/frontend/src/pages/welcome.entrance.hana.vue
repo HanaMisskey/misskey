@@ -79,6 +79,7 @@
 			<MkA to="/about">{{ i18n.ts.instanceInfo }}</MkA>
 			<a v-if="instance.impressumUrl" :href="instance.impressumUrl">{{ i18n.ts.impressum }}</a>
 			<a v-if="instance.tosUrl" :href="instance.tosUrl">{{ i18n.ts.termsOfService }}</a>
+			<a v-if="instance.commerceDisclosureUrl" :href="instance.commerceDisclosureUrl">{{ i18n.ts._hana.commerceDisclosure }}</a>
 			<a v-if="instance.privacyPolicyUrl" :href="instance.privacyPolicyUrl">{{ i18n.ts.privacyPolicy }}</a>
 			<a v-if="instance.repositoryUrl" :href="instance.repositoryUrl" target="_blank" rel="noopener">{{ i18n.ts.sourceCode }}<i class="ti ti-external-link"></i></a>
 		</div>

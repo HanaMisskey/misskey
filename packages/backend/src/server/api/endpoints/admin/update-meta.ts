@@ -8,6 +8,7 @@ import type { MiMeta } from '@/models/Meta.js';
 import { ModerationLogService } from '@/core/ModerationLogService.js';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { MetaService } from '@/core/MetaService.js';
+import { Column } from 'typeorm';
 
 export const meta = {
 	tags: ['admin'],
@@ -144,6 +145,7 @@ export const paramDef = {
 		perUserHomeTimelineCacheMax: { type: 'integer' },
 		perUserListTimelineCacheMax: { type: 'integer' },
 		notesPerOneAd: { type: 'integer' },
+		commerceDisclosureUrl: { type: 'string', nullable: true },
 		silencedHosts: {
 			type: 'array',
 			nullable: true,
@@ -168,6 +170,7 @@ export const paramDef = {
 		urlPreviewRequireContentLength: { type: 'boolean' },
 		urlPreviewUserAgent: { type: 'string', nullable: true },
 		urlPreviewSummaryProxyUrl: { type: 'string', nullable: true },
+		enableSubscriptions: { type: 'boolean' },
 	},
 	required: [],
 } as const;
@@ -607,6 +610,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				set.notesPerOneAd = ps.notesPerOneAd;
 			}
 
+			if (ps.commerceDisclosureUrl !== undefined) {
+				set.commerceDisclosureUrl = ps.commerceDisclosureUrl;
+			}
+
 			if (ps.bannedEmailDomains !== undefined) {
 				set.bannedEmailDomains = ps.bannedEmailDomains;
 			}
@@ -635,6 +642,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			if (ps.summalyProxy !== undefined || ps.urlPreviewSummaryProxyUrl !== undefined) {
 				const value = ((ps.urlPreviewSummaryProxyUrl ?? ps.summalyProxy) ?? '').trim();
 				set.urlPreviewSummaryProxyUrl = value === '' ? null : value;
+			}
+
+			if (ps.enableSubscriptions !== undefined) {
+				set.enableSubscriptions = ps.enableSubscriptions;
 			}
 
 			const before = await this.metaService.fetch(true);

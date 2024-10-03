@@ -63,6 +63,7 @@ import * as ep___admin_queue_deliverDelayed from './endpoints/admin/queue/delive
 import * as ep___admin_queue_inboxDelayed from './endpoints/admin/queue/inbox-delayed.js';
 import * as ep___admin_queue_promote from './endpoints/admin/queue/promote.js';
 import * as ep___admin_queue_stats from './endpoints/admin/queue/stats.js';
+import * as ep___admin_refreshUserSubscriptionStatus from './endpoints/admin/refresh-user-subscription-status.js';
 import * as ep___admin_relays_add from './endpoints/admin/relays/add.js';
 import * as ep___admin_relays_list from './endpoints/admin/relays/list.js';
 import * as ep___admin_relays_remove from './endpoints/admin/relays/remove.js';
@@ -92,6 +93,9 @@ import * as ep___admin_systemWebhook_delete from './endpoints/admin/system-webho
 import * as ep___admin_systemWebhook_list from './endpoints/admin/system-webhook/list.js';
 import * as ep___admin_systemWebhook_show from './endpoints/admin/system-webhook/show.js';
 import * as ep___admin_systemWebhook_update from './endpoints/admin/system-webhook/update.js';
+import * as ep___admin_subscriptionPlans_create from './endpoints/admin/subscription-plans/create.js';
+import * as ep___admin_subscriptionPlans_update from './endpoints/admin/subscription-plans/update.js';
+import * as ep___admin_subscriptionPlans_archive from './endpoints/admin/subscription-plans/archive.js';
 import * as ep___announcements from './endpoints/announcements.js';
 import * as ep___announcements_show from './endpoints/announcements/show.js';
 import * as ep___antennas_create from './endpoints/antennas/create.js';
@@ -342,6 +346,10 @@ import * as ep___resetDb from './endpoints/reset-db.js';
 import * as ep___resetPassword from './endpoints/reset-password.js';
 import * as ep___serverInfo from './endpoints/server-info.js';
 import * as ep___stats from './endpoints/stats.js';
+import * as ep___subscription_create from './endpoints/subscription/create.js';
+import * as ep___subscription_manage from './endpoints/subscription/manage.js';
+import * as ep___subscription_plans_list from './endpoints/subscription-plans/list.js';
+import * as ep___subscription_plans_show from './endpoints/subscription-plans/show.js';
 import * as ep___sw_show_registration from './endpoints/sw/show-registration.js';
 import * as ep___sw_update_registration from './endpoints/sw/update-registration.js';
 import * as ep___sw_register from './endpoints/sw/register.js';
@@ -467,6 +475,7 @@ const $admin_unsuspendUser: Provider = { provide: 'ep:admin/unsuspend-user', use
 const $admin_updateMeta: Provider = { provide: 'ep:admin/update-meta', useClass: ep___admin_updateMeta.default };
 const $admin_deleteAccount: Provider = { provide: 'ep:admin/delete-account', useClass: ep___admin_deleteAccount.default };
 const $admin_updateUserNote: Provider = { provide: 'ep:admin/update-user-note', useClass: ep___admin_updateUserNote.default };
+const $admin_refreshUserSubscriptionStatus: Provider = { provide: 'ep:admin/refresh-user-subscription-status', useClass: ep___admin_refreshUserSubscriptionStatus.default };
 const $admin_roles_create: Provider = { provide: 'ep:admin/roles/create', useClass: ep___admin_roles_create.default };
 const $admin_roles_delete: Provider = { provide: 'ep:admin/roles/delete', useClass: ep___admin_roles_delete.default };
 const $admin_roles_list: Provider = { provide: 'ep:admin/roles/list', useClass: ep___admin_roles_list.default };
@@ -481,6 +490,9 @@ const $admin_systemWebhook_delete: Provider = { provide: 'ep:admin/system-webhoo
 const $admin_systemWebhook_list: Provider = { provide: 'ep:admin/system-webhook/list', useClass: ep___admin_systemWebhook_list.default };
 const $admin_systemWebhook_show: Provider = { provide: 'ep:admin/system-webhook/show', useClass: ep___admin_systemWebhook_show.default };
 const $admin_systemWebhook_update: Provider = { provide: 'ep:admin/system-webhook/update', useClass: ep___admin_systemWebhook_update.default };
+const $admin_subscriptionPlans_create: Provider = { provide: 'ep:admin/subscription-plans/create', useClass: ep___admin_subscriptionPlans_create.default };
+const $admin_subscriptionPlans_update: Provider = { provide: 'ep:admin/subscription-plans/update', useClass: ep___admin_subscriptionPlans_update.default };
+const $admin_subscriptionPlans_archive: Provider = { provide: 'ep:admin/subscription-plans/archive', useClass: ep___admin_subscriptionPlans_archive.default };
 const $announcements: Provider = { provide: 'ep:announcements', useClass: ep___announcements.default };
 const $announcements_show: Provider = { provide: 'ep:announcements/show', useClass: ep___announcements_show.default };
 const $antennas_create: Provider = { provide: 'ep:antennas/create', useClass: ep___antennas_create.default };
@@ -731,6 +743,10 @@ const $resetDb: Provider = { provide: 'ep:reset-db', useClass: ep___resetDb.defa
 const $resetPassword: Provider = { provide: 'ep:reset-password', useClass: ep___resetPassword.default };
 const $serverInfo: Provider = { provide: 'ep:server-info', useClass: ep___serverInfo.default };
 const $stats: Provider = { provide: 'ep:stats', useClass: ep___stats.default };
+const $subscription_create: Provider = { provide: 'ep:subscription/create', useClass: ep___subscription_create.default };
+const $subscription_manage: Provider = { provide: 'ep:subscription/manage', useClass: ep___subscription_manage.default };
+const $subscription_plans_list: Provider = { provide: 'ep:subscription-plans/list', useClass: ep___subscription_plans_list.default };
+const $subscription_plans_show: Provider = { provide: 'ep:subscription-plans/show', useClass: ep___subscription_plans_show.default };
 const $sw_show_registration: Provider = { provide: 'ep:sw/show-registration', useClass: ep___sw_show_registration.default };
 const $sw_update_registration: Provider = { provide: 'ep:sw/update-registration', useClass: ep___sw_update_registration.default };
 const $sw_register: Provider = { provide: 'ep:sw/register', useClass: ep___sw_register.default };
@@ -845,6 +861,7 @@ const $reversi_verify: Provider = { provide: 'ep:reversi/verify', useClass: ep__
 		$admin_queue_inboxDelayed,
 		$admin_queue_promote,
 		$admin_queue_stats,
+		$admin_refreshUserSubscriptionStatus,
 		$admin_relays_add,
 		$admin_relays_list,
 		$admin_relays_remove,
@@ -874,6 +891,9 @@ const $reversi_verify: Provider = { provide: 'ep:reversi/verify', useClass: ep__
 		$admin_systemWebhook_list,
 		$admin_systemWebhook_show,
 		$admin_systemWebhook_update,
+		$admin_subscriptionPlans_create,
+		$admin_subscriptionPlans_update,
+		$admin_subscriptionPlans_archive,
 		$announcements,
 		$announcements_show,
 		$antennas_create,
@@ -1124,6 +1144,10 @@ const $reversi_verify: Provider = { provide: 'ep:reversi/verify', useClass: ep__
 		$resetPassword,
 		$serverInfo,
 		$stats,
+		$subscription_create,
+		$subscription_manage,
+		$subscription_plans_list,
+		$subscription_plans_show,
 		$sw_show_registration,
 		$sw_update_registration,
 		$sw_register,
@@ -1247,6 +1271,7 @@ const $reversi_verify: Provider = { provide: 'ep:reversi/verify', useClass: ep__
 		$admin_updateMeta,
 		$admin_deleteAccount,
 		$admin_updateUserNote,
+		$admin_refreshUserSubscriptionStatus,
 		$admin_roles_create,
 		$admin_roles_delete,
 		$admin_roles_list,
@@ -1261,6 +1286,9 @@ const $reversi_verify: Provider = { provide: 'ep:reversi/verify', useClass: ep__
 		$admin_systemWebhook_list,
 		$admin_systemWebhook_show,
 		$admin_systemWebhook_update,
+		$admin_subscriptionPlans_create,
+		$admin_subscriptionPlans_update,
+		$admin_subscriptionPlans_archive,
 		$announcements,
 		$announcements_show,
 		$antennas_create,
@@ -1511,6 +1539,10 @@ const $reversi_verify: Provider = { provide: 'ep:reversi/verify', useClass: ep__
 		$resetPassword,
 		$serverInfo,
 		$stats,
+		$subscription_create,
+		$subscription_manage,
+		$subscription_plans_list,
+		$subscription_plans_show,
 		$sw_register,
 		$sw_unregister,
 		$test,

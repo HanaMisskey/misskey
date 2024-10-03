@@ -531,6 +531,15 @@ export type paths = {
      */
     post: operations['admin___queue___stats'];
   };
+  '/admin/refresh-user-subscription-status': {
+    /**
+     * admin/refresh-user-subscription-status
+     * @description No description provided.
+     *
+     * **Credential required**: *Yes* / **Permission**: *write:admin:refresh-user-subscription-status*
+     */
+    post: operations['admin___refresh-user-subscription-status'];
+  };
   '/admin/relays/add': {
     /**
      * admin/relays/add
@@ -796,6 +805,36 @@ export type paths = {
      * **Credential required**: *Yes* / **Permission**: *write:admin:system-webhook*
      */
     post: operations['admin___system-webhook___update'];
+  };
+  '/admin/subscription-plans/create': {
+    /**
+     * admin/subscription-plans/create
+     * @description No description provided.
+     *
+     * **Internal Endpoint**: This endpoint is an API for the misskey mainframe and is not intended for use by third parties.
+     * **Credential required**: *Yes* / **Permission**: *write:admin:subscription-plans*
+     */
+    post: operations['admin___subscription-plans___create'];
+  };
+  '/admin/subscription-plans/update': {
+    /**
+     * admin/subscription-plans/update
+     * @description No description provided.
+     *
+     * **Internal Endpoint**: This endpoint is an API for the misskey mainframe and is not intended for use by third parties.
+     * **Credential required**: *Yes* / **Permission**: *write:admin:subscription-plans*
+     */
+    post: operations['admin___subscription-plans___update'];
+  };
+  '/admin/subscription-plans/archive': {
+    /**
+     * admin/subscription-plans/archive
+     * @description No description provided.
+     *
+     * **Internal Endpoint**: This endpoint is an API for the misskey mainframe and is not intended for use by third parties.
+     * **Credential required**: *Yes* / **Permission**: *write:admin:subscription-plans*
+     */
+    post: operations['admin___subscription-plans___archive'];
   };
   '/announcements': {
     /**
@@ -3227,6 +3266,42 @@ export type paths = {
      */
     post: operations['stats'];
   };
+  '/subscription/create': {
+    /**
+     * subscription/create
+     * @description No description provided.
+     *
+     * **Credential required**: *Yes* / **Permission**: *write:account*
+     */
+    post: operations['subscription___create'];
+  };
+  '/subscription/manage': {
+    /**
+     * subscription/manage
+     * @description No description provided.
+     *
+     * **Credential required**: *Yes* / **Permission**: *read:account*
+     */
+    post: operations['subscription___manage'];
+  };
+  '/subscription-plans/list': {
+    /**
+     * subscription-plans/list
+     * @description No description provided.
+     *
+     * **Credential required**: *No*
+     */
+    post: operations['subscription-plans___list'];
+  };
+  '/subscription-plans/show': {
+    /**
+     * subscription-plans/show
+     * @description No description provided.
+     *
+     * **Credential required**: *No*
+     */
+    post: operations['subscription-plans___show'];
+  };
   '/sw/show-registration': {
     /**
      * sw/show-registration
@@ -3769,6 +3844,9 @@ export type components = {
           iconUrl: string | null;
           displayOrder: number;
         })[];
+      /** @enum {string} */
+      subscriptionStatus: 'incomplete' | 'incomplete_expired' | 'trialing' | 'active' | 'past_due' | 'paused' | 'canceled' | 'unpaid' | 'none';
+      subscriptionPlanId: string | null;
     };
     UserDetailedNotMeOnly: {
       /** Format: url */
@@ -4015,6 +4093,8 @@ export type components = {
           /** Format: date-time */
           lastUsed: string;
         }[];
+      stripeCustomerId?: string | null;
+      stripeSubscriptionId: string | null;
     };
     UserDetailedNotMe: components['schemas']['UserLite'] & components['schemas']['UserDetailedNotMeOnly'];
     MeDetailed: components['schemas']['UserLite'] & components['schemas']['UserDetailedNotMeOnly'] & components['schemas']['MeDetailedOnly'];
@@ -4993,10 +5073,12 @@ export type components = {
       translatorAvailable: boolean;
       mediaProxy: string;
       enableUrlPreview: boolean;
+      enableSubscriptions: boolean;
       backgroundImageUrl: string | null;
       impressumUrl: string | null;
       logoImageUrl: string | null;
       privacyPolicyUrl: string | null;
+      commerceDisclosureUrl: string | null;
       inquiryUrl: string | null;
       serverRules: string[];
       themeColor: string | null;
@@ -5055,6 +5137,31 @@ export type components = {
       user?: components['schemas']['UserLite'];
       systemWebhookId?: string;
       systemWebhook?: components['schemas']['SystemWebhook'];
+    };
+    SubscriptionPlan: {
+      /**
+       * Format: id
+       * @example xxxxxxxxxx
+       */
+      id: string;
+      /** @example New Plan */
+      name: string;
+      /** @example 1000 */
+      price: number;
+      /** @example usd */
+      currency: string;
+      /** @example New Plan */
+      description: string | null;
+      /** @example price_xxxxxxxxxx */
+      stripePriceId: string;
+      /**
+       * Format: id
+       * @example xxxxxxxxxx
+       */
+      roleId: string;
+      role: components['schemas']['RoleLite'];
+      /** @example false */
+      isArchived: boolean;
     };
   };
   responses: never;
@@ -5189,6 +5296,7 @@ export type operations = {
             summalyProxy: string | null;
             themeColor: string | null;
             tosUrl: string | null;
+            commerceDisclosureUrl: string | null;
             uri: string;
             version: string;
             urlPreviewEnabled: boolean;
@@ -5197,6 +5305,7 @@ export type operations = {
             urlPreviewRequireContentLength: boolean;
             urlPreviewUserAgent: string | null;
             urlPreviewSummaryProxyUrl: string | null;
+            enableSubscriptions: boolean;
           };
         };
       };
@@ -8465,6 +8574,58 @@ export type operations = {
     };
   };
   /**
+   * admin/refresh-user-subscription-status
+   * @description No description provided.
+   *
+   * **Credential required**: *Yes* / **Permission**: *write:admin:refresh-user-subscription-status*
+   */
+  'admin___refresh-user-subscription-status': {
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: misskey:id */
+          userId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description OK (without any results) */
+      204: {
+        content: never;
+      };
+      /** @description Client error */
+      400: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Authentication error */
+      401: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Forbidden error */
+      403: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description I'm Ai */
+      418: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  /**
    * admin/relays/add
    * @description No description provided.
    *
@@ -8960,6 +9121,8 @@ export type operations = {
           'application/json': {
             email: string | null;
             emailVerified: boolean;
+            stripeCustomerId: string | null;
+            stripeSubscriptionId: string | null;
             autoAcceptFollowed: boolean;
             noCrawle: boolean;
             preventAiLearning: boolean;
@@ -9439,6 +9602,7 @@ export type operations = {
           perUserHomeTimelineCacheMax?: number;
           perUserListTimelineCacheMax?: number;
           notesPerOneAd?: number;
+          commerceDisclosureUrl?: string | null;
           silencedHosts?: string[] | null;
           mediaSilencedHosts?: string[] | null;
           /** @description [Deprecated] Use "urlPreviewSummaryProxyUrl" instead. */
@@ -9449,6 +9613,7 @@ export type operations = {
           urlPreviewRequireContentLength?: boolean;
           urlPreviewUserAgent?: string | null;
           urlPreviewSummaryProxyUrl?: string | null;
+          enableSubscriptions?: boolean;
         };
       };
     };
@@ -10357,6 +10522,178 @@ export type operations = {
         content: {
           'application/json': components['schemas']['SystemWebhook'];
         };
+      };
+      /** @description Client error */
+      400: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Authentication error */
+      401: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Forbidden error */
+      403: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description I'm Ai */
+      418: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  /**
+   * admin/subscription-plans/create
+   * @description No description provided.
+   *
+   * **Internal Endpoint**: This endpoint is an API for the misskey mainframe and is not intended for use by third parties.
+   * **Credential required**: *Yes* / **Permission**: *write:admin:subscription-plans*
+   */
+  'admin___subscription-plans___create': {
+    requestBody: {
+      content: {
+        'application/json': {
+          name: string;
+          price: number;
+          currency: string;
+          description?: string;
+          stripePriceId: string;
+          /** Format: misskey:id */
+          roleId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description OK (with results) */
+      200: {
+        content: {
+          'application/json': components['schemas']['SubscriptionPlan'];
+        };
+      };
+      /** @description Client error */
+      400: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Authentication error */
+      401: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Forbidden error */
+      403: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description I'm Ai */
+      418: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  /**
+   * admin/subscription-plans/update
+   * @description No description provided.
+   *
+   * **Internal Endpoint**: This endpoint is an API for the misskey mainframe and is not intended for use by third parties.
+   * **Credential required**: *Yes* / **Permission**: *write:admin:subscription-plans*
+   */
+  'admin___subscription-plans___update': {
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: misskey:id */
+          planId: string;
+          name?: string;
+          price?: number;
+          currency?: string;
+          description?: string;
+          /** Format: misskey:id */
+          roleId?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description OK (without any results) */
+      204: {
+        content: never;
+      };
+      /** @description Client error */
+      400: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Authentication error */
+      401: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Forbidden error */
+      403: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description I'm Ai */
+      418: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  /**
+   * admin/subscription-plans/archive
+   * @description No description provided.
+   *
+   * **Internal Endpoint**: This endpoint is an API for the misskey mainframe and is not intended for use by third parties.
+   * **Credential required**: *Yes* / **Permission**: *write:admin:subscription-plans*
+   */
+  'admin___subscription-plans___archive': {
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: misskey:id */
+          planId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description OK (without any results) */
+      204: {
+        content: never;
       };
       /** @description Client error */
       400: {
@@ -24980,6 +25317,222 @@ export type operations = {
             driveUsageLocal: number;
             driveUsageRemote: number;
           };
+        };
+      };
+      /** @description Client error */
+      400: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Authentication error */
+      401: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Forbidden error */
+      403: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description I'm Ai */
+      418: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  /**
+   * subscription/create
+   * @description No description provided.
+   *
+   * **Credential required**: *Yes* / **Permission**: *write:account*
+   */
+  subscription___create: {
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: misskey:id */
+          planId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description OK (with results) */
+      200: {
+        content: {
+          'application/json': {
+            redirect: {
+              permanent: boolean;
+              destination: string;
+            };
+          };
+        };
+      };
+      /** @description Client error */
+      400: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Authentication error */
+      401: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Forbidden error */
+      403: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description I'm Ai */
+      418: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description To many requests */
+      429: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  /**
+   * subscription/manage
+   * @description No description provided.
+   *
+   * **Credential required**: *Yes* / **Permission**: *read:account*
+   */
+  subscription___manage: {
+    responses: {
+      /** @description OK (with results) */
+      200: {
+        content: {
+          'application/json': {
+            redirect: {
+              permanent: boolean;
+              destination: string;
+            };
+          };
+        };
+      };
+      /** @description Client error */
+      400: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Authentication error */
+      401: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Forbidden error */
+      403: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description I'm Ai */
+      418: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  /**
+   * subscription-plans/list
+   * @description No description provided.
+   *
+   * **Credential required**: *No*
+   */
+  'subscription-plans___list': {
+    responses: {
+      /** @description OK (with results) */
+      200: {
+        content: {
+          'application/json': components['schemas']['SubscriptionPlan'][];
+        };
+      };
+      /** @description Client error */
+      400: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Authentication error */
+      401: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Forbidden error */
+      403: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description I'm Ai */
+      418: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  /**
+   * subscription-plans/show
+   * @description No description provided.
+   *
+   * **Credential required**: *No*
+   */
+  'subscription-plans___show': {
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: misskey:id */
+          planId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description OK (with results) */
+      200: {
+        content: {
+          'application/json': components['schemas']['SubscriptionPlan'];
         };
       };
       /** @description Client error */

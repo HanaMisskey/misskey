@@ -463,6 +463,10 @@ export const meta = {
 				type: 'string',
 				optional: false, nullable: true,
 			},
+			commerceDisclosureUrl: {
+				type: 'string',
+				optional: false, nullable: true,
+			},
 			uri: {
 				type: 'string',
 				optional: false, nullable: false,
@@ -494,6 +498,10 @@ export const meta = {
 			urlPreviewSummaryProxyUrl: {
 				type: 'string',
 				optional: false, nullable: true,
+			},
+			enableSubscriptions: {
+				type: 'boolean',
+				optional: false, nullable: false,
 			},
 		},
 	},
@@ -623,6 +631,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				perUserHomeTimelineCacheMax: instance.perUserHomeTimelineCacheMax,
 				perUserListTimelineCacheMax: instance.perUserListTimelineCacheMax,
 				notesPerOneAd: instance.notesPerOneAd,
+				commerceDisclosureUrl: instance.commerceDisclosureUrl,
 				summalyProxy: instance.urlPreviewSummaryProxyUrl,
 				urlPreviewEnabled: instance.urlPreviewEnabled,
 				urlPreviewTimeout: instance.urlPreviewTimeout,
@@ -630,6 +639,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				urlPreviewRequireContentLength: instance.urlPreviewRequireContentLength,
 				urlPreviewUserAgent: instance.urlPreviewUserAgent,
 				urlPreviewSummaryProxyUrl: instance.urlPreviewSummaryProxyUrl,
+				enableSubscriptions: instance.enableSubscriptions,
 			};
 		});
 	}
