@@ -149,6 +149,7 @@ export type Config = {
 	stripe: {
 		secretKey: string;
 		webhookSecret?: string;
+		customerPortalUrl?: string;
 	} | undefined;
 	proxy: string | undefined;
 	proxySmtp: string | undefined;
