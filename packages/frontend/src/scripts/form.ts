@@ -5,7 +5,7 @@
 
 import * as Misskey from 'misskey-js';
 
-type EnumItem = string | {
+export type EnumItem = string | {
 	label: string;
 	value: string;
 };

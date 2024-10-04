@@ -5176,6 +5176,10 @@ export interface Locale extends ILocale {
      * 新規登録したユーザーに表示されるチュートリアルをスキップできないようにします。チュートリアルを完了しなかったりチュートリアルページを回避したりした場合でも、強制的にリダイレクトされます。
      */
     "prohibitSkippingInitialTutorialDescription": string;
+    /**
+     * エクスポートしたいカテゴリを選択
+     */
+    "selectCategoryYouWantToExport": string;
     "_delivery": {
         /**
          * 配信状態

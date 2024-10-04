@@ -77,7 +77,7 @@ export class ExportCustomEmojisProcessorService {
 
 		await writeMeta(`{"metaVersion":2,"host":"${this.config.host}","exportedAt":"${new Date().toString()}","emojis":[`);
 
-		const customEmojis = await this.emojisRepository.find({
+		let customEmojis = await this.emojisRepository.find({
 			where: {
 				host: IsNull(),
 			},
@@ -85,6 +85,20 @@ export class ExportCustomEmojisProcessorService {
 				id: 'ASC',
 			},
 		});
+
+		// job.data.categoriesに指定がある場合はそのカテゴリのみをエクスポート
+		const categories = job.data.categories as (string | null)[] | null;
+		this.logger.info(`Exporting categories: ${categories}`);
+		if (categories != null) {
+			customEmojis = customEmojis.filter(emoji => {
+				if (emoji.category == null || emoji.category === 'null') {
+					// カテゴリがnull、つまりカテゴリなしのもの
+					return categories.includes(null) || categories.includes('null');
+				} else {
+					return categories.includes(emoji.category);
+				}
+			});
+		}
 
 		for (const emoji of customEmojis) {
 			if (!/^[a-zA-Z0-9_]+$/.test(emoji.name)) {

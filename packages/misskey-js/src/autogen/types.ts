@@ -15017,6 +15017,14 @@ export type operations = {
    * **Credential required**: *Yes*
    */
   'export-custom-emojis': {
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @description If null is provided instead of array, all emojis will be exported. If null is provided as an element of the array, emojis without category will be exported. */
+          categories?: ((string | null)[]) | null;
+        };
+      };
+    };
     responses: {
       /** @description OK (without any results) */
       204: {

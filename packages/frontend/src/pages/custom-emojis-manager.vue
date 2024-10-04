@@ -84,6 +84,8 @@ import { selectFile } from '@/scripts/select-file.js';
 import * as os from '@/os.js';
 import { misskeyApi } from '@/scripts/misskey-api.js';
 import { i18n } from '@/i18n.js';
+import type { EnumItem } from '@/scripts/form.js';
+import { customEmojiCategories } from '@/custom-emojis.js';
 import { definePageMetadata } from '@/scripts/page-metadata.js';
 
 const emojisPaginationComponent = shallowRef<InstanceType<typeof MkPagination>>();
@@ -180,7 +182,41 @@ const menu = (ev: MouseEvent) => {
 		icon: 'ti ti-download',
 		text: i18n.ts.export,
 		action: async () => {
+			const emojiCategoryItems = customEmojiCategories.value.map(category => {
+				if (category == null) {
+					return { value: '_NULL_', label: i18n.ts.other };
+				} else {
+					return { value: category, label: category };
+				}
+			}) satisfies EnumItem[];
+
+			// TODO: 複数選択可にする
+			const { canceled, result } = await os.form(i18n.ts.selectCategoryYouWantToExport, {
+				category: {
+					type: 'enum',
+					label: i18n.ts.category,
+					enum: [
+						{ value: '_ALL_', label: i18n.ts.all },
+						...emojiCategoryItems,
+					],
+					default: '_ALL_',
+				},
+			});
+
+			if (canceled) return;
+
+			let categories: (string | null)[] | null = null;
+
+			if (result.category === '_ALL_') {
+				categories = null;
+			} else if (result.category === '_NULL_') {
+				categories = [null];
+			} else {
+				categories = [result.category];
+			}
+
 			misskeyApi('export-custom-emojis', {
+				categories,
 			})
 				.then(() => {
 					os.alert({

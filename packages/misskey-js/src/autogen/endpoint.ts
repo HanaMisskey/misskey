@@ -249,6 +249,7 @@ import type {
 	EndpointRequest,
 	EndpointResponse,
 	EndpointsResponse,
+	ExportCustomEmojisRequest,
 	FederationFollowersRequest,
 	FederationFollowersResponse,
 	FederationFollowingRequest,
@@ -744,7 +745,7 @@ export type Endpoints = {
 	'email-address/available': { req: EmailAddressAvailableRequest; res: EmailAddressAvailableResponse };
 	'endpoint': { req: EndpointRequest; res: EndpointResponse };
 	'endpoints': { req: EmptyRequest; res: EndpointsResponse };
-	'export-custom-emojis': { req: EmptyRequest; res: EmptyResponse };
+	'export-custom-emojis': { req: ExportCustomEmojisRequest; res: EmptyResponse };
 	'federation/followers': { req: FederationFollowersRequest; res: FederationFollowersResponse };
 	'federation/following': { req: FederationFollowingRequest; res: FederationFollowingResponse };
 	'federation/instances': { req: FederationInstancesRequest; res: FederationInstancesResponse };

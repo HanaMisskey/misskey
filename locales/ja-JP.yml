@@ -1290,6 +1290,7 @@ passkeyVerificationSucceededButPasswordlessLoginDisabled: "パスキーの検証
 messageToFollower: "フォロワーへのメッセージ"
 prohibitSkippingInitialTutorial: "チュートリアルをスキップできないようにする"
 prohibitSkippingInitialTutorialDescription: "新規登録したユーザーに表示されるチュートリアルをスキップできないようにします。チュートリアルを完了しなかったりチュートリアルページを回避したりした場合でも、強制的にリダイレクトされます。"
+selectCategoryYouWantToExport: "エクスポートしたいカテゴリを選択"
 
 _delivery:
   status: "配信状態"
