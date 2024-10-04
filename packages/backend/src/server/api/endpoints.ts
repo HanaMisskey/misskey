@@ -219,6 +219,10 @@ import * as ep___i_2fa_removeKey from './endpoints/i/2fa/remove-key.js';
 import * as ep___i_2fa_unregister from './endpoints/i/2fa/unregister.js';
 import * as ep___i_apps from './endpoints/i/apps.js';
 import * as ep___i_authorizedApps from './endpoints/i/authorized-apps.js';
+import * as ep___i_bskMigrate_getMiauthId from './endpoints/i/bsk-migrate/get-miauth-id.js';
+import * as ep___i_bskMigrate_remove from './endpoints/i/bsk-migrate/remove.js';
+import * as ep___i_bskMigrate_status from './endpoints/i/bsk-migrate/status.js';
+import * as ep___i_bskMigrate_verify from './endpoints/i/bsk-migrate/verify.js';
 import * as ep___i_claimAchievement from './endpoints/i/claim-achievement.js';
 import * as ep___i_changePassword from './endpoints/i/change-password.js';
 import * as ep___i_deleteAccount from './endpoints/i/delete-account.js';
@@ -235,6 +239,7 @@ import * as ep___i_gallery_likes from './endpoints/i/gallery/likes.js';
 import * as ep___i_gallery_posts from './endpoints/i/gallery/posts.js';
 import * as ep___i_importBlocking from './endpoints/i/import-blocking.js';
 import * as ep___i_importFollowing from './endpoints/i/import-following.js';
+import * as ep___i_importNotes from './endpoints/i/import-notes.js';
 import * as ep___i_importMuting from './endpoints/i/import-muting.js';
 import * as ep___i_importUserLists from './endpoints/i/import-user-lists.js';
 import * as ep___i_importAntennas from './endpoints/i/import-antennas.js';
@@ -293,6 +298,7 @@ import * as ep___notes_featured from './endpoints/notes/featured.js';
 import * as ep___notes_globalTimeline from './endpoints/notes/global-timeline.js';
 import * as ep___notes_hybridTimeline from './endpoints/notes/hybrid-timeline.js';
 import * as ep___notes_localTimeline from './endpoints/notes/local-timeline.js';
+import * as ep___notes_hanamiTimeline from './endpoints/notes/hanami-timeline.js';
 import * as ep___notes_mentions from './endpoints/notes/mentions.js';
 import * as ep___notes_polls_recommendation from './endpoints/notes/polls/recommendation.js';
 import * as ep___notes_polls_vote from './endpoints/notes/polls/vote.js';
@@ -602,6 +608,10 @@ const eps = [
 	['i/2fa/unregister', ep___i_2fa_unregister],
 	['i/apps', ep___i_apps],
 	['i/authorized-apps', ep___i_authorizedApps],
+	['i/bsk-migrate/get-miauth-id', ep___i_bskMigrate_getMiauthId],
+	['i/bsk-migrate/remove', ep___i_bskMigrate_remove],
+	['i/bsk-migrate/status', ep___i_bskMigrate_status],
+	['i/bsk-migrate/verify', ep___i_bskMigrate_verify],
 	['i/claim-achievement', ep___i_claimAchievement],
 	['i/change-password', ep___i_changePassword],
 	['i/delete-account', ep___i_deleteAccount],
@@ -618,6 +628,7 @@ const eps = [
 	['i/gallery/posts', ep___i_gallery_posts],
 	['i/import-blocking', ep___i_importBlocking],
 	['i/import-following', ep___i_importFollowing],
+	['i/import-notes', ep___i_importNotes],
 	['i/import-muting', ep___i_importMuting],
 	['i/import-user-lists', ep___i_importUserLists],
 	['i/import-antennas', ep___i_importAntennas],
@@ -676,6 +687,7 @@ const eps = [
 	['notes/global-timeline', ep___notes_globalTimeline],
 	['notes/hybrid-timeline', ep___notes_hybridTimeline],
 	['notes/local-timeline', ep___notes_localTimeline],
+	['notes/hanami-timeline', ep___notes_hanamiTimeline],
 	['notes/mentions', ep___notes_mentions],
 	['notes/polls/recommendation', ep___notes_polls_recommendation],
 	['notes/polls/vote', ep___notes_polls_vote],

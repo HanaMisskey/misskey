@@ -79,6 +79,8 @@ import { ChannelFollowingService } from './ChannelFollowingService.js';
 import { RegistryApiService } from './RegistryApiService.js';
 import { ReversiService } from './ReversiService.js';
 
+import { BskMiAuthService } from './BskMiAuthService.js';
+
 import { ChartLoggerService } from './chart/ChartLoggerService.js';
 import FederationChart from './chart/charts/federation.js';
 import NotesChart from './chart/charts/notes.js';
@@ -225,6 +227,8 @@ const $FanoutTimelineEndpointService: Provider = { provide: 'FanoutTimelineEndpo
 const $ChannelFollowingService: Provider = { provide: 'ChannelFollowingService', useExisting: ChannelFollowingService };
 const $RegistryApiService: Provider = { provide: 'RegistryApiService', useExisting: RegistryApiService };
 const $ReversiService: Provider = { provide: 'ReversiService', useExisting: ReversiService };
+
+const $BskMiAuthService: Provider = { provide: 'BskMiAuthService', useExisting: BskMiAuthService };
 
 const $ChartLoggerService: Provider = { provide: 'ChartLoggerService', useExisting: ChartLoggerService };
 const $FederationChart: Provider = { provide: 'FederationChart', useExisting: FederationChart };
@@ -376,6 +380,8 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		RegistryApiService,
 		ReversiService,
 
+		BskMiAuthService,
+
 		ChartLoggerService,
 		FederationChart,
 		NotesChart,
@@ -521,6 +527,8 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$ChannelFollowingService,
 		$RegistryApiService,
 		$ReversiService,
+
+		$BskMiAuthService,
 
 		$ChartLoggerService,
 		$FederationChart,
@@ -669,6 +677,8 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		RegistryApiService,
 		ReversiService,
 
+		BskMiAuthService,
+
 		FederationChart,
 		NotesChart,
 		UsersChart,
@@ -813,6 +823,8 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$ChannelFollowingService,
 		$RegistryApiService,
 		$ReversiService,
+
+		$BskMiAuthService,
 
 		$FederationChart,
 		$NotesChart,

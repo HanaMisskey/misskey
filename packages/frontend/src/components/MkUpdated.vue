@@ -9,6 +9,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 		<div :class="$style.title"><MkSparkle>{{ i18n.ts.misskeyUpdated }}</MkSparkle></div>
 		<div :class="$style.version">✨{{ version }}🚀</div>
 		<MkButton full @click="whatIsNew">{{ i18n.ts.whatIsNew }}</MkButton>
+		<MkButton :class="$style.gotIt" full @click="whatIsNewHana">{{ i18n.ts.whatIsNew }} ({{ i18n.ts._hana.hanaMisskey }})</MkButton>
 		<MkButton :class="$style.gotIt" primary full @click="modal?.close()">{{ i18n.ts.gotIt }}</MkButton>
 	</div>
 </MkModal>
@@ -28,6 +29,11 @@ const modal = shallowRef<InstanceType<typeof MkModal>>();
 function whatIsNew() {
 	modal.value?.close();
 	window.open(`https://misskey-hub.net/docs/releases/#_${version.replace(/\./g, '')}`, '_blank');
+}
+
+function whatIsNewHana() {
+	modal.value?.close();
+	window.open(`https://docs.misskey.flowers/changelog/web#_${version.replace(/\./g, '-')}`, '_blank');
 }
 
 onMounted(() => {

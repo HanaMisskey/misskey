@@ -323,6 +323,22 @@ export interface Locale extends ILocale {
      */
     "import": string;
     /**
+     * インポート元
+     */
+    "importOrigin": string;
+    /**
+     * 他サービスでエクスポートしたノートなどをインポートすることができます。
+     */
+    "importNoteInfo": string;
+    /**
+     * すべてのノートがインポートできるわけではありません。改変のないMisskey以外では全くインポートできない場合もあります。
+     */
+    "importNoteDisclaimer": string;
+    /**
+     * インポートされたノートは、ユーザーページ以外には表示されない場合があります。
+     */
+    "importNoteWarm": string;
+    /**
      * エクスポート
      */
     "export": string;
@@ -5166,6 +5182,14 @@ export interface Locale extends ILocale {
      * フォロワーへのメッセージ
      */
     "messageToFollower": string;
+    /**
+     * チュートリアルをスキップできないようにする
+     */
+    "prohibitSkippingInitialTutorial": string;
+    /**
+     * 新規登録したユーザーに表示されるチュートリアルをスキップできないようにします。チュートリアルを完了しなかったりチュートリアルページを回避したりした場合でも、強制的にリダイレクトされます。
+     */
+    "prohibitSkippingInitialTutorialDescription": string;
     "_delivery": {
         /**
          * 配信状態
@@ -5302,68 +5326,6 @@ export interface Locale extends ILocale {
          */
         "silenceDescription": string;
     };
-    "_initialAccountSetting": {
-        /**
-         * アカウントの作成が完了しました！
-         */
-        "accountCreated": string;
-        /**
-         * さっそくアカウントの初期設定を行いましょう。
-         */
-        "letsStartAccountSetup": string;
-        /**
-         * まずはあなたのプロフィールを設定しましょう。
-         */
-        "letsFillYourProfile": string;
-        /**
-         * プロフィール設定
-         */
-        "profileSetting": string;
-        /**
-         * プライバシー設定
-         */
-        "privacySetting": string;
-        /**
-         * これらの設定は後から変更できます。
-         */
-        "theseSettingsCanEditLater": string;
-        /**
-         * この他にも様々な設定を「設定」ページから行えます。ぜひ後で確認してみてください。
-         */
-        "youCanEditMoreSettingsInSettingsPageLater": string;
-        /**
-         * タイムラインを構築するため、気になるユーザーをフォローしてみましょう。
-         */
-        "followUsers": string;
-        /**
-         * プッシュ通知を有効にすると{name}の通知をお使いのデバイスで受け取ることができます。
-         */
-        "pushNotificationDescription": ParameterizedString<"name">;
-        /**
-         * 初期設定が完了しました！
-         */
-        "initialAccountSettingCompleted": string;
-        /**
-         * {name}をお楽しみください！
-         */
-        "haveFun": ParameterizedString<"name">;
-        /**
-         * このまま{name}(Misskey)の使い方についてのチュートリアルに進むこともできますが、ここで中断してすぐに使い始めることもできます。
-         */
-        "youCanContinueTutorial": ParameterizedString<"name">;
-        /**
-         * チュートリアルを開始
-         */
-        "startTutorial": string;
-        /**
-         * 初期設定をスキップしますか？
-         */
-        "skipAreYouSure": string;
-        /**
-         * 初期設定をあとでやり直しますか？
-         */
-        "laterAreYouSure": string;
-    };
     "_initialTutorial": {
         /**
          * チュートリアルを見る
@@ -5390,6 +5352,21 @@ export interface Locale extends ILocale {
              * ここでは、Misskeyの基本的な使い方や機能を確認できます。
              */
             "description": string;
+        };
+        "_profileSettings": {
+            /**
+             * プロフィール設定
+             */
+            "title": string;
+            /**
+             * まずは基本的なプロフィールを設定して、ユーザーにあなたのことを知ってもらえるようにしましょう。
+             */
+            "description": string;
+            /**
+             * ここで設定した項目は後でいつでも変更できます。
+             * チュートリアル終了後には、更に多彩なプロフィール設定をご利用いただけます！
+             */
+            "youCanChangeThemLater": string;
         };
         "_note": {
             /**
@@ -5469,6 +5446,10 @@ export interface Locale extends ILocale {
              */
             "global": string;
             /**
+             * （はなモード利用者のみ）ホームタイムラインの投稿と、接続している他のサーバーにて人気の投稿があわせて表示されます。
+             */
+            "hanami": string;
+            /**
              * それぞれのタイムラインは、画面上部でいつでも切り替えられます。
              */
             "description2": string;
@@ -5476,6 +5457,16 @@ export interface Locale extends ILocale {
              * その他にも、リストタイムラインやチャンネルタイムラインなどがあります。詳しくは{link}をご覧ください。
              */
             "description3": ParameterizedString<"link">;
+        };
+        "_followUsers": {
+            /**
+             * 誰もフォローしていない状態だと、ホームタイムラインには何も表示されません。
+             */
+            "description1": string;
+            /**
+             * タイムラインを構築するため、気になるユーザーをフォローしてみましょう。
+             */
+            "description2": string;
         };
         "_postNote": {
             /**
@@ -5577,6 +5568,30 @@ export interface Locale extends ILocale {
              */
             "doItToContinue": string;
         };
+        "_pushNotification": {
+            /**
+             * プッシュ通知を有効にすると{name}の通知をお使いのデバイスで受け取ることができます。
+             */
+            "description": ParameterizedString<"name">;
+        };
+        "_privacySettings": {
+            /**
+             * プライバシー設定
+             */
+            "title": string;
+            /**
+             * 多くのユーザーが利用しているプライバシー関連の設定項目をリストアップしました。必要に応じて変更してください。
+             */
+            "description1": string;
+            /**
+             * これらの設定は後から変更できます。
+             */
+            "theseSettingsCanEditLater": string;
+            /**
+             * この他にも様々な設定を「設定」ページから行えます。ぜひ後で確認してみてください。
+             */
+            "youCanEditMoreSettingsInSettingsPageLater": string;
+        };
         "_done": {
             /**
              * チュートリアルは終了です🎉
@@ -5586,9 +5601,79 @@ export interface Locale extends ILocale {
              * ここで紹介した機能はほんの一部にすぎません。Misskeyの使い方をより詳しく知るには、{link}をご覧ください。
              */
             "description": ParameterizedString<"link">;
+            /**
+             * {name}をお楽しみください！
+             */
+            "haveFun": ParameterizedString<"name">;
+            /**
+             * このチュートリアルは、「もっと！」→「情報」→「チュートリアルを見る」からいつでも見返すことができます。
+             */
+            "youCanReferTutorialBy": string;
+        };
+        "_onboardingLanding": {
+            /**
+             * アカウントの作成が完了しました！
+             */
+            "accountCreated": string;
+            /**
+             * ようこそ、{name}へ！
+             */
+            "welcomeToX": ParameterizedString<"name">;
+            /**
+             * プロフィールを設定したり、{name}の基本的な使い方を学んだりして、すぐに使い始められるようにしましょう。
+             */
+            "description": ParameterizedString<"name">;
+            /**
+             * このチュートリアルの所要時間は{min}分程度です。
+             * チュートリアルを完了すると実績が解除されます。
+             */
+            "takesAbout": ParameterizedString<"min">;
+            /**
+             * このサーバーの管理者は新規ユーザーにチュートリアルを完了することを義務付けています。
+             * チュートリアルを完了するまでMisskeyを使い始めることはできません。
+             */
+            "adminForcesToTakeTutorial": string;
+        };
+        "_onboardingDone": {
+            /**
+             * お疲れ様でした！次のステップに進んで、{name}をもっと楽しめるようにしましょう。
+             */
+            "description": ParameterizedString<"name">;
+            /**
+             * 元のページに戻る
+             */
+            "backToOriginalPath": string;
+            /**
+             * あなたがアクセスしようとしていたページに戻ります。
+             */
+            "backToOriginalPathDescription": string;
+            /**
+             * プロフィール設定
+             */
+            "profile": string;
+            /**
+             * プロフィールをかんぺきにして、自分をアピールしましょう。
+             */
+            "profileDescription": string;
+            /**
+             * 人気のノートやユーザーを見つけて交流をはじめましょう。
+             */
+            "exploreDescription": string;
+            /**
+             * ホーム画面に進む
+             */
+            "goToTimeline": string;
+            /**
+             * 設定等を行わず、通常のホーム画面（タイムライン）に進みます。
+             */
+            "goToTimelineDescription": string;
         };
     };
     "_timelineDescription": {
+        /**
+         * はなみタイムラインでは、フォローしているアカウントの投稿に加えて、連合しているサーバーの人気な投稿も見られます。
+         */
+        "hanami": string;
         /**
          * ホームタイムラインでは、あなたがフォローしているアカウントの投稿を見られます。
          */
@@ -6140,6 +6225,16 @@ export interface Locale extends ILocale {
                  */
                 "flavor": string;
             };
+            "_markedAsHanaModeUser": {
+                /**
+                 * 菫ほどな小さき人に生まれたし
+                 */
+                "title": string;
+                /**
+                 * はなモードを有効にした
+                 */
+                "description": string;
+            };
             "_following1": {
                 /**
                  * はじめてのフォロー
@@ -6294,6 +6389,20 @@ export interface Locale extends ILocale {
                  */
                 "flavor": string;
             };
+            "_iLoveHanaMisskey": {
+                /**
+                 * I Love HanaMisskey
+                 */
+                "title": string;
+                /**
+                 * "I 💛 #HanaMisskey"を投稿した
+                 */
+                "description": string;
+                /**
+                 * はなみすきーを使ってくださりありがとうございます！
+                 */
+                "flavor": string;
+            };
             "_foundTreasure": {
                 /**
                  * 宝探し
@@ -6303,6 +6412,20 @@ export interface Locale extends ILocale {
                  * 隠されたお宝を発見した
                  */
                 "description": string;
+            };
+            "_foundLegacy": {
+                /**
+                 * 遺跡めぐり
+                 */
+                "title": string;
+                /**
+                 * 隠された当時のロゴを発見した
+                 */
+                "description": string;
+                /**
+                 * すべてはいつかは過去になる？
+                 */
+                "flavor": string;
             };
             "_client30min": {
                 /**
@@ -6741,6 +6864,10 @@ export interface Locale extends ILocale {
              */
             "ltlAvailable": string;
             /**
+             * はなみタイムラインの閲覧
+             */
+            "hanamiTlAvailable": string;
+            /**
              * パブリック投稿の許可
              */
             "canPublicNote": string;
@@ -6748,6 +6875,10 @@ export interface Locale extends ILocale {
              * ノート内の最大メンション数
              */
             "mentionMax": string;
+            /**
+             * ノートのインポート
+             */
+            "canImportNotes": string;
             /**
              * サーバー招待コードの発行
              */
@@ -6882,6 +7013,10 @@ export interface Locale extends ILocale {
              * botユーザー
              */
             "isBot": string;
+            /**
+             * はなモードが有効なユーザー
+             */
+            "isInHanaMode": string;
             /**
              * サスペンド済みユーザー
              */
@@ -8912,6 +9047,10 @@ export interface Locale extends ILocale {
          */
         "home": string;
         /**
+         * はなみ
+         */
+        "hanami": string;
+        /**
          * ローカル
          */
         "local": string;
@@ -10403,6 +10542,357 @@ export interface Locale extends ILocale {
          * 生成されたコードをウェブサイトに貼り付けてご利用ください。
          */
         "codeGeneratedDescription": string;
+    };
+    "_hana": {
+        /**
+         * 備考
+         */
+        "emojiRemarks": string;
+        /**
+         * はなみすきー設定
+         */
+        "hanaSettings": string;
+        /**
+         * はなみすきー
+         */
+        "hanaMisskey": string;
+        /**
+         * はなモード
+         */
+        "hanaMode": string;
+        /**
+         * はな
+         */
+        "hanaModeShort": string;
+        /**
+         * はなみすきーの主要な独自機能として「はなモード」があります。はなモードを有効にするかどうかで、はなみすきーでのSNS体験は大きく変わってきます。以下に主な違いとおすすめのユースケースを挙げますので、どちらか選択して進んでください。
+         */
+        "hanaModeTutorialDescription": string;
+        /**
+         * いつでも花びらを降らせる
+         */
+        "flowerEffect": string;
+        /**
+         * BackspaceKeyからの移行
+         */
+        "migrateFromBackspaceKey": string;
+        /**
+         * 独自検索エンジンは現在開発中です。今ご利用いただけるのは通常のMisskeyと同じ検索エンジン（Meilisearch）です。今後の進化にご期待ください！
+         */
+        "searchIsInBeta": string;
+        "_inDevelopment": {
+            /**
+             * この機能は開発中です
+             */
+            "title": string;
+            /**
+             * はなみすきーは新規機能盛りだくさんで鋭意開発中です！
+             * どんな機能が実装されるかはお楽しみ。
+             */
+            "description": string;
+        };
+        "_welcome": {
+            /**
+             * 「{x}」とは？
+             */
+            "whatAboutX": ParameterizedString<"x">;
+            "_aboutHana": {
+                /**
+                 * はなみすきー
+                 */
+                "title": string;
+                /**
+                 * はなみすきーは、Misskeyベースの分散型SNSサービスです。
+                 * あなたのSNS体験に「はな」を添える、数々の独自機能を備えています。
+                 */
+                "description": string;
+            };
+            "_aboutDecentralized": {
+                /**
+                 * 分散型SNS
+                 */
+                "title": string;
+                /**
+                 * 一般的なSNSサービス（X, Instagram, YouTubeなど）はそのサービス内で投稿データなどが完結するようになっています。しかし、分散型SNSは、サービス同士が共通の仕組みを通して連携しており、他のサービスのユーザーの投稿を見たり、フォローしたりできるのです。
+                 * はなみすきーは標準で分散型テクノロジーのActivityPubに対応しており、他のMisskey/Mastodon等を利用したサービスやThreadsなどと通信することができます。
+                 */
+                "description": string;
+            };
+            "_features": {
+                /**
+                 * 近日提供予定
+                 */
+                "inDevelopment": string;
+                "_hanaMode": {
+                    /**
+                     * はなモードで、あなただけのSNS体験を
+                     */
+                    "title": string;
+                    /**
+                     * はなみすきー独自機能「はなモード」をオンにすると、投稿内容がローカルタイムライン（LTL）に流れないようになります。ただし、「ホーム」投稿とは違い、LTLへのリノートが可能なほか、外部サーバーには通常のパブリックの投稿として配信されます。
+                     * これにより、おひとりさまサーバーに近い分散SNS体験をワンクリックで構築することができます。
+                     */
+                    "description": string;
+                };
+                "_reactionAbundance": {
+                    /**
+                     * リアクションで、もっと気軽につながろう
+                     */
+                    "title": string;
+                    /**
+                     * はなみすきーではユーザー同士の交流をより楽しめる「リアクション」機能を搭載。ユーザーの投稿に「いいね」ではなく絵文字を送ることができます。はなみすきーに標準搭載の豊富なリアクション絵文字で、リプライを送るよりも気軽に自分の気持ちを伝えられます。もちろん、リアクションよりいいねボタンがお好みならそのように設定することも可能です。
+                     */
+                    "description": string;
+                };
+                "_easyMigration": {
+                    /**
+                     * 他サービスから簡単移行
+                     */
+                    "title": string;
+                    /**
+                     * 他のMisskeyサーバーなどからの移行が簡単になる機能を提供！過去の投稿もはなみすきー上に引き継ぐことができます。
+                     */
+                    "description": string;
+                };
+                "_preciseSearching": {
+                    /**
+                     * 最新技術を活用した高精度な検索
+                     */
+                    "title": string;
+                    /**
+                     * 機械学習や最新の学術研究をもとに、はなみすきーのためにチューニングされた高精度で高速な検索機能を利用できます。また、はなみすきーの検索機能そのものが学術研究プロジェクトとなっているため、検索精度は日進月歩となることが期待できます。
+                     */
+                    "description": string;
+                };
+            };
+            "_cta": {
+                /**
+                 * はなみすきーで、かわいいSNS体験を
+                 */
+                "title": string;
+            };
+        };
+        "_hanaModeSwitcher": {
+            /**
+             * こんな方におすすめ
+             */
+            "recomenddedFor": string;
+            /**
+             * 通常
+             */
+            "normal": string;
+            /**
+             * LTLが使えます
+             */
+            "normal1": string;
+            /**
+             * 公開範囲「パブリック」で投稿した内容はLTLに表示されます
+             */
+            "normal2": string;
+            /**
+             * サーバー内のユーザーとの交流を重視したい方
+             */
+            "normalRecommend": string;
+            /**
+             * LTLが使えません
+             */
+            "hana1": string;
+            /**
+             * 公開範囲「パブリック」で投稿した内容はLTLに表示されません
+             */
+            "hana2": string;
+            /**
+             * フォロー中ユーザーの最新のノートとFediverseの人気の投稿をザッピングできる「はなみタイムライン」が使用できます
+             */
+            "hana3": string;
+            /**
+             * おひとりさまサーバーのような分散SNS体験をしたい方（内々での交流だけでなく、外部サーバーとの交流もしっかり重視したい方）
+             */
+            "hanaRecommend": string;
+            /**
+             * 一定期間にモードを変更できる回数には制限があります。
+             */
+            "saveConfirmDescription": string;
+        };
+        "_migrateFromBackspaceKey": {
+            /**
+             * BackspaceKey上のコンテンツを簡単に移行できます。
+             */
+            "about": string;
+            /**
+             * BackspaceKeyとこのアカウントを連携する
+             */
+            "step1": string;
+            /**
+             * 以下のボタンを押して、移行元のBackspaceKeyアカウントを連携してください。
+             */
+            "step1Description": string;
+            /**
+             * 移行したいコンテンツをエクスポートする
+             */
+            "step2": string;
+            /**
+             * BackspaceKey側で移行したいコンテンツの「エクスポート」ボタンを押してください。
+             */
+            "step2Description": string;
+            /**
+             * 連携中は、BackspaceKeyでエクスポートしたものすべてがはなみすきーにインポートされます。エクスポートだけしたい場合は、はなみすきー連携前に行ってください。
+             */
+            "step2Description2": string;
+            /**
+             * 通知を待つ
+             */
+            "step3": string;
+            /**
+             * コンテンツの移行が完了すると、それぞれに対して通知が送信されます。すべての移行が完了するまでしばらくお待ちください。
+             */
+            "step3Description": string;
+            /**
+             * アカウントの移行を行う
+             */
+            "step4": string;
+            /**
+             * {hana}で移行元のアカウントを指定したあと、{bsk}で移行先のアカウントを指定します。これにより、フォロワーが自動で引き継がれます。
+             */
+            "step4Description": ParameterizedString<"hana" | "bsk">;
+            /**
+             * この時点でBackspaceKeyのアカウントは利用できなくなります。必ずすべての移行が完了するまで待ってください。
+             */
+            "step4Description2": string;
+        };
+        "_welcomeCardGen": {
+            /**
+             * はなみすきーはじめました！カード
+             */
+            "title": string;
+            /**
+             * 名前にMFMを使用していたり、文字数が多すぎたりした場合は、ここで上書きできます。
+             */
+            "nameDescription": string;
+            /**
+             * プレビューに反映
+             */
+            "applyToPreview": string;
+            /**
+             * 画像を出力
+             */
+            "generateImage": string;
+            /**
+             * はなみすきーはじめましたカードが完成しました
+             */
+            "imageGenerated": string;
+            /**
+             * このカードをダウンロードして、X (Twitter)などの既存のSNSでシェアしてください🎉
+             */
+            "imageGeneratedDescription": string;
+            /**
+             * あたらしいSNS「 #はなみすきー 」をはじめました！登録してフォローしてね！ #はなみすきーはじめましたカード
+             * {url}
+             */
+            "shareText": ParameterizedString<"url">;
+            /**
+             * あたらしいMisskey系SNS「 #はなみすきー 」をはじめました！登録してフォローしてね！ #はなみすきーはじめましたカード
+             * {url}
+             */
+            "shareTextForX": ParameterizedString<"url">;
+            /**
+             * Xでポスト
+             */
+            "shareToX": string;
+            /**
+             * 技術的制約により、Xにポストする際、はじめましたカード自動では添付されません。
+             * お手数ですが、手動で画像を保存して、Xの投稿フォームにアップロードしていただきますようお願いします。
+             */
+            "shareWarning": string;
+        };
+        "_welcomeCardGenPopup": {
+            /**
+             * はなみすきーをはじめたことを知らせましょう！
+             */
+            "title": string;
+            /**
+             * このバナーが表示されている間限定！はなみすきーオリジナルのかわいいプロフィール画像を作ってシェアしてください！
+             */
+            "description": string;
+            /**
+             * 作ってみる
+             */
+            "create": string;
+        };
+        /**
+         * はなみすきーについて
+         */
+        "aboutHanaMisskey": string;
+        "_aboutHanaMisskey": {
+            /**
+             * はなみすきーはmisskey.flowersによって運営されている、Misskeyをベースにしたマイクロブログプラットフォームです。
+             */
+            "about": string;
+            /**
+             * ドキュメント
+             */
+            "documentation": string;
+            /**
+             * サービス状況
+             */
+            "serviceStatus": string;
+            /**
+             * BackspaceKeyアーカイブ（準備中）
+             */
+            "bskArchives": string;
+            /**
+             * チームメンバー
+             */
+            "teamMembers": string;
+            /**
+             * BackspaceKey時代の支援者
+             */
+            "bskPatrons": string;
+            /**
+             * はなみすきーの前身はBackspaceKeyというMisskeyサーバーでした。古くからのご支援に感謝します😊
+             */
+            "bskDescription": string;
+            /**
+             * ほかにも多くの方にご支援いただきました。ありがとうございます😊
+             */
+            "morePatrons": string;
+        };
+        "_visitorLoginPopup": {
+            /**
+             * はなみすきーで、かわいいSNS体験を
+             */
+            "title": string;
+            /**
+             * リアクションで楽しく。はなモードであなたらしく。あたらしいSNSをあなたも体験してみませんか。
+             */
+            "description": string;
+        };
+        "_tutorialMinorSettings": {
+            /**
+             * センシティブなコンテンツに関する設定
+             */
+            "title": string;
+            /**
+             * センシティブなコンテンツをどのように表示するかを設定できます。
+             */
+            "descriotion": string;
+            /**
+             * センシティブなメディアを含むノートをミュート
+             */
+            "muteSensitive": string;
+            /**
+             * センシティブな画像・動画・音声などを含むノートをすべて最小化した状態で表示します。クリックすると開いて中身を見ることができますが、開いたとしてもファイル自体にはぼかしがかかった状態で表示されます。
+             */
+            "muteSensitiveDescription": string;
+            /**
+             * センシティブなコンテンツはぼかしがかかった状態で表示されますが、誤操作防止のために、中身をクリックして開く際に追加で確認ダイアログを表示させることができます。
+             */
+            "confirmWhenRevealingSensitiveMediaDescription": string;
+            /**
+             * 未成年の方は、おうちの方といっしょに確認してください。この設定は後からいつでも変更できます。
+             */
+            "forMinor": string;
+        };
     };
 }
 declare const locales: {

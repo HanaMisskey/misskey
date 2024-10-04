@@ -87,6 +87,7 @@ export class MetaEntityService {
 			inquiryUrl: instance.inquiryUrl,
 			disableRegistration: instance.disableRegistration,
 			emailRequiredForSignup: instance.emailRequiredForSignup,
+			canSkipInitialTutorial: instance.canSkipInitialTutorial,
 			enableHcaptcha: instance.enableHcaptcha,
 			hcaptchaSiteKey: instance.hcaptchaSiteKey,
 			enableMcaptcha: instance.enableMcaptcha,
@@ -156,6 +157,7 @@ export class MetaEntityService {
 			proxyAccountName: proxyAccount ? proxyAccount.username : null,
 			features: {
 				localTimeline: instance.policies.ltlAvailable,
+				hanamiTimeline: instance.policies.hanamiTlAvailable,
 				globalTimeline: instance.policies.gtlAvailable,
 				registration: !instance.disableRegistration,
 				emailRequiredForSignup: instance.emailRequiredForSignup,

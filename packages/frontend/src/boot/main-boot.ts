@@ -14,6 +14,7 @@ import * as sound from '@/scripts/sound.js';
 import { $i, signout, updateAccount } from '@/account.js';
 import { instance } from '@/instance.js';
 import { ColdDeviceStorage, defaultStore } from '@/store.js';
+import { hanaStore } from '@/hana/store.js';
 import { reactionPicker } from '@/scripts/reaction-picker.js';
 import { miLocalStorage } from '@/local-storage.js';
 import { claimAchievement, claimedAchievements } from '@/scripts/achievements.js';
@@ -84,7 +85,12 @@ export async function mainBoot() {
 	}
 
 	try {
-		if (defaultStore.state.enableSeasonalScreenEffect) {
+		if (hanaStore.state.flowerEffect) {
+			const SakuraEffect = (await import('@/scripts/snowfall-effect.js')).SnowfallEffect;
+			new SakuraEffect({
+				sakura: true,
+			}).render();
+		} else if (defaultStore.state.enableSeasonalScreenEffect) {
 			const month = new Date().getMonth() + 1;
 			if (defaultStore.state.hemisphere === 'S') {
 				// ▼南半球
@@ -111,14 +117,6 @@ export async function mainBoot() {
 	}
 
 	if ($i) {
-		defaultStore.loaded.then(() => {
-			if (defaultStore.state.accountSetupWizard !== -1) {
-				const { dispose } = popup(defineAsyncComponent(() => import('@/components/MkUserSetupDialog.vue')), {}, {
-					closed: () => dispose(),
-				});
-			}
-		});
-
 		for (const announcement of ($i.unreadAnnouncements ?? []).filter(x => x.display === 'dialog')) {
 			const { dispose } = popup(defineAsyncComponent(() => import('@/components/MkAnnouncementDialog.vue')), {
 				announcement,
@@ -274,6 +272,16 @@ export async function mainBoot() {
 			});
 		}
 
+		if (
+			!hanaStore.state.neverShowWelcomeCardPopup &&
+			(Date.now() - createdAt.getTime()) < (1000 * 60 * 60 * 24 * 7) &&
+			(Date.now() - hanaStore.state.lastShowWelcomeCardPopup) > (1000 * 60 * 60 * 24)
+		) {
+			const { dispose } = popup(defineAsyncComponent(() => import('@/components/HanaWelcomeCardGeneratorPopup.vue')), {}, {
+				closed: () => dispose(),
+			});
+		}
+
 		if ('Notification' in window) {
 			// 許可を得ていなかったらリクエスト
 			if (Notification.permission === 'default') {
@@ -339,6 +347,10 @@ export async function mainBoot() {
 		// このままではMisskeyが利用できないので強制的にサインアウトさせる
 		main.on('myTokenRegenerated', () => {
 			signout();
+		});
+	} else if (location.pathname !== '/' && !instance.disableRegistration) {
+		const { dispose } = popup(defineAsyncComponent(() => import('@/components/HanaVisitorLoginPopup.vue')), {}, {
+			closed: () => dispose(),
 		});
 	}
 

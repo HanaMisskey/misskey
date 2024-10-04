@@ -31,6 +31,7 @@ import { ExportUserListsProcessorService } from './processors/ExportUserListsPro
 import { ExportAntennasProcessorService } from './processors/ExportAntennasProcessorService.js';
 import { ImportBlockingProcessorService } from './processors/ImportBlockingProcessorService.js';
 import { ImportCustomEmojisProcessorService } from './processors/ImportCustomEmojisProcessorService.js';
+import { ImportNotesProcessorService } from './processors/ImportNotesProcessorService.js';
 import { ImportFollowingProcessorService } from './processors/ImportFollowingProcessorService.js';
 import { ImportMutingProcessorService } from './processors/ImportMutingProcessorService.js';
 import { ImportUserListsProcessorService } from './processors/ImportUserListsProcessorService.js';
@@ -64,6 +65,7 @@ import { RelationshipProcessorService } from './processors/RelationshipProcessor
 		ExportBlockingProcessorService,
 		ExportUserListsProcessorService,
 		ExportAntennasProcessorService,
+		ImportNotesProcessorService,
 		ImportFollowingProcessorService,
 		ImportMutingProcessorService,
 		ImportBlockingProcessorService,

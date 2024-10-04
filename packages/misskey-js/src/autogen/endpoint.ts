@@ -319,6 +319,8 @@ import type {
 	IAppsResponse,
 	IAuthorizedAppsRequest,
 	IAuthorizedAppsResponse,
+	IBskMigrateGetMiauthIdResponse,
+	IBskMigrateStatusResponse,
 	IClaimAchievementRequest,
 	IChangePasswordRequest,
 	IDeleteAccountRequest,
@@ -331,6 +333,7 @@ import type {
 	IGalleryPostsResponse,
 	IImportBlockingRequest,
 	IImportFollowingRequest,
+	IImportNotesRequest,
 	IImportMutingRequest,
 	IImportUserListsRequest,
 	IImportAntennasRequest,
@@ -421,6 +424,8 @@ import type {
 	NotesHybridTimelineResponse,
 	NotesLocalTimelineRequest,
 	NotesLocalTimelineResponse,
+	NotesHanamiTimelineRequest,
+	NotesHanamiTimelineResponse,
 	NotesMentionsRequest,
 	NotesMentionsResponse,
 	NotesPollsRecommendationRequest,
@@ -783,6 +788,10 @@ export type Endpoints = {
 	'i/2fa/unregister': { req: I2faUnregisterRequest; res: EmptyResponse };
 	'i/apps': { req: IAppsRequest; res: IAppsResponse };
 	'i/authorized-apps': { req: IAuthorizedAppsRequest; res: IAuthorizedAppsResponse };
+	'i/bsk-migrate/get-miauth-id': { req: EmptyRequest; res: IBskMigrateGetMiauthIdResponse };
+	'i/bsk-migrate/remove': { req: EmptyRequest; res: EmptyResponse };
+	'i/bsk-migrate/status': { req: EmptyRequest; res: IBskMigrateStatusResponse };
+	'i/bsk-migrate/verify': { req: EmptyRequest; res: EmptyResponse };
 	'i/claim-achievement': { req: IClaimAchievementRequest; res: EmptyResponse };
 	'i/change-password': { req: IChangePasswordRequest; res: EmptyResponse };
 	'i/delete-account': { req: IDeleteAccountRequest; res: EmptyResponse };
@@ -799,6 +808,7 @@ export type Endpoints = {
 	'i/gallery/posts': { req: IGalleryPostsRequest; res: IGalleryPostsResponse };
 	'i/import-blocking': { req: IImportBlockingRequest; res: EmptyResponse };
 	'i/import-following': { req: IImportFollowingRequest; res: EmptyResponse };
+	'i/import-notes': { req: IImportNotesRequest; res: EmptyResponse };
 	'i/import-muting': { req: IImportMutingRequest; res: EmptyResponse };
 	'i/import-user-lists': { req: IImportUserListsRequest; res: EmptyResponse };
 	'i/import-antennas': { req: IImportAntennasRequest; res: EmptyResponse };
@@ -857,6 +867,7 @@ export type Endpoints = {
 	'notes/global-timeline': { req: NotesGlobalTimelineRequest; res: NotesGlobalTimelineResponse };
 	'notes/hybrid-timeline': { req: NotesHybridTimelineRequest; res: NotesHybridTimelineResponse };
 	'notes/local-timeline': { req: NotesLocalTimelineRequest; res: NotesLocalTimelineResponse };
+	'notes/hanami-timeline': { req: NotesHanamiTimelineRequest; res: NotesHanamiTimelineResponse };
 	'notes/mentions': { req: NotesMentionsRequest; res: NotesMentionsResponse };
 	'notes/polls/recommendation': { req: NotesPollsRecommendationRequest; res: NotesPollsRecommendationResponse };
 	'notes/polls/vote': { req: NotesPollsVoteRequest; res: EmptyResponse };

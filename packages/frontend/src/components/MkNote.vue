@@ -32,6 +32,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 				<i class="ti ti-dots" :class="$style.renoteMenu"></i>
 				<MkTime :time="note.createdAt"/>
 			</button>
+			<span v-if="note.visibility === 'public' && note.channel == null && note.isNoteInHanaMode === true" style="margin-left: 0.5em;" :title="`${i18n.ts._visibility[note.visibility]} (${i18n.ts._hana.hanaMode})`"><i class="ti ti-hanamisskey-hanamode"></i></span>
 			<span v-if="note.visibility !== 'public'" style="margin-left: 0.5em;" :title="i18n.ts._visibility[note.visibility]">
 				<i v-if="note.visibility === 'home'" class="ti ti-home"></i>
 				<i v-else-if="note.visibility === 'followers'" class="ti ti-lock"></i>
@@ -102,7 +103,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 				</div>
 				<MkA v-if="appearNote.channel && !inChannel" :class="$style.channel" :to="`/channels/${appearNote.channel.id}`"><i class="ti ti-device-tv"></i> {{ appearNote.channel.name }}</MkA>
 			</div>
-			<MkReactionsViewer v-if="appearNote.reactionAcceptance !== 'likeOnly'" :note="appearNote" :maxNumber="16" @mockUpdateMyReaction="emitUpdReaction">
+			<MkReactionsViewer v-if="appearNote.reactionAcceptance !== 'likeOnly'" :note="appearNote" :maxNumber="24" @mockUpdateMyReaction="emitUpdReaction">
 				<template #more>
 					<MkA :to="`/notes/${appearNote.id}/reactions`" :class="[$style.reactionOmitted]">{{ i18n.ts.more }}</MkA>
 				</template>

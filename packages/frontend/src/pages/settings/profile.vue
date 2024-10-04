@@ -113,6 +113,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 			<MkSwitch v-model="profile.isBot">{{ i18n.ts.flagAsBot }}<template #caption>{{ i18n.ts.flagAsBotDescription }}</template></MkSwitch>
 		</div>
 	</MkFolder>
+
+	<MkButton @click="welcomeCard">{{ i18n.ts._hana._welcomeCardGen.title }}</MkButton>
 </div>
 </template>
 
@@ -264,6 +266,14 @@ function changeBanner(ev) {
 		$i.bannerId = i.bannerId;
 		$i.bannerUrl = i.bannerUrl;
 		globalEvents.emit('requestClearPageCache');
+	});
+}
+
+function welcomeCard() {
+	const { dispose } = os.popup(defineAsyncComponent(() => import('@/components/HanaWelcomeCardGeneratorDialog.vue')), {}, {
+		closed: () => {
+			dispose();
+		},
 	});
 }
 

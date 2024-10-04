@@ -6,6 +6,7 @@
 import { Entity, Column, Index, OneToOne, JoinColumn, PrimaryColumn } from 'typeorm';
 import { id } from './util/id.js';
 import { MiDriveFile } from './DriveFile.js';
+import { supportedTypes } from '@/server/BskWebhookServerService.js';
 
 @Entity('user')
 @Index(['usernameLower', 'host'], { unique: true })
@@ -186,6 +187,12 @@ export class MiUser {
 
 	@Column('boolean', {
 		default: false,
+		comment: 'Whether the User is in Hana Mode.',
+	})
+	public isInHanaMode: boolean;
+
+	@Column('boolean', {
+		default: false,
 		comment: 'Whether the User is the root.',
 	})
 	public isRoot: boolean;
@@ -258,6 +265,23 @@ export class MiUser {
 		comment: 'The native access token of the User. It will be null if the origin of the user is local.',
 	})
 	public token: string | null;
+
+	@Index()
+	@Column({
+		...id(),
+		nullable: true,
+	})
+	public bskUserId: string | null;
+
+	@Column('varchar', {
+		length: 128, nullable: true,
+	})
+	public bskAccessToken: string | null;
+
+	@Column('varchar', {
+		length: 16, array: true, default: '{}',
+	})
+	public bskMigratedEntities: (typeof supportedTypes[number])[];
 
 	constructor(data: Partial<MiUser>) {
 		if (data == null) return;

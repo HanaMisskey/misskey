@@ -3,8 +3,7 @@ name: Check Misskey JS autogen
 on:
   pull_request_target:
     branches:
-      - master
-      - develop
+      - hanami
       - improve-misskey-js-autogen-check
     paths:
       - packages/backend/**

@@ -180,6 +180,17 @@ const routes: RouteDef[] = [{
 		name: 'other',
 		component: page(() => import('@/pages/settings/other.vue')),
 	}, {
+		path: '/hanamode',
+		name: 'hanamode',
+		component: page(() => import('@/pages/settings/hanamode.vue')),
+	}, {
+		path: '/migrate-from-bsk',
+		name: 'migrate-from-bsk',
+		component: page(() => import('@/pages/settings/migrate-from-bsk.vue')),
+		query: {
+			session: 'sessionId',
+		}
+	}, {
 		path: '/',
 		component: page(() => import('@/pages/_empty_.vue')),
 	}],
@@ -189,6 +200,10 @@ const routes: RouteDef[] = [{
 }, {
 	path: '/signup-complete/:code',
 	component: page(() => import('@/pages/signup-complete.vue')),
+}, {
+	path: '/onboarding',
+	component: page(() => import('@/pages/onboarding.vue')),
+	loginRequired: true,
 }, {
 	path: '/announcements',
 	component: page(() => import('@/pages/announcements.vue')),
@@ -205,6 +220,9 @@ const routes: RouteDef[] = [{
 }, {
 	path: '/about-misskey',
 	component: page(() => import('@/pages/about-misskey.vue')),
+}, {
+	path: '/about-hanamisskey',
+	component: page(() => import('@/pages/about-hanamisskey.vue')),
 }, {
 	path: '/invite',
 	name: 'invite',

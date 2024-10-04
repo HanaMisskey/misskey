@@ -34,6 +34,7 @@ import type { OnApplicationShutdown, OnModuleInit } from '@nestjs/common';
 export type RolePolicies = {
 	gtlAvailable: boolean;
 	ltlAvailable: boolean;
+	hanamiTlAvailable: boolean;
 	canPublicNote: boolean;
 	mentionLimit: number;
 	canInvite: boolean;
@@ -62,12 +63,14 @@ export type RolePolicies = {
 	canImportBlocking: boolean;
 	canImportFollowing: boolean;
 	canImportMuting: boolean;
+	canImportNotes: boolean;
 	canImportUserLists: boolean;
 };
 
 export const DEFAULT_POLICIES: RolePolicies = {
 	gtlAvailable: true,
 	ltlAvailable: true,
+	hanamiTlAvailable: true,
 	canPublicNote: true,
 	mentionLimit: 20,
 	canInvite: false,
@@ -96,6 +99,7 @@ export const DEFAULT_POLICIES: RolePolicies = {
 	canImportBlocking: true,
 	canImportFollowing: true,
 	canImportMuting: true,
+	canImportNotes: true,
 	canImportUserLists: true,
 };
 
@@ -254,6 +258,10 @@ export class RoleService implements OnApplicationShutdown, OnModuleInit {
 				case 'isCat': {
 					return user.isCat;
 				}
+				// はなモードが有効
+				case 'isInHanaMode':{
+					return user.isInHanaMode;
+				}
 				// 「ユーザを見つけやすくする」が有効なアカウント
 				case 'isExplorable': {
 					return user.isExplorable;
@@ -371,6 +379,7 @@ export class RoleService implements OnApplicationShutdown, OnModuleInit {
 		return {
 			gtlAvailable: calc('gtlAvailable', vs => vs.some(v => v === true)),
 			ltlAvailable: calc('ltlAvailable', vs => vs.some(v => v === true)),
+			hanamiTlAvailable: calc('hanamiTlAvailable', vs => vs.some(v => v === true)),
 			canPublicNote: calc('canPublicNote', vs => vs.some(v => v === true)),
 			mentionLimit: calc('mentionLimit', vs => Math.max(...vs)),
 			canInvite: calc('canInvite', vs => vs.some(v => v === true)),
@@ -399,6 +408,7 @@ export class RoleService implements OnApplicationShutdown, OnModuleInit {
 			canImportBlocking: calc('canImportBlocking', vs => vs.some(v => v === true)),
 			canImportFollowing: calc('canImportFollowing', vs => vs.some(v => v === true)),
 			canImportMuting: calc('canImportMuting', vs => vs.some(v => v === true)),
+			canImportNotes: calc('canImportNotes', vs => vs.some(v => v === true)),
 			canImportUserLists: calc('canImportUserLists', vs => vs.some(v => v === true)),
 		};
 	}

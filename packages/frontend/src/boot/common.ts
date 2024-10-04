@@ -12,8 +12,9 @@ import components from '@/components/index.js';
 import { applyTheme } from '@/scripts/theme.js';
 import { isDeviceDarkmode } from '@/scripts/is-device-darkmode.js';
 import { updateI18n } from '@/i18n.js';
-import { $i, refreshAccount, login } from '@/account.js';
+import { $i, iAmModerator, refreshAccount, login } from '@/account.js';
 import { defaultStore, ColdDeviceStorage } from '@/store.js';
+import { hanaStore } from '@/hana/store.js';
 import { fetchInstance, instance } from '@/instance.js';
 import { deviceKind } from '@/scripts/device-kind.js';
 import { reloadChannel } from '@/scripts/unison-reload.js';
@@ -21,6 +22,7 @@ import { getUrlWithoutLoginId } from '@/scripts/login-id.js';
 import { getAccountFromId } from '@/scripts/get-account-from-id.js';
 import { deckStore } from '@/ui/deck/deck-store.js';
 import { miLocalStorage } from '@/local-storage.js';
+import { claimedAchievements } from '@/scripts/achievements.js';
 import { fetchCustomEmojis } from '@/custom-emojis.js';
 import { setupRouter } from '@/router/main.js';
 import { createMainRouter } from '@/router/definition.js';
@@ -118,6 +120,26 @@ export async function common(createVue: () => App<Element>) {
 
 	await defaultStore.ready;
 	await deckStore.ready;
+	await hanaStore.ready;
+
+	// チュートリアルを完了していない通常ユーザーの場合、チュートリアルにリダイレクト
+	if (
+		!instance.canSkipInitialTutorial &&
+		$i &&
+		!iAmModerator &&
+		!claimedAchievements.includes('tutorialCompleted') &&
+		!location.pathname.startsWith('/onboarding') &&
+		!location.pathname.startsWith('/signup-complete')
+	) {
+		await refreshAccount();
+
+		if ($i && !$i.achievements.map((v) => v.name).includes('tutorialCompleted')) {
+			const param = new URLSearchParams();
+			param.set('redirected_from', location.pathname + location.search + location.hash);
+			location.replace('/onboarding?' + param.toString());
+			return;
+		}
+	}
 
 	const fetchInstanceMetaPromise = fetchInstance();
 

@@ -16,9 +16,12 @@ services:
 
   redis:
     restart: unless-stopped
-    image: redis:7-alpine
+    image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
+    command: ['--default_lua_flags=allow-undeclared-keys','--lock_on_hashtags']
     networks:
       - internal_network
+    ulimits:
+      memlock: -1
     volumes:
       - redis-data:/data
     healthcheck:

@@ -213,6 +213,10 @@ import * as ep___i_2fa_removeKey from './endpoints/i/2fa/remove-key.js';
 import * as ep___i_2fa_unregister from './endpoints/i/2fa/unregister.js';
 import * as ep___i_apps from './endpoints/i/apps.js';
 import * as ep___i_authorizedApps from './endpoints/i/authorized-apps.js';
+import * as ep___i_bskMigrate_getMiauthId from './endpoints/i/bsk-migrate/get-miauth-id.js';
+import * as ep___i_bskMigrate_remove from './endpoints/i/bsk-migrate/remove.js';
+import * as ep___i_bskMigrate_status from './endpoints/i/bsk-migrate/status.js';
+import * as ep___i_bskMigrate_verify from './endpoints/i/bsk-migrate/verify.js';
 import * as ep___i_claimAchievement from './endpoints/i/claim-achievement.js';
 import * as ep___i_changePassword from './endpoints/i/change-password.js';
 import * as ep___i_deleteAccount from './endpoints/i/delete-account.js';
@@ -229,6 +233,7 @@ import * as ep___i_gallery_likes from './endpoints/i/gallery/likes.js';
 import * as ep___i_gallery_posts from './endpoints/i/gallery/posts.js';
 import * as ep___i_importBlocking from './endpoints/i/import-blocking.js';
 import * as ep___i_importFollowing from './endpoints/i/import-following.js';
+import * as ep___i_importNotes from './endpoints/i/import-notes.js';
 import * as ep___i_importMuting from './endpoints/i/import-muting.js';
 import * as ep___i_importUserLists from './endpoints/i/import-user-lists.js';
 import * as ep___i_importAntennas from './endpoints/i/import-antennas.js';
@@ -287,6 +292,7 @@ import * as ep___notes_featured from './endpoints/notes/featured.js';
 import * as ep___notes_globalTimeline from './endpoints/notes/global-timeline.js';
 import * as ep___notes_hybridTimeline from './endpoints/notes/hybrid-timeline.js';
 import * as ep___notes_localTimeline from './endpoints/notes/local-timeline.js';
+import * as ep___notes_hanamiTimeline from './endpoints/notes/hanami-timeline.js';
 import * as ep___notes_mentions from './endpoints/notes/mentions.js';
 import * as ep___notes_polls_recommendation from './endpoints/notes/polls/recommendation.js';
 import * as ep___notes_polls_vote from './endpoints/notes/polls/vote.js';
@@ -598,6 +604,10 @@ const $i_2fa_removeKey: Provider = { provide: 'ep:i/2fa/remove-key', useClass: e
 const $i_2fa_unregister: Provider = { provide: 'ep:i/2fa/unregister', useClass: ep___i_2fa_unregister.default };
 const $i_apps: Provider = { provide: 'ep:i/apps', useClass: ep___i_apps.default };
 const $i_authorizedApps: Provider = { provide: 'ep:i/authorized-apps', useClass: ep___i_authorizedApps.default };
+const $i_bskMigrate_getMiauthId: Provider = { provide: 'ep:i/bsk-migrate/get-miauth-id', useClass: ep___i_bskMigrate_getMiauthId.default };
+const $i_bskMigrate_remove: Provider = { provide: 'ep:i/bsk-migrate/remove', useClass: ep___i_bskMigrate_remove.default };
+const $i_bskMigrate_status: Provider = { provide: 'ep:i/bsk-migrate/status', useClass: ep___i_bskMigrate_status.default };
+const $i_bskMigrate_verify: Provider = { provide: 'ep:i/bsk-migrate/verify', useClass: ep___i_bskMigrate_verify.default };
 const $i_claimAchievement: Provider = { provide: 'ep:i/claim-achievement', useClass: ep___i_claimAchievement.default };
 const $i_changePassword: Provider = { provide: 'ep:i/change-password', useClass: ep___i_changePassword.default };
 const $i_deleteAccount: Provider = { provide: 'ep:i/delete-account', useClass: ep___i_deleteAccount.default };
@@ -614,6 +624,7 @@ const $i_gallery_likes: Provider = { provide: 'ep:i/gallery/likes', useClass: ep
 const $i_gallery_posts: Provider = { provide: 'ep:i/gallery/posts', useClass: ep___i_gallery_posts.default };
 const $i_importBlocking: Provider = { provide: 'ep:i/import-blocking', useClass: ep___i_importBlocking.default };
 const $i_importFollowing: Provider = { provide: 'ep:i/import-following', useClass: ep___i_importFollowing.default };
+const $i_importNotes: Provider = { provide: 'ep:i/import-notes', useClass: ep___i_importNotes.default };
 const $i_importMuting: Provider = { provide: 'ep:i/import-muting', useClass: ep___i_importMuting.default };
 const $i_importUserLists: Provider = { provide: 'ep:i/import-user-lists', useClass: ep___i_importUserLists.default };
 const $i_importAntennas: Provider = { provide: 'ep:i/import-antennas', useClass: ep___i_importAntennas.default };
@@ -672,6 +683,7 @@ const $notes_featured: Provider = { provide: 'ep:notes/featured', useClass: ep__
 const $notes_globalTimeline: Provider = { provide: 'ep:notes/global-timeline', useClass: ep___notes_globalTimeline.default };
 const $notes_hybridTimeline: Provider = { provide: 'ep:notes/hybrid-timeline', useClass: ep___notes_hybridTimeline.default };
 const $notes_localTimeline: Provider = { provide: 'ep:notes/local-timeline', useClass: ep___notes_localTimeline.default };
+const $notes_hanamiTimeline: Provider = { provide: 'ep:notes/hanami-timeline', useClass: ep___notes_hanamiTimeline.default };
 const $notes_mentions: Provider = { provide: 'ep:notes/mentions', useClass: ep___notes_mentions.default };
 const $notes_polls_recommendation: Provider = { provide: 'ep:notes/polls/recommendation', useClass: ep___notes_polls_recommendation.default };
 const $notes_polls_vote: Provider = { provide: 'ep:notes/polls/vote', useClass: ep___notes_polls_vote.default };
@@ -987,6 +999,10 @@ const $reversi_verify: Provider = { provide: 'ep:reversi/verify', useClass: ep__
 		$i_2fa_unregister,
 		$i_apps,
 		$i_authorizedApps,
+		$i_bskMigrate_getMiauthId,
+		$i_bskMigrate_remove,
+		$i_bskMigrate_status,
+		$i_bskMigrate_verify,
 		$i_claimAchievement,
 		$i_changePassword,
 		$i_deleteAccount,
@@ -1003,6 +1019,7 @@ const $reversi_verify: Provider = { provide: 'ep:reversi/verify', useClass: ep__
 		$i_gallery_posts,
 		$i_importBlocking,
 		$i_importFollowing,
+		$i_importNotes,
 		$i_importMuting,
 		$i_importUserLists,
 		$i_importAntennas,
@@ -1061,6 +1078,7 @@ const $reversi_verify: Provider = { provide: 'ep:reversi/verify', useClass: ep__
 		$notes_globalTimeline,
 		$notes_hybridTimeline,
 		$notes_localTimeline,
+		$notes_hanamiTimeline,
 		$notes_mentions,
 		$notes_polls_recommendation,
 		$notes_polls_vote,
@@ -1370,6 +1388,10 @@ const $reversi_verify: Provider = { provide: 'ep:reversi/verify', useClass: ep__
 		$i_2fa_unregister,
 		$i_apps,
 		$i_authorizedApps,
+		$i_bskMigrate_getMiauthId,
+		$i_bskMigrate_remove,
+		$i_bskMigrate_status,
+		$i_bskMigrate_verify,
 		$i_claimAchievement,
 		$i_changePassword,
 		$i_deleteAccount,
@@ -1386,6 +1408,7 @@ const $reversi_verify: Provider = { provide: 'ep:reversi/verify', useClass: ep__
 		$i_gallery_posts,
 		$i_importBlocking,
 		$i_importFollowing,
+		$i_importNotes,
 		$i_importMuting,
 		$i_importUserLists,
 		$i_importAntennas,
@@ -1444,6 +1467,7 @@ const $reversi_verify: Provider = { provide: 'ep:reversi/verify', useClass: ep__
 		$notes_globalTimeline,
 		$notes_hybridTimeline,
 		$notes_localTimeline,
+		$notes_hanamiTimeline,
 		$notes_mentions,
 		$notes_polls_recommendation,
 		$notes_polls_vote,

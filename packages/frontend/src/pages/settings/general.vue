@@ -127,6 +127,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 				<MkSwitch v-model="useSystemFont">{{ i18n.ts.useSystemFont }}</MkSwitch>
 				<MkSwitch v-model="forceShowAds">{{ i18n.ts.forceShowAds }}</MkSwitch>
 				<MkSwitch v-model="enableSeasonalScreenEffect">{{ i18n.ts.seasonalScreenEffect }}</MkSwitch>
+				<MkSwitch v-model="flowerEffect">{{ i18n.ts._hana.flowerEffect }}</MkSwitch>
 				<MkSwitch v-model="useNativeUIForVideoAudioPlayer">{{ i18n.ts.useNativeUIForVideoAudioPlayer }}</MkSwitch>
 			</div>
 
@@ -262,6 +263,7 @@ import FormLink from '@/components/form/link.vue';
 import MkLink from '@/components/MkLink.vue';
 import MkInfo from '@/components/MkInfo.vue';
 import { defaultStore } from '@/store.js';
+import { hanaStore } from '@/hana/store.js';
 import * as os from '@/os.js';
 import { misskeyApi } from '@/scripts/misskey-api.js';
 import { reloadAsk } from '@/scripts/reload-ask.js';
@@ -320,6 +322,7 @@ const useNativeUIForVideoAudioPlayer = computed(defaultStore.makeGetterSetter('u
 const alwaysConfirmFollow = computed(defaultStore.makeGetterSetter('alwaysConfirmFollow'));
 const confirmWhenRevealingSensitiveMedia = computed(defaultStore.makeGetterSetter('confirmWhenRevealingSensitiveMedia'));
 const contextMenu = computed(defaultStore.makeGetterSetter('contextMenu'));
+const flowerEffect = computed(hanaStore.makeGetterSetter('flowerEffect'));
 
 watch(lang, () => {
 	miLocalStorage.setItem('lang', lang.value as string);
@@ -364,6 +367,7 @@ watch([
 	alwaysConfirmFollow,
 	confirmWhenRevealingSensitiveMedia,
 	contextMenu,
+	flowerEffect,
 ], async () => {
 	await reloadAsk({ reason: i18n.ts.reloadToApplySetting, unison: true });
 });

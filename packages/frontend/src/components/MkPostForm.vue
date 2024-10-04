@@ -21,11 +21,14 @@ SPDX-License-Identifier: AGPL-3.0-only
 		<div :class="$style.headerRight">
 			<template v-if="!(channel != null && fixed)">
 				<button v-if="channel == null" ref="visibilityButton" v-click-anime v-tooltip="i18n.ts.visibility" :class="['_button', $style.headerRightItem, $style.visibility]" @click="setVisibility">
-					<span v-if="visibility === 'public'"><i class="ti ti-world"></i></span>
+					<span v-if="visibility === 'public' && $i.isInHanaMode"><i class="ti ti-hanamisskey-hanamode"></i></span>
+					<span v-else-if="visibility === 'public'"><i class="ti ti-world"></i></span>
 					<span v-if="visibility === 'home'"><i class="ti ti-home"></i></span>
 					<span v-if="visibility === 'followers'"><i class="ti ti-lock"></i></span>
 					<span v-if="visibility === 'specified'"><i class="ti ti-mail"></i></span>
-					<span :class="$style.headerRightButtonText">{{ i18n.ts._visibility[visibility] }}</span>
+					<span :class="$style.headerRightButtonText">
+						{{ i18n.ts._visibility[visibility] }}{{ visibility === 'public' && $i.isInHanaMode ? ` (${i18n.ts._hana.hanaModeShort})` : '' }}
+					</span>
 				</button>
 				<button v-else class="_button" :class="[$style.headerRightItem, $style.visibility]" disabled>
 					<span><i class="ti ti-device-tv"></i></span>
@@ -162,7 +165,9 @@ const props = withDefaults(defineProps<{
 provide('mock', props.mock);
 
 const emit = defineEmits<{
+	(ev: 'posting'): void;
 	(ev: 'posted'): void;
+	(ev: 'postError'): void;
 	(ev: 'cancel'): void;
 	(ev: 'esc'): void;
 
@@ -550,6 +555,8 @@ function pushVisibleUser(user: Misskey.entities.UserDetailed) {
 }
 
 function addVisibleUser() {
+	if (props.mock) return;
+
 	os.selectUser().then(user => {
 		pushVisibleUser(user);
 
@@ -848,8 +855,11 @@ async function post(ev?: MouseEvent) {
 
 			const text = postData.text ?? '';
 			const lowerCase = text.toLowerCase();
-			if ((lowerCase.includes('love') || lowerCase.includes('❤')) && lowerCase.includes('misskey')) {
+			if ((lowerCase.includes('love') || lowerCase.includes('❤')) && lowerCase.includes('misskey') && !lowerCase.includes('hanamisskey')) {
 				claimAchievement('iLoveMisskey');
+			}
+			if ((lowerCase.includes('love') || lowerCase.includes('❤')) && lowerCase.includes('hanamisskey')) {
+				claimAchievement('iLoveHanaMisskey');
 			}
 			if ([
 				'https://youtu.be/Efrlqw8ytg4',
@@ -889,7 +899,9 @@ async function post(ev?: MouseEvent) {
 			type: 'error',
 			text: err.message + '\n' + (err as any).id,
 		});
+		emit('postError');
 	});
+	emit('posting');
 }
 
 function cancel() {
@@ -897,6 +909,8 @@ function cancel() {
 }
 
 function insertMention() {
+	if (props.mock) return;
+
 	os.selectUser({ localOnly: localOnly.value, includeSelf: true }).then(user => {
 		insertTextAtCursor(textareaEl.value, '@' + Misskey.acct.toString(user) + ' ');
 	});
