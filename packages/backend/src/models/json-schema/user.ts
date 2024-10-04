@@ -374,6 +374,10 @@ export const packedUserDetailedNotMeOnlySchema = {
 				ref: 'RoleLite',
 			},
 		},
+		followedMessage: {
+			type: 'string',
+			nullable: true, optional: true,
+		},
 		memo: {
 			type: 'string',
 			nullable: true, optional: false,
@@ -440,6 +444,10 @@ export const packedMeDetailedOnlySchema = {
 			type: 'string',
 			nullable: true, optional: false,
 			format: 'id',
+		},
+		followedMessage: {
+			type: 'string',
+			nullable: true, optional: false,
 		},
 		isModerator: {
 			type: 'boolean',

@@ -1,7 +1,7 @@
 block vars
 
 block loadClientEntry
-	- const clientEntry = config.clientEntry;
+	- const entry = config.frontendEntry;
 
 doctype html
 
@@ -36,7 +36,7 @@ html
 		link(rel='prefetch' href=serverErrorImageUrl)
 		link(rel='prefetch' href=infoImageUrl)
 		link(rel='prefetch' href=notFoundImageUrl)
-		link(rel='modulepreload' href=`/vite/${clientEntry.file}`)
+		link(rel='modulepreload' href=`/vite/${entry.file}`)
 
 		link(rel='preconnect' href='https://static-assets.misskey.flowers')
 		link(rel='preconnect' href='https://fonts.googleapis.com')
@@ -47,11 +47,11 @@ html
 		if icon
 			link(rel='prefetch' as='image' href=icon)
 
-		if !config.clientManifestExists
+		if !config.frontendManifestExists
 				script(type="module" src="/vite/@vite/client")
 
-		if Array.isArray(clientEntry.css)
-			each href in clientEntry.css
+		if Array.isArray(entry.css)
+			each href in entry.css
 				link(rel='stylesheet' href=`/vite/${href}`)
 
 		title
@@ -77,7 +77,7 @@ html
 
 		script.
 			var VERSION = "#{version}";
-			var CLIENT_ENTRY = "#{clientEntry.file}";
+			var CLIENT_ENTRY = "#{entry.file}";
 
 		script(type='application/json' id='misskey_meta' data-generated-at=now)
 			!= metaJson
