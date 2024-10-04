@@ -2683,6 +2683,7 @@ _hana:
   flowerEffect: "Show flurries all year round"
   migrateFromBackspaceKey: "Migrate from BackspaceKey"
   searchIsInBeta: "Our own search engine is currently under development. Currently you are using the same search engine (Meilisearch) as regular Misskey. Stay tuned to see how the search is optimized in the future!"
+  noteImportIsInBeta: "Note import from non-Misskey servers is undergoing maintenance based on feedback obtained from test operations. Thank you for your understanding."
   _inDevelopment:
     title: "This feature is under development"
     description: "HanaMisskey is packed with new features currently in development! Stay tuned to see what exciting features will be implemented."
