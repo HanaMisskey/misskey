@@ -57,12 +57,11 @@ if (note.value?.url != null || note.value?.uri != null) {
 
 .note {
 	background-color: var(--panel);
-	border-bottom: solid 1px var(--divider);
 }
 
 .cta {
 	height: calc(100% + var(--radius));
-	padding: var(--margin) calc(var(--margin) * 1.5);
+	padding: 0 16px 16px;
 	color: var(--accent);
 	font-weight: 700;
 	display: block;
