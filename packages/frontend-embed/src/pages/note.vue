@@ -7,9 +7,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 <div :class="$style.noteEmbedRoot">
 	<EmNoteDetailed v-if="note && !prohibited" :note="note" :class="$style.note"/>
 	<a v-if="note && !prohibited" :href="`${url}/notes/${noteId}`" target="_blank" :class="$style.cta">
-		<img :class="$style.particles" src="https://static-assets.misskey.flowers/misc/bg-particles/popup_v1.png"/>
-		<div :class="$style.text">{{ i18n.ts._hana._welcome._cta.title }}</div>
-		<div :class="$style.link">{{ i18n.ts.learnMore }}</div>
+		<div :class="$style.link">{{ i18n.tsx._hana.showOnX({ x: i18n.ts._hana.hanaMisskey }) }}</div>
 	</a>
 	<XNotFound v-else/>
 </div>
@@ -25,15 +23,12 @@ import { misskeyApi } from '@/misskey-api.js';
 import { assertServerContext } from '@/server-context';
 import { i18n } from '@/i18n.js';
 import { url } from '@@/js/config.js';
-import { defaultEmbedParams } from '@@/js/embed-page.js';
 
 const props = defineProps<{
 	noteId: string;
 }>();
 
 const serverContext = inject(DI.serverContext)!;
-
-const embedParams = inject(DI.embedParams, defaultEmbedParams);
 
 const note = ref<Misskey.entities.Note | null>(null);
 
@@ -70,45 +65,18 @@ if (note.value?.url != null || note.value?.uri != null) {
 	padding: var(--margin) calc(var(--margin) * 1.5);
 	color: var(--accent);
 	font-weight: 700;
-	display: flex;
-	position: relative;
-	align-items: center;
-	overflow: hidden;
-
-	.particles {
-		position: absolute;
-		bottom: 0;
-		right: 0;
-		width: 90%;
-		height: auto;
-		opacity: 0.5;
-		pointer-events: none;
-    -webkit-user-select: none;
-    user-select: none;
-    -webkit-user-drag: none;
-	}
-
-	.text, .link {
-		position: relative;
-	}
-
-	.text {
-		font-size: 1.15em;
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
+	display: block;
 
 	.link {
-		margin-left: auto;
-		flex-shrink: 0;
 		display: block;
 		border-radius: 999px;
-		padding: calc(var(--margin) / 4) var(--margin);
+		padding: calc(var(--margin) / 2) var(--margin);
 		background-color: var(--fgOnAccent);
 		color: var(--accent);
 		border: solid 1px var(--accent);
+		text-align: center;
 		transition: color 0.2s, background-color 0.2s;
+		font-size: .9em;
 	}
 
 	&:hover {
