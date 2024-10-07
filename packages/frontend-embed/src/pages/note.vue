@@ -4,10 +4,10 @@ SPDX-License-Identifier: AGPL-3.0-only
 -->
 
 <template>
-<div :class="[$style.noteEmbedRoot, { [$style.rounded]: embedParams.rounded }]">
+<div :class="$style.noteEmbedRoot">
 	<EmNoteDetailed v-if="note && !prohibited" :note="note" :class="$style.note"/>
 	<a v-if="note && !prohibited" :href="`${url}/notes/${noteId}`" target="_blank" :class="$style.cta">
-		<img :class="$style.particles" src="https://static-assets.misskey.flowers/misc/bg-particles/left_v1a.svg"/>
+		<img :class="$style.particles" src="https://static-assets.misskey.flowers/misc/bg-particles/popup_v1.png"/>
 		<div :class="$style.text">{{ i18n.ts._hana._welcome._cta.title }}</div>
 		<div :class="$style.link">{{ i18n.ts.learnMore }}</div>
 	</a>
@@ -57,24 +57,18 @@ if (note.value?.url != null || note.value?.uri != null) {
 
 <style lang="scss" module>
 .noteEmbedRoot {
-	background-image: linear-gradient(90deg, var(--buttonGradateA), var(--buttonGradateB));
-}
-
-.noteEmbedRoot.rounded {
-	.note {
-		border-radius: 0 0 var(--radius) var(--radius);
-	}
+	background-color: var(--panel);
 }
 
 .note {
 	background-color: var(--panel);
-	box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+	border-bottom: solid 1px var(--divider);
 }
 
 .cta {
 	height: calc(100% + var(--radius));
 	padding: var(--margin) calc(var(--margin) * 1.5);
-	color: var(--fgOnAccent);
+	color: var(--accent);
 	font-weight: 700;
 	display: flex;
 	position: relative;
@@ -84,10 +78,10 @@ if (note.value?.url != null || note.value?.uri != null) {
 	.particles {
 		position: absolute;
 		bottom: 0;
-		left: 0;
-		transform: rotateX(180deg);
-		width: 80%;
-		opacity: 0.75;
+		right: 0;
+		width: 90%;
+		height: auto;
+		opacity: 0.5;
 		pointer-events: none;
     -webkit-user-select: none;
     user-select: none;
@@ -111,9 +105,9 @@ if (note.value?.url != null || note.value?.uri != null) {
 		display: block;
 		border-radius: 999px;
 		padding: calc(var(--margin) / 4) var(--margin);
-		background-color: transparent;
-		color: var(--fgOnAccent);
-		border: solid 1px var(--fgOnAccent);
+		background-color: var(--fgOnAccent);
+		color: var(--accent);
+		border: solid 1px var(--accent);
 		transition: color 0.2s, background-color 0.2s;
 	}
 
@@ -121,8 +115,8 @@ if (note.value?.url != null || note.value?.uri != null) {
 		text-decoration: none;
 
 		.link {
-			background-color: var(--fgOnAccent);
-			color: var(--accent);
+			background-color: var(--accent);
+			color: var(--fgOnAccent);
 		}
 	}
 }
