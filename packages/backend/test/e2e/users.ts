@@ -87,7 +87,7 @@ describe('ユーザー', () => {
 			roles: user.roles,
 			memo: user.memo,
 
-			// hanami#170
+			// hanami#85
 			twoFactorEnabled: user.twoFactorEnabled,
 			usePasswordLessLogin: user.usePasswordLessLogin,
 			securityKeys: user.securityKeys,
