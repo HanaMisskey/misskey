@@ -171,12 +171,21 @@ async function initCanvas() {
 	function loadAvatar() {
 		return new Promise<void>(resolve => {
 			avatar.addEventListener('load', () => {
+				const radius = 98.8;
+				const avatarCenterX = 175.2;
+				const avatarCenterY = 272.7;
+
+				const avatarImageHeight = Math.max(avatar.height * (radius * 2 / avatar.width), radius * 2);
+				const avatarImageWidth = Math.max(avatar.width * (radius * 2 / avatar.height), radius * 2);
+				const avatarImageDX = avatarCenterX - avatarImageWidth / 2;
+				const avatarImageDY = avatarCenterY - avatarImageHeight / 2;
+
 				// 丸型に切り抜いて描画
 				ctx!.save();
 				ctx!.beginPath();
-				ctx!.arc(175.2, 272.7, 98.8, 0, Math.PI * 2);
+				ctx!.arc(avatarCenterX, avatarCenterY, radius, 0, Math.PI * 2);
 				ctx!.clip();
-				ctx!.drawImage(avatar, 76.3, 173.8, 197.6, 197.6);
+				ctx!.drawImage(avatar, avatarImageDX, avatarImageDY, avatarImageWidth, avatarImageHeight);
 				ctx!.restore();
 				resolve();
 			});
