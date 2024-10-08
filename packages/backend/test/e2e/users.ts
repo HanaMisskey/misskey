@@ -86,6 +86,11 @@ describe('ユーザー', () => {
 			followersVisibility: user.followersVisibility,
 			roles: user.roles,
 			memo: user.memo,
+
+			// hanami#85
+			twoFactorEnabled: true,
+			usePasswordLessLogin: false,
+			securityKeys: false,
 		});
 	};
 
@@ -622,7 +627,8 @@ describe('ユーザー', () => {
 		// @ts-expect-error UserDetailedNotMe doesn't include isModerator
 		{ label: '自分以外から見たときはModeratorか判定できない', user: () => userModerator, selector: (user: misskey.entities.UserDetailedNotMe) => user.isModerator, expected: () => undefined },
 		{ label: '自分から見た場合に二要素認証関連のプロパティがセットされている', user: () => alice, me: () => alice, selector: (user: misskey.entities.MeDetailed) => user.twoFactorEnabled, expected: () => false },
-		{ label: '自分以外から見た場合に二要素認証関連のプロパティがセットされていない', user: () => alice, me: () => bob, selector: (user: misskey.entities.UserDetailedNotMe) => user.twoFactorEnabled, expected: () => undefined },
+		//{ label: '自分以外から見た場合に二要素認証関連のプロパティがセットされていない', user: () => alice, me: () => bob, selector: (user: misskey.entities.UserDetailedNotMe) => user.twoFactorEnabled, expected: () => undefined },
+		{ label: '自分以外から見た場合に二要素認証関連のプロパティがでたらめ', user: () => alice, me: () => bob, selector: (user: misskey.entities.UserDetailedNotMe) => user.twoFactorEnabled, expected: () => true },
 		{ label: 'モデレーターから見た場合に二要素認証関連のプロパティがセットされている', user: () => alice, me: () => userModerator, selector: (user: misskey.entities.UserDetailedNotMe) => user.twoFactorEnabled, expected: () => false },
 		{ label: 'サイレンスになっている', user: () => userSilenced, selector: (user: misskey.entities.UserDetailed) => user.isSilenced },
 		// FIXME: 落ちる

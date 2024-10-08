@@ -568,6 +568,12 @@ export class UserEntityService implements OnModuleInit {
 					: false,
 			} : {}),
 
+			...(isDetailed && !(isMe || iAmModerator) ? {
+				twoFactorEnabled: true,
+				usePasswordLessLogin: false,
+				securityKeys: false,
+			} : {}),
+
 			...(isDetailed && isMe ? {
 				avatarId: user.avatarId,
 				bannerId: user.bannerId,
