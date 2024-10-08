@@ -88,9 +88,9 @@ describe('ユーザー', () => {
 			memo: user.memo,
 
 			// hanami#85
-			twoFactorEnabled: user.twoFactorEnabled,
-			usePasswordLessLogin: user.usePasswordLessLogin,
-			securityKeys: user.securityKeys,
+			twoFactorEnabled: true,
+			usePasswordLessLogin: false,
+			securityKeys: false,
 		});
 	};
 
