@@ -6,6 +6,38 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+ @font-face {
+	font-family: 'Inter___local';
+	font-style: normal;
+	font-weight: 100 900;
+	font-display: swap;
+	src: local('Inter');
+}
+
+@font-face {
+	font-family: 'Inter___local';
+	font-style: italic;
+	font-weight: 100 900;
+	font-display: swap;
+	src: local('Inter');
+}
+
+@font-face {
+	font-family: 'Biz UDGothic___local';
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: local('BIZ UDGothic');
+}
+
+@font-face {
+	font-family: 'Biz UDGothic___local';
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+	src: local('BIZ UDGothic Bold'), local('BIZ UDGothic');
+}
+
 :root {
 	--radius: 12px;
 	--marginFull: 14px;
@@ -21,7 +53,7 @@ html {
 	accent-color: var(--accent);
 	overflow: clip;
 	overflow-wrap: break-word;
-	font-family: 'Hiragino Maru Gothic Pro', "BIZ UDGothic", Roboto, HelveticaNeue, Arial, sans-serif;
+	font-family: 'Inter___local', 'Inter', 'Biz UDGothic___local', "BIZ UDGothic", Roboto, HelveticaNeue, Arial, sans-serif;
 	font-size: 14px;
 	line-height: 1.35;
 	text-size-adjust: 100%;

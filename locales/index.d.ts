@@ -10558,6 +10558,10 @@ export interface Locale extends ILocale {
          * 独自検索エンジンは現在開発中です。今ご利用いただけるのは通常のMisskeyと同じ検索エンジン（Meilisearch）です。今後の進化にご期待ください！
          */
         "searchIsInBeta": string;
+        /**
+         * {x}で見る
+         */
+        "showOnX": ParameterizedString<"x">;
         "_inDevelopment": {
             /**
              * この機能は開発中です
