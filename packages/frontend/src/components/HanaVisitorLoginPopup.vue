@@ -101,6 +101,6 @@ function close() {
 
 .loginButton {
 	font-size: 0.85em;
-	color: var(--fg);
+	color: var(--MI_THEME-fg);
 }
 </style>

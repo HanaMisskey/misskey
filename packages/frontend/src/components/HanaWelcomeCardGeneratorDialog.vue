@@ -349,7 +349,7 @@ onDeactivated(() => {
 
 .hanaWelcomeCardGenPreviewRoot {
 	position: relative;
-	background-color: var(--bg);
+	background-color: var(--MI_THEME-bg);
 	cursor: not-allowed;
 }
 
@@ -366,10 +366,10 @@ onDeactivated(() => {
 	width: fit-content;
 	flex-shrink: 0;
 	padding: 0 8px;
-	background-color: var(--panel);
-	border-right: 1px solid var(--divider);
-	border-bottom: 1px solid var(--divider);
-	border-bottom-right-radius: var(--radius);
+	background-color: var(--MI_THEME-panel);
+	border-right: 1px solid var(--MI_THEME-divider);
+	border-bottom: 1px solid var(--MI_THEME-divider);
+	border-bottom-right-radius: var(--MI_THEME-radius);
 	height: 28px;
 	line-height: 28px;
 	box-sizing: border-box;
@@ -418,8 +418,8 @@ onDeactivated(() => {
 
 .hanaWelcomeCardGenResultHeadingIcon {
 	margin: 0 auto;
-	background-color: var(--accentedBg);
-	color: var(--accent);
+	background-color: var(--MI_THEME-accentedBg);
+	color: var(--MI_THEME-accent);
 	text-align: center;
 	height: 64px;
 	width: 64px;
