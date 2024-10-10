@@ -123,7 +123,7 @@ defineExpose<TutorialPageCommonExpose>({
 
 <style lang="scss" module>
 .exampleNoteRoot {
-	border-radius: var(--radius);
+	border-radius: var(--MI-radius);
 	border: var(--MI_THEME-panelBorder);
 	background: var(--MI_THEME-panel);
 }

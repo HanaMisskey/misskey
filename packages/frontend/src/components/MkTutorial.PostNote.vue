@@ -86,7 +86,7 @@ defineExpose<TutorialPageCommonExpose>({
 <style lang="scss" module>
 .exampleRoot {
 	max-width: none!important;
-	border-radius: var(--radius);
+	border-radius: var(--MI-radius);
 	border: var(--MI_THEME-panelBorder);
 	background: var(--MI_THEME-panel);
 }
