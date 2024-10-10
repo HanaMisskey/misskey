@@ -140,6 +140,6 @@ defineExpose<TutorialPageCommonExpose>({
 }
 
 .actionWaitText {
-	color: var(--error);
+	color: var(--MI_THEME-error);
 }
 </style>

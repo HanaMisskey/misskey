@@ -248,7 +248,7 @@ definePageMetadata(() => ({
 .onboardingContainer {
 	position: relative;
 	border-radius: var(--MI-radius);
-	background-color: var(--acrylicPanel);
+	background-color: var(--MI_THEME-acrylicPanel);
 	overflow: clip;
 	box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 	max-width: 650px;
@@ -269,7 +269,7 @@ definePageMetadata(() => ({
 	line-height: 40px;
 	height: 40px;
 	padding: 0 var(--MI-margin);
-	background: var(--panelHighlight);
+	background: var(--MI_THEME-panelHighlight);
 	display: flex;
 	transition: transform 0.5s ease;
 	transform: translateY(-100%);
