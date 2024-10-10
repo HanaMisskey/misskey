@@ -87,7 +87,7 @@ function neverShow() {
 		bottom: 10%;
 		right: 20%;
 		height: 50%;
-		border: 2px solid var(--accent);
+		border: 2px solid var(--MI_THEME-accent);
 		border-radius: var(--radius);
 		transform: rotate(-10deg);
 	}
