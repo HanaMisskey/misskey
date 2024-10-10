@@ -136,7 +136,7 @@ defineExpose<TutorialPageCommonExpose>({
 .image {
 	max-width: 300px;
 	margin: 0 auto;
-	border-radius: var(--radius);
+	border-radius: var(--MI-radius);
 }
 
 .actionWaitText {

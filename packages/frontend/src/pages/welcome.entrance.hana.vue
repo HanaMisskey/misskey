@@ -286,14 +286,14 @@ function upcomingFeatureDialog() {
 .aboutWrapper {
 	margin: 0 16px;
 	padding: 16px;
-	border-radius: var(--radius);
+	border-radius: var(--MI-radius);
 	background: var(--MI_THEME-panel);
 }
 
 .decentralizedRoot {
 	margin-top: 32px;
 	padding: 16px;
-	border-radius: var(--radius);
+	border-radius: var(--MI-radius);
 	background: var(--MI_THEME-panel);
 
 	border: 2px dashed var(--misskey-accent);
@@ -364,12 +364,12 @@ function upcomingFeatureDialog() {
 		transform: translate(-50%, -50%);
 		width: 100%;
 		height: auto;
-		border-radius: var(--radius);
+		border-radius: var(--MI-radius);
 	}
 
 	&.noImage {
 		background-color: #aaa;
-		border-radius: var(--radius);
+		border-radius: var(--MI-radius);
 	}
 }
 

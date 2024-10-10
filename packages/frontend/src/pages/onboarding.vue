@@ -247,7 +247,7 @@ definePageMetadata(() => ({
 
 .onboardingContainer {
 	position: relative;
-	border-radius: var(--radius);
+	border-radius: var(--MI-radius);
 	background-color: var(--acrylicPanel);
 	overflow: clip;
 	box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
@@ -268,7 +268,7 @@ definePageMetadata(() => ({
 	font-size: 14px;
 	line-height: 40px;
 	height: 40px;
-	padding: 0 var(--margin);
+	padding: 0 var(--MI-margin);
 	background: var(--panelHighlight);
 	display: flex;
 	transition: transform 0.5s ease;
@@ -342,7 +342,7 @@ definePageMetadata(() => ({
 	width: 5em;
 	margin: 0 auto;
 	object-fit: contain;
-	border-radius: calc(var(--radius) / 2);
+	border-radius: calc(var(--MI-radius) / 2);
 }
 
 .welcomePageConfetti,
