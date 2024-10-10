@@ -390,7 +390,7 @@ onDeactivated(() => {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	padding: var(--margin);
+	padding: var(--MI-margin);
 }
 
 .hanaWelcomeCardGenPreviewCanvas {

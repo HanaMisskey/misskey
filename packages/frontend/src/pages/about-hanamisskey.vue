@@ -171,7 +171,7 @@ definePageMetadata(() => ({
 .znqjceqz {
 	> .about {
 		position: relative;
-		border-radius: var(--radius);
+		border-radius: var(--MI-radius);
 
 		> .container {
 			position: relative;
@@ -215,7 +215,7 @@ definePageMetadata(() => ({
 
 <style lang="scss" module>
 .creditKvValue {
-	margin-top: calc(var(--marginHalf) / 2);
+	margin-top: calc(var(--MI-marginHalf) / 2);
 }
 
 .contributors {

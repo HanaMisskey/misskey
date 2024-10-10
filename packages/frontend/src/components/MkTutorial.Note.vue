@@ -123,7 +123,7 @@ defineExpose<TutorialPageCommonExpose>({
 
 <style lang="scss" module>
 .exampleNoteRoot {
-	border-radius: var(--radius);
+	border-radius: var(--MI-radius);
 	border: var(--MI_THEME-panelBorder);
 	background: var(--MI_THEME-panel);
 }
@@ -136,10 +136,10 @@ defineExpose<TutorialPageCommonExpose>({
 .image {
 	max-width: 300px;
 	margin: 0 auto;
-	border-radius: var(--radius);
+	border-radius: var(--MI-radius);
 }
 
 .actionWaitText {
-	color: var(--error);
+	color: var(--MI_THEME-error);
 }
 </style>

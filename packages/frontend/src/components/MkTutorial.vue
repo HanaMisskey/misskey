@@ -91,6 +91,7 @@ import { i18n } from '@/i18n.js';
  * 2. tutorialBodyPagesDefにページのアイコン・タイトル・区分を追加
  *    （区分がsetupの場合はwithSetup == falseのときにスキップされます）
  * 3. componentsDefにページのコンポーネントを追加（順番を対応させること）
+ * 4. cypress/e2e/basic.cy.tsにページ分のテストを追加
  */
 
 /** チュートリアルページ用Expose */
@@ -358,7 +359,7 @@ defineExpose({
 
 .progressBarValue {
 	height: 100%;
-	background: linear-gradient(90deg, var(--buttonGradateA), var(--buttonGradateB));
+	background: linear-gradient(90deg, var(--MI_THEME-buttonGradateA), var(--MI_THEME-buttonGradateB));
 	transition: all 0.5s cubic-bezier(0,.5,.5,1);
 }
 
@@ -395,7 +396,7 @@ defineExpose({
 
 .progressBarValue {
 	height: 100%;
-	background: linear-gradient(90deg, var(--buttonGradateA), var(--buttonGradateB));
+	background: linear-gradient(90deg, var(--MI_THEME-buttonGradateA), var(--MI_THEME-buttonGradateB));
 	transition: all 0.5s cubic-bezier(0,.5,.5,1);
 }
 
@@ -435,8 +436,8 @@ defineExpose({
 	box-sizing: border-box;
 	flex-shrink: 0;
 	padding: 12px;
-	border-top: solid 0.5px var(--divider);
-	background: var(--acrylicBg);
+	border-top: solid 0.5px var(--MI_THEME-divider);
+	background: var(--MI_THEME-acrylicBg);
 
 	transition: transform 0.3s cubic-bezier(0,0,.35,1);
 	transform: translateY(100%);
