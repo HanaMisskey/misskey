@@ -2829,6 +2829,12 @@ _hana:
   migrateFromBackspaceKey: "BackspaceKeyからの移行"
   searchIsInBeta: "独自検索エンジンは現在開発中です。今ご利用いただけるのは通常のMisskeyと同じ検索エンジン（Meilisearch）です。今後の進化にご期待ください！"
   showOnX: "{x}で見る"
+  _admin:
+    prohibitedPartialScreenNames: "禁止するユーザー名に含まれる文字列"
+    prohibitedPartialScreenNamesDescription: "ユーザー名に含まれる文字列がこのリストに含まれる場合、そのユーザー名は使用できません。"
+  _error:
+    screenNameContainsProhibitedWords: "変更しようとした名前に禁止された文字列が含まれています"
+    screenNameContainsProhibitedWordsDescription: "名前に禁止されている文字列が含まれています。本名である等の理由でこの名前を使用したい場合は、サーバー管理者にお問い合わせください。"
   _inDevelopment:
     title: "この機能は開発中です"
     description: "はなみすきーは新規機能盛りだくさんで鋭意開発中です！\nどんな機能が実装されるかはお楽しみ。"

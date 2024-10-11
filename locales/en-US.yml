@@ -2727,6 +2727,12 @@ _hana:
   flowerEffect: "Show flurries all year round"
   migrateFromBackspaceKey: "Migrate from BackspaceKey"
   searchIsInBeta: "Our own search engine is currently under development. Currently you are using the same search engine (Meilisearch) as regular Misskey. Stay tuned to see how the search is optimized in the future!"
+  _admin:
+    prohibitedPartialScreenNames: "The Word(s) Prohibited in Usernames"
+    prohibitedPartialScreenNamesDescription: "If a username contains any of the words listed here, it will be rejected."
+  _error:
+    screenNameContainsProhibitedWords: "The new username contains prohibited words"
+    screenNameContainsProhibitedWordsDescription: "The name contains prohibited characters. If you wish to use this name due to reasons such as it being your real name, please contact the server administrator."
   _inDevelopment:
     title: "This feature is under development"
     description: "HanaMisskey is packed with new features currently in development! Stay tuned to see what exciting features will be implemented."
