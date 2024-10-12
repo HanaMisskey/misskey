@@ -10635,26 +10635,6 @@ export interface Locale extends ILocale {
          * {x}で見る
          */
         "showOnX": ParameterizedString<"x">;
-        "_admin": {
-            /**
-             * 禁止するユーザー名に含まれる文字列
-             */
-            "prohibitedPartialScreenNames": string;
-            /**
-             * ユーザー名に含まれる文字列がこのリストに含まれる場合、そのユーザー名は使用できません。
-             */
-            "prohibitedPartialScreenNamesDescription": string;
-        };
-        "_error": {
-            /**
-             * 変更しようとした名前に禁止された文字列が含まれています
-             */
-            "screenNameContainsProhibitedWords": string;
-            /**
-             * 名前に禁止されている文字列が含まれています。本名である等の理由でこの名前を使用したい場合は、サーバー管理者にお問い合わせください。
-             */
-            "screenNameContainsProhibitedWordsDescription": string;
-        };
         "_inDevelopment": {
             /**
              * この機能は開発中です
