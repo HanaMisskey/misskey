@@ -175,6 +175,8 @@ export class SearchService {
 		if (note.text == null && note.cw == null) return;
 		if (!['home', 'public'].includes(note.visibility)) return;
 
+		const createdAt = this.idService.parse(note.id).date;
+
 		if (this.meilisearch) {
 			switch (this.meilisearchIndexScope) {
 				case 'global':
@@ -193,7 +195,7 @@ export class SearchService {
 
 			await this.meilisearchNoteIndex?.addDocuments([{
 				id: note.id,
-				createdAt: this.idService.parse(note.id).date.getTime(),
+				createdAt: createdAt.getTime(),
 				userId: note.userId,
 				userHost: note.userHost,
 				channelId: note.channelId,
@@ -203,9 +205,11 @@ export class SearchService {
 			}], {
 				primaryKey: 'id',
 			});
-		}	else if (this.elasticsearch) {
+		}
+
+		if (this.elasticsearch) {
 			const body = {
-				createdAt: this.idService.parse(note.id).date.getTime(),
+				createdAt: createdAt.getTime(),
 				userId: note.userId,
 				userHost: note.userHost,
 				channelId: note.channelId,
@@ -229,7 +233,9 @@ export class SearchService {
 
 		if (this.meilisearch) {
 			this.meilisearchNoteIndex!.deleteDocument(note.id);
-		} else if (this.elasticsearch) {
+		}
+
+		if (this.elasticsearch) {
 			await this.elasticsearch.delete({
 				index: `${this.elasticsearchNoteIndex}-${this.idService.parse(note.id).date.toISOString().slice(0, 7).replace(/-/g, '')}`,
 				id: note.id,
