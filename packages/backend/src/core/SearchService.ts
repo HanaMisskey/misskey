@@ -18,6 +18,7 @@ import { CacheService } from '@/core/CacheService.js';
 import { QueryService } from '@/core/QueryService.js';
 import { IdService } from '@/core/IdService.js';
 import type Logger from '@/logger.js';
+import { IdentifiableError } from '@/misc/identifiable-error.js';
 import type { Index, MeiliSearch } from 'meilisearch';
 import type { Client as ElasticSearch } from '@elastic/elasticsearch';
 
@@ -119,7 +120,6 @@ export class SearchService {
 
 		if (config.meilisearch?.scope) {
 			this.meilisearchIndexScope = config.meilisearch.scope;
-			}
 		}
 
 		if (this.elasticsearch) {
@@ -167,6 +167,7 @@ export class SearchService {
 				}
 			}).catch((error) => {
 				this.logger.error('Error while checking if index exists', error);
+			});
 		}
 	}
 
@@ -250,12 +251,13 @@ export class SearchService {
 		userId?: MiNote['userId'] | null;
 		channelId?: MiNote['channelId'] | null;
 		host?: string | null;
+		preferredMethod?: 'meilisearch' | 'elasticsearch' | null;
 	}, pagination: {
 		untilId?: MiNote['id'];
 		sinceId?: MiNote['id'];
 		limit?: number;
 	}): Promise<MiNote[]> {
-		if (this.meilisearch) {
+		if (this.meilisearch && opts.preferredMethod !== 'elasticsearch') {
 			const filter: Q = {
 				op: 'and',
 				qs: [],
@@ -294,7 +296,9 @@ export class SearchService {
 				return true;
 			});
 			return notes.sort((a, b) => a.id > b.id ? -1 : 1);
-		} else if (this.elasticsearch) {
+		}
+
+		if (this.elasticsearch && opts.preferredMethod !== 'meilisearch') {
 			const esFilter: any = {
 				bool: {
 					must: [],
@@ -355,7 +359,17 @@ export class SearchService {
 			});
 
 			return notes.sort((a, b) => a.id > b.id ? -1 : 1);
-		} else {
+		}
+
+		if (!this.meilisearch && opts.preferredMethod === 'meilisearch') {
+			throw new IdentifiableError('meilisearch is not available');
+		}
+
+		if (!this.elasticsearch && opts.preferredMethod === 'elasticsearch') {
+			throw new IdentifiableError('elasticsearch is not available');
+		}
+
+		if (!this.elasticsearch && !this.meilisearch && opts.preferredMethod === null) {
 			const query = this.queryService.makePaginationQuery(this.notesRepository.createQueryBuilder('note'), pagination.sinceId, pagination.untilId);
 
 			if (opts.userId) {
