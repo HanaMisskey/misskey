@@ -5183,6 +5183,26 @@ export interface Locale extends ILocale {
      */
     "target": string;
     /**
+     * CAPTCHAのテストを目的とした機能です。<strong>本番環境で使用しないでください。</strong>
+     */
+    "testCaptchaWarning": string;
+    /**
+     * 禁止ワード（ユーザー名）
+     */
+    "prohibitedPartialScreenNames": string;
+    /**
+     * ユーザー名に含まれる文字列がこのリストに含まれる場合、そのユーザー名は使用できません。
+     */
+    "prohibitedPartialScreenNamesDescription": string;
+    /**
+     * 変更しようとした名前に禁止された文字列が含まれています
+     */
+    "screenNameContainsProhibitedWords": string;
+    /**
+     * 名前に禁止されている文字列が含まれています。この名前を使用したい場合は、サーバー管理者にお問い合わせください。
+     */
+    "screenNameContainsProhibitedWordsDescription": string;
+    /**
      * チュートリアルをスキップできないようにする
      */
     "prohibitSkippingInitialTutorial": string;
