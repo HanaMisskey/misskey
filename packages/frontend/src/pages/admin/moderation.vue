@@ -62,6 +62,18 @@ SPDX-License-Identifier: AGPL-3.0-only
 					</MkFolder>
 
 					<MkFolder>
+						<template #icon><i class="ti ti-user-x"></i></template>
+						<template #label>{{ i18n.ts._hana._admin.prohibitedPartialScreenNames }}</template>
+
+						<div class="_gaps">
+							<MkTextarea v-model="prohibitedPartialScreenNames">
+								<template #caption>{{ i18n.ts._hana._admin.prohibitedPartialScreenNamesDescription }}<br>{{ i18n.ts.prohibitedWordsDescription2 }}</template>
+							</MkTextarea>
+							<MkButton primary @click="save_prohibitedPartialScreenNames">{{ i18n.ts.save }}</MkButton>
+						</div>
+					</MkFolder>
+
+					<MkFolder>
 						<template #icon><i class="ti ti-eye-off"></i></template>
 						<template #label>{{ i18n.ts.hiddenTags }}</template>
 
@@ -136,6 +148,7 @@ const emailRequiredForSignup = ref<boolean>(false);
 const prohibitSkippingInitialTutorial = ref<boolean>(false);
 const sensitiveWords = ref<string>('');
 const prohibitedWords = ref<string>('');
+const prohibitedPartialScreenNames = ref<string>('');
 const hiddenTags = ref<string>('');
 const preservedUsernames = ref<string>('');
 const blockedHosts = ref<string>('');
@@ -149,10 +162,11 @@ async function init() {
 	prohibitSkippingInitialTutorial.value = !meta.canSkipInitialTutorial;
 	sensitiveWords.value = meta.sensitiveWords.join('\n');
 	prohibitedWords.value = meta.prohibitedWords.join('\n');
+	prohibitedPartialScreenNames.value = meta.prohibitedPartialScreenNames.join('\n');
 	hiddenTags.value = meta.hiddenTags.join('\n');
 	preservedUsernames.value = meta.preservedUsernames.join('\n');
 	blockedHosts.value = meta.blockedHosts.join('\n');
-	silencedHosts.value = meta.silencedHosts.join('\n');
+	silencedHosts.value = meta.silencedHosts?.join('\n') ?? '';
 	mediaSilencedHosts.value = meta.mediaSilencedHosts.join('\n');
 }
 
@@ -199,6 +213,14 @@ function save_sensitiveWords() {
 function save_prohibitedWords() {
 	os.apiWithDialog('admin/update-meta', {
 		prohibitedWords: prohibitedWords.value.split('\n'),
+	}).then(() => {
+		fetchInstance(true);
+	});
+}
+
+function save_prohibitedPartialScreenNames() {
+	os.apiWithDialog('admin/update-meta', {
+		prohibitedPartialScreenNames: prohibitedPartialScreenNames.value.split('\n'),
 	}).then(() => {
 		fetchInstance(true);
 	});
