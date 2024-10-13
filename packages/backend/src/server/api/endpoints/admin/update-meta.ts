@@ -84,6 +84,7 @@ export const paramDef = {
 		enableTurnstile: { type: 'boolean' },
 		turnstileSiteKey: { type: 'string', nullable: true },
 		turnstileSecretKey: { type: 'string', nullable: true },
+		enableTestcaptcha: { type: 'boolean' },
 		sensitiveMediaDetection: { type: 'string', enum: ['none', 'all', 'local', 'remote'] },
 		sensitiveMediaDetectionSensitivity: { type: 'string', enum: ['medium', 'low', 'high', 'veryLow', 'veryHigh'] },
 		setSensitiveFlagAutomatically: { type: 'boolean' },
@@ -136,6 +137,7 @@ export const paramDef = {
 		truemailAuthKey: { type: 'string', nullable: true },
 		enableChartsForRemoteUser: { type: 'boolean' },
 		enableChartsForFederatedInstances: { type: 'boolean' },
+		enableStatsForFederatedInstances: { type: 'boolean' },
 		enableServerMachineStats: { type: 'boolean' },
 		enableIdenticonGeneration: { type: 'boolean' },
 		serverRules: { type: 'array', items: { type: 'string' } },
@@ -370,6 +372,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				set.turnstileSecretKey = ps.turnstileSecretKey;
 			}
 
+			if (ps.enableTestcaptcha !== undefined) {
+				set.enableTestcaptcha = ps.enableTestcaptcha;
+			}
+
 			if (ps.sensitiveMediaDetection !== undefined) {
 				set.sensitiveMediaDetection = ps.sensitiveMediaDetection;
 			}
@@ -576,6 +582,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 
 			if (ps.enableChartsForFederatedInstances !== undefined) {
 				set.enableChartsForFederatedInstances = ps.enableChartsForFederatedInstances;
+			}
+
+			if (ps.enableStatsForFederatedInstances !== undefined) {
+				set.enableStatsForFederatedInstances = ps.enableStatsForFederatedInstances;
 			}
 
 			if (ps.enableServerMachineStats !== undefined) {
