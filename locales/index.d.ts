@@ -4383,6 +4383,10 @@ export interface Locale extends ILocale {
      */
     "enableChartsForFederatedInstances": string;
     /**
+     * リモートサーバーの情報を取得
+     */
+    "enableStatsForFederatedInstances": string;
+    /**
      * ノートのアクションにクリップを追加
      */
     "showClipButtonInNoteFooter": string;
@@ -5801,6 +5805,10 @@ export interface Locale extends ILocale {
          * サーバー運営者へのお問い合わせフォームのURLや、運営者の連絡先等が記載されたWebページのURLを指定します。
          */
         "inquiryUrlDescription": string;
+        /**
+         * 一定期間モデレーターのアクティビティが検出されなかった場合、スパム防止のためこの設定は自動でオフになります。
+         */
+        "thisSettingWillAutomaticallyOffWhenModeratorsInactive": string;
     };
     "_accountMigration": {
         /**
@@ -9792,6 +9800,14 @@ export interface Locale extends ILocale {
              * ユーザーが作成されたとき
              */
             "userCreated": string;
+            /**
+             * モデレーターが一定期間非アクティブになったとき
+             */
+            "inactiveModeratorsWarning": string;
+            /**
+             * モデレーターが一定期間非アクティブだったため、システムにより招待制へと変更されたとき
+             */
+            "inactiveModeratorsInvitationOnlyChanged": string;
         };
         /**
          * Webhookを削除しますか？

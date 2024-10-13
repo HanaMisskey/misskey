@@ -699,13 +699,15 @@ export class NoteCreateService implements OnApplicationShutdown {
 		}
 
 		// Register host
-		if (this.userEntityService.isRemoteUser(user)) {
-			this.federatedInstanceService.fetch(user.host).then(async i => {
-				this.updateNotesCountQueue.enqueue(i.id, 1);
-				if (this.meta.enableChartsForFederatedInstances) {
-					this.instanceChart.updateNote(i.host, note, true);
-				}
-			});
+		if (this.meta.enableStatsForFederatedInstances) {
+			if (this.userEntityService.isRemoteUser(user)) {
+				this.federatedInstanceService.fetchOrRegister(user.host).then(async i => {
+					this.updateNotesCountQueue.enqueue(i.id, 1);
+					if (this.meta.enableChartsForFederatedInstances) {
+						this.instanceChart.updateNote(i.host, note, true);
+					}
+				});
+			}
 		}
 
 		// ハッシュタグ更新
@@ -927,18 +929,8 @@ export class NoteCreateService implements OnApplicationShutdown {
 	}, data: Option, silent: boolean, tags: string[], mentionedUsers: MinimumUser[]) {
 		this.notesChart.update(note, true);
 
-		// Register host
 		if (this.userEntityService.isRemoteUser(user)) {
-			this.federatedInstanceService.fetch(user.host).then(async i => {
-				if (note.renote && note.text) {
-					this.instancesRepository.increment({ id: i.id }, 'notesCount', 1);
-				} else if (!note.renote) {
-					this.instancesRepository.increment({ id: i.id }, 'notesCount', 1);
-				}
-				if (this.meta.enableChartsForFederatedInstances) {
-					this.instanceChart.updateNote(i.host, note, true);
-				}
-			});
+			throw new IdentifiableError('a5890273-531e-4ce2-9d56-036f0fc11236', 'Remote user cannot import notes.');
 		}
 
 		if (data.renote && data.text) {
