@@ -5181,7 +5181,7 @@ export type operations = {
             mediaSilencedHosts: string[];
             pinnedUsers: string[];
             defaultFollowedUsers: string[];
-            permanentFollowedUsers: string[];
+            forciblyFollowedUsers: string[];
             hiddenTags: string[];
             blockedHosts: string[];
             sensitiveWords: string[];
@@ -9524,7 +9524,7 @@ export type operations = {
           disableRegistration?: boolean | null;
           pinnedUsers?: string[] | null;
           defaultFollowedUsers?: string[] | null;
-          permanentFollowedUsers?: string[] | null;
+          forciblyFollowedUsers?: string[] | null;
           hiddenTags?: string[] | null;
           blockedHosts?: string[] | null;
           sensitiveWords?: string[] | null;

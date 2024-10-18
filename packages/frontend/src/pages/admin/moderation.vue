@@ -47,9 +47,9 @@ SPDX-License-Identifier: AGPL-3.0-only
 								<template #label>{{ i18n.ts.defaultFollowedUsers }}</template>
 								<template #caption>{{ i18n.ts.defaultFollowedUsersDescription }}</template>
 							</MkTextarea>
-							<MkTextarea v-model="permanentFollowedUsers">
-								<template #label>{{ i18n.ts.permanentFollowedUsers }}</template>
-								<template #caption>{{ i18n.ts.permanentFollowedUsersDescription }}</template>
+							<MkTextarea v-model="forciblyFollowedUsers">
+								<template #label>{{ i18n.ts.forciblyFollowedUsers }}</template>
+								<template #caption>{{ i18n.ts.forciblyFollowedUsersDescription }}</template>
 							</MkTextarea>
 							<MkButton primary @click="save_defaultUsers">{{ i18n.ts.save }}</MkButton>
 						</div>
@@ -170,7 +170,7 @@ const prohibitedWordsForNameOfUser = ref<string>('');
 const hiddenTags = ref<string>('');
 const preservedUsernames = ref<string>('');
 const defaultFollowedUsers = ref<string>('');
-const permanentFollowedUsers = ref<string>('');
+const forciblyFollowedUsers = ref<string>('');
 const blockedHosts = ref<string>('');
 const silencedHosts = ref<string>('');
 const mediaSilencedHosts = ref<string>('');
@@ -186,7 +186,7 @@ async function init() {
 	hiddenTags.value = meta.hiddenTags.join('\n');
 	preservedUsernames.value = meta.preservedUsernames.join('\n');
 	defaultFollowedUsers.value = meta.defaultFollowedUsers.join('\n');
-	permanentFollowedUsers.value = meta.permanentFollowedUsers.join('\n');
+	forciblyFollowedUsers.value = meta.forciblyFollowedUsers.join('\n');
 	blockedHosts.value = meta.blockedHosts.join('\n');
 	silencedHosts.value = meta.silencedHosts?.join('\n') ?? '';
 	mediaSilencedHosts.value = meta.mediaSilencedHosts.join('\n');
@@ -227,7 +227,7 @@ function save_preservedUsernames() {
 function save_defaultUsers() {
 	os.apiWithDialog('admin/update-meta', {
 		defaultFollowedUsers: defaultFollowedUsers.value.split('\n'),
-		permanentFollowedUsers: permanentFollowedUsers.value.split('\n'),
+		forciblyFollowedUsers: forciblyFollowedUsers.value.split('\n'),
 	}, undefined, {
 		'bcf088ec-fec5-42d0-8b9e-16d3b4797a4d': {
 			text: i18n.ts.defaultFollowedUsersDuplicated,
