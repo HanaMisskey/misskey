@@ -120,7 +120,8 @@ services:
       "
 
   redis.test:
-    image: redis:7-alpine
+    image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
+    command: ['--default_lua_flags=allow-undeclared-keys','--lock_on_hashtags']
     volumes:
       - type: bind
         source: ./volumes/redis
