@@ -27,22 +27,22 @@ SPDX-License-Identifier: AGPL-3.0-only
 					<option value="user">{{ i18n.ts._hana._search.searchScopeUser }}</option>
 				</MkRadios>
 
-				<MkInput
-					v-if="searchScope === 'server'"
-					v-model="hostInput"
-					large
-					:placeholder="i18n.ts._hana._search.serverHostPlaceholder"
-					@enter.prevent="search"
-				>
-					<template #label>{{ i18n.ts._hana._search.pleaseEnterServerHost }}</template>
-					<template #prefix><i class="ti ti-server"></i></template>
-				</MkInput>
+				<div v-if="searchScope === 'server'" :class="$style.subOptionRoot">
+					<MkInput
+						v-model="hostInput"
+						:placeholder="i18n.ts._hana._search.serverHostPlaceholder"
+						@enter.prevent="search"
+					>
+						<template #label>{{ i18n.ts._hana._search.pleaseEnterServerHost }}</template>
+						<template #prefix><i class="ti ti-server"></i></template>
+					</MkInput>
+				</div>
 
-				<div v-if="searchScope === 'user'">
+				<div v-if="searchScope === 'user'" :class="$style.subOptionRoot">
 					<div :class="$style.userSelectLabel">{{ i18n.ts._hana._search.pleaseSelectUser }}</div>
 					<div class="_gaps">
 						<div v-if="user == null" :class="$style.userSelectButtons">
-							<div v-if="$i != null" style="min-width: 30cqw;">
+							<div v-if="$i != null">
 								<MkButton
 									transparent
 									:class="$style.userSelectButton"
@@ -332,6 +332,12 @@ async function search() {
 }
 </script>
 <style lang="scss" module>
+.subOptionRoot {
+	background: var(--MI_THEME-panel);
+	border-radius: var(--MI-radius);
+	padding: var(--MI-margin);
+}
+
 .userSelectLabel {
 	font-size: 0.85em;
 	padding: 0 0 8px;
