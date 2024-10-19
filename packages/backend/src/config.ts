@@ -338,7 +338,7 @@ function convertRedisOptions(options: RedisOptionsSource, host: string): RedisOp
 			if (err.message.includes(targetError)) {
 				return 2; // 再接続を行った後にクエリを実行する、そこでエラーがなければアプリケーション側にはエラーを伝えない。
 			}
-			return 0;
+			return false;
 		},
 	};
 }
