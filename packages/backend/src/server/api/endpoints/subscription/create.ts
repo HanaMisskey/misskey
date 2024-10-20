@@ -145,6 +145,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 
 				const makeCustomer = await stripe.customers.create({
 					email: userProfile.email,
+				}, {
+					idempotencyKey: user.id,
 				});
 				await this.userProfilesRepository.update({ userId: user.id }, {
 					stripeCustomerId: makeCustomer.id,
@@ -203,7 +205,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 						throw new ApiError(meta.errors.accessDenied);
 					}
 
-					await stripe.subscriptionItems.update(subscriptionItem.id, { plan: plan.stripePriceId });
+					await stripe.subscriptionItems.update(subscriptionItem.id, { plan: plan.stripePriceId }, { idempotencyKey: user.id + plan.id });
 					logger.info(`Subscription plan changed for user ${user.id} to plan ${plan.id}`);
 
 					throw new ApiError(meta.errors.accessDenied);
@@ -216,7 +218,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 					customer: customerId,
 					allow_promotion_codes: true,
 					return_url: `${this.config.url}/settings/subscription`,
-				}, {});
+				});
 
 				if (!session.url) throw new ApiError(meta.errors.sessionInvalid);
 
