@@ -5215,6 +5215,10 @@ export interface Locale extends ILocale {
      */
     "reset": string;
     /**
+     * 常に絶対時刻で表示する
+     */
+    "alwaysUseAbsoluteTime": string;
+    /**
      * チュートリアルをスキップできないようにする
      */
     "prohibitSkippingInitialTutorial": string;
