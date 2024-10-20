@@ -32,7 +32,7 @@ export class StripeWebhookServerService {
 		private globalEventService: GlobalEventService,
 		private loggerService: LoggerService,
 	) {
-		this.logger = this.loggerService.getLogger('server', 'gray');
+		this.logger = this.loggerService.getLogger('subscription:webhook');
 	}
 
 	@bindThis
@@ -65,28 +65,30 @@ export class StripeWebhookServerService {
 			}
 			//#endregion
 
+			/* サブスクリプションの機能が無効にされていてもWebhookは処理するようにする。
 			const instance = await this.metaService.fetch(true);
 
 			if (!instance.enableSubscriptions) {
 				reply.code(503);
 				return;
 			}
+			*/
 			if (!(this.config.stripe && this.config.stripe.secretKey && this.config.stripe.webhookSecret)) {
-				reply.code(503);
-				return;
+				this.logger.error('The Stripe webhook configuration is not set correctly.');
+				return reply.code(503);
 			}
 
 			const body = request.rawBody;
 			if (!body) {
-				reply.code(400);
-				return;
+				this.logger.error('Request body from Stripe webhook is empty.');
+				return reply.code(400);
 			}
 
 			// Retrieve the event by verifying the signature using the raw body and secret.
 			const signature = request.headers['stripe-signature'];
 			if (!signature) { // Check if signature exists.
-				reply.code(400);
-				return;
+				this.logger.error('Webhook does not contain a signature.');
+				return reply.code(400);
 			}
 
 			const stripe = new Stripe(this.config.stripe.secretKey);
@@ -94,8 +96,8 @@ export class StripeWebhookServerService {
 			try {
 				event = stripe.webhooks.constructEvent(body, signature, this.config.stripe.webhookSecret);
 			} catch (err) {
-				reply.code(400);
-				return;
+				this.logger.error('Webhook signature verification or event parsing failed.', { error: err });
+				return reply.code(400);
 			}
 
 			if (!assertIsSupportedEvent(event)) {
@@ -111,8 +113,8 @@ export class StripeWebhookServerService {
 				const userProfile = await this.userProfilesRepository.findOneBy({ stripeCustomerId: customer });
 
 				if (!userProfile) {
-					reply.code(400);
-					return;
+					this.logger.warn(`CustomerId: "${customer}" has no user profile found.`);
+					return reply.code(400);
 				}
 				reply.code(204); // Stripeへの応答を設定
 				return { userProfile, subscription: eventData };
@@ -133,6 +135,7 @@ export class StripeWebhookServerService {
 					const user = await this.usersRepository.findOneByOrFail({ id: userProfile.userId });
 
 					if (user.stripeSubscriptionId != null) {
+						this.logger.info(`Subscription already exists for user ID ${user.id}. No processing is needed.`);
 						return; // 既にサブスクリプションが存在する場合は何もしない
 					}
 
@@ -141,6 +144,7 @@ export class StripeWebhookServerService {
 							// ユーザーにロールが割り当てられていない場合、ロールを割り当てる
 							if (!roles.some((role) => role.id === subscriptionPlan.roleId)) {
 								await this.roleService.assign(userProfile.userId, subscriptionPlan.roleId);
+								this.logger.info(`${userProfile.userId} has been assigned the role "${subscriptionPlan.roleId}" by the subscription creation event.`);
 							}
 						});
 					}
@@ -176,12 +180,14 @@ export class StripeWebhookServerService {
 								for (const role of roles) {
 									if (roleIds.includes(role.id) && role.id !== subscriptionPlan.roleId) {
 										await this.roleService.unassign(user.id, role.id); // 他のサブスクリプションプランのロールが割り当てられている場合、ロールを解除する
+										this.logger.info(`${user.id} has been unassigned the role "${role.id}" by the subscription update event.`);
 									}
 								}
 
 								// ユーザーにロールが割り当てられていない場合、ロールを割り当てる
 								if (!roles.some((role) => role.id === subscriptionPlan.roleId)) {
 									await this.roleService.assign(user.id, subscriptionPlan.roleId);
+									this.logger.info(`${user.id} has been assigned the role "${subscriptionPlan.roleId}" by the subscription update event.`);
 								}
 							});
 						} else if (subscriptionPlan.id !== user.subscriptionPlanId) { // サブスクリプションプランが変更された場合
@@ -190,11 +196,13 @@ export class StripeWebhookServerService {
 								// 旧サブスクリプションプランのロールが割り当てられている場合、ロールを解除する
 								if (roles.some((role) => role.id === oldSubscriptionPlan.roleId)) {
 									await this.roleService.unassign(user.id, oldSubscriptionPlan.roleId);
+									this.logger.info(`${user.id} has been unassigned the role "${oldSubscriptionPlan.roleId}" by the subscription update event.`);
 								}
-	
+
 								// 新しいサブスクリプションプランのロールが割り当てられていない場合、ロールを割り当てる
 								if (!roles.some((role) => role.id === subscriptionPlan.roleId)) {
 									await this.roleService.assign(user.id, subscriptionPlan.roleId);
+									this.logger.info(`${user.id} has been assigned the role "${subscriptionPlan.roleId}" by the subscription update event.`);
 								}
 							});
 						} else if (previousData && previousData.status) { // サブスクリプションステータスが変更された場合
@@ -202,6 +210,7 @@ export class StripeWebhookServerService {
 								// ユーザーにロールが割り当てられていない場合、ロールを割り当てる
 								if (!roles.some((role) => role.id === subscriptionPlan.roleId)) {
 									await this.roleService.assign(user.id, subscriptionPlan.roleId);
+									this.logger.info(`${user.id} has been assigned the role "${subscriptionPlan.roleId}" by the subscription update event.`);
 								}
 							});
 						}
@@ -237,6 +246,7 @@ export class StripeWebhookServerService {
 					await this.roleService.getUserRoles(userProfile.userId).then(async (roles) => {
 						if (roles.some((role) => role.id === subscriptionPlan.roleId)) {
 							await this.roleService.unassign(userProfile.userId, subscriptionPlan.roleId);
+							this.logger.info(`${userProfile.userId} has been unassigned the role "${subscriptionPlan.roleId}" by the subscription deletion event.`);
 						}
 					});
 
@@ -257,6 +267,8 @@ export class StripeWebhookServerService {
 
 				default: {
 					// Unhandled event type.
+					//@ts-expect-error
+					this.logger.warn(`Unhandled event type: ${event.type}`);
 					reply.code(204);
 					return;
 				}
