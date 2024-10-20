@@ -60,6 +60,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private deleteAccountService: DeleteAccountService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
+			if (!(me.subscriptionStatus === 'unpaid' || me.subscriptionStatus === 'canceled' || me.subscriptionStatus === 'none')) {
+				throw new ApiError(meta.errors.subscriptionIsActive);
+			}
+
 			const profile = await this.userProfilesRepository.findOneByOrFail({ userId: me.id });
 
 			const userDetailed = await this.usersRepository.findOneByOrFail({ id: me.id });

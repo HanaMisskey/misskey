@@ -10,6 +10,7 @@ import { QueueService } from '@/core/QueueService.js';
 import { DI } from '@/di-symbols.js';
 import { UserEntityService } from '@/core/entities/UserEntityService.js';
 import { DeleteAccountService } from '@/core/DeleteAccountService.js';
+import { ApiError } from '@/server/api/error.js';
 
 export const meta = {
 	tags: ['admin'],
@@ -17,6 +18,14 @@ export const meta = {
 	requireCredential: true,
 	requireAdmin: true,
 	kind: 'write:admin:account',
+
+	errors: {
+		subscriptionIsActive: {
+			message: 'If Subscription is active, cannot move account.',
+			code: 'SUBSCRIPTION_IS_ACTIVE',
+			id: 'f5c8b3b4-9e4d-4b7f-9f4d-9f1f0a7a3d0a',
+		},
+	},
 } as const;
 
 export const paramDef = {
@@ -42,8 +51,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				throw new Error('user not found');
 			}
 
-			if (user.isRoot) {
-				throw new Error('cannot delete a root account');
+			if (!(user.subscriptionStatus === 'unpaid' || user.subscriptionStatus === 'canceled' || user.subscriptionStatus === 'none')) {
+				throw new ApiError(meta.errors.subscriptionIsActive);
 			}
 
 			await this.deleteAccoountService.deleteAccount(user);
