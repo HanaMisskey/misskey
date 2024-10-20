@@ -5207,6 +5207,14 @@ export interface Locale extends ILocale {
      */
     "yourNameContainsProhibitedWordsDescription": string;
     /**
+     * 文字数
+     */
+    "textCount": string;
+    /**
+     * リセット
+     */
+    "reset": string;
+    /**
      * チュートリアルをスキップできないようにする
      */
     "prohibitSkippingInitialTutorial": string;
