@@ -18,7 +18,6 @@ import { CacheService } from '@/core/CacheService.js';
 import { QueryService } from '@/core/QueryService.js';
 import { IdService } from '@/core/IdService.js';
 import type Logger from '@/logger.js';
-import { IdentifiableError } from '@/misc/identifiable-error.js';
 import type { Index, MeiliSearch } from 'meilisearch';
 import type { Client as ElasticSearch } from '@elastic/elasticsearch';
 
@@ -177,24 +176,21 @@ export class SearchService {
 		if (!['home', 'public'].includes(note.visibility)) return;
 
 		const createdAt = this.idService.parse(note.id).date;
+		const indexingPromises = [];
 
 		if (this.meilisearch) {
 			switch (this.meilisearchIndexScope) {
 				case 'global':
 					break;
-
 				case 'local':
-					if (note.userHost == null) break;
+					this.logger.error('local scope is not supported', error);
 					return;
-
 				default: {
-					if (note.userHost == null) break;
-					if (this.meilisearchIndexScope.includes(note.userHost)) break;
-					return;
+					break;
 				}
 			}
 
-			await this.meilisearchNoteIndex?.addDocuments([{
+			const meiliIndexing = this.meilisearchNoteIndex?.addDocuments([{
 				id: note.id,
 				createdAt: createdAt.getTime(),
 				userId: note.userId,
@@ -206,6 +202,7 @@ export class SearchService {
 			}], {
 				primaryKey: 'id',
 			});
+			indexingPromises.push(meiliIndexing);
 		}
 
 		if (this.elasticsearch) {
@@ -218,32 +215,44 @@ export class SearchService {
 				text: note.text,
 				tags: note.tags,
 			};
-			await this.elasticsearch.index({
+			const esIndexing = this.elasticsearch.index({
 				index: `${this.elasticsearchNoteIndex}-${createdAt.toISOString().slice(0, 7).replace(/-/g, '')}`,
 				id: note.id,
 				body: body,
 			}).catch((error) => {
 				console.error(error);
 			});
+			indexingPromises.push(esIndexing);
 		}
+
+		await Promise.all(indexingPromises);
 	}
 
 	@bindThis
 	public async unindexNote(note: MiNote): Promise<void> {
 		if (!['home', 'public'].includes(note.visibility)) return;
+		const unindexPromises = [];
 
 		if (this.meilisearch) {
-			this.meilisearchNoteIndex!.deleteDocument(note.id);
+			const meiliUnindexing = this.meilisearchNoteIndex!.deleteDocument(note.id)
+				.catch((error) => {
+					this.logger.error('failed to delete note from meilisearch', error);
+				});
+			unindexPromises.push(meiliUnindexing);
 		}
 
 		if (this.elasticsearch) {
-			await this.elasticsearch.delete({
-				index: `${this.elasticsearchNoteIndex}-${this.idService.parse(note.id).date.toISOString().slice(0, 7).replace(/-/g, '')}`,
+			const indexName = `${this.elasticsearchNoteIndex}-${this.idService.parse(note.id).date.toISOString().slice(0, 7).replace(/-/g, '')}`;
+			const esUnindexing = this.elasticsearch.delete({
+				index: indexName,
 				id: note.id,
 			}).catch((error) => {
-				this.logger.error(error);
+				this.logger.error('failed to delete note from elasticsearch', error);
 			});
+			unindexPromises.push(esUnindexing);
 		}
+
+		await Promise.all(unindexPromises);
 	}
 
 	@bindThis
@@ -362,11 +371,11 @@ export class SearchService {
 		}
 
 		if (!this.meilisearch && opts.preferredMethod === 'meilisearch') {
-			throw new IdentifiableError('meilisearch is not available');
+			this.logger.error('meilisearch is not available', error);
 		}
 
 		if (!this.elasticsearch && opts.preferredMethod === 'elasticsearch') {
-			throw new IdentifiableError('elasticsearch is not available');
+			this.logger.error('elasticsearch is not available', error);
 		}
 
 		if (!this.elasticsearch && !this.meilisearch && opts.preferredMethod === null) {
