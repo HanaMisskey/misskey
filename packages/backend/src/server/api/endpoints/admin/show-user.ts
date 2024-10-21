@@ -31,6 +31,10 @@ export const meta = {
 				type: 'boolean',
 				optional: false, nullable: false,
 			},
+			followedMessage: {
+				type: 'string',
+				optional: false, nullable: true,
+			},
 			stripeCustomerId: {
 				type: 'string',
 				optional: false, nullable: true,
@@ -234,10 +238,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			return {
 				email: profile.email,
 				emailVerified: profile.emailVerified,
+				autoAcceptFollowed: profile.autoAcceptFollowed,
 				stripeCustomerId: profile.stripeCustomerId,
 				stripeSubscriptionId: user.stripeSubscriptionId,
-				autoAcceptFollowed: profile.autoAcceptFollowed,
-				noCrawle: profile.noCrawle,
 				preventAiLearning: profile.preventAiLearning,
 				alwaysMarkNsfw: profile.alwaysMarkNsfw,
 				autoSensitive: profile.autoSensitive,

@@ -69,6 +69,8 @@ import * as ep___admin_relays_list from './endpoints/admin/relays/list.js';
 import * as ep___admin_relays_remove from './endpoints/admin/relays/remove.js';
 import * as ep___admin_resetPassword from './endpoints/admin/reset-password.js';
 import * as ep___admin_resolveAbuseUserReport from './endpoints/admin/resolve-abuse-user-report.js';
+import * as ep___admin_forwardAbuseUserReport from './endpoints/admin/forward-abuse-user-report.js';
+import * as ep___admin_updateAbuseUserReport from './endpoints/admin/update-abuse-user-report.js';
 import * as ep___admin_sendEmail from './endpoints/admin/send-email.js';
 import * as ep___admin_serverInfo from './endpoints/admin/server-info.js';
 import * as ep___admin_showModerationLogs from './endpoints/admin/show-moderation-logs.js';
@@ -93,6 +95,7 @@ import * as ep___admin_systemWebhook_delete from './endpoints/admin/system-webho
 import * as ep___admin_systemWebhook_list from './endpoints/admin/system-webhook/list.js';
 import * as ep___admin_systemWebhook_show from './endpoints/admin/system-webhook/show.js';
 import * as ep___admin_systemWebhook_update from './endpoints/admin/system-webhook/update.js';
+import * as ep___admin_systemWebhook_test from './endpoints/admin/system-webhook/test.js';
 import * as ep___admin_subscriptionPlans_create from './endpoints/admin/subscription-plans/create.js';
 import * as ep___admin_subscriptionPlans_update from './endpoints/admin/subscription-plans/update.js';
 import * as ep___admin_subscriptionPlans_archive from './endpoints/admin/subscription-plans/archive.js';
@@ -267,6 +270,7 @@ import * as ep___i_webhooks_show from './endpoints/i/webhooks/show.js';
 import * as ep___i_webhooks_list from './endpoints/i/webhooks/list.js';
 import * as ep___i_webhooks_update from './endpoints/i/webhooks/update.js';
 import * as ep___i_webhooks_delete from './endpoints/i/webhooks/delete.js';
+import * as ep___i_webhooks_test from './endpoints/i/webhooks/test.js';
 import * as ep___invite_create from './endpoints/invite/create.js';
 import * as ep___invite_delete from './endpoints/invite/delete.js';
 import * as ep___invite_list from './endpoints/invite/list.js';
@@ -465,6 +469,8 @@ const $admin_relays_list: Provider = { provide: 'ep:admin/relays/list', useClass
 const $admin_relays_remove: Provider = { provide: 'ep:admin/relays/remove', useClass: ep___admin_relays_remove.default };
 const $admin_resetPassword: Provider = { provide: 'ep:admin/reset-password', useClass: ep___admin_resetPassword.default };
 const $admin_resolveAbuseUserReport: Provider = { provide: 'ep:admin/resolve-abuse-user-report', useClass: ep___admin_resolveAbuseUserReport.default };
+const $admin_forwardAbuseUserReport: Provider = { provide: 'ep:admin/forward-abuse-user-report', useClass: ep___admin_forwardAbuseUserReport.default };
+const $admin_updateAbuseUserReport: Provider = { provide: 'ep:admin/update-abuse-user-report', useClass: ep___admin_updateAbuseUserReport.default };
 const $admin_sendEmail: Provider = { provide: 'ep:admin/send-email', useClass: ep___admin_sendEmail.default };
 const $admin_serverInfo: Provider = { provide: 'ep:admin/server-info', useClass: ep___admin_serverInfo.default };
 const $admin_showModerationLogs: Provider = { provide: 'ep:admin/show-moderation-logs', useClass: ep___admin_showModerationLogs.default };
@@ -490,6 +496,7 @@ const $admin_systemWebhook_delete: Provider = { provide: 'ep:admin/system-webhoo
 const $admin_systemWebhook_list: Provider = { provide: 'ep:admin/system-webhook/list', useClass: ep___admin_systemWebhook_list.default };
 const $admin_systemWebhook_show: Provider = { provide: 'ep:admin/system-webhook/show', useClass: ep___admin_systemWebhook_show.default };
 const $admin_systemWebhook_update: Provider = { provide: 'ep:admin/system-webhook/update', useClass: ep___admin_systemWebhook_update.default };
+const $admin_systemWebhook_test: Provider = { provide: 'ep:admin/system-webhook/test', useClass: ep___admin_systemWebhook_test.default };
 const $admin_subscriptionPlans_create: Provider = { provide: 'ep:admin/subscription-plans/create', useClass: ep___admin_subscriptionPlans_create.default };
 const $admin_subscriptionPlans_update: Provider = { provide: 'ep:admin/subscription-plans/update', useClass: ep___admin_subscriptionPlans_update.default };
 const $admin_subscriptionPlans_archive: Provider = { provide: 'ep:admin/subscription-plans/archive', useClass: ep___admin_subscriptionPlans_archive.default };
@@ -664,6 +671,7 @@ const $i_webhooks_list: Provider = { provide: 'ep:i/webhooks/list', useClass: ep
 const $i_webhooks_show: Provider = { provide: 'ep:i/webhooks/show', useClass: ep___i_webhooks_show.default };
 const $i_webhooks_update: Provider = { provide: 'ep:i/webhooks/update', useClass: ep___i_webhooks_update.default };
 const $i_webhooks_delete: Provider = { provide: 'ep:i/webhooks/delete', useClass: ep___i_webhooks_delete.default };
+const $i_webhooks_test: Provider = { provide: 'ep:i/webhooks/test', useClass: ep___i_webhooks_test.default };
 const $invite_create: Provider = { provide: 'ep:invite/create', useClass: ep___invite_create.default };
 const $invite_delete: Provider = { provide: 'ep:invite/delete', useClass: ep___invite_delete.default };
 const $invite_list: Provider = { provide: 'ep:invite/list', useClass: ep___invite_list.default };
@@ -867,6 +875,8 @@ const $reversi_verify: Provider = { provide: 'ep:reversi/verify', useClass: ep__
 		$admin_relays_remove,
 		$admin_resetPassword,
 		$admin_resolveAbuseUserReport,
+		$admin_forwardAbuseUserReport,
+		$admin_updateAbuseUserReport,
 		$admin_sendEmail,
 		$admin_serverInfo,
 		$admin_showModerationLogs,
@@ -891,6 +901,7 @@ const $reversi_verify: Provider = { provide: 'ep:reversi/verify', useClass: ep__
 		$admin_systemWebhook_list,
 		$admin_systemWebhook_show,
 		$admin_systemWebhook_update,
+		$admin_systemWebhook_test,
 		$admin_subscriptionPlans_create,
 		$admin_subscriptionPlans_update,
 		$admin_subscriptionPlans_archive,
@@ -1065,6 +1076,7 @@ const $reversi_verify: Provider = { provide: 'ep:reversi/verify', useClass: ep__
 		$i_webhooks_show,
 		$i_webhooks_update,
 		$i_webhooks_delete,
+		$i_webhooks_test,
 		$invite_create,
 		$invite_delete,
 		$invite_list,
@@ -1261,6 +1273,8 @@ const $reversi_verify: Provider = { provide: 'ep:reversi/verify', useClass: ep__
 		$admin_relays_remove,
 		$admin_resetPassword,
 		$admin_resolveAbuseUserReport,
+		$admin_forwardAbuseUserReport,
+		$admin_updateAbuseUserReport,
 		$admin_sendEmail,
 		$admin_serverInfo,
 		$admin_showModerationLogs,
@@ -1286,6 +1300,7 @@ const $reversi_verify: Provider = { provide: 'ep:reversi/verify', useClass: ep__
 		$admin_systemWebhook_list,
 		$admin_systemWebhook_show,
 		$admin_systemWebhook_update,
+		$admin_systemWebhook_test,
 		$admin_subscriptionPlans_create,
 		$admin_subscriptionPlans_update,
 		$admin_subscriptionPlans_archive,
@@ -1460,6 +1475,7 @@ const $reversi_verify: Provider = { provide: 'ep:reversi/verify', useClass: ep__
 		$i_webhooks_show,
 		$i_webhooks_update,
 		$i_webhooks_delete,
+		$i_webhooks_test,
 		$invite_create,
 		$invite_delete,
 		$invite_list,

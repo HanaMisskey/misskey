@@ -8,13 +8,12 @@ import * as mfm from 'mfm-js';
 import { In, DataSource, IsNull, LessThan } from 'typeorm';
 import * as Redis from 'ioredis';
 import { Inject, Injectable, OnApplicationShutdown } from '@nestjs/common';
-import RE2 from 're2';
 import { extractMentions } from '@/misc/extract-mentions.js';
 import { extractCustomEmojisFromMfm } from '@/misc/extract-custom-emojis-from-mfm.js';
 import { extractHashtags } from '@/misc/extract-hashtags.js';
 import type { IMentionedRemoteUsers } from '@/models/Note.js';
 import { MiNote } from '@/models/Note.js';
-import type { ChannelFollowingsRepository, ChannelsRepository, FollowingsRepository, InstancesRepository, MiFollowing, MutingsRepository, NotesRepository, NoteThreadMutingsRepository, UserListMembershipsRepository, UserProfilesRepository, UsersRepository } from '@/models/_.js';
+import type { ChannelFollowingsRepository, ChannelsRepository, FollowingsRepository, InstancesRepository, MiFollowing, MiMeta, MutingsRepository, NotesRepository, NoteThreadMutingsRepository, UserListMembershipsRepository, UserProfilesRepository, UsersRepository } from '@/models/_.js';
 import type { MiDriveFile } from '@/models/DriveFile.js';
 import type { MiApp } from '@/models/App.js';
 import { concat } from '@/misc/prelude/array.js';
@@ -23,11 +22,8 @@ import type { MiUser, MiLocalUser, MiRemoteUser } from '@/models/User.js';
 import type { IPoll } from '@/models/Poll.js';
 import { MiPoll } from '@/models/Poll.js';
 import { isDuplicateKeyValueError } from '@/misc/is-duplicate-key-value-error.js';
-import { checkWordMute } from '@/misc/check-word-mute.js';
 import type { MiChannel } from '@/models/Channel.js';
 import { normalizeForSearch } from '@/misc/normalize-for-search.js';
-import { MemorySingleCache } from '@/misc/cache.js';
-import type { MiUserProfile } from '@/models/UserProfile.js';
 import { RelayService } from '@/core/RelayService.js';
 import { FederatedInstanceService } from '@/core/FederatedInstanceService.js';
 import { DI } from '@/di-symbols.js';
@@ -51,7 +47,6 @@ import { RemoteUserResolveService } from '@/core/RemoteUserResolveService.js';
 import { bindThis } from '@/decorators.js';
 import { DB_MAX_NOTE_TEXT_LENGTH } from '@/const.js';
 import { RoleService } from '@/core/RoleService.js';
-import { MetaService } from '@/core/MetaService.js';
 import { SearchService } from '@/core/SearchService.js';
 import { FeaturedService } from '@/core/FeaturedService.js';
 import { FanoutTimelineNamePrefix, FanoutTimelineService } from '@/core/FanoutTimelineService.js';
@@ -60,6 +55,7 @@ import { UserBlockingService } from '@/core/UserBlockingService.js';
 import { isReply } from '@/misc/is-reply.js';
 import { trackPromise } from '@/misc/promise-tracker.js';
 import { IdentifiableError } from '@/misc/identifiable-error.js';
+import { CollapsedQueue } from '@/misc/collapsed-queue.js';
 
 type NotificationType = 'reply' | 'renote' | 'quote' | 'mention';
 
@@ -152,10 +148,14 @@ type Option = {
 @Injectable()
 export class NoteCreateService implements OnApplicationShutdown {
 	#shutdownController = new AbortController();
+	private updateNotesCountQueue: CollapsedQueue<MiNote['id'], number>;
 
 	constructor(
 		@Inject(DI.config)
 		private config: Config,
+
+		@Inject(DI.meta)
+		private meta: MiMeta,
 
 		@Inject(DI.db)
 		private db: DataSource,
@@ -211,7 +211,6 @@ export class NoteCreateService implements OnApplicationShutdown {
 		private apDeliverManagerService: ApDeliverManagerService,
 		private apRendererService: ApRendererService,
 		private roleService: RoleService,
-		private metaService: MetaService,
 		private searchService: SearchService,
 		private notesChart: NotesChart,
 		private perUserNotesChart: PerUserNotesChart,
@@ -219,7 +218,9 @@ export class NoteCreateService implements OnApplicationShutdown {
 		private instanceChart: InstanceChart,
 		private utilityService: UtilityService,
 		private userBlockingService: UserBlockingService,
-	) { }
+	) {
+		this.updateNotesCountQueue = new CollapsedQueue(process.env.NODE_ENV !== 'test' ? 60 * 1000 * 5 : 0, this.collapseNotesCount, this.performUpdateNotesCount);
+	}
 
 	@bindThis
 	public async create(user: {
@@ -258,10 +259,8 @@ export class NoteCreateService implements OnApplicationShutdown {
 		if (data.channel != null) data.visibleUsers = [];
 		if (data.channel != null) data.localOnly = true;
 
-		const meta = await this.metaService.fetch();
-
 		if (data.visibility === 'public' && data.channel == null) {
-			const sensitiveWords = meta.sensitiveWords;
+			const sensitiveWords = this.meta.sensitiveWords;
 			if (this.utilityService.isKeyWordIncluded(data.cw ?? data.text ?? '', sensitiveWords)) {
 				data.visibility = 'home';
 			} else if ((await this.roleService.getUserPolicies(user.id)).canPublicNote === false) {
@@ -269,17 +268,17 @@ export class NoteCreateService implements OnApplicationShutdown {
 			}
 		}
 
-		const hasProhibitedWords = await this.checkProhibitedWordsContain({
+		const hasProhibitedWords = this.checkProhibitedWordsContain({
 			cw: data.cw,
 			text: data.text,
 			pollChoices: data.poll?.choices,
-		}, meta.prohibitedWords);
+		}, this.meta.prohibitedWords);
 
 		if (hasProhibitedWords) {
 			throw new IdentifiableError('689ee33f-f97c-479a-ac49-1b9f8140af99', 'Note contains prohibited words');
 		}
 
-		const inSilencedInstance = this.utilityService.isSilencedHost(meta.silencedHosts, user.host);
+		const inSilencedInstance = this.utilityService.isSilencedHost(this.meta.silencedHosts, user.host);
 
 		if (data.visibility === 'public' && inSilencedInstance && user.host !== null) {
 			data.visibility = 'home';
@@ -372,7 +371,7 @@ export class NoteCreateService implements OnApplicationShutdown {
 		}
 
 		// if the host is media-silenced, custom emojis are not allowed
-		if (this.utilityService.isMediaSilencedHost(meta.mediaSilencedHosts, user.host)) emojis = [];
+		if (this.utilityService.isMediaSilencedHost(this.meta.mediaSilencedHosts, user.host)) emojis = [];
 
 		tags = tags.filter(tag => Array.from(tag).length <= 128).splice(0, 32);
 
@@ -444,10 +443,8 @@ export class NoteCreateService implements OnApplicationShutdown {
 		if (data.channel != null) data.visibleUsers = [];
 		if (data.channel != null) data.localOnly = true;
 
-		const meta = await this.metaService.fetch();
-
 		if (data.visibility === 'public' && data.channel == null) {
-			const sensitiveWords = meta.sensitiveWords;
+			const sensitiveWords = this.meta.sensitiveWords;
 			if (this.utilityService.isKeyWordIncluded(data.cw ?? data.text ?? '', sensitiveWords)) {
 				data.visibility = 'home';
 			} else if ((await this.roleService.getUserPolicies(user.id)).canPublicNote === false) {
@@ -459,13 +456,13 @@ export class NoteCreateService implements OnApplicationShutdown {
 			cw: data.cw,
 			text: data.text,
 			pollChoices: data.poll?.choices,
-		}, meta.prohibitedWords);
+		}, this.meta.prohibitedWords);
 
 		if (hasProhibitedWords) {
 			throw new IdentifiableError('689ee33f-f97c-479a-ac49-1b9f8140af99', 'Note contains prohibited words');
 		}
 
-		const inSilencedInstance = this.utilityService.isSilencedHost(meta.silencedHosts, user.host);
+		const inSilencedInstance = this.utilityService.isSilencedHost(this.meta.silencedHosts, user.host);
 
 		if (data.visibility === 'public' && inSilencedInstance && user.host !== null) {
 			data.visibility = 'home';
@@ -696,21 +693,21 @@ export class NoteCreateService implements OnApplicationShutdown {
 		host: MiUser['host'];
 		isBot: MiUser['isBot'];
 	}, data: Option, silent: boolean, tags: string[], mentionedUsers: MinimumUser[]) {
-		const meta = await this.metaService.fetch();
-
 		this.notesChart.update(note, true);
-		if (note.visibility !== 'specified' && (meta.enableChartsForRemoteUser || (user.host == null))) {
+		if (note.visibility !== 'specified' && (this.meta.enableChartsForRemoteUser || (user.host == null))) {
 			this.perUserNotesChart.update(user, note, true);
 		}
 
 		// Register host
-		if (this.userEntityService.isRemoteUser(user)) {
-			this.federatedInstanceService.fetch(user.host).then(async i => {
-				this.instancesRepository.increment({ id: i.id }, 'notesCount', 1);
-				if ((await this.metaService.fetch()).enableChartsForFederatedInstances) {
-					this.instanceChart.updateNote(i.host, note, true);
-				}
-			});
+		if (this.meta.enableStatsForFederatedInstances) {
+			if (this.userEntityService.isRemoteUser(user)) {
+				this.federatedInstanceService.fetchOrRegister(user.host).then(async i => {
+					this.updateNotesCountQueue.enqueue(i.id, 1);
+					if (this.meta.enableChartsForFederatedInstances) {
+						this.instanceChart.updateNote(i.host, note, true);
+					}
+				});
+			}
 		}
 
 		// ハッシュタグ更新
@@ -930,22 +927,10 @@ export class NoteCreateService implements OnApplicationShutdown {
 		host: MiUser['host'];
 		isBot: MiUser['isBot'];
 	}, data: Option, silent: boolean, tags: string[], mentionedUsers: MinimumUser[]) {
-		const meta = await this.metaService.fetch();
-
 		this.notesChart.update(note, true);
 
-		// Register host
 		if (this.userEntityService.isRemoteUser(user)) {
-			this.federatedInstanceService.fetch(user.host).then(async i => {
-				if (note.renote && note.text) {
-					this.instancesRepository.increment({ id: i.id }, 'notesCount', 1);
-				} else if (!note.renote) {
-					this.instancesRepository.increment({ id: i.id }, 'notesCount', 1);
-				}
-				if ((await this.metaService.fetch()).enableChartsForFederatedInstances) {
-					this.instanceChart.updateNote(i.host, note, true);
-				}
-			});
+			throw new IdentifiableError('a5890273-531e-4ce2-9d56-036f0fc11236', 'Remote user cannot import notes.');
 		}
 
 		if (data.renote && data.text) {
@@ -1144,8 +1129,7 @@ export class NoteCreateService implements OnApplicationShutdown {
 
 	@bindThis
 	private async pushToTl(note: MiNote, user: { id: MiUser['id']; host: MiUser['host']; }, notToPush?: FanoutTimelineNamePrefix[]) {
-		const meta = await this.metaService.fetch();
-		if (!meta.enableFanoutTimeline) return;
+		if (!this.meta.enableFanoutTimeline) return;
 
 		const r = this.redisForTimelines.pipeline();
 
@@ -1160,7 +1144,7 @@ export class NoteCreateService implements OnApplicationShutdown {
 			}
 
 			if (shouldPush('userTimeline')) {
-				this.fanoutTimelineService.push(`userTimelineWithChannel:${user.id}`, note.id, note.userHost == null ? meta.perLocalUserUserTimelineCacheMax : meta.perRemoteUserUserTimelineCacheMax, r);
+				this.fanoutTimelineService.push(`userTimelineWithChannel:${user.id}`, note.id, note.userHost == null ? this.meta.perLocalUserUserTimelineCacheMax : this.meta.perRemoteUserUserTimelineCacheMax, r);
 			}
 
 			const channelFollowings = await this.channelFollowingsRepository.find({
@@ -1172,9 +1156,9 @@ export class NoteCreateService implements OnApplicationShutdown {
 
 			for (const channelFollowing of channelFollowings) {
 				if (shouldPush('homeTimeline')) {
-					this.fanoutTimelineService.push(`homeTimeline:${channelFollowing.followerId}`, note.id, meta.perUserHomeTimelineCacheMax, r);
+					this.fanoutTimelineService.push(`homeTimeline:${channelFollowing.followerId}`, note.id, this.meta.perUserHomeTimelineCacheMax, r);
 					if (note.fileIds.length > 0) {
-						this.fanoutTimelineService.push(`homeTimelineWithFiles:${channelFollowing.followerId}`, note.id, meta.perUserHomeTimelineCacheMax / 2, r);
+						this.fanoutTimelineService.push(`homeTimelineWithFiles:${channelFollowing.followerId}`, note.id, this.meta.perUserHomeTimelineCacheMax / 2, r);
 					}
 				}
 			}
@@ -1213,9 +1197,9 @@ export class NoteCreateService implements OnApplicationShutdown {
 				}
 
 				if (shouldPush('homeTimeline')) {
-					this.fanoutTimelineService.push(`homeTimeline:${following.followerId}`, note.id, meta.perUserHomeTimelineCacheMax, r);
+					this.fanoutTimelineService.push(`homeTimeline:${following.followerId}`, note.id, this.meta.perUserHomeTimelineCacheMax, r);
 					if (note.fileIds.length > 0) {
-						this.fanoutTimelineService.push(`homeTimelineWithFiles:${following.followerId}`, note.id, meta.perUserHomeTimelineCacheMax / 2, r);
+						this.fanoutTimelineService.push(`homeTimelineWithFiles:${following.followerId}`, note.id, this.meta.perUserHomeTimelineCacheMax / 2, r);
 					}
 				}
 			}
@@ -1232,9 +1216,9 @@ export class NoteCreateService implements OnApplicationShutdown {
 				}
 
 				if (shouldPush('userListTimeline')) {
-					this.fanoutTimelineService.push(`userListTimeline:${userListMembership.userListId}`, note.id, meta.perUserListTimelineCacheMax, r);
+					this.fanoutTimelineService.push(`userListTimeline:${userListMembership.userListId}`, note.id, this.meta.perUserListTimelineCacheMax, r);
 					if (note.fileIds.length > 0) {
-						this.fanoutTimelineService.push(`userListTimelineWithFiles:${userListMembership.userListId}`, note.id, meta.perUserListTimelineCacheMax / 2, r);
+						this.fanoutTimelineService.push(`userListTimelineWithFiles:${userListMembership.userListId}`, note.id, this.meta.perUserListTimelineCacheMax / 2, r);
 					}
 				}
 			}
@@ -1243,9 +1227,9 @@ export class NoteCreateService implements OnApplicationShutdown {
 			if (note.userHost == null) {
 				if (note.visibility !== 'specified' || !note.visibleUserIds.some(v => v === user.id)) {
 					if (shouldPush('homeTimeline')) {
-						this.fanoutTimelineService.push(`homeTimeline:${user.id}`, note.id, meta.perUserHomeTimelineCacheMax, r);
+						this.fanoutTimelineService.push(`homeTimeline:${user.id}`, note.id, this.meta.perUserHomeTimelineCacheMax, r);
 						if (note.fileIds.length > 0) {
-							this.fanoutTimelineService.push(`homeTimelineWithFiles:${user.id}`, note.id, meta.perUserHomeTimelineCacheMax / 2, r);
+							this.fanoutTimelineService.push(`homeTimelineWithFiles:${user.id}`, note.id, this.meta.perUserHomeTimelineCacheMax / 2, r);
 						}
 					}
 				}
@@ -1254,7 +1238,7 @@ export class NoteCreateService implements OnApplicationShutdown {
 			// 自分自身以外への返信
 			if (isReply(note)) {
 				if (shouldPush('userTimeline')) {
-					this.fanoutTimelineService.push(`userTimelineWithReplies:${user.id}`, note.id, note.userHost == null ? meta.perLocalUserUserTimelineCacheMax : meta.perRemoteUserUserTimelineCacheMax, r);
+					this.fanoutTimelineService.push(`userTimelineWithReplies:${user.id}`, note.id, note.userHost == null ? this.meta.perLocalUserUserTimelineCacheMax : this.meta.perRemoteUserUserTimelineCacheMax, r);
 				}
 
 				if (note.visibility === 'public' && note.userHost == null) {
@@ -1267,9 +1251,9 @@ export class NoteCreateService implements OnApplicationShutdown {
 				}
 			} else {
 				if (shouldPush('userTimeline')) {
-					this.fanoutTimelineService.push(`userTimeline:${user.id}`, note.id, note.userHost == null ? meta.perLocalUserUserTimelineCacheMax : meta.perRemoteUserUserTimelineCacheMax, r);
+					this.fanoutTimelineService.push(`userTimeline:${user.id}`, note.id, note.userHost == null ? this.meta.perLocalUserUserTimelineCacheMax : this.meta.perRemoteUserUserTimelineCacheMax, r);
 					if (note.fileIds.length > 0) {
-						this.fanoutTimelineService.push(`userTimelineWithFiles:${user.id}`, note.id, note.userHost == null ? meta.perLocalUserUserTimelineCacheMax / 2 : meta.perRemoteUserUserTimelineCacheMax / 2, r);
+						this.fanoutTimelineService.push(`userTimelineWithFiles:${user.id}`, note.id, note.userHost == null ? this.meta.perLocalUserUserTimelineCacheMax / 2 : this.meta.perRemoteUserUserTimelineCacheMax / 2, r);
 					}
 				}
 
@@ -1331,9 +1315,9 @@ export class NoteCreateService implements OnApplicationShutdown {
 		}
 	}
 
-	public async checkProhibitedWordsContain(content: Parameters<UtilityService['concatNoteContentsForKeyWordCheck']>[0], prohibitedWords?: string[]) {
+	public checkProhibitedWordsContain(content: Parameters<UtilityService['concatNoteContentsForKeyWordCheck']>[0], prohibitedWords?: string[]) {
 		if (prohibitedWords == null) {
-			prohibitedWords = (await this.metaService.fetch()).prohibitedWords;
+			prohibitedWords = this.meta.prohibitedWords;
 		}
 
 		if (
@@ -1349,12 +1333,23 @@ export class NoteCreateService implements OnApplicationShutdown {
 	}
 
 	@bindThis
-	public dispose(): void {
-		this.#shutdownController.abort();
+	private collapseNotesCount(oldValue: number, newValue: number) {
+		return oldValue + newValue;
 	}
 
 	@bindThis
-	public onApplicationShutdown(signal?: string | undefined): void {
-		this.dispose();
+	private async performUpdateNotesCount(id: MiNote['id'], incrBy: number) {
+		await this.instancesRepository.increment({ id: id }, 'notesCount', incrBy);
+	}
+
+	@bindThis
+	public async dispose(): Promise<void> {
+		this.#shutdownController.abort();
+		await this.updateNotesCountQueue.performAllNow();
+	}
+
+	@bindThis
+	public async onApplicationShutdown(signal?: string | undefined): Promise<void> {
+		await this.dispose();
 	}
 }

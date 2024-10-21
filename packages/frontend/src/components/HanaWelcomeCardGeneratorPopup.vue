@@ -62,12 +62,12 @@ function neverShow() {
 .root {
 	position: fixed;
 	z-index: v-bind(zIndex);
-	bottom: var(--margin);
+	bottom: var(--MI-margin);
 	left: 0;
 	right: 0;
 	margin: auto;
 	box-sizing: border-box;
-	width: calc(100% - (var(--margin) * 2));
+	width: calc(100% - (var(--MI-margin) * 2));
 	max-width: 500px;
 	display: flex;
 }
@@ -87,8 +87,8 @@ function neverShow() {
 		bottom: 10%;
 		right: 20%;
 		height: 50%;
-		border: 2px solid var(--accent);
-		border-radius: var(--radius);
+		border: 2px solid var(--MI_THEME-accent);
+		border-radius: var(--MI-radius);
 		transform: rotate(-10deg);
 	}
 }

@@ -25,7 +25,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 					<MkAnimBg style="position: absolute; top: 0;" :scale="1.5"/>
 					<MkSpacer :marginMin="20" :marginMax="28">
 						<div class="_gaps" style="text-align: center;">
-							<i class="ti ti-confetti" style="display: block; margin: auto; font-size: 3em; color: var(--accent);"></i>
+							<i class="ti ti-confetti" style="display: block; margin: auto; font-size: 3em; color: var(--MI_THEME-accent);"></i>
 							<div style="font-size: 120%;">{{ i18n.ts._initialTutorial._landing.title }}</div>
 							<div>{{ i18n.ts._initialTutorial._landing.description }}</div>
 							<MkButton primary rounded gradate style="margin: 16px auto 0 auto;" data-cy-user-setup-start @click="next">{{ i18n.ts._initialTutorial.launchTutorial }} <i class="ti ti-arrow-right"></i></MkButton>
@@ -39,7 +39,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 					<MkAnimBg style="position: absolute; top: 0;" :scale="1.5"/>
 					<MkSpacer :marginMin="20" :marginMax="28">
 						<div class="_gaps">
-							<i class="ti ti-check" style="display: block; margin: auto; font-size: 3em; color: var(--accent);"></i>
+							<i class="ti ti-check" style="display: block; margin: auto; font-size: 3em; color: var(--MI_THEME-accent);"></i>
 							<div style="text-align: center; font-size: 120%;">{{ i18n.ts._initialTutorial._done.title }}</div>
 							<I18n :src="i18n.ts._initialTutorial._done.description" tag="div" style="text-align: center; padding: 0 16px;">
 								<template #link>
@@ -91,6 +91,7 @@ import { i18n } from '@/i18n.js';
  * 2. tutorialBodyPagesDefにページのアイコン・タイトル・区分を追加
  *    （区分がsetupの場合はwithSetup == falseのときにスキップされます）
  * 3. componentsDefにページのコンポーネントを追加（順番を対応させること）
+ * 4. cypress/e2e/basic.cy.tsにページ分のテストを追加
  */
 
 /** チュートリアルページ用Expose */
@@ -169,7 +170,7 @@ import XPrivacySettings from '@/components/MkTutorial.PrivacySettings.vue';
 import XMinorSettings from '@/components/MkTutorial.MinorSettings.vue';
 import MkAnimBg from '@/components/MkAnimBg.vue';
 import { instance } from '@/instance.js';
-import { host } from '@/config.js';
+import { host } from '@@/js/config.js';
 import { claimAchievement } from '@/scripts/achievements.js';
 
 import type { Component } from 'vue';
@@ -358,7 +359,7 @@ defineExpose({
 
 .progressBarValue {
 	height: 100%;
-	background: linear-gradient(90deg, var(--buttonGradateA), var(--buttonGradateB));
+	background: linear-gradient(90deg, var(--MI_THEME-buttonGradateA), var(--MI_THEME-buttonGradateB));
 	transition: all 0.5s cubic-bezier(0,.5,.5,1);
 }
 
@@ -395,7 +396,7 @@ defineExpose({
 
 .progressBarValue {
 	height: 100%;
-	background: linear-gradient(90deg, var(--buttonGradateA), var(--buttonGradateB));
+	background: linear-gradient(90deg, var(--MI_THEME-buttonGradateA), var(--MI_THEME-buttonGradateB));
 	transition: all 0.5s cubic-bezier(0,.5,.5,1);
 }
 
@@ -435,8 +436,8 @@ defineExpose({
 	box-sizing: border-box;
 	flex-shrink: 0;
 	padding: 12px;
-	border-top: solid 0.5px var(--divider);
-	background: var(--acrylicBg);
+	border-top: solid 0.5px var(--MI_THEME-divider);
+	background: var(--MI_THEME-acrylicBg);
 
 	transition: transform 0.3s cubic-bezier(0,0,.35,1);
 	transform: translateY(100%);

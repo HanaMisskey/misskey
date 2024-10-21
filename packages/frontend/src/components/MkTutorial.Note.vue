@@ -21,7 +21,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 	</div>
 	<div>{{ i18n.ts._initialTutorial._reaction.letsTryReacting }}</div>
 	<MkNote :class="$style.exampleNoteRoot" :note="exampleNote" :mock="true" @reaction="addReaction" @removeReaction="removeReaction"/>
-	<div v-if="onceReacted"><b style="color: var(--accent);"><i class="ti ti-check"></i> {{ i18n.ts._initialTutorial.wellDone }}</b> {{ i18n.ts._initialTutorial._reaction.reactNotification }}<br>{{ i18n.ts._initialTutorial._reaction.reactDone }}</div>
+	<div v-if="onceReacted"><b style="color: var(--MI_THEME-accent);"><i class="ti ti-check"></i> {{ i18n.ts._initialTutorial.wellDone }}</b> {{ i18n.ts._initialTutorial._reaction.reactNotification }}<br>{{ i18n.ts._initialTutorial._reaction.reactDone }}</div>
 	<div v-else><b :class="$style.actionWaitText">{{ i18n.ts._initialTutorial._reaction.reactToContinue }}</b></div>
 </div>
 </template>
@@ -123,23 +123,23 @@ defineExpose<TutorialPageCommonExpose>({
 
 <style lang="scss" module>
 .exampleNoteRoot {
-	border-radius: var(--radius);
-	border: var(--panelBorder);
-	background: var(--panel);
+	border-radius: var(--MI-radius);
+	border: var(--MI_THEME-panelBorder);
+	background: var(--MI_THEME-panel);
 }
 
 .divider {
 	height: 1px;
-	background: var(--divider);
+	background: var(--MI_THEME-divider);
 }
 
 .image {
 	max-width: 300px;
 	margin: 0 auto;
-	border-radius: var(--radius);
+	border-radius: var(--MI-radius);
 }
 
 .actionWaitText {
-	color: var(--error);
+	color: var(--MI_THEME-error);
 }
 </style>

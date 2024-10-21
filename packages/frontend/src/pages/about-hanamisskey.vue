@@ -171,7 +171,7 @@ definePageMetadata(() => ({
 .znqjceqz {
 	> .about {
 		position: relative;
-		border-radius: var(--radius);
+		border-radius: var(--MI-radius);
 
 		> .container {
 			position: relative;
@@ -215,7 +215,7 @@ definePageMetadata(() => ({
 
 <style lang="scss" module>
 .creditKvValue {
-	margin-top: calc(var(--marginHalf) / 2);
+	margin-top: calc(var(--MI-marginHalf) / 2);
 }
 
 .contributors {
@@ -228,17 +228,17 @@ definePageMetadata(() => ({
 	display: flex;
 	align-items: center;
 	padding: 12px;
-	background: var(--buttonBg);
+	background: var(--MI_THEME-buttonBg);
 	border-radius: 6px;
 
 	&:hover {
 		text-decoration: none;
-		background: var(--buttonHoverBg);
+		background: var(--MI_THEME-buttonHoverBg);
 	}
 
 	&.active {
-		color: var(--accent);
-		background: var(--buttonHoverBg);
+		color: var(--MI_THEME-accent);
+		background: var(--MI_THEME-buttonHoverBg);
 	}
 }
 
@@ -261,7 +261,7 @@ definePageMetadata(() => ({
 	display: flex;
 	align-items: center;
 	padding: 12px;
-	background: var(--buttonBg);
+	background: var(--MI_THEME-buttonBg);
 	border-radius: 6px;
 }
 

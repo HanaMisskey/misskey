@@ -72,7 +72,7 @@ import { ref, shallowRef, onMounted, onDeactivated, watch } from 'vue';
 import * as Misskey from 'misskey-js';
 import { i18n } from '@/i18n.js';
 import { signinRequired } from '@/account.js';
-import { apiUrl, host } from '@/config.js';
+import { apiUrl, host } from '@@/js/config.js';
 import { defaultStore } from '@/store.js';
 import { hanaStore } from '@/hana/store.js';
 import * as os from '@/os.js';
@@ -171,12 +171,21 @@ async function initCanvas() {
 	function loadAvatar() {
 		return new Promise<void>(resolve => {
 			avatar.addEventListener('load', () => {
+				const radius = 98.8;
+				const avatarCenterX = 175.2;
+				const avatarCenterY = 272.7;
+
+				const avatarImageHeight = Math.max(avatar.height * (radius * 2 / avatar.width), radius * 2);
+				const avatarImageWidth = Math.max(avatar.width * (radius * 2 / avatar.height), radius * 2);
+				const avatarImageDX = avatarCenterX - avatarImageWidth / 2;
+				const avatarImageDY = avatarCenterY - avatarImageHeight / 2;
+
 				// 丸型に切り抜いて描画
 				ctx!.save();
 				ctx!.beginPath();
-				ctx!.arc(175.2, 272.7, 98.8, 0, Math.PI * 2);
+				ctx!.arc(avatarCenterX, avatarCenterY, radius, 0, Math.PI * 2);
 				ctx!.clip();
-				ctx!.drawImage(avatar, 76.3, 173.8, 197.6, 197.6);
+				ctx!.drawImage(avatar, avatarImageDX, avatarImageDY, avatarImageWidth, avatarImageHeight);
 				ctx!.restore();
 				resolve();
 			});
@@ -340,7 +349,7 @@ onDeactivated(() => {
 
 .hanaWelcomeCardGenPreviewRoot {
 	position: relative;
-	background-color: var(--bg);
+	background-color: var(--MI_THEME-bg);
 	cursor: not-allowed;
 }
 
@@ -357,10 +366,10 @@ onDeactivated(() => {
 	width: fit-content;
 	flex-shrink: 0;
 	padding: 0 8px;
-	background-color: var(--panel);
-	border-right: 1px solid var(--divider);
-	border-bottom: 1px solid var(--divider);
-	border-bottom-right-radius: var(--radius);
+	background-color: var(--MI_THEME-panel);
+	border-right: 1px solid var(--MI_THEME-divider);
+	border-bottom: 1px solid var(--MI_THEME-divider);
+	border-bottom-right-radius: var(--MI_THEME-radius);
 	height: 28px;
 	line-height: 28px;
 	box-sizing: border-box;
@@ -381,7 +390,7 @@ onDeactivated(() => {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	padding: var(--margin);
+	padding: var(--MI-margin);
 }
 
 .hanaWelcomeCardGenPreviewCanvas {
@@ -409,8 +418,8 @@ onDeactivated(() => {
 
 .hanaWelcomeCardGenResultHeadingIcon {
 	margin: 0 auto;
-	background-color: var(--accentedBg);
-	color: var(--accent);
+	background-color: var(--MI_THEME-accentedBg);
+	color: var(--MI_THEME-accent);
 	text-align: center;
 	height: 64px;
 	width: 64px;

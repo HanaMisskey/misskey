@@ -183,7 +183,7 @@ function upcomingFeatureDialog() {
 		width: calc(100% - var(--outerBorderSize) * 2);
 		height: calc(100% - var(--outerBorderSize) * 2);
 		content: '';
-		border: var(--outerBorderSize) solid var(--panel);
+		border: var(--outerBorderSize) solid var(--MI_THEME-panel);
 		border-radius: calc(var(--outerBorderSize) + 12px);
 		z-index: 9999;
 		pointer-events: none;
@@ -241,7 +241,7 @@ function upcomingFeatureDialog() {
 }
 
 .logo {
-	background: linear-gradient(transparent, var(--bg));
+	background: linear-gradient(transparent, var(--MI_THEME-bg));
 	width: 100%;
 	min-height: 25%;
 	padding: 16px 16px 0 16px;
@@ -256,7 +256,7 @@ function upcomingFeatureDialog() {
 }
 
 .cta {
-	background: var(--bg);
+	background: var(--MI_THEME-bg);
 	width: 100%;
 	min-height: 75%;
 	padding: 16px;
@@ -287,15 +287,15 @@ function upcomingFeatureDialog() {
 .aboutWrapper {
 	margin: 0 16px;
 	padding: 16px;
-	border-radius: var(--radius);
-	background: var(--panel);
+	border-radius: var(--MI-radius);
+	background: var(--MI_THEME-panel);
 }
 
 .decentralizedRoot {
 	margin-top: 32px;
 	padding: 16px;
-	border-radius: var(--radius);
-	background: var(--panel);
+	border-radius: var(--MI-radius);
+	background: var(--MI_THEME-panel);
 
 	border: 2px dashed var(--misskey-accent);
 
@@ -365,17 +365,17 @@ function upcomingFeatureDialog() {
 		transform: translate(-50%, -50%);
 		width: 100%;
 		height: auto;
-		border-radius: var(--radius);
+		border-radius: var(--MI-radius);
 	}
 
 	&.noImage {
 		background-color: #aaa;
-		border-radius: var(--radius);
+		border-radius: var(--MI-radius);
 	}
 }
 
 .featuresRoot .feature:nth-child(odd) {
-	background: var(--panel);
+	background: var(--MI_THEME-panel);
 }
 
 .footerCtaRoot {
@@ -469,7 +469,7 @@ function upcomingFeatureDialog() {
 	gap: 16px;
 
 	a {
-		color: var(--fg);
+		color: var(--MI_THEME-fg);
 		text-decoration: none;
 
 		&:hover {
@@ -488,7 +488,7 @@ function upcomingFeatureDialog() {
 			left: calc(var(--outerBorderSize) * -3);
 			width: calc(100% - calc(var(--outerBorderSize) * 2));
 			height: calc(100% - calc(var(--outerBorderSize) * 2));
-			border: calc(var(--outerBorderSize) * 4) solid var(--panel);
+			border: calc(var(--outerBorderSize) * 4) solid var(--MI_THEME-panel);
 			border-radius: calc(calc(var(--outerBorderSize) * 4) + 12px);
 		}
 
