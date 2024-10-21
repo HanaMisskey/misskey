@@ -267,7 +267,7 @@ export class StripeWebhookServerService {
 
 				default: {
 					// Unhandled event type.
-					//@ts-expect-error
+					//@ts-expect-error 未処理のイベントタイプ
 					this.logger.warn(`Unhandled event type: ${event.type}`);
 					reply.code(204);
 					return;
