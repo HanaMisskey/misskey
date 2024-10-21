@@ -11,6 +11,11 @@ url: http://127.0.0.1:3000/
 # ONCE YOU HAVE STARTED THE INSTANCE, DO NOT CHANGE THE
 # URL SETTINGS AFTER THAT!
 
+elasticsearch:
+  host: elasticsearch
+  port: 9200
+  rejectUnauthorized: false
+
 #   ┌───────────────────────┐
 #───┘ Port and TLS settings └───────────────────────────────────
 

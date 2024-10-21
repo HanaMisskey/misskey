@@ -7,6 +7,7 @@ import { Global, Inject, Module } from '@nestjs/common';
 import * as Redis from 'ioredis';
 import { DataSource } from 'typeorm';
 import { MeiliSearch } from 'meilisearch';
+import { Client as ElasticSearch } from '@elastic/elasticsearch';
 import { DI } from './di-symbols.js';
 import { Config, loadConfig } from './config.js';
 import { createPostgresDataSource } from './postgres.js';
@@ -37,6 +38,30 @@ const $meilisearch: Provider = {
 			return new MeiliSearch({
 				host: `${config.meilisearch.ssl ? 'https' : 'http'}://${config.meilisearch.host}:${config.meilisearch.port}`,
 				apiKey: config.meilisearch.apiKey,
+			});
+		} else {
+			return null;
+		}
+	},
+	inject: [DI.config],
+};
+
+const $elasticsearch: Provider = {
+	provide: DI.elasticsearch,
+	useFactory: (config: Config) => {
+		if (config.elasticsearch) {
+			return new ElasticSearch({
+				nodes: {
+					url: new URL(`${config.elasticsearch.ssl ? 'https' : 'http'}://${config.elasticsearch.host}:${config.elasticsearch.port}`),
+					ssl: {
+						rejectUnauthorized: config.elasticsearch.rejectUnauthorized,
+					},
+				},
+				auth: (config.elasticsearch.user && config.elasticsearch.pass) ? {
+					username: config.elasticsearch.user,
+					password: config.elasticsearch.pass,
+				} : undefined,
+				pingTimeout: 30000,
 			});
 		} else {
 			return null;
@@ -148,8 +173,8 @@ const $meta: Provider = {
 @Global()
 @Module({
 	imports: [RepositoryModule],
-	providers: [$config, $db, $meta, $meilisearch, $redis, $redisForPub, $redisForSub, $redisForTimelines, $redisForReactions],
-	exports: [$config, $db, $meta, $meilisearch, $redis, $redisForPub, $redisForSub, $redisForTimelines, $redisForReactions, RepositoryModule],
+	providers: [$config, $db, $meta, $meilisearch, $elasticsearch, $redis, $redisForPub, $redisForSub, $redisForTimelines, $redisForReactions],
+	exports: [$config, $db, $meta, $meilisearch, $elasticsearch, $redis, $redisForPub, $redisForSub, $redisForTimelines, $redisForReactions, RepositoryModule],
 })
 export class GlobalModule implements OnApplicationShutdown {
 	constructor(
