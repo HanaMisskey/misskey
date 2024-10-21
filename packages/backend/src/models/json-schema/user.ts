@@ -183,6 +183,15 @@ export const packedUserLiteSchema = {
 				},
 			},
 		},
+		subscriptionStatus: {
+			type: 'string',
+			enum: ['incomplete', 'incomplete_expired', 'trialing', 'active', 'past_due', 'paused', 'canceled', 'unpaid', 'none'],
+			nullable: false, optional: false,
+		},
+		subscriptionPlanId: {
+			type: 'string',
+			nullable: true, optional: false,
+		},
 	},
 } as const;
 
@@ -679,6 +688,14 @@ export const packedMeDetailedOnlySchema = {
 					},
 				},
 			},
+		},
+		stripeCustomerId: {
+			type: 'string',
+			nullable: true, optional: true,
+		},
+		stripeSubscriptionId: {
+			type: 'string',
+			nullable: true, optional: false,
 		},
 		//#endregion
 	},

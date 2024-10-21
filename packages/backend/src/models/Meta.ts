@@ -663,4 +663,15 @@ export class MiMeta {
 		default: '{}',
 	})
 	public federationHosts: string[];
+
+	@Column('boolean', {
+		default: false,
+	})
+	public enableSubscriptions: boolean;
+
+	@Column('varchar', {
+		length: 1024,
+		nullable: true,
+	})
+	public commerceDisclosureUrl: string | null;
 }

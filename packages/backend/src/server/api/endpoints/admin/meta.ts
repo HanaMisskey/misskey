@@ -482,6 +482,10 @@ export const meta = {
 				type: 'string',
 				optional: false, nullable: true,
 			},
+			commerceDisclosureUrl: {
+				type: 'string',
+				optional: false, nullable: true,
+			},
 			uri: {
 				type: 'string',
 				optional: false, nullable: false,
@@ -525,6 +529,10 @@ export const meta = {
 					type: 'string',
 					optional: false, nullable: false,
 				},
+			},
+			enableSubscriptions: {
+				type: 'boolean',
+				optional: false, nullable: false,
 			},
 		},
 	},
@@ -658,6 +666,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				perUserListTimelineCacheMax: instance.perUserListTimelineCacheMax,
 				enableReactionsBuffering: instance.enableReactionsBuffering,
 				notesPerOneAd: instance.notesPerOneAd,
+				commerceDisclosureUrl: instance.commerceDisclosureUrl,
 				summalyProxy: instance.urlPreviewSummaryProxyUrl,
 				urlPreviewEnabled: instance.urlPreviewEnabled,
 				urlPreviewTimeout: instance.urlPreviewTimeout,
@@ -667,6 +676,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				urlPreviewSummaryProxyUrl: instance.urlPreviewSummaryProxyUrl,
 				federation: instance.federation,
 				federationHosts: instance.federationHosts,
+				enableSubscriptions: instance.enableSubscriptions,
 			};
 		});
 	}

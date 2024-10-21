@@ -259,6 +259,9 @@ type AdminQueuePromoteRequest = operations['admin___queue___promote']['requestBo
 type AdminQueueStatsResponse = operations['admin___queue___stats']['responses']['200']['content']['application/json'];
 
 // @public (undocumented)
+type AdminRefreshUserSubscriptionStatusRequest = operations['admin___refresh-user-subscription-status']['requestBody']['content']['application/json'];
+
+// @public (undocumented)
 type AdminRelaysAddRequest = operations['admin___relays___add']['requestBody']['content']['application/json'];
 
 // @public (undocumented)
@@ -338,6 +341,18 @@ type AdminShowUsersRequest = operations['admin___show-users']['requestBody']['co
 
 // @public (undocumented)
 type AdminShowUsersResponse = operations['admin___show-users']['responses']['200']['content']['application/json'];
+
+// @public (undocumented)
+type AdminSubscriptionPlansArchiveRequest = operations['admin___subscription-plans___archive']['requestBody']['content']['application/json'];
+
+// @public (undocumented)
+type AdminSubscriptionPlansCreateRequest = operations['admin___subscription-plans___create']['requestBody']['content']['application/json'];
+
+// @public (undocumented)
+type AdminSubscriptionPlansCreateResponse = operations['admin___subscription-plans___create']['responses']['200']['content']['application/json'];
+
+// @public (undocumented)
+type AdminSubscriptionPlansUpdateRequest = operations['admin___subscription-plans___update']['requestBody']['content']['application/json'];
 
 // @public (undocumented)
 type AdminSuspendUserRequest = operations['admin___suspend-user']['requestBody']['content']['application/json'];
@@ -1297,6 +1312,7 @@ declare namespace entities {
         AdminQueueInboxDelayedResponse,
         AdminQueuePromoteRequest,
         AdminQueueStatsResponse,
+        AdminRefreshUserSubscriptionStatusRequest,
         AdminRelaysAddRequest,
         AdminRelaysAddResponse,
         AdminRelaysListResponse,
@@ -1341,6 +1357,10 @@ declare namespace entities {
         AdminSystemWebhookUpdateRequest,
         AdminSystemWebhookUpdateResponse,
         AdminSystemWebhookTestRequest,
+        AdminSubscriptionPlansCreateRequest,
+        AdminSubscriptionPlansCreateResponse,
+        AdminSubscriptionPlansUpdateRequest,
+        AdminSubscriptionPlansArchiveRequest,
         AnnouncementsRequest,
         AnnouncementsResponse,
         AnnouncementsShowRequest,
@@ -1718,6 +1738,12 @@ declare namespace entities {
         ResetPasswordRequest,
         ServerInfoResponse,
         StatsResponse,
+        SubscriptionCreateRequest,
+        SubscriptionCreateResponse,
+        SubscriptionManageResponse,
+        SubscriptionPlansListResponse,
+        SubscriptionPlansShowRequest,
+        SubscriptionPlansShowResponse,
         SwShowRegistrationRequest,
         SwShowRegistrationResponse,
         SwUpdateRegistrationRequest,
@@ -1855,7 +1881,8 @@ declare namespace entities {
         MetaDetailedOnly,
         MetaDetailed,
         SystemWebhook,
-        AbuseReportNotificationRecipient
+        AbuseReportNotificationRecipient,
+        SubscriptionPlan
     }
 }
 export { entities }
@@ -2887,7 +2914,7 @@ type PartialRolePolicyOverride = Partial<{
 }>;
 
 // @public (undocumented)
-export const permissions: readonly ["read:account", "write:account", "read:blocks", "write:blocks", "read:drive", "write:drive", "read:favorites", "write:favorites", "read:following", "write:following", "read:messaging", "write:messaging", "read:mutes", "write:mutes", "write:notes", "read:notifications", "write:notifications", "read:reactions", "write:reactions", "write:votes", "read:pages", "write:pages", "write:page-likes", "read:page-likes", "read:user-groups", "write:user-groups", "read:channels", "write:channels", "read:gallery", "write:gallery", "read:gallery-likes", "write:gallery-likes", "read:flash", "write:flash", "read:flash-likes", "write:flash-likes", "read:admin:abuse-user-reports", "write:admin:delete-account", "write:admin:delete-all-files-of-a-user", "read:admin:index-stats", "read:admin:table-stats", "read:admin:user-ips", "read:admin:meta", "write:admin:reset-password", "write:admin:resolve-abuse-user-report", "write:admin:send-email", "read:admin:server-info", "read:admin:show-moderation-log", "read:admin:show-user", "write:admin:suspend-user", "write:admin:unset-user-avatar", "write:admin:unset-user-banner", "write:admin:unsuspend-user", "write:admin:meta", "write:admin:user-note", "write:admin:roles", "read:admin:roles", "write:admin:relays", "read:admin:relays", "write:admin:invite-codes", "read:admin:invite-codes", "write:admin:announcements", "read:admin:announcements", "write:admin:avatar-decorations", "read:admin:avatar-decorations", "write:admin:federation", "write:admin:account", "read:admin:account", "write:admin:emoji", "read:admin:emoji", "write:admin:queue", "read:admin:queue", "write:admin:promo", "write:admin:drive", "read:admin:drive", "write:admin:ad", "read:admin:ad", "write:invite-codes", "read:invite-codes", "write:clip-favorite", "read:clip-favorite", "read:federation", "write:report-abuse"];
+export const permissions: readonly ["read:account", "write:account", "read:blocks", "write:blocks", "read:drive", "write:drive", "read:favorites", "write:favorites", "read:following", "write:following", "read:messaging", "write:messaging", "read:mutes", "write:mutes", "write:notes", "read:notifications", "write:notifications", "read:reactions", "write:reactions", "write:votes", "read:pages", "write:pages", "write:page-likes", "read:page-likes", "read:user-groups", "write:user-groups", "read:channels", "write:channels", "read:gallery", "write:gallery", "read:gallery-likes", "write:gallery-likes", "read:flash", "write:flash", "read:flash-likes", "write:flash-likes", "read:admin:abuse-user-reports", "write:admin:delete-account", "write:admin:delete-all-files-of-a-user", "read:admin:index-stats", "read:admin:table-stats", "read:admin:user-ips", "read:admin:meta", "write:admin:reset-password", "write:admin:resolve-abuse-user-report", "write:admin:send-email", "read:admin:server-info", "read:admin:show-moderation-log", "read:admin:show-user", "write:admin:suspend-user", "write:admin:unset-user-avatar", "write:admin:unset-user-banner", "write:admin:unsuspend-user", "write:admin:meta", "write:admin:user-note", "write:admin:roles", "read:admin:roles", "write:admin:relays", "read:admin:relays", "write:admin:invite-codes", "read:admin:invite-codes", "write:admin:announcements", "read:admin:announcements", "write:admin:avatar-decorations", "read:admin:avatar-decorations", "write:admin:federation", "write:admin:account", "read:admin:account", "write:admin:emoji", "read:admin:emoji", "write:admin:queue", "read:admin:queue", "write:admin:promo", "write:admin:drive", "read:admin:drive", "write:admin:ad", "read:admin:ad", "write:invite-codes", "read:invite-codes", "write:clip-favorite", "read:clip-favorite", "read:federation", "write:report-abuse", "write:admin:refresh-user-subscription-status"];
 
 // @public (undocumented)
 type PingResponse = operations['ping']['responses']['200']['content']['application/json'];
@@ -3190,6 +3217,27 @@ export type StreamEvents = {
     _connected_: void;
     _disconnected_: void;
 } & BroadcastEvents;
+
+// @public (undocumented)
+type SubscriptionCreateRequest = operations['subscription___create']['requestBody']['content']['application/json'];
+
+// @public (undocumented)
+type SubscriptionCreateResponse = operations['subscription___create']['responses']['200']['content']['application/json'];
+
+// @public (undocumented)
+type SubscriptionManageResponse = operations['subscription___manage']['responses']['200']['content']['application/json'];
+
+// @public (undocumented)
+type SubscriptionPlan = components['schemas']['SubscriptionPlan'];
+
+// @public (undocumented)
+type SubscriptionPlansListResponse = operations['subscription-plans___list']['responses']['200']['content']['application/json'];
+
+// @public (undocumented)
+type SubscriptionPlansShowRequest = operations['subscription-plans___show']['requestBody']['content']['application/json'];
+
+// @public (undocumented)
+type SubscriptionPlansShowResponse = operations['subscription-plans___show']['responses']['200']['content']['application/json'];
 
 // Warning: (ae-forgotten-export) The symbol "SwitchCase" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "IsCaseMatched" needs to be exported by the entry point index.d.ts

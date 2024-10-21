@@ -81,6 +81,7 @@ const devConfig: UserConfig = {
 			'/.well-known': {
 				target: httpUrl,
 			},
+			'/transaction': httpUrl,
 		},
 	},
 	build: {

@@ -35,6 +35,14 @@ export const meta = {
 				type: 'string',
 				optional: false, nullable: true,
 			},
+			stripeCustomerId: {
+				type: 'string',
+				optional: false, nullable: true,
+			},
+			stripeSubscriptionId: {
+				type: 'string',
+				optional: false, nullable: true,
+			},
 			autoAcceptFollowed: {
 				type: 'boolean',
 				optional: false, nullable: false,
@@ -230,9 +238,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			return {
 				email: profile.email,
 				emailVerified: profile.emailVerified,
-				followedMessage: profile.followedMessage,
 				autoAcceptFollowed: profile.autoAcceptFollowed,
-				noCrawle: profile.noCrawle,
+				stripeCustomerId: profile.stripeCustomerId,
+				stripeSubscriptionId: user.stripeSubscriptionId,
 				preventAiLearning: profile.preventAiLearning,
 				alwaysMarkNsfw: profile.alwaysMarkNsfw,
 				autoSensitive: profile.autoSensitive,
@@ -248,6 +256,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				isHibernated: user.isHibernated,
 				lastActiveDate: user.lastActiveDate ? user.lastActiveDate.toISOString() : null,
 				moderationNote: profile.moderationNote ?? '',
+				followedMessage: profile.followedMessage,
+				noCrawle: profile.noCrawle,
 				signins,
 				policies: await this.roleService.getUserPolicies(user.id),
 				roles: await this.roleEntityService.packMany(roles, me),

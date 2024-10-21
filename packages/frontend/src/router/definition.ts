@@ -56,6 +56,10 @@ const routes: RouteDef[] = [{
 		name: 'profile',
 		component: page(() => import('@/pages/settings/profile.vue')),
 	}, {
+		path: '/subscription',
+		name: 'subscription',
+		component: page(() => import('@/pages/settings/subscription.vue')),
+	}, {
 		path: '/avatar-decoration',
 		name: 'avatarDecoration',
 		component: page(() => import('@/pages/settings/avatar-decoration.vue')),
@@ -504,6 +508,10 @@ const routes: RouteDef[] = [{
 		path: '/system-webhook',
 		name: 'system-webhook',
 		component: page(() => import('@/pages/admin/system-webhook.vue')),
+	}, {
+		path: '/subscription-plans',
+		name: 'subscription-plans',
+		component: page(() => import('@/pages/admin/subscription-plans.vue')),
 	}, {
 		path: '/',
 		component: page(() => import('@/pages/_empty_.vue')),

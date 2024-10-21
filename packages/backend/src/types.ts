@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import type Stripe from 'stripe';
+
 /**
  * note - 通知オンにしているユーザーが投稿した
  * follow - フォローされた
@@ -116,11 +118,26 @@ export const moderationLogTypes = [
 	'createAbuseReportNotificationRecipient',
 	'updateAbuseReportNotificationRecipient',
 	'deleteAbuseReportNotificationRecipient',
-	'deleteAccount',
+  'deleteAccount',
 	'deletePage',
 	'deleteFlash',
 	'deleteGalleryPost',
+	'createSubscriptionPlan',
+	'updateSubscriptionPlan',
+	'archiveSubscriptionPlan',
 ] as const;
+
+export const subscriptionStatus = [
+	'incomplete',
+	'incomplete_expired',
+	'trialing',
+	'active',
+	'past_due',
+	'paused',
+	'canceled',
+	'unpaid',
+	'none',
+] as const satisfies (Stripe.Subscription.Status | 'none')[];
 
 export type ModerationLogPayloads = {
 	updateServerSettings: {
@@ -371,6 +388,18 @@ export type ModerationLogPayloads = {
 		postUserId: string;
 		postUserUsername: string;
 		post: any;
+  };
+	createSubscriptionPlan: {
+		subscriptionPlanId: string;
+		subscriptionPlan: any;
+	};
+	updateSubscriptionPlan: {
+		subscriptionPlanId: string;
+		before: any;
+		after: any;
+	};
+	archiveSubscriptionPlan: {
+		subscriptionPlanId: string;
 	};
 };
 
