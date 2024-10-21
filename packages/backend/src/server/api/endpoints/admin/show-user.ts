@@ -256,6 +256,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				isHibernated: user.isHibernated,
 				lastActiveDate: user.lastActiveDate ? user.lastActiveDate.toISOString() : null,
 				moderationNote: profile.moderationNote ?? '',
+				followedMessage: profile.followedMessage,
+				noCrawle: profile.noCrawle,
 				signins,
 				policies: await this.roleService.getUserPolicies(user.id),
 				roles: await this.roleEntityService.packMany(roles, me),
