@@ -266,7 +266,9 @@ export class SearchService {
 		sinceId?: MiNote['id'];
 		limit?: number;
 	}): Promise<MiNote[]> {
-		if (this.meilisearch && opts.preferredMethod !== 'elasticsearch') {
+		const preferredMethod = opts.preferredMethod ?? null;
+
+		if (this.meilisearch && preferredMethod !== 'elasticsearch') {
 			const filter: Q = {
 				op: 'and',
 				qs: [],
@@ -307,7 +309,7 @@ export class SearchService {
 			return notes.sort((a, b) => a.id > b.id ? -1 : 1);
 		}
 
-		if (this.elasticsearch && opts.preferredMethod !== 'meilisearch') {
+		if (this.elasticsearch && preferredMethod !== 'meilisearch') {
 			const esFilter: any = {
 				bool: {
 					must: [],
@@ -378,7 +380,7 @@ export class SearchService {
 			this.logger.error('elasticsearch is not available', error);
 		}
 
-		if (!this.elasticsearch && !this.meilisearch && opts.preferredMethod === null) {
+		if (!this.elasticsearch && !this.meilisearch && preferredMethod === null) {
 			const query = this.queryService.makePaginationQuery(this.notesRepository.createQueryBuilder('note'), pagination.sinceId, pagination.untilId);
 
 			if (opts.userId) {
