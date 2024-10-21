@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import type Stripe from 'stripe';
+
 /**
  * note - 通知オンにしているユーザーが投稿した
  * follow - フォローされた
@@ -135,7 +137,7 @@ export const subscriptionStatus = [
 	'canceled',
 	'unpaid',
 	'none',
-] as const;
+] as const satisfies (Stripe.Subscription.Status | 'none')[];
 
 export type ModerationLogPayloads = {
 	updateServerSettings: {
