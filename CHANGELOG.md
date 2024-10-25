@@ -10,8 +10,7 @@
 - Fix: 通知の範囲指定の設定項目が必要ない通知設定でも範囲指定の設定がでている問題を修正
 
 ### Server
-- Fix: Nested proxy requestsを検出した際にブロックするように
-  [ghsa-gq5q-c77c-v236](https://github.com/misskey-dev/misskey/security/advisories/ghsa-gq5q-c77c-v236)
+-
 
 ## 2024.10.1
 
