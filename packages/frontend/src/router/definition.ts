@@ -189,7 +189,15 @@ const routes: RouteDef[] = [{
 		component: page(() => import('@/pages/settings/migrate-from-bsk.vue')),
 		query: {
 			session: 'sessionId',
-		}
+		},
+	}, {
+		path: '/cross-renote',
+		name: 'cross-renote',
+		component: page(() => import('@/pages/settings/cross-renote.vue')),
+		query: {
+			host: 'host',
+			session: 'sessionId',
+		},
 	}, {
 		path: '/',
 		component: page(() => import('@/pages/_empty_.vue')),

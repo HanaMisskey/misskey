@@ -1,5 +1,6 @@
 import { markRaw } from 'vue';
 import { Storage } from '@/pizzax.js';
+import type { CrossRenoteStore } from '@/hana/scripts/cross-renote.js';
 
 /**
  * はなみすきー独自のデータ用
@@ -16,5 +17,9 @@ export const hanaStore = markRaw(new Storage('hanaMain', {
 	flowerEffect: {
 		where: 'device',
 		default: false,
+	},
+	crossRenoteAccounts: {
+		where: 'account',
+		default: [] as CrossRenoteStore[],
 	},
 }));

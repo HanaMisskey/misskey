@@ -10663,6 +10663,10 @@ export interface Locale extends ILocale {
          * {x}で見る
          */
         "showOnX": ParameterizedString<"x">;
+        /**
+         * クロスリノートのアカウント上限
+         */
+        "crossRenoteAccountLimit": string;
         "_inDevelopment": {
             /**
              * この機能は開発中です
@@ -10975,6 +10979,28 @@ export interface Locale extends ILocale {
              * 未成年の方は、おうちの方といっしょに確認してください。この設定は後からいつでも変更できます。
              */
             "forMinor": string;
+        };
+        "_crossRenote": {
+            /**
+             * クロスリノート
+             */
+            "title": string;
+            /**
+             * この機能は、はなみすきーに投稿したノートを半自動で外部サービスでリノートするものです。利用するサーバーの規約やルールに則って、自己責任でご利用ください。
+             */
+            "warning": string;
+            /**
+             * 設定できるアカウント数の上限に達しました
+             */
+            "accountQtyExceeded": string;
+            /**
+             * 公開範囲のオーバーライド
+             */
+            "visibilityOverride": string;
+            /**
+             * このアカウントは既に連携済みです。再連携しますか？
+             */
+            "alreadyLinked": string;
         };
     };
 }

@@ -65,6 +65,7 @@ export type RolePolicies = {
 	canImportMuting: boolean;
 	canImportNotes: boolean;
 	canImportUserLists: boolean;
+	crossRenoteAccountLimit: number;
 };
 
 export const DEFAULT_POLICIES: RolePolicies = {
@@ -101,6 +102,7 @@ export const DEFAULT_POLICIES: RolePolicies = {
 	canImportMuting: true,
 	canImportNotes: true,
 	canImportUserLists: true,
+	crossRenoteAccountLimit: 2,
 };
 
 @Injectable()
@@ -412,6 +414,7 @@ export class RoleService implements OnApplicationShutdown, OnModuleInit {
 			canImportMuting: calc('canImportMuting', vs => vs.some(v => v === true)),
 			canImportNotes: calc('canImportNotes', vs => vs.some(v => v === true)),
 			canImportUserLists: calc('canImportUserLists', vs => vs.some(v => v === true)),
+			crossRenoteAccountLimit: calc('crossRenoteAccountLimit', vs => Math.max(...vs)),
 		};
 	}
 
