@@ -4926,6 +4926,7 @@ export type components = {
       canImportFollowing: boolean;
       canImportMuting: boolean;
       canImportUserLists: boolean;
+      crossRenoteAccountLimit: number;
     };
     ReversiGameLite: {
       /** Format: id */
