@@ -1,5 +1,6 @@
 import * as Misskey from 'misskey-js';
 import { url } from '@@/js/config.js';
+import { signinRequired } from '@/account.js';
 import { hanaStore } from '@/hana/store.js';
 
 export type CrossRenoteStore = {
@@ -18,6 +19,10 @@ export async function crossRenote({ createdNote, accountIds }: { createdNote: Mi
 	const renotePromises: Promise<void>[] = [];
 
 	if (createdNote.visibility === 'specified' || createdNote.visibility === 'followers' || createdNote.localOnly === true) return;
+
+	const $i = signinRequired();
+
+	if (hanaStore.state.crossRenoteAccounts.length > $i.policies.crossRenoteAccountLimit) return;
 
 	for (const account of crossRenoteAccounts) {
 		renotePromises.push((async () => {

@@ -37,6 +37,7 @@ import * as Misskey from 'misskey-js';
 import MkModal from '@/components/MkModal.vue';
 import MkMenuItem from '@/components/MkMenu.item.vue';
 
+import { signinRequired } from '@/account.js';
 import { instance } from '@/instance.js';
 import { i18n } from '@/i18n.js';
 import * as os from '@/os.js';
@@ -69,7 +70,13 @@ const textCountPercentage = computed(() => {
 	return props.textLength / maxTextLength.value * 100;
 });
 
+const $i = signinRequired();
+
 function getCrossRenoteAccountMenu(): NonModalCompatibleInnerMenuItem[] {
+	if ($i.policies.crossRenoteAccountLimit > hanaStore.reactiveState.crossRenoteAccounts.value.length) {
+		return [];
+	}
+
 	const menus = hanaStore.reactiveState.crossRenoteAccounts.value.map<MenuSwitch>((account) => {
 		const menu = reactive({
 			type: 'switch',
