@@ -39,7 +39,7 @@ import { instance } from '@/instance.js';
 import { lookup } from '@/scripts/lookup.js';
 import * as os from '@/os.js';
 import { misskeyApi } from '@/scripts/misskey-api.js';
-import { lookupUser, lookupUserByEmail, lookupFile } from '@/scripts/admin-lookup.js';
+import { lookupUser, lookupUserByCustomer, lookupUserByEmail, lookupFile } from '@/scripts/admin-lookup.js';
 import { PageMetadata, definePageMetadata, provideMetadataReceiver, provideReactiveMetadata } from '@/scripts/page-metadata.js';
 import { useRouter } from '@/router/supplier.js';
 
@@ -296,6 +296,12 @@ function adminLookup(ev: MouseEvent) {
 		icon: 'ti ti-user',
 		action: () => {
 			lookupUserByEmail();
+		},
+	}, {
+		text: `${i18n.ts.user} (CustomerID)`,
+		icon: 'ti ti-user',
+		action: () => {
+			lookupUserByCustomer();
 		},
 	}, {
 		text: i18n.ts.file,

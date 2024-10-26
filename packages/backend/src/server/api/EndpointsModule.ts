@@ -16,6 +16,7 @@ import * as ep___admin_meta from './endpoints/admin/meta.js';
 import * as ep___admin_accounts_create from './endpoints/admin/accounts/create.js';
 import * as ep___admin_accounts_delete from './endpoints/admin/accounts/delete.js';
 import * as ep___admin_accounts_findByEmail from './endpoints/admin/accounts/find-by-email.js';
+import * as ep___admin_accounts_findByStripeCustomer from './endpoints/admin/accounts/find-by-stripe-customer.js';
 import * as ep___admin_ad_create from './endpoints/admin/ad/create.js';
 import * as ep___admin_ad_delete from './endpoints/admin/ad/delete.js';
 import * as ep___admin_ad_list from './endpoints/admin/ad/list.js';
@@ -417,6 +418,7 @@ const $admin_abuseReport_notificationRecipient_delete: Provider = { provide: 'ep
 const $admin_accounts_create: Provider = { provide: 'ep:admin/accounts/create', useClass: ep___admin_accounts_create.default };
 const $admin_accounts_delete: Provider = { provide: 'ep:admin/accounts/delete', useClass: ep___admin_accounts_delete.default };
 const $admin_accounts_findByEmail: Provider = { provide: 'ep:admin/accounts/find-by-email', useClass: ep___admin_accounts_findByEmail.default };
+const $admin_accounts_findByStripeCustomer: Provider = { provide: 'ep:admin/accounts/find-by-stripe-customer', useClass: ep___admin_accounts_findByStripeCustomer.default };
 const $admin_ad_create: Provider = { provide: 'ep:admin/ad/create', useClass: ep___admin_ad_create.default };
 const $admin_ad_delete: Provider = { provide: 'ep:admin/ad/delete', useClass: ep___admin_ad_delete.default };
 const $admin_ad_list: Provider = { provide: 'ep:admin/ad/list', useClass: ep___admin_ad_list.default };
@@ -822,6 +824,7 @@ const $reversi_verify: Provider = { provide: 'ep:reversi/verify', useClass: ep__
 		$admin_accounts_create,
 		$admin_accounts_delete,
 		$admin_accounts_findByEmail,
+		$admin_accounts_findByStripeCustomer,
 		$admin_ad_create,
 		$admin_ad_delete,
 		$admin_ad_list,
@@ -1221,6 +1224,7 @@ const $reversi_verify: Provider = { provide: 'ep:reversi/verify', useClass: ep__
 		$admin_accounts_create,
 		$admin_accounts_delete,
 		$admin_accounts_findByEmail,
+		$admin_accounts_findByStripeCustomer,
 		$admin_ad_create,
 		$admin_ad_delete,
 		$admin_ad_list,
