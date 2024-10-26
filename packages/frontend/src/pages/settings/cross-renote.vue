@@ -32,7 +32,7 @@ import XSettings from './cross-renote.settings.vue';
 import { signinRequired } from '@/account.js';
 import * as os from '@/os.js';
 import { i18n } from '@/i18n.js';
-import { url } from '@@/js/config.js';
+import { host, url } from '@@/js/config.js';
 import { extractDomain } from '@@/js/url.js';
 
 import { hanaStore } from '@/hana/store.js';
@@ -90,7 +90,7 @@ async function addAccount() {
 	});
 
 	let targetHost: string | null = extractDomain(hostTemp ?? '');
-	if (targetHost === null) {
+	if (targetHost === null || targetHost === host) {
 		os.alert({
 			title: i18n.ts.invalidValue,
 			text: i18n.ts.tryAgain,
