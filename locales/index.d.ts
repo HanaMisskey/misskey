@@ -5207,6 +5207,18 @@ export interface Locale extends ILocale {
      */
     "yourNameContainsProhibitedWordsDescription": string;
     /**
+     * 文字数
+     */
+    "textCount": string;
+    /**
+     * リセット
+     */
+    "reset": string;
+    /**
+     * 常に絶対時刻で表示する
+     */
+    "alwaysUseAbsoluteTime": string;
+    /**
      * チュートリアルをスキップできないようにする
      */
     "prohibitSkippingInitialTutorial": string;
@@ -9410,7 +9422,7 @@ export interface Locale extends ILocale {
          */
         "youGotQuote": ParameterizedString<"name">;
         /**
-         * {name}がRenoteしました
+         * {name}がリノートしました
          */
         "youRenoted": ParameterizedString<"name">;
         /**
@@ -9515,7 +9527,7 @@ export interface Locale extends ILocale {
              */
             "reply": string;
             /**
-             * Renote
+             * リノート
              */
             "renote": string;
             /**
@@ -9573,7 +9585,7 @@ export interface Locale extends ILocale {
              */
             "reply": string;
             /**
-             * Renote
+             * リノート
              */
             "renote": string;
         };
