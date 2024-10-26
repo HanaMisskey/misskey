@@ -106,6 +106,11 @@ const menuDef = computed(() => [{
 		to: '/settings/hanamode',
 		active: currentPage.value?.route.name === 'hanamode',
 	}, {
+		icon: 'ti ti-repeat',
+		text: i18n.ts._hana._crossRenote.title,
+		to: '/settings/cross-renote',
+		active: currentPage.value?.route.name === 'cross-renote',
+	}, {
 		icon: 'ti ti-plane',
 		text: i18n.ts._hana.migrateFromBackspaceKey,
 		to: '/settings/migrate-from-bsk',

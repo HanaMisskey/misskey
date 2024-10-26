@@ -5,7 +5,11 @@
 		<MkFolder v-for="account in hanaStore.reactiveState.crossRenoteAccounts.value" :key="account.id">
 			<template #label>{{ account.serverName ?? account.host }}</template>
 			<template #caption>@{{ account.username }}@{{ account.host }}</template>
-			<XSettings :account="account" @changed="onSettingsChanged"/>
+			<XSettings
+				:account="account"
+				@changed="onSettingsChanged"
+				@delete="removeAccount"
+			/>
 		</MkFolder>
 	</div>
 	<div class="_buttons">
@@ -15,9 +19,11 @@
 </template>
 
 <script setup lang="ts">
+import { ref, defineAsyncComponent } from 'vue';
 import { v4 as uuid } from 'uuid';
 import * as Misskey from 'misskey-js';
 
+import MkButton from '@/components/MkButton.vue';
 import MkInfo from '@/components/MkInfo.vue';
 import MkFolder from '@/components/MkFolder.vue';
 
@@ -26,11 +32,15 @@ import XSettings from './cross-renote.settings.vue';
 import { signinRequired } from '@/account.js';
 import * as os from '@/os.js';
 import { i18n } from '@/i18n.js';
+import { url } from '@@/js/config.js';
+import { extractDomain } from '@@/js/url.js';
 
 import { hanaStore } from '@/hana/store.js';
 import { misskeyApi } from '@/scripts/misskey-api.js';
+import { reloadAsk } from '@/scripts/reload-ask.js';
+import { useRouter } from '@/router/supplier.js';
+
 import type { CrossRenoteStore } from '@/hana/scripts/cross-renote.js';
-import { reloadAsk } from '@/scripts/reload-ask';
 
 const props = defineProps<{
 	host?: string;
@@ -40,13 +50,13 @@ const props = defineProps<{
 const $i = signinRequired();
 
 function onSettingsChanged(newValue: CrossRenoteStore) {
-	hanaStore.set('crossRenoteAccounts', hanaStore.state.crossRenoteAccounts.map((account) => {
+	os.promiseDialog(hanaStore.set('crossRenoteAccounts', hanaStore.state.crossRenoteAccounts.map((account) => {
 		if (account.id === newValue.id) {
 			return newValue;
 		} else {
 			return account;
 		}
-	})).then(() => {
+	}))).then(() => {
 		reloadAsk({
 			unison: true,
 			reason: i18n.ts.reloadToApplySetting,
@@ -54,7 +64,59 @@ function onSettingsChanged(newValue: CrossRenoteStore) {
 	});
 }
 
-function addAccount() {
+async function addAccount() {
+	if ($i.policies.crossRenoteAccountLimit <= hanaStore.reactiveState.crossRenoteAccounts.value.length) {
+		os.alert({
+			text: i18n.ts._hana._crossRenote.accountQtyExceeded,
+			type: 'error',
+		});
+		return;
+	}
+
+	const { canceled, result: hostTemp } = await os.inputText({
+		title: i18n.ts.inputHostName,
+		placeholder: 'misskey.example.com',
+	});
+
+	if (canceled) return;
+
+	const showing = ref(true);
+
+	const { dispose } = os.popup(defineAsyncComponent(() => import('@/components/MkWaitingDialog.vue')), {
+		success: false,
+		showing,
+	}, {
+		closed: () => dispose(),
+	});
+
+	let targetHost: string | null = extractDomain(hostTemp ?? '');
+	if (targetHost === null) {
+		os.alert({
+			title: i18n.ts.invalidValue,
+			text: i18n.ts.tryAgain,
+			type: 'error'
+		});
+		showing.value = false;
+		return;
+	}
+
+	const authUrl = new URL(`https://${targetHost}/miauth/${uuid()}`);
+	authUrl.searchParams.set('callback', `${url}/settings/cross-renote?host=${targetHost}`);
+	authUrl.searchParams.set('name', i18n.ts._hana.hanaMisskey);
+	authUrl.searchParams.set('permission', 'read:account,write:notes');
+
+	location.href = authUrl.toString();
+}
+
+async function removeAccount(accountId: string) {
+	const { canceled } = await os.confirm({
+		type: 'warning',
+		text: i18n.ts.deleteConfirm,
+	});
+
+	if (canceled) return;
+
+	os.promiseDialog(hanaStore.set('crossRenoteAccounts', hanaStore.reactiveState.crossRenoteAccounts.value.filter((account) => account.id !== accountId)));
 }
 
 if (props.sessionId && props.host) {
@@ -63,21 +125,33 @@ if (props.sessionId && props.host) {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
-			}
+			},
+			body: '{}',
 		});
 
 		if (res.status !== 200) {
-			return os.alert({
+			os.alert({
 				title: i18n.ts.somethingHappened,
 				text: i18n.ts.failedToFetchAccountInformation,
 				type: 'error'
 			});
+			return;
 		}
 
 		const resJson = await res.json() as {
+			ok: boolean;
 			token: string;
 			user: Misskey.entities.User;
 		};
+
+		if (resJson.ok !== true) {
+			os.alert({
+				title: i18n.ts.somethingHappened,
+				text: i18n.ts.failedToFetchAccountInformation,
+				type: 'error'
+			});
+			return;
+		}
 
 		let instanceInfoRes: Misskey.entities.FederationShowInstanceResponse | null = null;
 
@@ -89,7 +163,7 @@ if (props.sessionId && props.host) {
 			// ignore
 		}
 
-		if (hanaStore.state.crossRenoteAccounts.some((account) => account.userId === resJson.user.id)) {
+		if (hanaStore.reactiveState.crossRenoteAccounts.value.some((account) => account.userId === resJson.user.id)) {
 			const { canceled } = await os.confirm({
 				type: 'info',
 				text: i18n.ts._hana._crossRenote.alreadyLinked,
@@ -101,7 +175,7 @@ if (props.sessionId && props.host) {
 		}
 
 		hanaStore.set('crossRenoteAccounts', [
-			...hanaStore.state.crossRenoteAccounts.filter((account) => account.userId !== resJson.user.id),
+			...hanaStore.reactiveState.crossRenoteAccounts.value.filter((account) => account.userId !== resJson.user.id),
 			{
 				id: uuid(),
 				host: props.host!,
@@ -113,6 +187,9 @@ if (props.sessionId && props.host) {
 		]);
 	})();
 
-	os.promiseDialog(verifyPromise);
+	os.promiseDialog(verifyPromise).then(() => {
+		const router = useRouter();
+		router.replace('/settings/cross-renote');
+	});
 }
 </script>
