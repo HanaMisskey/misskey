@@ -41,7 +41,7 @@ export async function crossRenote({ createdNote, accountIds }: { createdNote: Mi
 				body: JSON.stringify({
 					i: account.token,
 					uri: `${url}/notes/${createdNote.id}`,
-				} as Misskey.entities.ApShowRequest & { i: string }),
+				} satisfies Misskey.entities.ApShowRequest & { i: string }),
 			});
 
 			if (!apFetch.ok) {
@@ -64,7 +64,7 @@ export async function crossRenote({ createdNote, accountIds }: { createdNote: Mi
 					renoteId: apNote.object.id,
 					visibility: computedVisibility,
 					localOnly: account.localOnly ?? false,
-				} as Misskey.entities.NotesCreateRequest & { i: string }),
+				} satisfies Misskey.entities.NotesCreateRequest & { i: string }),
 			});
 		})());
 	}
