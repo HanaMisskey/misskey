@@ -13,26 +13,31 @@
 		</MkFolder>
 	</div>
 	<div class="_buttons">
-		<MkButton primary @click="addAccount"><i class="ti ti-plus"></i>{{ i18n.ts.addAccount }}</MkButton>
+		<MkButton
+			primary
+			:disabled="$i.policies.crossRenoteAccountLimit <= hanaStore.reactiveState.crossRenoteAccounts.value.length"
+			@click="addAccount"
+		><i class="ti ti-plus"></i>{{ i18n.ts.addAccount }}</MkButton>
 	</div>
 </div>
 </template>
 
 <script setup lang="ts">
-import { ref, defineAsyncComponent } from 'vue';
+import { ref, nextTick } from 'vue';
 import { v4 as uuid } from 'uuid';
 import * as Misskey from 'misskey-js';
 
 import MkButton from '@/components/MkButton.vue';
 import MkInfo from '@/components/MkInfo.vue';
 import MkFolder from '@/components/MkFolder.vue';
+import MkWaitingDialog from '@/components/MkWaitingDialog.vue';
 
 import XSettings from './cross-renote.settings.vue';
 
 import { signinRequired } from '@/account.js';
 import * as os from '@/os.js';
 import { i18n } from '@/i18n.js';
-import { host, url } from '@@/js/config.js';
+import { hostname, url } from '@@/js/config.js';
 import { extractDomain } from '@@/js/url.js';
 
 import { hanaStore } from '@/hana/store.js';
@@ -82,21 +87,23 @@ async function addAccount() {
 
 	const showing = ref(true);
 
-	const { dispose } = os.popup(defineAsyncComponent(() => import('@/components/MkWaitingDialog.vue')), {
+	const { dispose } = os.popup(MkWaitingDialog, {
 		success: false,
 		showing,
 	}, {
 		closed: () => dispose(),
 	});
 
+	await nextTick();
+
 	let targetHost: string | null = extractDomain(hostTemp ?? '');
-	if (targetHost === null || targetHost === host) {
+	if (targetHost === null || targetHost === hostname) {
+		showing.value = false;
 		os.alert({
 			title: i18n.ts.invalidValue,
 			text: i18n.ts.tryAgain,
 			type: 'error'
 		});
-		showing.value = false;
 		return;
 	}
 

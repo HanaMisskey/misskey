@@ -10986,7 +10986,7 @@ export interface Locale extends ILocale {
              */
             "title": string;
             /**
-             * この機能は、はなみすきーに投稿したノートを半自動で外部サービスでリノートするものです。利用するサーバーの規約やルールに則って、自己責任でご利用ください。
+             * この機能は、はなみすきーに投稿したノートを半自動で外部サービスでリノートするものです。サードパーティクライアントでは利用できません。利用するサーバーの規約やルールに則って、自己責任でご利用ください。
              */
             "warning": string;
             /**
@@ -11001,6 +11001,10 @@ export interface Locale extends ILocale {
              * このアカウントは既に連携済みです。再連携しますか？
              */
             "alreadyLinked": string;
+            /**
+             * {name}にリノート
+             */
+            "renoteToX": ParameterizedString<"name">;
         };
     };
 }

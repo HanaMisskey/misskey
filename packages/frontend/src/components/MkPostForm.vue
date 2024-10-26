@@ -128,6 +128,7 @@ import { miLocalStorage } from '@/local-storage.js';
 import { claimAchievement } from '@/scripts/achievements.js';
 import { emojiPicker } from '@/scripts/emoji-picker.js';
 import { mfmFunctionPicker } from '@/scripts/mfm-function-picker.js';
+import { crossRenote } from '@/hana/scripts/cross-renote.js';
 
 const $i = signinRequired();
 
@@ -203,6 +204,8 @@ const recentHashtags = ref(JSON.parse(miLocalStorage.getItem('hashtags') ?? '[]'
 const imeText = ref('');
 const showingOptions = ref(false);
 const textAreaReadOnly = ref(false);
+
+const crossRenoteAccountIds = ref<string[]>([]);
 
 const draftKey = computed((): string => {
 	let key = props.channel ? `channel:${props.channel.id}` : '';
@@ -533,10 +536,18 @@ function showOtherSettings() {
 	const { dispose } = os.popup(defineAsyncComponent(() => import('@/components/MkPostFormOtherMenu.vue')), {
 		currentReactionAcceptance: reactionAcceptance.value,
 		textLength: textLength.value,
+		enabledCrossRenoteAccountIds: crossRenoteAccountIds,
 		src: otherSettingsButton.value,
 	}, {
 		changeReactionAcceptance: (value: Misskey.entities.Note['reactionAcceptance']) => {
 			reactionAcceptance.value = value;
+		},
+		changeCrossRenoteAccountSettings: (id: string, value: boolean) => {
+			if (value && !crossRenoteAccountIds.value.includes(id)) {
+				crossRenoteAccountIds.value.push(id);
+			} else if (!value) {
+				crossRenoteAccountIds.value = crossRenoteAccountIds.value.filter(x => x !== id);
+			}
 		},
 		reset: () => {
 			clear();
@@ -828,7 +839,7 @@ async function post(ev?: MouseEvent) {
 	}
 
 	posting.value = true;
-	misskeyApi('notes/create', postData, token).then(() => {
+	misskeyApi('notes/create', postData, token).then((res) => {
 		if (props.freezeAfterPosted) {
 			posted.value = true;
 		} else {
@@ -889,6 +900,11 @@ async function post(ev?: MouseEvent) {
 			if (m === 0 && s === 0) {
 				claimAchievement('postedAt0min0sec');
 			}
+
+			crossRenote({
+				createdNote: res.createdNote,
+				accountIds: crossRenoteAccountIds.value,
+			});
 		});
 	}).catch(err => {
 		posting.value = false;

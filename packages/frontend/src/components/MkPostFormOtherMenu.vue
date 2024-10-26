@@ -31,7 +31,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 </template>
 
 <script lang="ts" setup>
-import { shallowRef, computed } from 'vue';
+import { shallowRef, computed, reactive, watch } from 'vue';
 import * as Misskey from 'misskey-js';
 
 import MkModal from '@/components/MkModal.vue';
@@ -41,19 +41,22 @@ import { instance } from '@/instance.js';
 import { i18n } from '@/i18n.js';
 import * as os from '@/os.js';
 import number from '@/filters/number.js';
+import { hanaStore } from '@/hana/store.js';
 
-import type { NonModalCompatibleInnerMenuItem } from '@/types/menu.js';
+import type { MenuSwitch, NonModalCompatibleInnerMenuItem } from '@/types/menu.js';
 
 const modal = shallowRef<InstanceType<typeof MkModal>>();
 
 const props = defineProps<{
 	currentReactionAcceptance: Misskey.entities.Note['reactionAcceptance'];
 	textLength: number;
+	enabledCrossRenoteAccountIds: string[];
 	src?: HTMLElement;
 }>();
 
 const emit = defineEmits<{
 	(ev: 'changeReactionAcceptance', value: Misskey.entities.Note['reactionAcceptance']): void;
+	(ev: 'changeCrossRenoteAccountSettings', id: string, to: boolean): void;
 	(ev: 'reset'): void;
 	(ev: 'closed'): void;
 }>();
@@ -65,6 +68,27 @@ const maxTextLength = computed(() => {
 const textCountPercentage = computed(() => {
 	return props.textLength / maxTextLength.value * 100;
 });
+
+function getCrossRenoteAccountMenu(): NonModalCompatibleInnerMenuItem[] {
+	const menus = hanaStore.reactiveState.crossRenoteAccounts.value.map<MenuSwitch>((account) => {
+		const menu = reactive({
+			type: 'switch',
+			text: `@${account.username}@${account.host}`,
+			ref: props.enabledCrossRenoteAccountIds.includes(account.id), // refを直接渡すとMkMenuItem内でのwatchが効かないため、refの値を直接渡す
+		}) as unknown as MenuSwitch;
+
+		watch(() => menu.ref, (to) => {
+			emit('changeCrossRenoteAccountSettings', account.id, to as unknown as boolean);
+		});
+
+		return menu;
+	});
+
+	return menus.length >= 0 ? [{
+		type: 'label',
+		text: i18n.ts._hana._crossRenote.title,
+	}, ...menus, { type: 'divider' }] : [];
+}
 
 // actionを発火した瞬間にMkMenuItemからcloseイベントが出るが、それを利用すると正しくemitできないため、action内で別途closeを呼ぶ
 const menuDef = computed<NonModalCompatibleInnerMenuItem[]>(() => {
@@ -82,7 +106,7 @@ const menuDef = computed<NonModalCompatibleInnerMenuItem[]>(() => {
 		action: () => {
 			toggleReactionAcceptance();
 		},
-	}, { type: 'divider' }, {
+	}, { type: 'divider' }, ...getCrossRenoteAccountMenu(), {
 		icon: 'ti ti-trash',
 		text: i18n.ts.reset,
 		danger: true,

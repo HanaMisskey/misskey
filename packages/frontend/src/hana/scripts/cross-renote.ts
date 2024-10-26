@@ -13,8 +13,8 @@ export type CrossRenoteStore = {
 	visibilityOverride?: Exclude<Misskey.entities.Note['visibility'], 'specified'>;
 };
 
-export async function crossRenote({ createdNote, renoteIds }: { createdNote: Misskey.entities.Note, renoteIds: string[] }): Promise<void> {
-	const crossRenoteAccounts = hanaStore.state.crossRenoteAccounts.filter(account => renoteIds.includes(account.id));
+export async function crossRenote({ createdNote, accountIds }: { createdNote: Misskey.entities.Note, accountIds: string[] }): Promise<void> {
+	const crossRenoteAccounts = hanaStore.state.crossRenoteAccounts.filter(account => accountIds.includes(account.id));
 	const renotePromises: Promise<void>[] = [];
 
 	if (createdNote.visibility === 'specified' || createdNote.visibility === 'followers' || createdNote.localOnly === true) return;
