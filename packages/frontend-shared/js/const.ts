@@ -108,6 +108,7 @@ export const ROLE_POLICIES = [
 	'canImportFollowing',
 	'canImportMuting',
 	'canImportUserLists',
+	'crossRenoteAccountLimit',
 ] as const;
 
 // なんか動かない

@@ -272,6 +272,13 @@ SPDX-License-Identifier: AGPL-3.0-only
 								<template #label>{{ i18n.ts.enable }}</template>
 							</MkSwitch>
 						</MkFolder>
+
+						<MkFolder v-if="matchQuery([i18n.ts._hana.crossRenoteAccountLimit, 'crossRenoteAccountLimit'])">
+							<template #label>{{ i18n.ts._hana.crossRenoteAccountLimit }}</template>
+							<template #suffix>{{ policies.crossRenoteAccountLimit }}</template>
+							<MkInput v-model="policies.crossRenoteAccountLimit" type="number">
+							</MkInput>
+						</MkFolder>
 					</div>
 				</MkFolder>
 				<MkButton primary rounded @click="create"><i class="ti ti-plus"></i> {{ i18n.ts._role.new }}</MkButton>
