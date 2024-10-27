@@ -109,7 +109,8 @@ async function addAccount() {
 
 	const authUrl = new URL(`https://${targetHost}/miauth/${uuid()}`);
 	authUrl.searchParams.set('callback', `${url}/settings/cross-renote?host=${targetHost}`);
-	authUrl.searchParams.set('name', i18n.ts._hana.hanaMisskey);
+	authUrl.searchParams.set('icon', 'https://static-assets.misskey.flowers/brand-assets/icons/app_v1_512x512.png');
+	authUrl.searchParams.set('name', `${i18n.ts._hana.hanaMisskey} (${i18n.ts._hana._crossRenote.title})`);
 	authUrl.searchParams.set('permission', 'read:account,write:notes');
 
 	location.href = authUrl.toString();
