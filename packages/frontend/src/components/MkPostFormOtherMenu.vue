@@ -73,7 +73,7 @@ const textCountPercentage = computed(() => {
 const $i = signinRequired();
 
 function getCrossRenoteAccountMenu(): NonModalCompatibleInnerMenuItem[] {
-	if ($i.policies.crossRenoteAccountLimit > hanaStore.reactiveState.crossRenoteAccounts.value.length) {
+	if (hanaStore.reactiveState.crossRenoteAccounts.value.length > $i.policies.crossRenoteAccountLimit) {
 		return [];
 	}
 
