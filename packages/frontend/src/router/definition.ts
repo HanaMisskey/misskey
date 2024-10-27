@@ -190,7 +190,7 @@ const routes: RouteDef[] = [{
 		query: {
 			session: 'sessionId',
 		},
-	}, {
+	}, ...($i?.policies.crossRenoteAccountLimit != null && $i.policies.crossRenoteAccountLimit > 0 ? [{
 		path: '/cross-renote',
 		name: 'cross-renote',
 		component: page(() => import('@/pages/settings/cross-renote.vue')),
@@ -198,7 +198,7 @@ const routes: RouteDef[] = [{
 			host: 'host',
 			session: 'sessionId',
 		},
-	}, {
+	}] : []), {
 		path: '/',
 		component: page(() => import('@/pages/_empty_.vue')),
 	}],
