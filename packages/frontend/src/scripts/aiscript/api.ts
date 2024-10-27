@@ -54,8 +54,12 @@ export function createAiScriptEnv(opts) {
 				// バグがあればundefinedもあり得るため念のため
 				if (typeof token.value !== 'string') throw new Error('invalid token');
 			}
-			const actualToken: string|null = token?.value ?? opts.token ?? null;
-			return misskeyApi(ep.value, utils.valToJs(param), actualToken).then(res => {
+			const actualToken: string | null = token?.value ?? opts.token ?? null;
+			const payload: any = utils.valToJs(param);
+			if (/^\/?i\/registry\/set\/?/.test(ep.value) && payload.scope.includes('hanaMain')) {
+				return values.ERROR('request_not_allowed', values.NULL);
+			}
+			return misskeyApi(ep.value, payload, actualToken).then(res => {
 				return utils.jsToVal(res);
 			}, err => {
 				return values.ERROR('request_failed', utils.jsToVal(err));
