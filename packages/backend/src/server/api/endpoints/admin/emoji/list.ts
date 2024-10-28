@@ -9,7 +9,7 @@ import type { EmojisRepository } from '@/models/typeorm/_.js';
 import type { MiEmoji } from '@/models/typeorm/Emoji.js';
 import { QueryService } from '@/core/QueryService.js';
 import { DI } from '@/di-symbols.js';
-import { EmojiEntityService } from '@/core/entities/EmojiEntityService.js';
+import { EmojiEntityService } from '@/core/entities/typeorm/EmojiEntityService.js';
 //import { sqlLikeEscape } from '@/misc/sql-like-escape.js';
 
 export const meta = {

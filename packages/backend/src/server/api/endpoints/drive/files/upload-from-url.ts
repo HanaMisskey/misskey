@@ -7,7 +7,7 @@ import ms from 'ms';
 import { Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { GlobalEventService } from '@/core/GlobalEventService.js';
-import { DriveFileEntityService } from '@/core/entities/DriveFileEntityService.js';
+import { DriveFileEntityService } from '@/core/entities/typeorm/DriveFileEntityService.js';
 import { DriveService } from '@/core/DriveService.js';
 
 export const meta = {

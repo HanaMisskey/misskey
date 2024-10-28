@@ -9,7 +9,7 @@ import type { UsersRepository, FollowingsRepository, UserProfilesRepository } fr
 import { birthdaySchema } from '@/models/typeorm/User.js';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { QueryService } from '@/core/QueryService.js';
-import { FollowingEntityService } from '@/core/entities/FollowingEntityService.js';
+import { FollowingEntityService } from '@/core/entities/typeorm/FollowingEntityService.js';
 import { UtilityService } from '@/core/UtilityService.js';
 import { DI } from '@/di-symbols.js';
 import { RoleService } from '@/core/RoleService.js';

@@ -13,7 +13,7 @@ import { IdService } from '@/core/IdService.js';
 import type { MiUserNotePining } from '@/models/typeorm/UserNotePining.js';
 import { RelayService } from '@/core/RelayService.js';
 import type { Config } from '@/config.js';
-import { UserEntityService } from '@/core/entities/UserEntityService.js';
+import { UserEntityService } from '@/core/entities/typeorm/UserEntityService.js';
 import { ApDeliverManagerService } from '@/core/activitypub/ApDeliverManagerService.js';
 import { ApRendererService } from '@/core/activitypub/ApRendererService.js';
 import { bindThis } from '@/decorators.js';

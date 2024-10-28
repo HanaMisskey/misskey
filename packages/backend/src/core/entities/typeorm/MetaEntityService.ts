@@ -11,7 +11,7 @@ import type { MiMeta } from '@/models/typeorm/Meta.js';
 import type { AdsRepository } from '@/models/typeorm/_.js';
 import { MAX_NOTE_TEXT_LENGTH } from '@/const.js';
 import { bindThis } from '@/decorators.js';
-import { UserEntityService } from '@/core/entities/UserEntityService.js';
+import { UserEntityService } from '@/core/entities/typeorm/UserEntityService.js';
 import { InstanceActorService } from '@/core/InstanceActorService.js';
 import type { Config } from '@/config.js';
 import { DI } from '@/di-symbols.js';

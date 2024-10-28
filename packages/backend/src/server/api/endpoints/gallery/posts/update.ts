@@ -8,7 +8,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import type { DriveFilesRepository, GalleryPostsRepository } from '@/models/typeorm/_.js';
 import type { MiDriveFile } from '@/models/typeorm/DriveFile.js';
-import { GalleryPostEntityService } from '@/core/entities/GalleryPostEntityService.js';
+import { GalleryPostEntityService } from '@/core/entities/typeorm/GalleryPostEntityService.js';
 import { DI } from '@/di-symbols.js';
 
 export const meta = {

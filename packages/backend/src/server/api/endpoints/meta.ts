@@ -5,7 +5,7 @@
 
 import { Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
-import { MetaEntityService } from '@/core/entities/MetaEntityService.js';
+import { MetaEntityService } from '@/core/entities/typeorm/MetaEntityService.js';
 
 export const meta = {
 	tags: ['meta'],

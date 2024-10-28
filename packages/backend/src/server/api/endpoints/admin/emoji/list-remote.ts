@@ -8,7 +8,7 @@ import { Endpoint } from '@/server/api/endpoint-base.js';
 import type { EmojisRepository } from '@/models/typeorm/_.js';
 import { QueryService } from '@/core/QueryService.js';
 import { UtilityService } from '@/core/UtilityService.js';
-import { EmojiEntityService } from '@/core/entities/EmojiEntityService.js';
+import { EmojiEntityService } from '@/core/entities/typeorm/EmojiEntityService.js';
 import { DI } from '@/di-symbols.js';
 import { sqlLikeEscape } from '@/misc/sql-like-escape.js';
 

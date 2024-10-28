@@ -22,7 +22,7 @@ import { RoleService } from '@/core/RoleService.js';
 import { RecipientMethod } from '@/models/typeorm/AbuseReportNotificationRecipient.js';
 import { ModerationLogService } from '@/core/ModerationLogService.js';
 import { SystemWebhookService } from '@/core/SystemWebhookService.js';
-import { UserEntityService } from '@/core/entities/UserEntityService.js';
+import { UserEntityService } from '@/core/entities/typeorm/UserEntityService.js';
 import { IdService } from './IdService.js';
 
 @Injectable()

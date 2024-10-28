@@ -8,7 +8,7 @@ import type { DriveFilesRepository } from '@/models/typeorm/_.js';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { QueryService } from '@/core/QueryService.js';
 import { DI } from '@/di-symbols.js';
-import { DriveFileEntityService } from '@/core/entities/DriveFileEntityService.js';
+import { DriveFileEntityService } from '@/core/entities/typeorm/DriveFileEntityService.js';
 
 export const meta = {
 	tags: ['admin'],

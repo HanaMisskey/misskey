@@ -10,7 +10,7 @@ import type { SigninsRepository, UserProfilesRepository } from '@/models/typeorm
 import { IdService } from '@/core/IdService.js';
 import type { MiLocalUser } from '@/models/typeorm/User.js';
 import { GlobalEventService } from '@/core/GlobalEventService.js';
-import { SigninEntityService } from '@/core/entities/SigninEntityService.js';
+import { SigninEntityService } from '@/core/entities/typeorm/SigninEntityService.js';
 import { bindThis } from '@/decorators.js';
 import { EmailService } from '@/core/EmailService.js';
 import { NotificationService } from '@/core/NotificationService.js';

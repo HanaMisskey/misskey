@@ -7,7 +7,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import type { MiDriveFile } from '@/models/typeorm/DriveFile.js';
 import type { DriveFilesRepository } from '@/models/typeorm/_.js';
 import { Endpoint } from '@/server/api/endpoint-base.js';
-import { DriveFileEntityService } from '@/core/entities/DriveFileEntityService.js';
+import { DriveFileEntityService } from '@/core/entities/typeorm/DriveFileEntityService.js';
 import { DI } from '@/di-symbols.js';
 import { RoleService } from '@/core/RoleService.js';
 import { ApiError } from '../../../error.js';

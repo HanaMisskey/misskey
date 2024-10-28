@@ -9,7 +9,7 @@ import { Endpoint } from '@/server/api/endpoint-base.js';
 import type { NotesRepository, RolesRepository } from '@/models/typeorm/_.js';
 import { QueryService } from '@/core/QueryService.js';
 import { DI } from '@/di-symbols.js';
-import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
+import { NoteEntityService } from '@/core/entities/typeorm/NoteEntityService.js';
 import { IdService } from '@/core/IdService.js';
 import { FanoutTimelineService } from '@/core/FanoutTimelineService.js';
 import { ApiError } from '../../error.js';

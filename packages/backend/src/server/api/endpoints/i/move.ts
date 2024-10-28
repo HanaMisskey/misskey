@@ -16,7 +16,7 @@ import { RemoteUserResolveService } from '@/core/RemoteUserResolveService.js';
 import { ApiLoggerService } from '@/server/api/ApiLoggerService.js';
 import { GetterService } from '@/server/api/GetterService.js';
 import { ApPersonService } from '@/core/activitypub/models/ApPersonService.js';
-import { UserEntityService } from '@/core/entities/UserEntityService.js';
+import { UserEntityService } from '@/core/entities/typeorm/UserEntityService.js';
 
 import * as Acct from '@/misc/acct.js';
 

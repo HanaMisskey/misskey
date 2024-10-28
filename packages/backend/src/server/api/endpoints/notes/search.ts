@@ -6,7 +6,7 @@
 import { Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { SearchService } from '@/core/SearchService.js';
-import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
+import { NoteEntityService } from '@/core/entities/typeorm/NoteEntityService.js';
 import { RoleService } from '@/core/RoleService.js';
 import { ApiError } from '../../error.js';
 

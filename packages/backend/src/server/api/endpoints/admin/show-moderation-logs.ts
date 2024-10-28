@@ -8,7 +8,7 @@ import { Endpoint } from '@/server/api/endpoint-base.js';
 import type { ModerationLogsRepository } from '@/models/typeorm/_.js';
 import { QueryService } from '@/core/QueryService.js';
 import { DI } from '@/di-symbols.js';
-import { ModerationLogEntityService } from '@/core/entities/ModerationLogEntityService.js';
+import { ModerationLogEntityService } from '@/core/entities/typeorm/ModerationLogEntityService.js';
 
 export const meta = {
 	tags: ['admin'],

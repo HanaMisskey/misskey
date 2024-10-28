@@ -7,7 +7,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import type { NotesRepository, DriveFilesRepository } from '@/models/typeorm/_.js';
 import { QueryService } from '@/core/QueryService.js';
-import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
+import { NoteEntityService } from '@/core/entities/typeorm/NoteEntityService.js';
 import { DI } from '@/di-symbols.js';
 import { ApiError } from '../../../error.js';
 import { RoleService } from '@/core/RoleService.js';

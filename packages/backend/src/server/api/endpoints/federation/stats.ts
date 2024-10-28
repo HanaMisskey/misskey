@@ -8,7 +8,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import type { FollowingsRepository, InstancesRepository } from '@/models/typeorm/_.js';
 import { awaitAll } from '@/misc/prelude/await-all.js';
 import { Endpoint } from '@/server/api/endpoint-base.js';
-import { InstanceEntityService } from '@/core/entities/InstanceEntityService.js';
+import { InstanceEntityService } from '@/core/entities/typeorm/InstanceEntityService.js';
 import { DI } from '@/di-symbols.js';
 
 export const meta = {

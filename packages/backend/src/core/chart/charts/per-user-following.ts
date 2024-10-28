@@ -8,7 +8,7 @@ import { Not, IsNull, DataSource } from 'typeorm';
 import type { MiUser } from '@/models/typeorm/User.js';
 import { AppLockService } from '@/core/AppLockService.js';
 import { DI } from '@/di-symbols.js';
-import { UserEntityService } from '@/core/entities/UserEntityService.js';
+import { UserEntityService } from '@/core/entities/typeorm/UserEntityService.js';
 import type { FollowingsRepository } from '@/models/typeorm/_.js';
 import { bindThis } from '@/decorators.js';
 import Chart from '../core.js';

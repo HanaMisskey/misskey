@@ -6,7 +6,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { UserListsRepository, UsersRepository } from '@/models/typeorm/_.js';
 import { Endpoint } from '@/server/api/endpoint-base.js';
-import { UserListEntityService } from '@/core/entities/UserListEntityService.js';
+import { UserListEntityService } from '@/core/entities/typeorm/UserListEntityService.js';
 import { ApiError } from '@/server/api/error.js';
 import { DI } from '@/di-symbols.js';
 

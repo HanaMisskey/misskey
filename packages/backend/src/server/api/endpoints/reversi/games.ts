@@ -6,7 +6,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Brackets } from 'typeorm';
 import { Endpoint } from '@/server/api/endpoint-base.js';
-import { ReversiGameEntityService } from '@/core/entities/ReversiGameEntityService.js';
+import { ReversiGameEntityService } from '@/core/entities/typeorm/ReversiGameEntityService.js';
 import { DI } from '@/di-symbols.js';
 import type { ReversiGamesRepository } from '@/models/typeorm/_.js';
 import { QueryService } from '@/core/QueryService.js';

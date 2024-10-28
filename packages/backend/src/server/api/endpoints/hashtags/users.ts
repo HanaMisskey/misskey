@@ -8,7 +8,7 @@ import { Endpoint } from '@/server/api/endpoint-base.js';
 import type { UsersRepository } from '@/models/typeorm/_.js';
 import { safeForSql } from "@/misc/safe-for-sql.js";
 import { normalizeForSearch } from '@/misc/normalize-for-search.js';
-import { UserEntityService } from '@/core/entities/UserEntityService.js';
+import { UserEntityService } from '@/core/entities/typeorm/UserEntityService.js';
 import { DI } from '@/di-symbols.js';
 
 export const meta = {

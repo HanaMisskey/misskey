@@ -8,7 +8,7 @@ import { In, IsNull } from 'typeorm';
 import * as Redis from 'ioredis';
 import { DI } from '@/di-symbols.js';
 import { IdService } from '@/core/IdService.js';
-import { EmojiEntityService } from '@/core/entities/EmojiEntityService.js';
+import { EmojiEntityService } from '@/core/entities/typeorm/EmojiEntityService.js';
 import { GlobalEventService } from '@/core/GlobalEventService.js';
 import type { MiDriveFile } from '@/models/typeorm/DriveFile.js';
 import type { MiEmoji } from '@/models/typeorm/Emoji.js';

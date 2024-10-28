@@ -8,7 +8,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import type { UsersRepository, PagesRepository } from '@/models/typeorm/_.js';
 import type { MiPage } from '@/models/typeorm/Page.js';
 import { Endpoint } from '@/server/api/endpoint-base.js';
-import { PageEntityService } from '@/core/entities/PageEntityService.js';
+import { PageEntityService } from '@/core/entities/typeorm/PageEntityService.js';
 import { DI } from '@/di-symbols.js';
 import { ApiError } from '../../error.js';
 

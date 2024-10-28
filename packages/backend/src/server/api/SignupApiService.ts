@@ -12,7 +12,7 @@ import type { Config } from '@/config.js';
 import { CaptchaService } from '@/core/CaptchaService.js';
 import { IdService } from '@/core/IdService.js';
 import { SignupService } from '@/core/SignupService.js';
-import { UserEntityService } from '@/core/entities/UserEntityService.js';
+import { UserEntityService } from '@/core/entities/typeorm/UserEntityService.js';
 import { EmailService } from '@/core/EmailService.js';
 import { MiLocalUser } from '@/models/typeorm/User.js';
 import { FastifyReplyError } from '@/misc/fastify-reply-error.js';

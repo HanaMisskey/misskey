@@ -8,7 +8,7 @@ import { Endpoint } from '@/server/api/endpoint-base.js';
 import { ApiError } from '@/server/api/error.js';
 import {
 	AbuseReportNotificationRecipientEntityService,
-} from '@/core/entities/AbuseReportNotificationRecipientEntityService.js';
+} from '@/core/entities/typeorm/AbuseReportNotificationRecipientEntityService.js';
 import { AbuseReportNotificationService } from '@/core/AbuseReportNotificationService.js';
 import { DI } from '@/di-symbols.js';
 import type { UserProfilesRepository } from '@/models/typeorm/_.js';

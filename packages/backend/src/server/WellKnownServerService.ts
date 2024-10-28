@@ -13,7 +13,7 @@ import type { Config } from '@/config.js';
 import { escapeAttribute, escapeValue } from '@/misc/prelude/xml.js';
 import type { MiUser } from '@/models/typeorm/User.js';
 import * as Acct from '@/misc/acct.js';
-import { UserEntityService } from '@/core/entities/UserEntityService.js';
+import { UserEntityService } from '@/core/entities/typeorm/UserEntityService.js';
 import { bindThis } from '@/decorators.js';
 import { NodeinfoServerService } from './NodeinfoServerService.js';
 import { OAuth2ProviderService } from './oauth/OAuth2ProviderService.js';

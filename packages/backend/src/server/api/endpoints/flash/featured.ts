@@ -6,7 +6,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { FlashsRepository } from '@/models/typeorm/_.js';
 import { Endpoint } from '@/server/api/endpoint-base.js';
-import { FlashEntityService } from '@/core/entities/FlashEntityService.js';
+import { FlashEntityService } from '@/core/entities/typeorm/FlashEntityService.js';
 import { DI } from '@/di-symbols.js';
 import { FlashService } from '@/core/FlashService.js';
 

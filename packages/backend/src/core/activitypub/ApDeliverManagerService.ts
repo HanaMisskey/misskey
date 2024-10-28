@@ -9,7 +9,7 @@ import { DI } from '@/di-symbols.js';
 import type { FollowingsRepository } from '@/models/typeorm/_.js';
 import type { MiLocalUser, MiRemoteUser, MiUser } from '@/models/typeorm/User.js';
 import { QueueService } from '@/core/QueueService.js';
-import { UserEntityService } from '@/core/entities/UserEntityService.js';
+import { UserEntityService } from '@/core/entities/typeorm/UserEntityService.js';
 import { bindThis } from '@/decorators.js';
 import type { IActivity } from '@/core/activitypub/type.js';
 import { ThinUser } from '@/queue/types.js';

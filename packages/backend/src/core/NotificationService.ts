@@ -14,7 +14,7 @@ import type { MiNotification } from '@/models/typeorm/Notification.js';
 import { bindThis } from '@/decorators.js';
 import { GlobalEventService } from '@/core/GlobalEventService.js';
 import { PushNotificationService } from '@/core/PushNotificationService.js';
-import { NotificationEntityService } from '@/core/entities/NotificationEntityService.js';
+import { NotificationEntityService } from '@/core/entities/typeorm/NotificationEntityService.js';
 import { IdService } from '@/core/IdService.js';
 import { CacheService } from '@/core/CacheService.js';
 import type { Config } from '@/config.js';

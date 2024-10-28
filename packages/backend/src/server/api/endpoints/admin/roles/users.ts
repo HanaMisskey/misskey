@@ -9,7 +9,7 @@ import type { RoleAssignmentsRepository, RolesRepository } from '@/models/typeor
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { QueryService } from '@/core/QueryService.js';
 import { DI } from '@/di-symbols.js';
-import { UserEntityService } from '@/core/entities/UserEntityService.js';
+import { UserEntityService } from '@/core/entities/typeorm/UserEntityService.js';
 import { IdService } from '@/core/IdService.js';
 import { ApiError } from '../../../error.js';
 

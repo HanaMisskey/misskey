@@ -13,7 +13,7 @@ import type { OnModuleInit } from '@nestjs/common';
 import type { } from '@/models/typeorm/Blocking.js';
 import type { MiUser } from '@/models/typeorm/User.js';
 import type { MiNoteReaction } from '@/models/typeorm/NoteReaction.js';
-import type { ReactionService } from '../ReactionService.js';
+import type { ReactionService } from '../../ReactionService.js';
 import type { UserEntityService } from './UserEntityService.js';
 import type { NoteEntityService } from './NoteEntityService.js';
 import { ModuleRef } from '@nestjs/core';

@@ -6,7 +6,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import type { InstancesRepository } from '@/models/typeorm/_.js';
-import { InstanceEntityService } from '@/core/entities/InstanceEntityService.js';
+import { InstanceEntityService } from '@/core/entities/typeorm/InstanceEntityService.js';
 import { MetaService } from '@/core/MetaService.js';
 import { DI } from '@/di-symbols.js';
 import { sqlLikeEscape } from '@/misc/sql-like-escape.js';

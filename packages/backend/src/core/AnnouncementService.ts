@@ -11,7 +11,7 @@ import type { AnnouncementReadsRepository, AnnouncementsRepository, MiAnnounceme
 import { bindThis } from '@/decorators.js';
 import { Packed } from '@/misc/json-schema.js';
 import { IdService } from '@/core/IdService.js';
-import { AnnouncementEntityService } from '@/core/entities/AnnouncementEntityService.js';
+import { AnnouncementEntityService } from '@/core/entities/typeorm/AnnouncementEntityService.js';
 import { GlobalEventService } from '@/core/GlobalEventService.js';
 import { ModerationLogService } from '@/core/ModerationLogService.js';
 

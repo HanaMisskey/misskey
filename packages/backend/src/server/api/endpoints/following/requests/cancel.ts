@@ -6,7 +6,7 @@
 import { Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { IdentifiableError } from '@/misc/identifiable-error.js';
-import { UserEntityService } from '@/core/entities/UserEntityService.js';
+import { UserEntityService } from '@/core/entities/typeorm/UserEntityService.js';
 import { GetterService } from '@/server/api/GetterService.js';
 import { UserFollowingService } from '@/core/UserFollowingService.js';
 import { ApiError } from '../../../error.js';

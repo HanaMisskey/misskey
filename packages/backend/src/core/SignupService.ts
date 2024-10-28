@@ -15,7 +15,7 @@ import { IdService } from '@/core/IdService.js';
 import { MiUserKeypair } from '@/models/typeorm/UserKeypair.js';
 import { MiUsedUsername } from '@/models/typeorm/UsedUsername.js';
 import generateUserToken from '@/misc/generate-native-user-token.js';
-import { UserEntityService } from '@/core/entities/UserEntityService.js';
+import { UserEntityService } from '@/core/entities/typeorm/UserEntityService.js';
 import { InstanceActorService } from '@/core/InstanceActorService.js';
 import { bindThis } from '@/decorators.js';
 import UsersChart from '@/core/chart/charts/users.js';

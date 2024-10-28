@@ -7,7 +7,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import type { GalleryPostsRepository } from '@/models/typeorm/_.js';
 import { QueryService } from '@/core/QueryService.js';
-import { GalleryPostEntityService } from '@/core/entities/GalleryPostEntityService.js';
+import { GalleryPostEntityService } from '@/core/entities/typeorm/GalleryPostEntityService.js';
 import { DI } from '@/di-symbols.js';
 
 export const meta = {

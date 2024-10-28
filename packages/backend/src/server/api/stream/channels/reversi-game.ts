@@ -8,7 +8,7 @@ import type { MiReversiGame } from '@/models/typeorm/_.js';
 import { DI } from '@/di-symbols.js';
 import { bindThis } from '@/decorators.js';
 import { ReversiService } from '@/core/ReversiService.js';
-import { ReversiGameEntityService } from '@/core/entities/ReversiGameEntityService.js';
+import { ReversiGameEntityService } from '@/core/entities/typeorm/ReversiGameEntityService.js';
 import { isJsonObject } from '@/misc/json-value.js';
 import type { JsonObject, JsonValue } from '@/misc/json-value.js';
 import Channel, { type MiChannelService } from '../channel.js';

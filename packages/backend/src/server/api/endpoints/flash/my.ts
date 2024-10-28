@@ -7,7 +7,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import type { FlashsRepository } from '@/models/typeorm/_.js';
 import { QueryService } from '@/core/QueryService.js';
-import { FlashEntityService } from '@/core/entities/FlashEntityService.js';
+import { FlashEntityService } from '@/core/entities/typeorm/FlashEntityService.js';
 import { DI } from '@/di-symbols.js';
 
 export const meta = {

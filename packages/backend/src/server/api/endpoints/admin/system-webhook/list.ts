@@ -5,7 +5,7 @@
 
 import { Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
-import { SystemWebhookEntityService } from '@/core/entities/SystemWebhookEntityService.js';
+import { SystemWebhookEntityService } from '@/core/entities/typeorm/SystemWebhookEntityService.js';
 import { systemWebhookEventTypes } from '@/models/typeorm/SystemWebhook.js';
 import { SystemWebhookService } from '@/core/SystemWebhookService.js';
 

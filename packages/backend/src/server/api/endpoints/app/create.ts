@@ -9,7 +9,7 @@ import type { AppsRepository } from '@/models/typeorm/_.js';
 import { IdService } from '@/core/IdService.js';
 import { unique } from '@/misc/prelude/array.js';
 import { secureRndstr } from '@/misc/secure-rndstr.js';
-import { AppEntityService } from '@/core/entities/AppEntityService.js';
+import { AppEntityService } from '@/core/entities/typeorm/AppEntityService.js';
 import { DI } from '@/di-symbols.js';
 
 export const meta = {

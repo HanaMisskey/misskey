@@ -8,9 +8,9 @@ import { In } from 'typeorm';
 import { DI } from '@/di-symbols.js';
 import type { AbuseReportNotificationRecipientRepository, MiAbuseReportNotificationRecipient } from '@/models/typeorm/_.js';
 import { bindThis } from '@/decorators.js';
-import { UserEntityService } from '@/core/entities/UserEntityService.js';
+import { UserEntityService } from '@/core/entities/typeorm/UserEntityService.js';
 import { Packed } from '@/misc/json-schema.js';
-import { SystemWebhookEntityService } from '@/core/entities/SystemWebhookEntityService.js';
+import { SystemWebhookEntityService } from '@/core/entities/typeorm/SystemWebhookEntityService.js';
 
 @Injectable()
 export class AbuseReportNotificationRecipientEntityService {

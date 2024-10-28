@@ -9,7 +9,7 @@ import type { MiMeta, UsersRepository } from '@/models/typeorm/_.js';
 import * as Acct from '@/misc/acct.js';
 import type { MiUser } from '@/models/typeorm/User.js';
 import { Endpoint } from '@/server/api/endpoint-base.js';
-import { UserEntityService } from '@/core/entities/UserEntityService.js';
+import { UserEntityService } from '@/core/entities/typeorm/UserEntityService.js';
 import { DI } from '@/di-symbols.js';
 
 export const meta = {

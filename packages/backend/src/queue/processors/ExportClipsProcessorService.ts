@@ -16,7 +16,7 @@ import { createTemp } from '@/misc/create-temp.js';
 import type { MiPoll } from '@/models/typeorm/Poll.js';
 import type { MiNote } from '@/models/typeorm/Note.js';
 import { bindThis } from '@/decorators.js';
-import { DriveFileEntityService } from '@/core/entities/DriveFileEntityService.js';
+import { DriveFileEntityService } from '@/core/entities/typeorm/DriveFileEntityService.js';
 import { Packed } from '@/misc/json-schema.js';
 import { IdService } from '@/core/IdService.js';
 import { NotificationService } from '@/core/NotificationService.js';

@@ -7,7 +7,7 @@ import { Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import {
 	AbuseReportNotificationRecipientEntityService,
-} from '@/core/entities/AbuseReportNotificationRecipientEntityService.js';
+} from '@/core/entities/typeorm/AbuseReportNotificationRecipientEntityService.js';
 import { AbuseReportNotificationService } from '@/core/AbuseReportNotificationService.js';
 
 export const meta = {

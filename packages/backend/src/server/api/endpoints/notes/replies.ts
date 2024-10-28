@@ -7,7 +7,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import type { NotesRepository } from '@/models/typeorm/_.js';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { QueryService } from '@/core/QueryService.js';
-import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
+import { NoteEntityService } from '@/core/entities/typeorm/NoteEntityService.js';
 import { DI } from '@/di-symbols.js';
 
 export const meta = {

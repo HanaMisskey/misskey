@@ -17,8 +17,8 @@ import { deepClone } from '@/misc/clone.js';
 import { bindThis } from '@/decorators.js';
 import { isMimeImage } from '@/misc/is-mime-image.js';
 import { IdService } from '@/core/IdService.js';
-import { UtilityService } from '../UtilityService.js';
-import { VideoProcessingService } from '../VideoProcessingService.js';
+import { UtilityService } from '../../UtilityService.js';
+import { VideoProcessingService } from '../../VideoProcessingService.js';
 import { UserEntityService } from './UserEntityService.js';
 import { DriveFolderEntityService } from './DriveFolderEntityService.js';
 

@@ -9,7 +9,7 @@ import type { DriveFilesRepository } from '@/models/typeorm/_.js';
 import type { MiDriveFile } from '@/models/typeorm/DriveFile.js';
 import { AppLockService } from '@/core/AppLockService.js';
 import { DI } from '@/di-symbols.js';
-import { DriveFileEntityService } from '@/core/entities/DriveFileEntityService.js';
+import { DriveFileEntityService } from '@/core/entities/typeorm/DriveFileEntityService.js';
 import { bindThis } from '@/decorators.js';
 import Chart from '../core.js';
 import { ChartLoggerService } from '../ChartLoggerService.js';

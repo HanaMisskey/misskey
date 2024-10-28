@@ -10,7 +10,7 @@ import type { MiUser } from '@/models/typeorm/User.js';
 import type { MiNote } from '@/models/typeorm/Note.js';
 import { Packed } from '@/misc/json-schema.js';
 import type { NotesRepository } from '@/models/typeorm/_.js';
-import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
+import { NoteEntityService } from '@/core/entities/typeorm/NoteEntityService.js';
 import { FanoutTimelineName, FanoutTimelineService } from '@/core/FanoutTimelineService.js';
 import { isUserRelated } from '@/misc/is-user-related.js';
 import { isQuote, isRenote } from '@/misc/is-renote.js';

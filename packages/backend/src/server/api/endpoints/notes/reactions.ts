@@ -8,7 +8,7 @@ import { Brackets, type FindOptionsWhere } from 'typeorm';
 import type { NoteReactionsRepository } from '@/models/typeorm/_.js';
 import type { MiNoteReaction } from '@/models/typeorm/NoteReaction.js';
 import { Endpoint } from '@/server/api/endpoint-base.js';
-import { NoteReactionEntityService } from '@/core/entities/NoteReactionEntityService.js';
+import { NoteReactionEntityService } from '@/core/entities/typeorm/NoteReactionEntityService.js';
 import { DI } from '@/di-symbols.js';
 import { QueryService } from '@/core/QueryService.js';
 import { isThisReactionUserRelated } from '@/misc/is-user-related.js';

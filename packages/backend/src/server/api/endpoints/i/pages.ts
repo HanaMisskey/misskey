@@ -7,7 +7,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import type { PagesRepository } from '@/models/typeorm/_.js';
 import { QueryService } from '@/core/QueryService.js';
-import { PageEntityService } from '@/core/entities/PageEntityService.js';
+import { PageEntityService } from '@/core/entities/typeorm/PageEntityService.js';
 import { DI } from '@/di-symbols.js';
 
 export const meta = {

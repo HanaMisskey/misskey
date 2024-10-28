@@ -7,7 +7,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import type { BlockingsRepository } from '@/models/typeorm/_.js';
 import { QueryService } from '@/core/QueryService.js';
-import { BlockingEntityService } from '@/core/entities/BlockingEntityService.js';
+import { BlockingEntityService } from '@/core/entities/typeorm/BlockingEntityService.js';
 import { DI } from '@/di-symbols.js';
 
 export const meta = {

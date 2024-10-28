@@ -8,7 +8,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { DB_MAX_IMAGE_COMMENT_LENGTH } from '@/const.js';
 import { IdentifiableError } from '@/misc/identifiable-error.js';
 import { Endpoint } from '@/server/api/endpoint-base.js';
-import { DriveFileEntityService } from '@/core/entities/DriveFileEntityService.js';
+import { DriveFileEntityService } from '@/core/entities/typeorm/DriveFileEntityService.js';
 import { DriveService } from '@/core/DriveService.js';
 import { ApiError } from '../../../error.js';
 import { MiMeta } from '@/models/typeorm/_.js';

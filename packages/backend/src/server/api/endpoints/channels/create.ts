@@ -9,7 +9,7 @@ import { Endpoint } from '@/server/api/endpoint-base.js';
 import type { ChannelsRepository, DriveFilesRepository } from '@/models/typeorm/_.js';
 import type { MiChannel } from '@/models/typeorm/Channel.js';
 import { IdService } from '@/core/IdService.js';
-import { ChannelEntityService } from '@/core/entities/ChannelEntityService.js';
+import { ChannelEntityService } from '@/core/entities/typeorm/ChannelEntityService.js';
 import { DI } from '@/di-symbols.js';
 import { ApiError } from '../../error.js';
 

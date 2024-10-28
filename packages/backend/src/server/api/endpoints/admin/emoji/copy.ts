@@ -10,7 +10,7 @@ import type { MiDriveFile } from '@/models/typeorm/DriveFile.js';
 import { DI } from '@/di-symbols.js';
 import { DriveService } from '@/core/DriveService.js';
 import { CustomEmojiService } from '@/core/CustomEmojiService.js';
-import { EmojiEntityService } from '@/core/entities/EmojiEntityService.js';
+import { EmojiEntityService } from '@/core/entities/typeorm/EmojiEntityService.js';
 import { ApiError } from '../../../error.js';
 
 export const meta = {

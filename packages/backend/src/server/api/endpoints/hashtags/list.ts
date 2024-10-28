@@ -6,7 +6,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import type { HashtagsRepository } from '@/models/typeorm/_.js';
-import { HashtagEntityService } from '@/core/entities/HashtagEntityService.js';
+import { HashtagEntityService } from '@/core/entities/typeorm/HashtagEntityService.js';
 import { DI } from '@/di-symbols.js';
 
 export const meta = {

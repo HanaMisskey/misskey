@@ -10,7 +10,7 @@ import type { DriveFilesRepository, GalleryPostsRepository } from '@/models/type
 import { MiGalleryPost } from '@/models/typeorm/GalleryPost.js';
 import type { MiDriveFile } from '@/models/typeorm/DriveFile.js';
 import { IdService } from '@/core/IdService.js';
-import { GalleryPostEntityService } from '@/core/entities/GalleryPostEntityService.js';
+import { GalleryPostEntityService } from '@/core/entities/typeorm/GalleryPostEntityService.js';
 import { DI } from '@/di-symbols.js';
 
 export const meta = {

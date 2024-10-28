@@ -8,7 +8,7 @@ import { Endpoint } from '@/server/api/endpoint-base.js';
 import type { DriveFilesRepository } from '@/models/typeorm/_.js';
 import { DI } from '@/di-symbols.js';
 import { CustomEmojiService } from '@/core/CustomEmojiService.js';
-import { EmojiEntityService } from '@/core/entities/EmojiEntityService.js';
+import { EmojiEntityService } from '@/core/entities/typeorm/EmojiEntityService.js';
 import { ApiError } from '../../../error.js';
 
 export const meta = {

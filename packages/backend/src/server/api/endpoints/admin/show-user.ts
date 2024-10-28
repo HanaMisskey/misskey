@@ -8,7 +8,7 @@ import type { UsersRepository, SigninsRepository, UserProfilesRepository } from 
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { DI } from '@/di-symbols.js';
 import { RoleService } from '@/core/RoleService.js';
-import { RoleEntityService } from '@/core/entities/RoleEntityService.js';
+import { RoleEntityService } from '@/core/entities/typeorm/RoleEntityService.js';
 import { IdService } from '@/core/IdService.js';
 import { notificationRecieveConfig } from '@/models/json-schema/user.js';
 

@@ -8,7 +8,7 @@ import { Endpoint } from '@/server/api/endpoint-base.js';
 import type { AbuseUserReportsRepository } from '@/models/typeorm/_.js';
 import { QueryService } from '@/core/QueryService.js';
 import { DI } from '@/di-symbols.js';
-import { AbuseUserReportEntityService } from '@/core/entities/AbuseUserReportEntityService.js';
+import { AbuseUserReportEntityService } from '@/core/entities/typeorm/AbuseUserReportEntityService.js';
 
 export const meta = {
 	tags: ['admin'],

@@ -8,7 +8,7 @@ import { IsNull } from 'typeorm';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import type { UsersRepository } from '@/models/typeorm/_.js';
 import { SignupService } from '@/core/SignupService.js';
-import { UserEntityService } from '@/core/entities/UserEntityService.js';
+import { UserEntityService } from '@/core/entities/typeorm/UserEntityService.js';
 import { InstanceActorService } from '@/core/InstanceActorService.js';
 import { localUsernameSchema, passwordSchema } from '@/models/typeorm/User.js';
 import { DI } from '@/di-symbols.js';

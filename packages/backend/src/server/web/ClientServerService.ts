@@ -35,20 +35,20 @@ import type {
 	UserWebhookDeliverQueue,
 	SystemWebhookDeliverQueue,
 } from '@/core/QueueModule.js';
-import { UserEntityService } from '@/core/entities/UserEntityService.js';
-import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
-import { PageEntityService } from '@/core/entities/PageEntityService.js';
-import { MetaEntityService } from '@/core/entities/MetaEntityService.js';
-import { GalleryPostEntityService } from '@/core/entities/GalleryPostEntityService.js';
-import { ClipEntityService } from '@/core/entities/ClipEntityService.js';
-import { ChannelEntityService } from '@/core/entities/ChannelEntityService.js';
+import { UserEntityService } from '@/core/entities/typeorm/UserEntityService.js';
+import { NoteEntityService } from '@/core/entities/typeorm/NoteEntityService.js';
+import { PageEntityService } from '@/core/entities/typeorm/PageEntityService.js';
+import { MetaEntityService } from '@/core/entities/typeorm/MetaEntityService.js';
+import { GalleryPostEntityService } from '@/core/entities/typeorm/GalleryPostEntityService.js';
+import { ClipEntityService } from '@/core/entities/typeorm/ClipEntityService.js';
+import { ChannelEntityService } from '@/core/entities/typeorm/ChannelEntityService.js';
 import type { ChannelsRepository, ClipsRepository, FlashsRepository, GalleryPostsRepository, MiMeta, NotesRepository, PagesRepository, ReversiGamesRepository, UserProfilesRepository, UsersRepository } from '@/models/typeorm/_.js';
 import type Logger from '@/logger.js';
 import { handleRequestRedirectToOmitSearch } from '@/misc/fastify-hook-handlers.js';
 import { bindThis } from '@/decorators.js';
-import { FlashEntityService } from '@/core/entities/FlashEntityService.js';
+import { FlashEntityService } from '@/core/entities/typeorm/FlashEntityService.js';
 import { RoleService } from '@/core/RoleService.js';
-import { ReversiGameEntityService } from '@/core/entities/ReversiGameEntityService.js';
+import { ReversiGameEntityService } from '@/core/entities/typeorm/ReversiGameEntityService.js';
 import { FeedService } from './FeedService.js';
 import { UrlPreviewService } from './UrlPreviewService.js';
 import { ClientLoggerService } from './ClientLoggerService.js';
