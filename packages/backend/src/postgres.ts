@@ -84,7 +84,6 @@ import { MiReversiGame } from '@/models/typeorm/ReversiGame.js';
 import { Config } from '@/config.js';
 import MisskeyLogger from '@/logger.js';
 import { bindThis } from '@/decorators.js';
-import { entitiesOfTypeORM } from './built/postgres.js';
 import { Config } from './built/config.js';
 
 pg.types.setTypeParser(20, Number);
