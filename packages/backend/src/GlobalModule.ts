@@ -7,14 +7,14 @@ import { Global, Inject, Module } from '@nestjs/common';
 import * as Redis from 'ioredis';
 import { DataSource } from 'typeorm';
 import { MeiliSearch } from 'meilisearch';
+import { MiMeta } from '@/models/typeorm/Meta.js';
 import { DI } from './di-symbols.js';
 import { Config, loadConfig } from './config.js';
-import { createPostgresDataSource } from './postgres.js';
+import { createPostgresDataSourceWWithTypeORM } from './postgres.js';
 import { RepositoryModule } from './models/typeorm/RepositoryModule.js';
 import { allSettled } from './misc/promise-tracker.js';
-import type { Provider, OnApplicationShutdown } from '@nestjs/common';
-import { MiMeta } from '@/models/typeorm/Meta.js';
 import { GlobalEvents } from './core/GlobalEventService.js';
+import type { Provider, OnApplicationShutdown } from '@nestjs/common';
 
 const $config: Provider = {
 	provide: DI.config,
@@ -24,7 +24,7 @@ const $config: Provider = {
 const $db: Provider = {
 	provide: DI.db,
 	useFactory: async (config) => {
-		const db = createPostgresDataSource(config);
+		const db = createPostgresDataSourceWWithTypeORM(config);
 		return await db.initialize();
 	},
 	inject: [DI.config],
