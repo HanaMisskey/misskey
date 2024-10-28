@@ -6,9 +6,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import * as Misskey from 'misskey-js';
 import { DI } from '@/di-symbols.js';
-import type { SigninsRepository, UserProfilesRepository } from '@/models/_.js';
+import type { SigninsRepository, UserProfilesRepository } from '@/models/typeorm/_.js';
 import { IdService } from '@/core/IdService.js';
-import type { MiLocalUser } from '@/models/User.js';
+import type { MiLocalUser } from '@/models/typeorm/User.js';
 import { GlobalEventService } from '@/core/GlobalEventService.js';
 import { SigninEntityService } from '@/core/entities/SigninEntityService.js';
 import { bindThis } from '@/decorators.js';

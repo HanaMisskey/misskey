@@ -5,8 +5,8 @@
 
 import { Inject, Injectable } from '@nestjs/common';
 import { IsNull, Not } from 'typeorm';
-import type { MiLocalUser } from '@/models/User.js';
-import type { UsersRepository } from '@/models/_.js';
+import type { MiLocalUser } from '@/models/typeorm/User.js';
+import type { UsersRepository } from '@/models/typeorm/_.js';
 import { MemorySingleCache } from '@/misc/cache.js';
 import { DI } from '@/di-symbols.js';
 import { CreateSystemUserService } from '@/core/CreateSystemUserService.js';

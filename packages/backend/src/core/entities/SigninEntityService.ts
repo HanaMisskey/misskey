@@ -4,8 +4,8 @@
  */
 
 import { Injectable } from '@nestjs/common';
-import type { } from '@/models/Blocking.js';
-import type { MiSignin } from '@/models/Signin.js';
+import type { } from '@/models/typeorm/Blocking.js';
+import type { MiSignin } from '@/models/typeorm/Signin.js';
 import { bindThis } from '@/decorators.js';
 import { IdService } from '@/core/IdService.js';
 

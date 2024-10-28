@@ -5,7 +5,7 @@
 
 import { Inject, Injectable } from '@nestjs/common';
 import * as Redis from 'ioredis';
-import type { MiGalleryPost, MiNote, MiUser } from '@/models/_.js';
+import type { MiGalleryPost, MiNote, MiUser } from '@/models/typeorm/_.js';
 import { DI } from '@/di-symbols.js';
 import { bindThis } from '@/decorators.js';
 

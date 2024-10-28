@@ -5,14 +5,14 @@
 
 import { Inject, Injectable, OnApplicationShutdown } from '@nestjs/common';
 import { DI } from '@/di-symbols.js';
-import type { NotesRepository, UserPublickeysRepository, UsersRepository } from '@/models/_.js';
+import type { NotesRepository, UserPublickeysRepository, UsersRepository } from '@/models/typeorm/_.js';
 import type { Config } from '@/config.js';
 import { MemoryKVCache } from '@/misc/cache.js';
-import type { MiUserPublickey } from '@/models/UserPublickey.js';
+import type { MiUserPublickey } from '@/models/typeorm/UserPublickey.js';
 import { CacheService } from '@/core/CacheService.js';
-import type { MiNote } from '@/models/Note.js';
+import type { MiNote } from '@/models/typeorm/Note.js';
 import { bindThis } from '@/decorators.js';
-import { MiLocalUser, MiRemoteUser } from '@/models/User.js';
+import { MiLocalUser, MiRemoteUser } from '@/models/typeorm/User.js';
 import { getApId } from './type.js';
 import { ApPersonService } from './models/ApPersonService.js';
 import type { IObject } from './type.js';

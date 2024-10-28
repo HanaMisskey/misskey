@@ -5,10 +5,10 @@
 
 import { Inject, Injectable } from '@nestjs/common';
 import { DI } from '@/di-symbols.js';
-import type { EmojisRepository } from '@/models/_.js';
+import type { EmojisRepository } from '@/models/typeorm/_.js';
 import type { Packed } from '@/misc/json-schema.js';
-import type { } from '@/models/Blocking.js';
-import type { MiEmoji } from '@/models/Emoji.js';
+import type { } from '@/models/typeorm/Blocking.js';
+import type { MiEmoji } from '@/models/typeorm/Emoji.js';
 import { bindThis } from '@/decorators.js';
 
 @Injectable()

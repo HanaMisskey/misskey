@@ -5,9 +5,9 @@
 
 import { Brackets, In } from 'typeorm';
 import { Injectable, Inject } from '@nestjs/common';
-import type { MiUser, MiLocalUser, MiRemoteUser } from '@/models/User.js';
-import type { MiNote, IMentionedRemoteUsers } from '@/models/Note.js';
-import type { InstancesRepository, MiMeta, NotesRepository, UsersRepository } from '@/models/_.js';
+import type { MiUser, MiLocalUser, MiRemoteUser } from '@/models/typeorm/User.js';
+import type { MiNote, IMentionedRemoteUsers } from '@/models/typeorm/Note.js';
+import type { InstancesRepository, MiMeta, NotesRepository, UsersRepository } from '@/models/typeorm/_.js';
 import { RelayService } from '@/core/RelayService.js';
 import { FederatedInstanceService } from '@/core/FederatedInstanceService.js';
 import { DI } from '@/di-symbols.js';

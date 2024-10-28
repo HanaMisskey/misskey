@@ -6,7 +6,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Brackets, SelectQueryBuilder } from 'typeorm';
 import { DI } from '@/di-symbols.js';
-import { type FollowingsRepository, MiUser, type UsersRepository } from '@/models/_.js';
+import { type FollowingsRepository, MiUser, type UsersRepository } from '@/models/typeorm/_.js';
 import { bindThis } from '@/decorators.js';
 import { sqlLikeEscape } from '@/misc/sql-like-escape.js';
 import type { Config } from '@/config.js';

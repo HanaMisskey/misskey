@@ -5,9 +5,9 @@
 
 import { Injectable, Inject } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import type { DriveFilesRepository, FollowingsRepository, UsersRepository, NotesRepository } from '@/models/_.js';
-import type { MiDriveFile } from '@/models/DriveFile.js';
-import type { MiNote } from '@/models/Note.js';
+import type { DriveFilesRepository, FollowingsRepository, UsersRepository, NotesRepository } from '@/models/typeorm/_.js';
+import type { MiDriveFile } from '@/models/typeorm/DriveFile.js';
+import type { MiNote } from '@/models/typeorm/Note.js';
 import { AppLockService } from '@/core/AppLockService.js';
 import { DI } from '@/di-symbols.js';
 import { UtilityService } from '@/core/UtilityService.js';

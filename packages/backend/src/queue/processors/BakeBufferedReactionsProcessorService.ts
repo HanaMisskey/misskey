@@ -9,7 +9,7 @@ import { bindThis } from '@/decorators.js';
 import { ReactionsBufferingService } from '@/core/ReactionsBufferingService.js';
 import { QueueLoggerService } from '../QueueLoggerService.js';
 import type * as Bull from 'bullmq';
-import { MiMeta } from '@/models/_.js';
+import { MiMeta } from '@/models/typeorm/_.js';
 import { DI } from '@/di-symbols.js';
 
 @Injectable()

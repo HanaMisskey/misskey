@@ -7,10 +7,10 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { In } from 'typeorm';
 import { DI } from '@/di-symbols.js';
-import type { FollowRequestsRepository, NotesRepository, MiUser, UsersRepository } from '@/models/_.js';
+import type { FollowRequestsRepository, NotesRepository, MiUser, UsersRepository } from '@/models/typeorm/_.js';
 import { awaitAll } from '@/misc/prelude/await-all.js';
-import type { MiGroupedNotification, MiNotification } from '@/models/Notification.js';
-import type { MiNote } from '@/models/Note.js';
+import type { MiGroupedNotification, MiNotification } from '@/models/typeorm/Notification.js';
+import type { MiNote } from '@/models/typeorm/Note.js';
 import type { Packed } from '@/misc/json-schema.js';
 import { bindThis } from '@/decorators.js';
 import { FilterUnionByProperty, groupedNotificationTypes } from '@/types.js';
@@ -59,7 +59,7 @@ export class NotificationEntityService implements OnModuleInit {
 	async #packInternal <T extends MiNotification | MiGroupedNotification> (
 		src: T,
 		meId: MiUser['id'],
-		 
+
 		options: {
 			checkValidNotifier?: boolean;
 		},
@@ -236,7 +236,7 @@ export class NotificationEntityService implements OnModuleInit {
 	public async pack(
 		src: MiNotification | MiGroupedNotification,
 		meId: MiUser['id'],
-		 
+
 		options: {
 			checkValidNotifier?: boolean;
 		},

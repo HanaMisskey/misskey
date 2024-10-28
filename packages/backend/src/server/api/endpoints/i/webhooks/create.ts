@@ -6,8 +6,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { IdService } from '@/core/IdService.js';
-import type { WebhooksRepository } from '@/models/_.js';
-import { webhookEventTypes } from '@/models/Webhook.js';
+import type { WebhooksRepository } from '@/models/typeorm/_.js';
+import { webhookEventTypes } from '@/models/typeorm/Webhook.js';
 import { GlobalEventService } from '@/core/GlobalEventService.js';
 import { DI } from '@/di-symbols.js';
 import { RoleService } from '@/core/RoleService.js';

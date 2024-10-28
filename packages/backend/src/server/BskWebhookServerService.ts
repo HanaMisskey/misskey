@@ -5,7 +5,7 @@ import { HttpRequestService } from '@/core/HttpRequestService.js';
 import { MetaService } from '@/core/MetaService.js';
 import { DriveService } from '@/core/DriveService.js';
 import type { Config } from '@/config.js';
-import type { DriveFilesRepository, UsersRepository } from '@/models/_.js';
+import type { DriveFilesRepository, UsersRepository } from '@/models/typeorm/_.js';
 import { bindThis } from '@/decorators.js';
 import { DI } from '@/di-symbols.js';
 import type { FastifyInstance, FastifyPluginOptions } from 'fastify';

@@ -12,8 +12,8 @@ import { IsNull, LessThan, MoreThan } from 'typeorm';
 import type {
 	MiReversiGame,
 	ReversiGamesRepository,
-} from '@/models/_.js';
-import type { MiUser } from '@/models/User.js';
+} from '@/models/typeorm/_.js';
+import type { MiUser } from '@/models/typeorm/User.js';
 import { DI } from '@/di-symbols.js';
 import { bindThis } from '@/decorators.js';
 import { CacheService } from '@/core/CacheService.js';

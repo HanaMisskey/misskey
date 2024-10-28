@@ -5,10 +5,10 @@
 
 import { Inject, Injectable } from '@nestjs/common';
 import { DI } from '@/di-symbols.js';
-import type { ModerationLogsRepository } from '@/models/_.js';
+import type { ModerationLogsRepository } from '@/models/typeorm/_.js';
 import { awaitAll } from '@/misc/prelude/await-all.js';
-import type { } from '@/models/Blocking.js';
-import { MiModerationLog } from '@/models/ModerationLog.js';
+import type { } from '@/models/typeorm/Blocking.js';
+import { MiModerationLog } from '@/models/typeorm/ModerationLog.js';
 import { bindThis } from '@/decorators.js';
 import { IdService } from '@/core/IdService.js';
 import type { Packed } from '@/misc/json-schema.js';

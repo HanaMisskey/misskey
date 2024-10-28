@@ -5,9 +5,9 @@
 
 import { IsNull } from 'typeorm';
 import { Inject, Injectable } from '@nestjs/common';
-import type { MiMeta, UsedUsernamesRepository, UsersRepository } from '@/models/_.js';
+import type { MiMeta, UsedUsernamesRepository, UsersRepository } from '@/models/typeorm/_.js';
 import { Endpoint } from '@/server/api/endpoint-base.js';
-import { localUsernameSchema } from '@/models/User.js';
+import { localUsernameSchema } from '@/models/typeorm/User.js';
 import { DI } from '@/di-symbols.js';
 
 export const meta = {

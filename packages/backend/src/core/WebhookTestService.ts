@@ -4,12 +4,12 @@
  */
 
 import { Injectable } from '@nestjs/common';
-import { MiAbuseUserReport, MiNote, MiUser, MiWebhook } from '@/models/_.js';
+import { MiAbuseUserReport, MiNote, MiUser, MiWebhook } from '@/models/typeorm/_.js';
 import { bindThis } from '@/decorators.js';
-import { MiSystemWebhook, type SystemWebhookEventType } from '@/models/SystemWebhook.js';
+import { MiSystemWebhook, type SystemWebhookEventType } from '@/models/typeorm/SystemWebhook.js';
 import { SystemWebhookService } from '@/core/SystemWebhookService.js';
 import { Packed } from '@/misc/json-schema.js';
-import { type WebhookEventTypes } from '@/models/Webhook.js';
+import { type WebhookEventTypes } from '@/models/typeorm/Webhook.js';
 import { UserWebhookService } from '@/core/UserWebhookService.js';
 import { QueueService } from '@/core/QueueService.js';
 import { ModeratorInactivityRemainingTime } from '@/queue/processors/CheckModeratorsActivityProcessorService.js';

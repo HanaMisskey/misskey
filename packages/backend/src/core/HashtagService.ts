@@ -6,11 +6,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 import * as Redis from 'ioredis';
 import { DI } from '@/di-symbols.js';
-import type { MiUser } from '@/models/User.js';
+import type { MiUser } from '@/models/typeorm/User.js';
 import { normalizeForSearch } from '@/misc/normalize-for-search.js';
 import { IdService } from '@/core/IdService.js';
-import type { MiHashtag } from '@/models/Hashtag.js';
-import type { HashtagsRepository, MiMeta } from '@/models/_.js';
+import type { MiHashtag } from '@/models/typeorm/Hashtag.js';
+import type { HashtagsRepository, MiMeta } from '@/models/typeorm/_.js';
 import { UserEntityService } from '@/core/entities/UserEntityService.js';
 import { bindThis } from '@/decorators.js';
 import { FeaturedService } from '@/core/FeaturedService.js';

@@ -9,7 +9,7 @@ import Xev from 'xev';
 import * as osUtils from 'os-utils';
 import { bindThis } from '@/decorators.js';
 import type { OnApplicationShutdown } from '@nestjs/common';
-import { MiMeta } from '@/models/_.js';
+import { MiMeta } from '@/models/typeorm/_.js';
 import { DI } from '@/di-symbols.js';
 
 const ev = new Xev();

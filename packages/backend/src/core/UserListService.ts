@@ -6,10 +6,10 @@
 import { Inject, Injectable, OnApplicationShutdown, OnModuleInit } from '@nestjs/common';
 import * as Redis from 'ioredis';
 import { ModuleRef } from '@nestjs/core';
-import type { UserListMembershipsRepository } from '@/models/_.js';
-import type { MiUser } from '@/models/User.js';
-import type { MiUserList } from '@/models/UserList.js';
-import type { MiUserListMembership } from '@/models/UserListMembership.js';
+import type { UserListMembershipsRepository } from '@/models/typeorm/_.js';
+import type { MiUser } from '@/models/typeorm/User.js';
+import type { MiUserList } from '@/models/typeorm/UserList.js';
+import type { MiUserListMembership } from '@/models/typeorm/UserListMembership.js';
 import { IdService } from '@/core/IdService.js';
 import type { GlobalEvents } from '@/core/GlobalEventService.js';
 import { GlobalEventService } from '@/core/GlobalEventService.js';

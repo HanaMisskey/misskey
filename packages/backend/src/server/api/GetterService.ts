@@ -5,10 +5,10 @@
 
 import { Inject, Injectable } from '@nestjs/common';
 import { DI } from '@/di-symbols.js';
-import type { NotesRepository, UsersRepository } from '@/models/_.js';
+import type { NotesRepository, UsersRepository } from '@/models/typeorm/_.js';
 import { IdentifiableError } from '@/misc/identifiable-error.js';
-import type { MiLocalUser, MiRemoteUser, MiUser } from '@/models/User.js';
-import type { MiNote } from '@/models/Note.js';
+import type { MiLocalUser, MiRemoteUser, MiUser } from '@/models/typeorm/User.js';
+import type { MiNote } from '@/models/typeorm/Note.js';
 import { UserEntityService } from '@/core/entities/UserEntityService.js';
 import { bindThis } from '@/decorators.js';
 

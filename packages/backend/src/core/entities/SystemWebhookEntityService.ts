@@ -6,7 +6,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { In } from 'typeorm';
 import { DI } from '@/di-symbols.js';
-import type { MiSystemWebhook, SystemWebhooksRepository } from '@/models/_.js';
+import type { MiSystemWebhook, SystemWebhooksRepository } from '@/models/typeorm/_.js';
 import { bindThis } from '@/decorators.js';
 import { Packed } from '@/misc/json-schema.js';
 

@@ -5,12 +5,12 @@
 
 import { Inject, Injectable } from '@nestjs/common';
 import { DI } from '@/di-symbols.js';
-import type { GalleryLikesRepository, GalleryPostsRepository } from '@/models/_.js';
+import type { GalleryLikesRepository, GalleryPostsRepository } from '@/models/typeorm/_.js';
 import { awaitAll } from '@/misc/prelude/await-all.js';
 import type { Packed } from '@/misc/json-schema.js';
-import type { } from '@/models/Blocking.js';
-import type { MiUser } from '@/models/User.js';
-import type { MiGalleryPost } from '@/models/GalleryPost.js';
+import type { } from '@/models/typeorm/Blocking.js';
+import type { MiUser } from '@/models/typeorm/User.js';
+import type { MiGalleryPost } from '@/models/typeorm/GalleryPost.js';
 import { bindThis } from '@/decorators.js';
 import { IdService } from '@/core/IdService.js';
 import { UserEntityService } from './UserEntityService.js';

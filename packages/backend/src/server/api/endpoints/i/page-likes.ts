@@ -5,7 +5,7 @@
 
 import { Inject, Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
-import type { PageLikesRepository } from '@/models/_.js';
+import type { PageLikesRepository } from '@/models/typeorm/_.js';
 import { QueryService } from '@/core/QueryService.js';
 import { PageLikeEntityService } from '@/core/entities/PageLikeEntityService.js';
 import { DI } from '@/di-symbols.js';

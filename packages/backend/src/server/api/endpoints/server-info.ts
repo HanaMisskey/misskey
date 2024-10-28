@@ -7,7 +7,7 @@ import * as os from 'node:os';
 import si from 'systeminformation';
 import { Inject, Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
-import { MiMeta } from '@/models/_.js';
+import { MiMeta } from '@/models/typeorm/_.js';
 import { DI } from '@/di-symbols.js';
 
 export const meta = {

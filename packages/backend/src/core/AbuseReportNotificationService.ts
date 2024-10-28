@@ -16,10 +16,10 @@ import type {
 	MiAbuseUserReport,
 	MiMeta,
 	MiUser,
-} from '@/models/_.js';
+} from '@/models/typeorm/_.js';
 import { EmailService } from '@/core/EmailService.js';
 import { RoleService } from '@/core/RoleService.js';
-import { RecipientMethod } from '@/models/AbuseReportNotificationRecipient.js';
+import { RecipientMethod } from '@/models/typeorm/AbuseReportNotificationRecipient.js';
 import { ModerationLogService } from '@/core/ModerationLogService.js';
 import { SystemWebhookService } from '@/core/SystemWebhookService.js';
 import { UserEntityService } from '@/core/entities/UserEntityService.js';

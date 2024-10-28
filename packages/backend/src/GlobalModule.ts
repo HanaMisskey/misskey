@@ -10,10 +10,10 @@ import { MeiliSearch } from 'meilisearch';
 import { DI } from './di-symbols.js';
 import { Config, loadConfig } from './config.js';
 import { createPostgresDataSource } from './postgres.js';
-import { RepositoryModule } from './models/RepositoryModule.js';
+import { RepositoryModule } from './models/typeorm/RepositoryModule.js';
 import { allSettled } from './misc/promise-tracker.js';
 import type { Provider, OnApplicationShutdown } from '@nestjs/common';
-import { MiMeta } from '@/models/Meta.js';
+import { MiMeta } from '@/models/typeorm/Meta.js';
 import { GlobalEvents } from './core/GlobalEventService.js';
 
 const $config: Provider = {

@@ -12,10 +12,10 @@ import {
 } from '@simplewebauthn/server';
 import { AttestationFormat, isoCBOR, isoUint8Array } from '@simplewebauthn/server/helpers';
 import { DI } from '@/di-symbols.js';
-import type { MiMeta, UserSecurityKeysRepository } from '@/models/_.js';
+import type { MiMeta, UserSecurityKeysRepository } from '@/models/typeorm/_.js';
 import type { Config } from '@/config.js';
 import { bindThis } from '@/decorators.js';
-import { MiUser } from '@/models/_.js';
+import { MiUser } from '@/models/typeorm/_.js';
 import { IdentifiableError } from '@/misc/identifiable-error.js';
 import type {
 	AuthenticationResponseJSON,

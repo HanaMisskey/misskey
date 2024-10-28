@@ -14,7 +14,7 @@ import type { Packed } from '@/misc/json-schema.js';
 import type { Promiseable } from '@/misc/prelude/await-all.js';
 import { awaitAll } from '@/misc/prelude/await-all.js';
 import { USER_ACTIVE_THRESHOLD, USER_ONLINE_THRESHOLD } from '@/const.js';
-import type { MiLocalUser, MiPartialLocalUser, MiPartialRemoteUser, MiRemoteUser, MiUser } from '@/models/User.js';
+import type { MiLocalUser, MiPartialLocalUser, MiPartialRemoteUser, MiRemoteUser, MiUser } from '@/models/typeorm/User.js';
 import {
 	birthdaySchema,
 	descriptionSchema,
@@ -22,7 +22,7 @@ import {
 	locationSchema,
 	nameSchema,
 	passwordSchema,
-} from '@/models/User.js';
+} from '@/models/typeorm/User.js';
 import type {
 	BlockingsRepository,
 	FollowingsRepository,
@@ -38,7 +38,7 @@ import type {
 	UserProfilesRepository,
 	UserSecurityKeysRepository,
 	UsersRepository,
-} from '@/models/_.js';
+} from '@/models/typeorm/_.js';
 import { bindThis } from '@/decorators.js';
 import { RoleService } from '@/core/RoleService.js';
 import { ApPersonService } from '@/core/activitypub/models/ApPersonService.js';

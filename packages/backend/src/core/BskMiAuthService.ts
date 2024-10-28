@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import * as Redis from 'ioredis';
 import { DI } from '@/di-symbols.js';
 import type { Config } from '@/config.js';
-import type { MiUser } from '@/models/User.js';
+import type { MiUser } from '@/models/typeorm/User.js';
 import { bindThis } from '@/decorators.js';
 import { IdentifiableError } from '@/misc/identifiable-error.js';
 import { HttpRequestService } from '@/core/HttpRequestService.js';

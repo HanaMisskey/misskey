@@ -10,7 +10,7 @@ import RE2 from 're2';
 import { DI } from '@/di-symbols.js';
 import type { Config } from '@/config.js';
 import { bindThis } from '@/decorators.js';
-import { MiMeta } from '@/models/Meta.js';
+import { MiMeta } from '@/models/typeorm/Meta.js';
 
 @Injectable()
 export class UtilityService {

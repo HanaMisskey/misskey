@@ -6,7 +6,7 @@
 import { In } from 'typeorm';
 import * as Redis from 'ioredis';
 import { Inject, Injectable } from '@nestjs/common';
-import type { NotesRepository } from '@/models/_.js';
+import type { NotesRepository } from '@/models/typeorm/_.js';
 import { FilterUnionByProperty, notificationTypes, obsoleteNotificationTypes } from '@/types.js';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { NoteReadService } from '@/core/NoteReadService.js';
@@ -14,7 +14,7 @@ import { NotificationEntityService } from '@/core/entities/NotificationEntitySer
 import { NotificationService } from '@/core/NotificationService.js';
 import { DI } from '@/di-symbols.js';
 import { IdService } from '@/core/IdService.js';
-import { MiNotification } from '@/models/Notification.js';
+import { MiNotification } from '@/models/typeorm/Notification.js';
 
 export const meta = {
 	tags: ['account', 'notifications'],

@@ -5,7 +5,7 @@
 
 import { Inject, Injectable } from '@nestjs/common';
 import { DI } from '@/di-symbols.js';
-import { type FlashsRepository } from '@/models/_.js';
+import { type FlashsRepository } from '@/models/typeorm/_.js';
 
 /**
  * MisskeyPlay関係のService

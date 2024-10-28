@@ -4,8 +4,8 @@
  */
 
 import { Inject, Injectable } from '@nestjs/common';
-import type { FollowingsRepository, UsersRepository } from '@/models/_.js';
-import type { MiUser } from '@/models/User.js';
+import type { FollowingsRepository, UsersRepository } from '@/models/typeorm/_.js';
+import type { MiUser } from '@/models/typeorm/User.js';
 import { DI } from '@/di-symbols.js';
 import { bindThis } from '@/decorators.js';
 import { SystemWebhookService } from '@/core/SystemWebhookService.js';

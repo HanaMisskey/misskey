@@ -5,9 +5,9 @@
 
 import { Inject, Injectable } from '@nestjs/common';
 import { DI } from '@/di-symbols.js';
-import type { MiRegistryItem, RegistryItemsRepository } from '@/models/_.js';
+import type { MiRegistryItem, RegistryItemsRepository } from '@/models/typeorm/_.js';
 import { IdentifiableError } from '@/misc/identifiable-error.js';
-import type { MiUser } from '@/models/User.js';
+import type { MiUser } from '@/models/typeorm/User.js';
 import { IdService } from '@/core/IdService.js';
 import { GlobalEventService } from '@/core/GlobalEventService.js';
 import { bindThis } from '@/decorators.js';

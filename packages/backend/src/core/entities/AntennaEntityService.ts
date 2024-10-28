@@ -5,9 +5,9 @@
 
 import { Inject, Injectable } from '@nestjs/common';
 import { DI } from '@/di-symbols.js';
-import type { AntennasRepository } from '@/models/_.js';
+import type { AntennasRepository } from '@/models/typeorm/_.js';
 import type { Packed } from '@/misc/json-schema.js';
-import type { MiAntenna } from '@/models/Antenna.js';
+import type { MiAntenna } from '@/models/typeorm/Antenna.js';
 import { bindThis } from '@/decorators.js';
 import { IdService } from '@/core/IdService.js';
 

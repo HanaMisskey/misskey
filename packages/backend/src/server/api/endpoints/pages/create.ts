@@ -5,9 +5,9 @@
 
 import ms from 'ms';
 import { Inject, Injectable } from '@nestjs/common';
-import type { DriveFilesRepository, PagesRepository } from '@/models/_.js';
+import type { DriveFilesRepository, PagesRepository } from '@/models/typeorm/_.js';
 import { IdService } from '@/core/IdService.js';
-import { MiPage } from '@/models/Page.js';
+import { MiPage } from '@/models/typeorm/Page.js';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { PageEntityService } from '@/core/entities/PageEntityService.js';
 import { DI } from '@/di-symbols.js';

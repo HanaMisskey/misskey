@@ -11,7 +11,7 @@ import { HttpRequestService } from '@/core/HttpRequestService.js';
 import { GetterService } from '@/server/api/GetterService.js';
 import { RoleService } from '@/core/RoleService.js';
 import { ApiError } from '../../error.js';
-import { MiMeta } from '@/models/_.js';
+import { MiMeta } from '@/models/typeorm/_.js';
 import { DI } from '@/di-symbols.js';
 
 export const meta = {

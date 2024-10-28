@@ -5,9 +5,9 @@
 
 import { Inject, Injectable } from '@nestjs/common';
 import { DI } from '@/di-symbols.js';
-import type { AbuseUserReportsRepository } from '@/models/_.js';
+import type { AbuseUserReportsRepository } from '@/models/typeorm/_.js';
 import { awaitAll } from '@/misc/prelude/await-all.js';
-import type { MiAbuseUserReport } from '@/models/AbuseUserReport.js';
+import type { MiAbuseUserReport } from '@/models/typeorm/AbuseUserReport.js';
 import { bindThis } from '@/decorators.js';
 import { IdService } from '@/core/IdService.js';
 import type { Packed } from '@/misc/json-schema.js';

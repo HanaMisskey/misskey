@@ -5,14 +5,14 @@
 
 import { Inject, Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
-import type { ChannelsRepository, MiMeta, NotesRepository } from '@/models/_.js';
+import type { ChannelsRepository, MiMeta, NotesRepository } from '@/models/typeorm/_.js';
 import { QueryService } from '@/core/QueryService.js';
 import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
 import ActiveUsersChart from '@/core/chart/charts/active-users.js';
 import { DI } from '@/di-symbols.js';
 import { IdService } from '@/core/IdService.js';
 import { FanoutTimelineEndpointService } from '@/core/FanoutTimelineEndpointService.js';
-import { MiLocalUser } from '@/models/User.js';
+import { MiLocalUser } from '@/models/typeorm/User.js';
 import { ApiError } from '../../error.js';
 
 export const meta = {

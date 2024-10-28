@@ -5,14 +5,14 @@
 
 import { Inject, Injectable } from '@nestjs/common';
 import * as Redis from 'ioredis';
-import type { MiAntenna } from '@/models/Antenna.js';
-import type { MiNote } from '@/models/Note.js';
-import type { MiUser } from '@/models/User.js';
+import type { MiAntenna } from '@/models/typeorm/Antenna.js';
+import type { MiNote } from '@/models/typeorm/Note.js';
+import type { MiUser } from '@/models/typeorm/User.js';
 import { GlobalEventService } from '@/core/GlobalEventService.js';
 import * as Acct from '@/misc/acct.js';
 import type { Packed } from '@/misc/json-schema.js';
 import { DI } from '@/di-symbols.js';
-import type { AntennasRepository, UserListMembershipsRepository } from '@/models/_.js';
+import type { AntennasRepository, UserListMembershipsRepository } from '@/models/typeorm/_.js';
 import { UtilityService } from '@/core/UtilityService.js';
 import { bindThis } from '@/decorators.js';
 import type { GlobalEvents } from '@/core/GlobalEventService.js';

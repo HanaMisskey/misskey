@@ -5,11 +5,11 @@
 
 import { Inject, Injectable } from '@nestjs/common';
 import { IsNull } from 'typeorm';
-import type { MiLocalUser, MiUser } from '@/models/User.js';
-import type { RelaysRepository, UsersRepository } from '@/models/_.js';
+import type { MiLocalUser, MiUser } from '@/models/typeorm/User.js';
+import type { RelaysRepository, UsersRepository } from '@/models/typeorm/_.js';
 import { IdService } from '@/core/IdService.js';
 import { MemorySingleCache } from '@/misc/cache.js';
-import type { MiRelay } from '@/models/Relay.js';
+import type { MiRelay } from '@/models/typeorm/Relay.js';
 import { QueueService } from '@/core/QueueService.js';
 import { CreateSystemUserService } from '@/core/CreateSystemUserService.js';
 import { ApRendererService } from '@/core/activitypub/ApRendererService.js';

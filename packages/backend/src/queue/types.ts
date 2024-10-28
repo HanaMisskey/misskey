@@ -4,10 +4,10 @@
  */
 
 import type { Antenna } from '@/server/api/endpoints/i/import-antennas.js';
-import type { MiDriveFile } from '@/models/DriveFile.js';
-import type { MiNote } from '@/models/Note.js';
-import type { MiUser } from '@/models/User.js';
-import type { MiWebhook } from '@/models/Webhook.js';
+import type { MiDriveFile } from '@/models/typeorm/DriveFile.js';
+import type { MiNote } from '@/models/typeorm/Note.js';
+import type { MiUser } from '@/models/typeorm/User.js';
+import type { MiWebhook } from '@/models/typeorm/Webhook.js';
 import type { IActivity } from '@/core/activitypub/type.js';
 import type httpSignature from '@peertube/http-signature';
 

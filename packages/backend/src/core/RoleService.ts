@@ -14,13 +14,13 @@ import type {
 	RoleAssignmentsRepository,
 	RolesRepository,
 	UsersRepository,
-} from '@/models/_.js';
+} from '@/models/typeorm/_.js';
 import { MemoryKVCache, MemorySingleCache } from '@/misc/cache.js';
-import type { MiUser } from '@/models/User.js';
+import type { MiUser } from '@/models/typeorm/User.js';
 import { DI } from '@/di-symbols.js';
 import { bindThis } from '@/decorators.js';
 import { CacheService } from '@/core/CacheService.js';
-import type { RoleCondFormulaValue } from '@/models/Role.js';
+import type { RoleCondFormulaValue } from '@/models/typeorm/Role.js';
 import { UserEntityService } from '@/core/entities/UserEntityService.js';
 import type { GlobalEvents } from '@/core/GlobalEventService.js';
 import { GlobalEventService } from '@/core/GlobalEventService.js';

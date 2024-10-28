@@ -6,9 +6,9 @@
 import { randomUUID } from 'node:crypto';
 import { Inject, Injectable } from '@nestjs/common';
 import type { IActivity } from '@/core/activitypub/type.js';
-import type { MiDriveFile } from '@/models/DriveFile.js';
-import type { MiWebhook, webhookEventTypes } from '@/models/Webhook.js';
-import type { MiSystemWebhook, SystemWebhookEventType } from '@/models/SystemWebhook.js';
+import type { MiDriveFile } from '@/models/typeorm/DriveFile.js';
+import type { MiWebhook, webhookEventTypes } from '@/models/typeorm/Webhook.js';
+import type { MiSystemWebhook, SystemWebhookEventType } from '@/models/typeorm/SystemWebhook.js';
 import type { Config } from '@/config.js';
 import { DI } from '@/di-symbols.js';
 import { bindThis } from '@/decorators.js';
@@ -35,7 +35,7 @@ import type {
 } from './QueueModule.js';
 import type httpSignature from '@peertube/http-signature';
 import type * as Bull from 'bullmq';
-import { MiNote } from '@/models/Note.js';
+import { MiNote } from '@/models/typeorm/Note.js';
 
 @Injectable()
 export class QueueService {

@@ -5,8 +5,8 @@
 
 import { Inject, Injectable } from '@nestjs/common';
 import * as Redis from 'ioredis';
-import { type WebhooksRepository } from '@/models/_.js';
-import { MiWebhook } from '@/models/Webhook.js';
+import { type WebhooksRepository } from '@/models/typeorm/_.js';
+import { MiWebhook } from '@/models/typeorm/Webhook.js';
 import { DI } from '@/di-symbols.js';
 import { bindThis } from '@/decorators.js';
 import { GlobalEvents } from '@/core/GlobalEventService.js';

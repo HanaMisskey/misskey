@@ -11,7 +11,7 @@ import {
 } from '@/core/entities/AbuseReportNotificationRecipientEntityService.js';
 import { AbuseReportNotificationService } from '@/core/AbuseReportNotificationService.js';
 import { DI } from '@/di-symbols.js';
-import type { UserProfilesRepository } from '@/models/_.js';
+import type { UserProfilesRepository } from '@/models/typeorm/_.js';
 
 export const meta = {
 	tags: ['admin', 'abuse-report', 'notification-recipient'],

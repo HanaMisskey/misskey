@@ -6,10 +6,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { DI } from '@/di-symbols.js';
 import { bindThis } from '@/decorators.js';
-import type { MiUser } from '@/models/User.js';
-import type { MiNote } from '@/models/Note.js';
+import type { MiUser } from '@/models/typeorm/User.js';
+import type { MiNote } from '@/models/typeorm/Note.js';
 import { Packed } from '@/misc/json-schema.js';
-import type { NotesRepository } from '@/models/_.js';
+import type { NotesRepository } from '@/models/typeorm/_.js';
 import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
 import { FanoutTimelineName, FanoutTimelineService } from '@/core/FanoutTimelineService.js';
 import { isUserRelated } from '@/misc/is-user-related.js';

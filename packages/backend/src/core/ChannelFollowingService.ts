@@ -6,12 +6,12 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import Redis from 'ioredis';
 import { DI } from '@/di-symbols.js';
-import type { ChannelFollowingsRepository } from '@/models/_.js';
-import { MiChannel } from '@/models/_.js';
+import type { ChannelFollowingsRepository } from '@/models/typeorm/_.js';
+import { MiChannel } from '@/models/typeorm/_.js';
 import { IdService } from '@/core/IdService.js';
 import { GlobalEvents, GlobalEventService } from '@/core/GlobalEventService.js';
 import { bindThis } from '@/decorators.js';
-import type { MiLocalUser } from '@/models/User.js';
+import type { MiLocalUser } from '@/models/typeorm/User.js';
 import { RedisKVCache } from '@/misc/cache.js';
 
 @Injectable()

@@ -4,8 +4,8 @@
  */
 
 import { Inject, Injectable } from '@nestjs/common';
-import type { MiMeta, UsersRepository } from '@/models/_.js';
-import type { MiLocalUser } from '@/models/User.js';
+import type { MiMeta, UsersRepository } from '@/models/typeorm/_.js';
+import type { MiLocalUser } from '@/models/typeorm/User.js';
 import { DI } from '@/di-symbols.js';
 import { bindThis } from '@/decorators.js';
 
