@@ -9,7 +9,7 @@
 	"scripts": {
 		"start": "node ./built/boot/entry.js",
 		"start:test": "cross-env NODE_ENV=test node ./built/boot/entry.js",
-		"migrate": "pnpm typeorm migration:run -d ormconfig.js",
+		"migrate-typeorm": "pnpm typeorm migration:run -d ormconfig.js",
 		"revert": "pnpm typeorm migration:revert -d ormconfig.js",
 		"check:connect": "node ./scripts/check_connect.js",
 		"build": "swc src -d built -D --strip-leading-paths",
