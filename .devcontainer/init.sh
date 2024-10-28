@@ -13,5 +13,5 @@ pnpm config set store-dir /home/node/.local/share/pnpm/store
 pnpm install --frozen-lockfile
 cp .devcontainer/devcontainer.yml .config/default.yml
 pnpm build
-pnpm migrate
+pnpm migrate-typeorm
 pnpm exec cypress install
