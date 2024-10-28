@@ -10,7 +10,7 @@ import { MeiliSearch } from 'meilisearch';
 import { MiMeta } from '@/models/typeorm/Meta.js';
 import { DI } from './di-symbols.js';
 import { Config, loadConfig } from './config.js';
-import { createPostgresDataSourceWWithTypeORM } from './postgres.js';
+import { createPostgresDataSourceWithTypeORM } from './postgres.js';
 import { RepositoryModule } from './models/typeorm/RepositoryModule.js';
 import { allSettled } from './misc/promise-tracker.js';
 import { GlobalEvents } from './core/GlobalEventService.js';
@@ -24,7 +24,7 @@ const $config: Provider = {
 const $db: Provider = {
 	provide: DI.db,
 	useFactory: async (config) => {
-		const db = createPostgresDataSourceWWithTypeORM(config);
+		const db = createPostgresDataSourceWithTypeORM(config);
 		return await db.initialize();
 	},
 	inject: [DI.config],
