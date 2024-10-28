@@ -128,7 +128,7 @@ class MyCustomLogger implements Logger {
 	}
 }
 
-export const entities = [
+export const entitiesOfTypeORM = [
 	MiAnnouncement,
 	MiAnnouncementRead,
 	MiMeta,
@@ -248,7 +248,7 @@ export function createPostgresDataSourceWithTypeORM(config: Config) {
 		logging: log,
 		logger: log ? new MyCustomLogger() : undefined,
 		maxQueryExecutionTime: 300,
-		entities: entities,
+		entities: entitiesOfTypeORM,
 		migrations: ['../../migration/*.js'],
 	});
 }

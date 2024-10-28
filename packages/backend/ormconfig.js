@@ -1,6 +1,6 @@
 import { DataSource } from 'typeorm';
 import { loadConfig } from './built/config.js';
-import { entities } from './built/postgres.js';
+import { entitiesOfTypeORM } from './built/postgres.js';
 
 const config = loadConfig();
 
@@ -12,6 +12,6 @@ export default new DataSource({
 	password: config.db.pass,
 	database: config.db.db,
 	extra: config.db.extra,
-	entities: entities,
+	entities: entitiesOfTypeORM,
 	migrations: ['migration/typeorm/*.js'],
 });
