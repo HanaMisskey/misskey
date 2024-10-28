@@ -30,7 +30,7 @@
 		"migrate-typeorm": "cd packages/backend && pnpm migrate-typeorm",
 		"revert": "cd packages/backend && pnpm revert",
 		"check:connect": "cd packages/backend && pnpm check:connect",
-		"migrateandstart": "pnpm migrate && pnpm start",
+		"migrateandstart": "pnpm migrate-typeorm && pnpm start",
 		"watch": "pnpm dev",
 		"dev": "node scripts/dev.mjs",
 		"lint": "pnpm -r lint",
