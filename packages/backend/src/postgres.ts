@@ -6,6 +6,8 @@
 // https://github.com/typeorm/typeorm/issues/2400
 import pg from 'pg';
 import { DataSource, Logger } from 'typeorm';
+import { MikroORM, Options } from '@mikro-orm/core';
+import { RedisCacheAdapter } from 'mikro-orm-cache-adapter-ioredis';
 import * as highlight from 'cli-highlight';
 import { entities as charts } from '@/core/chart/entities-typeorm.js';
 
@@ -82,6 +84,8 @@ import { MiReversiGame } from '@/models/typeorm/ReversiGame.js';
 import { Config } from '@/config.js';
 import MisskeyLogger from '@/logger.js';
 import { bindThis } from '@/decorators.js';
+import { entitiesOfTypeORM } from './built/postgres.js';
+import { Config } from './built/config.js';
 
 pg.types.setTypeParser(20, Number);
 
@@ -201,6 +205,8 @@ export const entitiesOfTypeORM = [
 	...charts,
 ];
 
+export const entitiesOfMicroORM = [];
+
 const log = process.env.NODE_ENV !== 'production';
 
 export function createPostgresDataSourceWithTypeORM(config: Config) {
@@ -251,4 +257,54 @@ export function createPostgresDataSourceWithTypeORM(config: Config) {
 		entities: entitiesOfTypeORM,
 		migrations: ['../../migration/*.js'],
 	});
+}
+
+export function createPostgresDataSourceWithMikroORM(config: Config) {
+	const ormConfig: Options = {
+		type: 'postgresql',
+		host: config.db.host,
+		port: config.db.port,
+		user: config.db.user,
+		password: config.db.pass,
+		dbName: config.db.db,
+		entities: entitiesOfMicroORM,
+		migrations: {
+			path: '../../migration/microorm', // マイグレーションパス
+			pattern: /^[\w-]+\d+\.js$/, // マイグレーションファイルのパターン
+		},
+		replicas: config.dbReplications ? [
+			{
+				host: config.db.host,
+				port: config.db.port,
+				user: config.db.user,
+				password: config.db.pass,
+				dbName: config.db.db,
+			},
+			...config.dbSlaves!.map(rep => ({
+				host: rep.host,
+				port: rep.port,
+				user: rep.user,
+				password: rep.pass,
+				dbName: rep.db,
+			})),
+		] : undefined,
+		allowGlobalContext: true,
+		debug: config.log,
+		logger: config.log ? new MyCustomLogger() : undefined,
+		cache: !config.db.disableCache && process.env.NODE_ENV !== 'test'
+			? {
+				enabled: true,
+				adapter: new RedisCacheAdapter({
+					host: config.redis.host,
+					port: config.redis.port,
+					family: config.redis.family ?? 0,
+					password: config.redis.pass,
+					keyPrefix: `${config.redis.prefix}:query:`,
+					db: config.redis.db ?? 0,
+				}),
+			}
+			: false,
+	};
+
+	return MikroORM.init(ormConfig);
 }
