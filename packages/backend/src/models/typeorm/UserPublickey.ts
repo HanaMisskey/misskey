@@ -4,7 +4,7 @@
  */
 
 import { PrimaryColumn, Entity, Index, JoinColumn, Column, OneToOne } from 'typeorm';
-import { id } from '../util/id.js';
+import { id } from '../util/id-typeorm.js';
 import { MiUser } from './User.js';
 
 @Entity('user_publickey')

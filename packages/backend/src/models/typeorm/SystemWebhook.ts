@@ -5,7 +5,7 @@
 
 import { Column, Entity, Index, PrimaryColumn } from 'typeorm';
 import { Serialized } from '@/types.js';
-import { id } from '../util/id.js';
+import { id } from '../util/id-typeorm.js';
 
 export const systemWebhookEventTypes = [
 	// ユーザからの通報を受けたとき

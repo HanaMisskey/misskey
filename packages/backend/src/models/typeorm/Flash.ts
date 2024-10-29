@@ -4,7 +4,7 @@
  */
 
 import { Entity, Index, JoinColumn, Column, PrimaryColumn, ManyToOne } from 'typeorm';
-import { id } from '../util/id.js';
+import { id } from '../util/id-typeorm.js';
 import { MiUser } from './User.js';
 
 export const flashVisibility = ['public', 'private'] as const;

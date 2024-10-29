@@ -4,7 +4,7 @@
  */
 
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
-import { id } from '../util/id.js';
+import { id } from '../util/id-typeorm.js';
 import { MiUser } from './User.js';
 
 @Entity('user_memo')

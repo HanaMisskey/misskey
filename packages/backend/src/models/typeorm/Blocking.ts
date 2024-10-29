@@ -4,7 +4,7 @@
  */
 
 import { PrimaryColumn, Entity, Index, JoinColumn, Column, ManyToOne } from 'typeorm';
-import { id } from '../util/id.js';
+import { id } from '../util/id-typeorm.js';
 import { MiUser } from './User.js';
 
 @Entity('blocking')

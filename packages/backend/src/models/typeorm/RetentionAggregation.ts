@@ -4,7 +4,7 @@
  */
 
 import { Entity, PrimaryColumn, Index, Column } from 'typeorm';
-import { id } from '../util/id.js';
+import { id } from '../util/id-typeorm.js';
 import type { MiUser } from './User.js';
 
 @Entity('retention_aggregation')

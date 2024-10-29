@@ -4,7 +4,7 @@
  */
 
 import { PrimaryColumn, Entity, Index, Column } from 'typeorm';
-import { id } from '../util/id.js';
+import { id } from '../util/id-typeorm.js';
 
 @Entity('user_pending')
 export class MiUserPending {

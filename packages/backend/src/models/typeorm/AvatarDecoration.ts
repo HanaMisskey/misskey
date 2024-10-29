@@ -4,7 +4,7 @@
  */
 
 import { Entity, PrimaryColumn, Index, Column, ManyToOne, JoinColumn } from 'typeorm';
-import { id } from '../util/id.js';
+import { id } from '../util/id-typeorm.js';
 
 @Entity('avatar_decoration')
 export class MiAvatarDecoration {

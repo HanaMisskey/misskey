@@ -1,15 +1,9 @@
-/*
- * SPDX-FileCopyrightText: syuilo and misskey-project
- * SPDX-License-Identifier: AGPL-3.0-only
- */
-
 import { Inject, Injectable } from '@nestjs/common';
-import { Brackets } from 'typeorm';
 import { DI } from '@/di-symbols.js';
-import type { RoleAssignmentsRepository, RolesRepository } from '@/models/typeorm/_.js';
+import type { RoleAssignmentsRepository, RolesRepository } from '@/models/mikroorm/_.js';
 import { awaitAll } from '@/misc/prelude/await-all.js';
-import type { MiUser } from '@/models/typeorm/User.js';
-import type { MiRole } from '@/models/typeorm/Role.js';
+import type { MiUser } from '@/models/mikroorm/User.js';
+import type { MiRole } from '@/models/mikroorm/Role.js';
 import { bindThis } from '@/decorators.js';
 import { DEFAULT_POLICIES } from '@/core/RoleService.js';
 import { IdService } from '@/core/IdService.js';
@@ -24,24 +18,22 @@ export class RoleEntityService {
 		private roleAssignmentsRepository: RoleAssignmentsRepository,
 
 		private idService: IdService,
-	) {
-	}
+	) {}
 
 	@bindThis
 	public async pack(
 		src: MiRole['id'] | MiRole,
 		me?: { id: MiUser['id'] } | null | undefined,
 	) {
-		const role = typeof src === 'object' ? src : await this.rolesRepository.findOneByOrFail({ id: src });
+		const role = typeof src === 'object' ? src : await this.rolesRepository.findOneOrFail({ id: src });
 
-		const assignedCount = await this.roleAssignmentsRepository.createQueryBuilder('assign')
-			.where('assign.roleId = :roleId', { roleId: role.id })
-			.andWhere(new Brackets(qb => {
-				qb
-					.where('assign.expiresAt IS NULL')
-					.orWhere('assign.expiresAt > :now', { now: new Date() });
-			}))
-			.getCount();
+		const assignedCount = await this.roleAssignmentsRepository.count({
+			roleId: role.id,
+			$or: [
+				{ expiresAt: null },
+				{ expiresAt: { $gt: new Date() } },
+			],
+		});
 
 		const policies = { ...role.policies };
 		for (const [k, v] of Object.entries(DEFAULT_POLICIES)) {
@@ -82,4 +74,3 @@ export class RoleEntityService {
 		return Promise.all(roles.map(x => this.pack(x, me)));
 	}
 }
-

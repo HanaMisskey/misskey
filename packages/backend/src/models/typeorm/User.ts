@@ -4,9 +4,9 @@
  */
 
 import { Entity, Column, Index, OneToOne, JoinColumn, PrimaryColumn } from 'typeorm';
-import { id } from '../util/id.js';
-import { MiDriveFile } from './DriveFile.js';
 import { supportedTypes } from '@/server/BskWebhookServerService.js';
+import { id } from '../util/id-typeorm.js';
+import { MiDriveFile } from './DriveFile.js';
 
 @Entity('user')
 @Index(['usernameLower', 'host'], { unique: true })

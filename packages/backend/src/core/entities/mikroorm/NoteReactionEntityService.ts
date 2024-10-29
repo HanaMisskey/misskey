@@ -1,12 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { DI } from '@/di-symbols.js';
-import type { NoteReactionsRepository } from '@/models/typeorm/_.js';
+import type { NoteReactionsRepository } from '@/models/mikrooorm/_.js';
 import type { Packed } from '@/misc/json-schema.js';
 import { bindThis } from '@/decorators.js';
 import { IdService } from '@/core/IdService.js';
-import type { MiUser } from '@/models/typeorm/User.js';
-import type { MiNoteReaction } from '@/models/typeorm/NoteReaction.js';
+import type { MiUser } from '@/models/mikrooorm/User.js';
+import type { MiNoteReaction } from '@/models/mikrooorm/NoteReaction.js';
 import type { OnModuleInit } from '@nestjs/common';
 import type { ReactionService } from '../../ReactionService.js';
 import type { UserEntityService } from './UserEntityService.js';

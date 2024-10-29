@@ -6,7 +6,7 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import { MiSystemWebhook } from '@/models/typeorm/SystemWebhook.js';
 import { MiUserProfile } from '@/models/typeorm/UserProfile.js';
-import { id } from '../util/id.js';
+import { id } from '../util/id-typeorm.js';
 import { MiUser } from './User.js';
 
 /**

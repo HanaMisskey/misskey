@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { DI } from '@/di-symbols.js';
-import type { ModerationLogsRepository } from '@/models/typeorm/_.js';
+import type { ModerationLogsRepository } from '@/models/mikrooorm/_.js';
 import { awaitAll } from '@/misc/prelude/await-all.js';
-import type { } from '@/models/typeorm/Blocking.js';
-import type { MiModerationLog } from '@/models/typeorm/ModerationLog.js';
+import type { } from '@/models/mikrooorm/Blocking.js';
+import type { MiModerationLog } from '@/models/mikrooorm/ModerationLog.js';
 import { bindThis } from '@/decorators.js';
 import { IdService } from '@/core/IdService.js';
 import type { Packed } from '@/misc/json-schema.js';
@@ -26,7 +26,7 @@ export class ModerationLogEntityService {
 			packedUser?: Packed<'UserDetailedNotMe'>,
 		},
 	): Promise<Packed<'ModerationLog'>> {
-		// `findOneOrFail`メソッドはTypeORMから移行する際、適切な互換メソッドに変更
+		// `findOneOrFail`メソッドはmikrooormから移行する際、適切な互換メソッドに変更
 		const log = typeof src === 'object' ? src : await this.moderationLogsRepository.findOneOrFail({ where: { id: src } });
 
 		return await awaitAll({
