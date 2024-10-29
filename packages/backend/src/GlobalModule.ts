@@ -7,10 +7,12 @@ import { Global, Inject, Module } from '@nestjs/common';
 import * as Redis from 'ioredis';
 import { DataSource } from 'typeorm';
 import { MeiliSearch } from 'meilisearch';
+import { MikroORM } from '@mikro-orm/postgresql';
 import { MiMeta } from '@/models/typeorm/Meta.js';
 import { DI } from './di-symbols.js';
 import { Config, loadConfig } from './config.js';
 import { createPostgresDataSourceWithTypeORM } from './postgres.js';
+import { createPostgresDataSourceWithMikroORM } from './postgres.js';
 import { RepositoryModule } from './models/typeorm/RepositoryModule.js';
 import { allSettled } from './misc/promise-tracker.js';
 import { GlobalEvents } from './core/GlobalEventService.js';
@@ -26,6 +28,16 @@ const $db: Provider = {
 	useFactory: async (config) => {
 		const db = createPostgresDataSourceWithTypeORM(config);
 		return await db.initialize();
+	},
+	inject: [DI.config],
+};
+
+const $dbWithMikroORM: Provider = {
+	provide: DI.dbWithMikroORM,
+	useFactory: async (config) => {
+		const ormconfig = createPostgresDataSourceWithMikroORM(config);
+		const orm = await MikroORM.init(ormconfig);
+		return orm;
 	},
 	inject: [DI.config],
 };
@@ -148,12 +160,13 @@ const $meta: Provider = {
 @Global()
 @Module({
 	imports: [RepositoryModule],
-	providers: [$config, $db, $meta, $meilisearch, $redis, $redisForPub, $redisForSub, $redisForTimelines, $redisForReactions],
-	exports: [$config, $db, $meta, $meilisearch, $redis, $redisForPub, $redisForSub, $redisForTimelines, $redisForReactions, RepositoryModule],
+	providers: [$config, $db, $dbWithMikroORM, $meta, $meilisearch, $redis, $redisForPub, $redisForSub, $redisForTimelines, $redisForReactions],
+	exports: [$config, $db, $dbWithMikroORM, $meta, $meilisearch, $redis, $redisForPub, $redisForSub, $redisForTimelines, $redisForReactions, RepositoryModule],
 })
 export class GlobalModule implements OnApplicationShutdown {
 	constructor(
 		@Inject(DI.db) private db: DataSource,
+		@Inject(DI.dbWithMikroORM) private dbWithMikroORM: MikroORM,
 		@Inject(DI.redis) private redisClient: Redis.Redis,
 		@Inject(DI.redisForPub) private redisForPub: Redis.Redis,
 		@Inject(DI.redisForSub) private redisForSub: Redis.Redis,
@@ -167,6 +180,7 @@ export class GlobalModule implements OnApplicationShutdown {
 		// And then disconnect from DB
 		await Promise.all([
 			this.db.destroy(),
+			this.dbWithMikroORM.close(),
 			this.redisClient.disconnect(),
 			this.redisForPub.disconnect(),
 			this.redisForSub.disconnect(),

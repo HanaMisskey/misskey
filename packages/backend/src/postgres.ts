@@ -6,15 +6,16 @@
 // https://github.com/typeorm/typeorm/issues/2400
 import pg from 'pg';
 import { DataSource, Logger } from 'typeorm';
-import { MikroORM, Options } from '@mikro-orm/core';
-import { RedisCacheAdapter } from 'mikro-orm-cache-adapter-ioredis';
+import { MikroORM, Options } from '@mikro-orm/postgresql';
+import { RedisCacheAdapter } from 'mikro-orm-cache-adapter-redis';
+import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 import * as highlight from 'cli-highlight';
 import { entities as charts } from '@/core/chart/entities-typeorm.js';
 
 import { MiAbuseUserReport } from '@/models/typeorm/AbuseUserReport.js';
 import { MiAbuseReportNotificationRecipient } from '@/models/typeorm/AbuseReportNotificationRecipient.js';
 import { MiAccessToken } from '@/models/typeorm/AccessToken.js';
-import { MiAd } from '@/models/typeorm/Ad.js';
+import { MiAd } from '@/models/mikroorm/Ad.js';
 import { MiAnnouncement } from '@/models/typeorm/Announcement.js';
 import { MiAnnouncementRead } from '@/models/typeorm/AnnouncementRead.js';
 import { MiAntenna } from '@/models/typeorm/Antenna.js';
@@ -187,7 +188,6 @@ export const entitiesOfTypeORM = [
 	MiChannelFollowing,
 	MiChannelFavorite,
 	MiRegistryItem,
-	MiAd,
 	MiPasswordResetRequest,
 	MiUserPending,
 	MiWebhook,
@@ -204,7 +204,7 @@ export const entitiesOfTypeORM = [
 	...charts,
 ];
 
-export const entitiesOfMicroORM = [];
+export const entitiesOfMikroORM = [MiAd];
 
 const log = process.env.NODE_ENV !== 'production';
 
@@ -260,50 +260,13 @@ export function createPostgresDataSourceWithTypeORM(config: Config) {
 
 export function createPostgresDataSourceWithMikroORM(config: Config) {
 	const ormConfig: Options = {
-		type: 'postgresql',
 		host: config.db.host,
 		port: config.db.port,
 		user: config.db.user,
 		password: config.db.pass,
 		dbName: config.db.db,
-		entities: entitiesOfMicroORM,
-		migrations: {
-			path: '../../migration/microorm', // マイグレーションパス
-			pattern: /^[\w-]+\d+\.js$/, // マイグレーションファイルのパターン
-		},
-		replicas: config.dbReplications ? [
-			{
-				host: config.db.host,
-				port: config.db.port,
-				user: config.db.user,
-				password: config.db.pass,
-				dbName: config.db.db,
-			},
-			...config.dbSlaves!.map(rep => ({
-				host: rep.host,
-				port: rep.port,
-				user: rep.user,
-				password: rep.pass,
-				dbName: rep.db,
-			})),
-		] : undefined,
-		allowGlobalContext: true,
-		debug: config.log,
-		logger: config.log ? new MyCustomLogger() : undefined,
-		cache: !config.db.disableCache && process.env.NODE_ENV !== 'test'
-			? {
-				enabled: true,
-				adapter: new RedisCacheAdapter({
-					host: config.redis.host,
-					port: config.redis.port,
-					family: config.redis.family ?? 0,
-					password: config.redis.pass,
-					keyPrefix: `${config.redis.prefix}:query:`,
-					db: config.redis.db ?? 0,
-				}),
-			}
-			: false,
+		entities: entitiesOfMikroORM,
 	};
 
-	return MikroORM.init(ormConfig);
+	return ormConfig;
 }

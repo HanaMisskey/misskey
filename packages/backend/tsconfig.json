@@ -7,7 +7,7 @@
 		"noUnusedParameters": false,
 		"noUnusedLocals": false,
 		"noFallthroughCasesInSwitch": true,
-		"declaration": false,
+		"declaration": true,
 		"sourceMap": false,
 		"target": "ES2022",
 		"module": "nodenext",
