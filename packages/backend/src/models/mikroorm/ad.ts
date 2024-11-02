@@ -3,7 +3,7 @@ import { id } from '@/models/util/id-mikroorm.js';
 
 @Entity({ tableName: 'ad' })
 export class MiAd {
-	@PrimaryKey({ type: 'string', customType: id() })
+	@PrimaryKey({ type: id() })
 	public id!: string;
 
 	@Index()
