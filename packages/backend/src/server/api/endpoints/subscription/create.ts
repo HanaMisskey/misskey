@@ -252,7 +252,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 						},
 					],
 					success_url: `${this.config.url}/settings/subscription`, // ←決済成功時は強制的に管理ページに
-					return_url: this.config.url + (ps.returnPath ?? '/settings/subscription'),
+					cancel_url: this.config.url + (ps.returnPath ?? '/settings/subscription'),
 					customer: customerId,
 				});
 
