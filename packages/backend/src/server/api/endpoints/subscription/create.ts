@@ -89,7 +89,7 @@ export const paramDef = {
 	properties: {
 		planId: { type: 'string', format: 'misskey:id', nullable: true },
 		planSlug: { type: 'string', pattern: '^[a-zA-Z0-9_-]+$', nullable: true },
-		returnPath: { type: 'string', pattern: '^\/[a-zA-Z0-9_-\/]+$', nullable: true },
+		returnPath: { type: 'string', pattern: '^\\/[a-zA-Z0-9_\\/-]+$', nullable: true },
 	},
 } as const;
 

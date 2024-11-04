@@ -58,7 +58,7 @@ export const meta = {
 export const paramDef = {
 	type: 'object',
 	properties: {
-		returnPath: { type: 'string', pattern: '^\/[a-zA-Z0-9_-\/]+$', nullable: true },
+		returnPath: { type: 'string', pattern: '^\\/[a-zA-Z0-9_\\/-]+$', nullable: true },
 	},
 	required: [],
 } as const;
