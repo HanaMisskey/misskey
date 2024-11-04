@@ -5,7 +5,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 <template>
 <MkStickyContainer>
-	<template #header><MkPageHeader v-model:tab="tab" :actions="headerActions" :tabs="headerTabs"/></template>
+	<template #header><MkPageHeader :actions="headerActions" :tabs="headerTabs"/></template>
 	<MkSpacer :contentMax="900">
 		<div class="_gaps">
 			<MkSwitch v-model="enableSubscription" @update:modelValue="enableSubscriptionChanged">
@@ -21,6 +21,9 @@ SPDX-License-Identifier: AGPL-3.0-only
 				<div class="_gaps_m">
 					<MkInput v-model="subscriptionPlan.name">
 						<template #label>{{ i18n.ts.name }}</template>
+					</MkInput>
+					<MkInput v-model="subscriptionPlan.slug">
+						<template #label>URL Slug</template>
 					</MkInput>
 					<MkInput v-model="subscriptionPlan.price" type="number">
 						<template #label>{{ i18n.ts._hana._subscription.price }}</template>
@@ -73,6 +76,7 @@ function add() {
 		_id: Math.random().toString(36),
 		id: null,
 		name: '',
+		slug: '',
 		price: 0,
 		currency: '',
 		description: '',
@@ -96,6 +100,7 @@ async function save(subscriptionPlan) {
 	if (subscriptionPlan.id == null) {
 		await os.apiWithDialog('admin/subscription-plans/create', {
 			name: subscriptionPlan.name,
+			slug: subscriptionPlan.slug || null, // 空文字列をnullに変換
 			price: subscriptionPlan.price,
 			currency: subscriptionPlan.currency,
 			description: subscriptionPlan.description,
@@ -107,6 +112,7 @@ async function save(subscriptionPlan) {
 		os.apiWithDialog('admin/subscription-plans/update', {
 			planId: subscriptionPlan.id,
 			name: subscriptionPlan.name,
+			slug: subscriptionPlan.slug || null, // 空文字列をnullに変換
 			price: subscriptionPlan.price,
 			currency: subscriptionPlan.currency,
 			description: subscriptionPlan.description,

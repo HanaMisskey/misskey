@@ -43,6 +43,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				return {
 					id: subscriptionPlan.id,
 					name: subscriptionPlan.name,
+					slug: subscriptionPlan.slug,
 					price: subscriptionPlan.price,
 					currency: subscriptionPlan.currency,
 					description: subscriptionPlan.description,

@@ -26,6 +26,7 @@ export const paramDef = {
 	type: 'object',
 	properties: {
 		planId: { type: 'string', format: 'misskey:id' },
+		slug: { type: 'string', pattern: '^[a-zA-Z0-9_-]+$', nullable: true },
 		name: { type: 'string' },
 		price: { type: 'integer' },
 		currency: { type: 'string' },
@@ -56,6 +57,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				id: ps.planId,
 			}, {
 				name: ps.name,
+				slug: ps.slug,
 				price: ps.price,
 				currency: ps.currency,
 				description: ps.description,

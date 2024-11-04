@@ -12,6 +12,11 @@ export const packedSubscriptionPlanSchema = {
 			optional: false, nullable: false,
 			example: 'New Plan',
 		},
+		slug: {
+			type: 'string',
+			optional: false, nullable: true,
+			example: 'new-plan',
+		},
 		price: {
 			type: 'integer',
 			optional: false, nullable: false,

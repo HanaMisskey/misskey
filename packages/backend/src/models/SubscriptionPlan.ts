@@ -12,6 +12,13 @@ export class MiSubscriptionPlan {
 	})
 	public name: string;
 
+	@Index({ unique: true })
+	@Column('varchar', {
+		length: 128,
+		nullable: true,
+	})
+	public slug: string | null;
+
 	@Column('integer')
 	public price: number;
 

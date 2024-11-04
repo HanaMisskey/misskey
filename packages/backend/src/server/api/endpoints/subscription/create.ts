@@ -1,7 +1,7 @@
 import ms from 'ms';
 import { Stripe } from 'stripe';
 import { Inject, Injectable } from '@nestjs/common';
-import type { UsersRepository, UserProfilesRepository, SubscriptionPlansRepository } from '@/models/_.js';
+import type { UsersRepository, UserProfilesRepository, SubscriptionPlansRepository, MiSubscriptionPlan } from '@/models/_.js';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { DI } from '@/di-symbols.js';
 import { MetaService } from '@/core/MetaService.js';
@@ -87,9 +87,9 @@ export const meta = {
 export const paramDef = {
 	type: 'object',
 	properties: {
-		planId: { type: 'string', format: 'misskey:id' },
+		planId: { type: 'string', format: 'misskey:id', nullable: true },
+		planSlug: { type: 'string', pattern: '^[a-zA-Z0-9_-]+$', nullable: true },
 	},
-	required: ['planId'],
 } as const;
 
 @Injectable()
@@ -111,6 +111,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private loggerService: LoggerService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
+			if (!ps.planId && !ps.planSlug) {
+				throw new ApiError(meta.errors.noSuchPlan);
+			}
+
 			const logger = this.loggerService.getLogger('subscription:create');
 			const instance = await this.metaService.fetch(true);
 			if (!(instance.enableSubscriptions)) {
@@ -120,8 +124,14 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				throw new ApiError(meta.errors.unavailable);
 			}
 
-			const plan = await this.subscriptionPlansRepository.findOneBy({ id: ps.planId });
-			if (plan?.isArchived || !plan?.stripePriceId) {
+			let plan: MiSubscriptionPlan | null = null;
+			if (ps.planId) {
+				plan = await this.subscriptionPlansRepository.findOneBy({ id: ps.planId });
+			} else if (ps.planSlug) {
+				plan = await this.subscriptionPlansRepository.findOneBy({ slug: ps.planSlug });
+			}
+
+			if (plan == null || plan?.isArchived || !plan?.stripePriceId) {
 				throw new ApiError(meta.errors.noSuchPlan);
 			}
 

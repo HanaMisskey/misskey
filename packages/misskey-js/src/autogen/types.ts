@@ -5214,6 +5214,8 @@ export type components = {
       id: string;
       /** @example New Plan */
       name: string;
+      /** @example new-plan */
+      slug: string | null;
       /** @example 1000 */
       price: number;
       /** @example usd */
@@ -10822,6 +10824,7 @@ export type operations = {
       content: {
         'application/json': {
           name: string;
+          slug?: string | null;
           price: number;
           currency: string;
           description?: string;
@@ -10883,6 +10886,7 @@ export type operations = {
         'application/json': {
           /** Format: misskey:id */
           planId: string;
+          slug?: string | null;
           name?: string;
           price?: number;
           currency?: string;
@@ -25693,7 +25697,8 @@ export type operations = {
       content: {
         'application/json': {
           /** Format: misskey:id */
-          planId: string;
+          planId?: string | null;
+          planSlug?: string | null;
         };
       };
     };

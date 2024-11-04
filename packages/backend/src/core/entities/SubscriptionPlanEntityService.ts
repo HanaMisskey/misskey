@@ -27,6 +27,7 @@ export class SubscriptionPlanEntityService {
 		return await awaitAll({
 			id: subscriptionPlan.id,
 			name: subscriptionPlan.name,
+			slug: subscriptionPlan.slug,
 			price: subscriptionPlan.price,
 			currency: subscriptionPlan.currency,
 			description: subscriptionPlan.description,
