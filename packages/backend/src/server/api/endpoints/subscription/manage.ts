@@ -67,7 +67,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			if (!instance.enableSubscriptions) {
 				throw new ApiError(meta.errors.unavailable);
 			}
-			if (!(this.config.stripe && this.config.stripe.secretKey && this.config.stripe.customerPortalUrl)) {
+			if (this.config.stripe == null || this.config.stripe.secretKey == null || this.config.stripe.customerPortalUrl == null) {
 				throw new ApiError(meta.errors.unavailable);
 			}
 
@@ -77,7 +77,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				return {
 					redirect: {
 						permanent: false,
-						destination: config.stripe?.customerPortalUrl,
+						destination: config.stripe!.customerPortalUrl!,
 					},
 				};
 			}
