@@ -51,6 +51,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				throw new Error('user not found');
 			}
 
+			if (user.isRoot) {
+				throw new Error('cannot delete a root account');
+			}
+
 			if (!(user.subscriptionStatus === 'unpaid' || user.subscriptionStatus === 'canceled' || user.subscriptionStatus === 'none')) {
 				throw new ApiError(meta.errors.subscriptionIsActive);
 			}

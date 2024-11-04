@@ -40,6 +40,12 @@ export const meta = {
 			code: 'NO_SUCH_USER',
 			id: '6a27f458-92aa-4807-bbc3-3b8223a84a7e',
 		},
+
+		sessionInvalid: {
+			message: 'Session is invalid.',
+			code: 'SESSION_INVALID',
+			id: '4cee5674-69de-474d-aea7-00ed3c4fc8d7',
+		},
 	},
 } as const;
 
@@ -91,6 +97,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				customer: userProfile.stripeCustomerId,
 				return_url: this.config.url + (ps.returnPath ?? '/settings/subscription'),
 			});
+
+			if (!session.url) {
+				throw new ApiError(meta.errors.sessionInvalid);
+			}
 
 			return {
 				redirect: {

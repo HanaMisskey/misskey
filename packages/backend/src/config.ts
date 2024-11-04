@@ -68,6 +68,7 @@ type Source = {
 	stripe?: {
 		secretKey: string;
 		webhookSecret: string;
+		customerPortalUrl: string;
 	};
 
 	proxy?: string;
