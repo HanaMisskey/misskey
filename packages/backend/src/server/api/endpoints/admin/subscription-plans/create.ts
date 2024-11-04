@@ -27,6 +27,11 @@ export const meta = {
 			code: 'NO_SUCH_ROLE',
 			id: 'de0d6ecd-8e0a-4253-88ff-74bc89ae3d45',
 		},
+		planWithThisSlugAlreadyExists: {
+			message: 'Plan with this slug already exists.',
+			code: 'PLAN_WITH_THIS_SLUG_ALREADY_EXISTS',
+			id: '17098d0d-514f-49c1-826f-27c06475d1b7',
+		},
 	},
 } as const;
 
@@ -60,6 +65,13 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			const role = await this.rolesRepository.findOneBy({ id: ps.roleId });
 			if (!role) {
 				throw new ApiError(meta.errors.noSuchRole);
+			}
+
+			if (ps.slug != null) {
+				const sameSlugExists = await this.subscriptionPlansRepository.existsBy({ slug: ps.slug });
+				if (sameSlugExists) {
+					throw new ApiError(meta.errors.planWithThisSlugAlreadyExists);
+				}
 			}
 
 			const subscriptionPlan = await this.subscriptionPlansRepository.insert({

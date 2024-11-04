@@ -2913,6 +2913,7 @@ _hana:
     unpaid: "未払い"
     none: "なし"
     refresh: "サブスクリプションの状態を更新"
+    planWithThisSlugAlreadyExists: "このslugを持つプランが既に存在します。"
   _welcomeCardGen:
     title: "はなみすきーはじめました！カード"
     nameDescription: "名前にMFMを使用していたり、文字数が多すぎたりした場合は、ここで上書きできます。"

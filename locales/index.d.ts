@@ -10928,6 +10928,10 @@ export interface Locale extends ILocale {
              * サブスクリプションの状態を更新
              */
             "refresh": string;
+            /**
+             * このslugを持つプランが既に存在します。
+             */
+            "planWithThisSlugAlreadyExists": string;
         };
         "_welcomeCardGen": {
             /**

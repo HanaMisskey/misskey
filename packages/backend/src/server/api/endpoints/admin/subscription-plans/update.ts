@@ -19,6 +19,11 @@ export const meta = {
 			code: 'NO_SUCH_PLAN',
 			id: 'cd23ef55-09ad-428a-ac61-95a45e124b32',
 		},
+		planWithThisSlugAlreadyExists: {
+			message: 'Plan with this slug already exists.',
+			code: 'PLAN_WITH_THIS_SLUG_ALREADY_EXISTS',
+			id: '17098d0d-514f-49c1-826f-27c06475d1b7',
+		},
 	},
 } as const;
 
@@ -51,6 +56,13 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 
 			if (!plan) {
 				throw new ApiError(meta.errors.noSuchPlan);
+			}
+
+			if (ps.slug) {
+				const existingPlan = await this.subscriptionPlansRepository.findOneBy({ slug: ps.slug });
+				if (existingPlan && existingPlan.id !== plan.id) {
+					throw new ApiError(meta.errors.planWithThisSlugAlreadyExists);
+				}
 			}
 
 			await this.subscriptionPlansRepository.update({

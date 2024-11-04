@@ -106,6 +106,10 @@ async function save(subscriptionPlan) {
 			description: subscriptionPlan.description,
 			stripePriceId: subscriptionPlan.stripePriceId,
 			roleId: subscriptionPlan.roleId,
+		}, undefined, {
+			'17098d0d-514f-49c1-826f-27c06475d1b7': {
+				text: i18n.ts._hana._subscription.planWithThisSlugAlreadyExists,
+			},
 		});
 		load();
 	} else {
@@ -118,6 +122,10 @@ async function save(subscriptionPlan) {
 			description: subscriptionPlan.description,
 			stripePriceId: subscriptionPlan.stripePriceId,
 			roleId: subscriptionPlan.roleId,
+		}, undefined, {
+			'17098d0d-514f-49c1-826f-27c06475d1b7': {
+				text: i18n.ts._hana._subscription.planWithThisSlugAlreadyExists,
+			},
 		});
 	}
 }
