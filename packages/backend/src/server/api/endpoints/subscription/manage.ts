@@ -57,7 +57,9 @@ export const meta = {
 
 export const paramDef = {
 	type: 'object',
-	properties: {},
+	properties: {
+		returnPath: { type: 'string', pattern: '^\/[a-zA-Z0-9_-\/]+$', nullable: true },
+	},
 	required: [],
 } as const;
 
@@ -94,7 +96,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			const stripe = new Stripe(this.config.stripe.secretKey);
 			const session = await stripe.billingPortal.sessions.create({
 				customer: userProfile.stripeCustomerId,
-				return_url: `${this.config.url}/settings/subscription`,
+				return_url: this.config.url + (ps.returnPath ?? '/settings/subscription'),
 			});
 
 			if (!session.url) {

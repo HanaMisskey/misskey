@@ -507,6 +507,7 @@ export type ServerInfoResponse = operations['server-info']['responses']['200']['
 export type StatsResponse = operations['stats']['responses']['200']['content']['application/json'];
 export type SubscriptionCreateRequest = operations['subscription___create']['requestBody']['content']['application/json'];
 export type SubscriptionCreateResponse = operations['subscription___create']['responses']['200']['content']['application/json'];
+export type SubscriptionManageRequest = operations['subscription___manage']['requestBody']['content']['application/json'];
 export type SubscriptionManageResponse = operations['subscription___manage']['responses']['200']['content']['application/json'];
 export type SubscriptionPlansListResponse = operations['subscription-plans___list']['responses']['200']['content']['application/json'];
 export type SubscriptionPlansShowRequest = operations['subscription-plans___show']['requestBody']['content']['application/json'];

@@ -89,6 +89,7 @@ export const paramDef = {
 	properties: {
 		planId: { type: 'string', format: 'misskey:id', nullable: true },
 		planSlug: { type: 'string', pattern: '^[a-zA-Z0-9_-]+$', nullable: true },
+		returnPath: { type: 'string', pattern: '^\/[a-zA-Z0-9_-\/]+$', nullable: true },
 	},
 } as const;
 
@@ -227,7 +228,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				const session = await stripe.checkout.sessions.create({
 					customer: customerId,
 					allow_promotion_codes: true,
-					return_url: `${this.config.url}/settings/subscription`,
+					return_url: this.config.url + (ps.returnPath ?? '/settings/subscription'),
 				});
 
 				if (!session.url) throw new ApiError(meta.errors.sessionInvalid);
@@ -250,8 +251,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 							quantity: 1,
 						},
 					],
-					success_url: `${this.config.url}/settings/subscription`,
-					cancel_url: `${this.config.url}/settings/subscription`,
+					success_url: `${this.config.url}/settings/subscription`, // ←決済成功時は強制的に管理ページに
+					return_url: this.config.url + (ps.returnPath ?? '/settings/subscription'),
 					customer: customerId,
 				});
 

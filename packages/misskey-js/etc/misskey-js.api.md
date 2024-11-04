@@ -1740,6 +1740,7 @@ declare namespace entities {
         StatsResponse,
         SubscriptionCreateRequest,
         SubscriptionCreateResponse,
+        SubscriptionManageRequest,
         SubscriptionManageResponse,
         SubscriptionPlansListResponse,
         SubscriptionPlansShowRequest,
@@ -3223,6 +3224,9 @@ type SubscriptionCreateRequest = operations['subscription___create']['requestBod
 
 // @public (undocumented)
 type SubscriptionCreateResponse = operations['subscription___create']['responses']['200']['content']['application/json'];
+
+// @public (undocumented)
+type SubscriptionManageRequest = operations['subscription___manage']['requestBody']['content']['application/json'];
 
 // @public (undocumented)
 type SubscriptionManageResponse = operations['subscription___manage']['responses']['200']['content']['application/json'];

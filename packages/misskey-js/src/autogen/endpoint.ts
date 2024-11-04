@@ -504,6 +504,7 @@ import type {
 	StatsResponse,
 	SubscriptionCreateRequest,
 	SubscriptionCreateResponse,
+	SubscriptionManageRequest,
 	SubscriptionManageResponse,
 	SubscriptionPlansListResponse,
 	SubscriptionPlansShowRequest,
@@ -940,7 +941,7 @@ export type Endpoints = {
 	'server-info': { req: EmptyRequest; res: ServerInfoResponse };
 	'stats': { req: EmptyRequest; res: StatsResponse };
 	'subscription/create': { req: SubscriptionCreateRequest; res: SubscriptionCreateResponse };
-	'subscription/manage': { req: EmptyRequest; res: SubscriptionManageResponse };
+	'subscription/manage': { req: SubscriptionManageRequest; res: SubscriptionManageResponse };
 	'subscription-plans/list': { req: EmptyRequest; res: SubscriptionPlansListResponse };
 	'subscription-plans/show': { req: SubscriptionPlansShowRequest; res: SubscriptionPlansShowResponse };
 	'sw/show-registration': { req: SwShowRegistrationRequest; res: SwShowRegistrationResponse };

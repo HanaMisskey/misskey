@@ -25699,6 +25699,7 @@ export type operations = {
           /** Format: misskey:id */
           planId?: string | null;
           planSlug?: string | null;
+          returnPath?: string | null;
         };
       };
     };
@@ -25759,6 +25760,13 @@ export type operations = {
    * **Credential required**: *Yes* / **Permission**: *read:account*
    */
   subscription___manage: {
+    requestBody: {
+      content: {
+        'application/json': {
+          returnPath?: string | null;
+        };
+      };
+    };
     responses: {
       /** @description OK (with results) */
       200: {
