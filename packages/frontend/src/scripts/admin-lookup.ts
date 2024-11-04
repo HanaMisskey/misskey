@@ -92,20 +92,15 @@ export async function lookupUserByCustomer() {
 		title: 'Stripe Customer ID',
 		type: 'text',
 	});
-	if (canceled) return;
+	if (canceled || result == null) return;
 
-	try {
-		const user = await os.apiWithDialog('admin/accounts/find-by-stripe-customer', { customerId: result });
-
-		os.pageWindow(`/admin/user/${user.id}`);
-	} catch (err) {
-		if (err.code === 'USER_NOT_FOUND') {
-			os.alert({
-				type: 'error',
-				text: i18n.ts.noSuchUser,
-			});
-		} else {
-			throw err;
+	os.apiWithDialog('admin/accounts/find-by-stripe-customer', {
+		customerId: result,
+	}, undefined, {
+		'cb865949-8af5-4062-a88c-ef55e8786d1d': {
+			text: i18n.ts.noSuchUser,
 		}
-	}
+	}).then((user) => {
+		os.pageWindow(`/admin/user/${user.id}`);
+	});
 }
