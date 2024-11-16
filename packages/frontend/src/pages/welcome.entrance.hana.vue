@@ -6,7 +6,7 @@
 	</div>
 	<iframe
 		ref="frameEl"
-		:src="`https://frame-static-assets.misskey.flowers/${lang}/${dev}`"
+		:src="frameUrl"
 		:class="$style.frame"
 		@load="onFrameLoad"
 	></iframe>
@@ -34,6 +34,8 @@ const dev = _DEV_ ? '?debug' : '';
 
 const lang = miLocalStorage.getItem('lang')?.includes('ja') ? 'ja' : 'en';
 
+const frameUrl = `https://frame-static-assets.misskey.flowers/${lang}/${dev}`;
+
 const frameEl = useTemplateRef('frameEl');
 
 let iframeLoaded = false;
@@ -42,7 +44,7 @@ function onFrameLoad() {
 	if (!iframeLoaded) {
 		iframeLoaded = true;
 	} else if (frameEl.value) {
-		frameEl.value.src = `https://frame-static-assets.misskey.flowers/${lang}/${dev}`;
+		frameEl.value.src = frameUrl;
 		iframeLoaded = false;
 	}
 	frameEl.value?.contentWindow?.postMessage({
