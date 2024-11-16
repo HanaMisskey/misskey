@@ -121,14 +121,14 @@ onUnmounted(() => {
 
 <style lang="scss" module>
 .root {
-	height: 100dvh;
+	height: 100svh;
 	overflow: hidden;
 	overflow: clip;
 }
 
 .frame {
 	width: 100%;
-	min-height: 100svh;
+	height: 100svh;
 	border: none;
 }
 </style>
