@@ -1304,6 +1304,9 @@ thisContentsAreMarkedAsSigninRequiredByAuthor: "投稿者により、表示に�
 lockdown: "ロックダウン"
 pleaseSelectAccount: "アカウントを選択してください"
 availableRoles: "利用可能なロール"
+textCount: "文字数"
+reset: "リセット"
+alwaysUseAbsoluteTime: "常に絶対時刻で表示する"
 prohibitSkippingInitialTutorial: "チュートリアルをスキップできないようにする"
 prohibitSkippingInitialTutorialDescription: "新規登録したユーザーに表示されるチュートリアルをスキップできないようにします。チュートリアルを完了しなかったりチュートリアルページを回避したりした場合でも、強制的にリダイレクトされます。"
 
@@ -2856,6 +2859,10 @@ _selfXssPrevention:
   description1: "ここに何かを貼り付けると、悪意のあるユーザーにアカウントを乗っ取られたり、個人情報を盗まれたりする可能性があります。"
   description2: "貼り付けようとしているものが何なのかを正確に理解していない場合は、%c今すぐ作業を中止してこのウィンドウを閉じてください。"
   description3: "詳しくはこちらをご確認ください。 {link}"
+
+_followRequest:
+  recieved: "受け取った申請"
+  sent: "送った申請"
 
 _hana:
   emojiRemarks: "備考"

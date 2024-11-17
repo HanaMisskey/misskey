@@ -5235,6 +5235,18 @@ export interface Locale extends ILocale {
      */
     "availableRoles": string;
     /**
+     * 文字数
+     */
+    "textCount": string;
+    /**
+     * リセット
+     */
+    "reset": string;
+    /**
+     * 常に絶対時刻で表示する
+     */
+    "alwaysUseAbsoluteTime": string;
+    /**
      * チュートリアルをスキップできないようにする
      */
     "prohibitSkippingInitialTutorial": string;
@@ -10717,6 +10729,16 @@ export interface Locale extends ILocale {
          * 詳しくはこちらをご確認ください。 {link}
          */
         "description3": ParameterizedString<"link">;
+    };
+    "_followRequest": {
+        /**
+         * 受け取った申請
+         */
+        "recieved": string;
+        /**
+         * 送った申請
+         */
+        "sent": string;
     };
     "_hana": {
         /**
