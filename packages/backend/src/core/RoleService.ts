@@ -102,7 +102,7 @@ export const DEFAULT_POLICIES: RolePolicies = {
 	canImportMuting: true,
 	canImportNotes: true,
 	canImportUserLists: true,
-	crossRenoteAccountLimit: 2,
+	crossRenoteAccountLimit: 0,
 };
 
 @Injectable()
