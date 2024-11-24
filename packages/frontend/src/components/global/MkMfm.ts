@@ -17,6 +17,7 @@ import MkCode from '@/components/MkCode.vue';
 import MkCodeInline from '@/components/MkCodeInline.vue';
 import MkGoogle from '@/components/MkGoogle.vue';
 import MkSparkle from '@/components/MkSparkle.vue';
+import HanaSaizeMenuBadge from '@/components/HanaSaizeMenuBadge.vue';
 import MkA, { MkABehavior } from '@/components/global/MkA.vue';
 import { defaultStore } from '@/store.js';
 
@@ -324,6 +325,15 @@ export default function (props: MfmProps, { emit }: { emit: SetupContext<MfmEven
 							emit('clickEv', clickEv);
 						} }, genEl(token.children, scale));
 					}
+					case 'saize': {
+						if (token.children.length === 1 && token.children[0].type === 'text') {
+							return h(HanaSaizeMenuBadge, {
+								menuCode: token.children[0].props.text,
+							});
+						} else {
+							return genEl(token.children, scale);
+						}
+					}
 				}
 				if (style === undefined) {
 					return h('span', {}, ['$[', token.props.name, ' ', ...genEl(token.children, scale), ']']);
@@ -467,8 +477,8 @@ export default function (props: MfmProps, { emit }: { emit: SetupContext<MfmEven
 			}
 
 			default: {
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				console.error('unrecognized ast type:', (token as any).type);
+				// @ts-expect-error 存在しないASTタイプ
+				console.error('unrecognized ast type:', token.type);
 
 				return [];
 			}
