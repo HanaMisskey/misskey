@@ -526,6 +526,7 @@ function showOtherSettings() {
 		currentReactionAcceptance: reactionAcceptance.value,
 		textLength: textLength.value,
 		enabledCrossRenoteAccountIds: crossRenoteAccountIds,
+		enableCrossRenote: !localOnly.value && ['public', 'home'].includes(visibility.value),
 		src: otherSettingsButton.value,
 	}, {
 		changeReactionAcceptance: (value: Misskey.entities.Note['reactionAcceptance']) => {

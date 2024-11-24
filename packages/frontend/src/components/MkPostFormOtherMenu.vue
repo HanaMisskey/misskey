@@ -52,6 +52,7 @@ const props = defineProps<{
 	currentReactionAcceptance: Misskey.entities.Note['reactionAcceptance'];
 	textLength: number;
 	enabledCrossRenoteAccountIds: string[];
+	enableCrossRenote?: boolean;
 	src?: HTMLElement;
 }>();
 
@@ -74,6 +75,10 @@ const $i = signinRequired();
 
 function getCrossRenoteAccountMenu(): NonModalCompatibleInnerMenuItem[] {
 	if (hanaStore.reactiveState.crossRenoteAccounts.value.length > $i.policies.crossRenoteAccountLimit) {
+		return [];
+	}
+
+	if (props.enableCrossRenote === false) {
 		return [];
 	}
 
