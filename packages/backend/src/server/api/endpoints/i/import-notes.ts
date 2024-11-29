@@ -29,6 +29,12 @@ export const meta = {
 			code: 'EMPTY_FILE',
 			id: '31a1b42c-06f7-42ae-8a38-a661c5c9f691',
 		},
+
+		thisServiceIsTemporarilyUnavailable: {
+			message: 'Importing notes from this service is temporarily unavailable.',
+			code: 'TEMPORARILY_UNAVAILABLE',
+			id: '5e8fb268-42c1-4320-8ee3-b475823bec64',
+		},
 	},
 } as const;
 
@@ -50,11 +56,17 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private queueService: QueueService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
+			// 一時的な対応
+			if (ps.type == null || ps.type !== 'Misskey') throw new ApiError(meta.errors.thisServiceIsTemporarilyUnavailable);
+
 			const file = await this.driveFilesRepository.findOneBy({ id: ps.fileId });
 
 			if (file == null) throw new ApiError(meta.errors.noSuchFile);
 
 			if (file.size === 0) throw new ApiError(meta.errors.emptyFile);
+
+			// 一時的な対応
+			if (!file.name.startsWith('notes-') || !file.name.endsWith('.json')) throw new ApiError(meta.errors.thisServiceIsTemporarilyUnavailable);
 
 			this.queueService.createImportNotesJob(me, file.id, ps.type);
 		});
