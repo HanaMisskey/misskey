@@ -6,7 +6,13 @@
 import { Entity, Column, Index, OneToOne, JoinColumn, PrimaryColumn } from 'typeorm';
 import { id } from './util/id.js';
 import { MiDriveFile } from './DriveFile.js';
-import { supportedTypes } from '@/server/BskWebhookServerService.js';
+
+const bskMigrateSupportedTypes = [
+	'notes',
+	'following',
+	'muting',
+	'blocking',
+] as const;
 
 @Entity('user')
 @Index(['usernameLower', 'host'], { unique: true })
@@ -209,6 +215,23 @@ export class MiUser {
 	})
 	public isHibernated: boolean;
 
+	@Column('boolean', {
+		default: false,
+	})
+	public requireSigninToViewContents: boolean;
+
+	// in sec, マイナスで相対時間
+	@Column('integer', {
+		nullable: true,
+	})
+	public makeNotesFollowersOnlyBefore: number | null;
+
+	// in sec, マイナスで相対時間
+	@Column('integer', {
+		nullable: true,
+	})
+	public makeNotesHiddenBefore: number | null;
+
 	// アカウントが削除されたかどうかのフラグだが、完全に削除される際は物理削除なので実質削除されるまでの「削除が進行しているかどうか」のフラグ
 	@Column('boolean', {
 		default: false,
@@ -281,7 +304,7 @@ export class MiUser {
 	@Column('varchar', {
 		length: 16, array: true, default: '{}',
 	})
-	public bskMigratedEntities: (typeof supportedTypes[number])[];
+	public bskMigratedEntities: (typeof bskMigrateSupportedTypes[number])[];
 
 	constructor(data: Partial<MiUser>) {
 		if (data == null) return;

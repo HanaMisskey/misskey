@@ -149,11 +149,17 @@ defineExpose<WidgetComponentExpose>({
 		padding: 16px;
 
 		&:not(:first-child) {
-			border-top: solid 0.5px var(--divider);
+			border-top: solid 0.5px var(--MI_THEME-divider);
 		}
 
 		> .label {
 			display: flex;
+
+			> .icon {
+				color: var(--MI_THEME-warn);
+				margin-left: auto;
+				animation: warnBlink 1s infinite;
+			}
 		}
 
 		> .values {
@@ -168,11 +174,11 @@ defineExpose<WidgetComponentExpose>({
 
 				> div:last-child {
 					&.inc {
-						color: var(--warn);
+						color: var(--MI_THEME-warn);
 					}
 
 					&.dec {
-						color: var(--success);
+						color: var(--MI_THEME-success);
 					}
 				}
 			}

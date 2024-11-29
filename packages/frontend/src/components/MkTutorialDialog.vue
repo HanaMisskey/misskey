@@ -27,7 +27,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 </template>
 
 <script lang="ts" setup>
-import { ref, shallowRef } from 'vue';
+import { shallowRef } from 'vue';
 import MkModalWindow from '@/components/MkModalWindow.vue';
 import XTutorial from '@/components/MkTutorial.vue';
 import { i18n } from '@/i18n.js';
@@ -83,7 +83,7 @@ async function close(skip?: boolean) {
 
 .progressBarValue {
 	height: 100%;
-	background: linear-gradient(90deg, var(--buttonGradateA), var(--buttonGradateB));
+	background: linear-gradient(90deg, var(--MI_THEME-buttonGradateA), var(--MI_THEME-buttonGradateB));
 	transition: all 0.5s cubic-bezier(0,.5,.5,1);
 }
 
@@ -113,7 +113,7 @@ async function close(skip?: boolean) {
 	left: 0;
 	flex-shrink: 0;
 	padding: 12px;
-	border-top: solid 0.5px var(--divider);
+	border-top: solid 0.5px var(--MI_THEME-divider);
 	-webkit-backdrop-filter: blur(15px);
 	backdrop-filter: blur(15px);
 }

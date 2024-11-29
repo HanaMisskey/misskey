@@ -17,6 +17,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 		<EmA :to="notePage(note)">
 			<EmTime :time="note.createdAt" colored/>
 		</EmA>
+		<span v-if="note.visibility === 'public' && note.channel == null && note.isNoteInHanaMode === true" style="margin-left: 0.5em;" :title="`${i18n.ts._visibility[note.visibility]} (${i18n.ts._hana.hanaMode})`"><i class="ti ti-hanamisskey-hanamode"></i></span>
 		<span v-if="note.visibility !== 'public'" style="margin-left: 0.5em;">
 			<i v-if="note.visibility === 'home'" class="ti ti-home"></i>
 			<i v-else-if="note.visibility === 'followers'" class="ti ti-lock"></i>
@@ -33,6 +34,7 @@ import { } from 'vue';
 import * as Misskey from 'misskey-js';
 import { notePage } from '@/utils.js';
 import { userPage } from '@/utils.js';
+import { i18n } from '@/i18n.js';
 import EmA from '@/components/EmA.vue';
 import EmUserName from '@/components/EmUserName.vue';
 import EmAcct from '@/components/EmAcct.vue';
@@ -72,7 +74,7 @@ defineProps<{
 	margin: 0 .5em 0 0;
 	padding: 1px 6px;
 	font-size: 80%;
-	border: solid 0.5px var(--divider);
+	border: solid 0.5px var(--MI_THEME-divider);
 	border-radius: 3px;
 }
 

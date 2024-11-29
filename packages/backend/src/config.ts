@@ -63,6 +63,8 @@ type Source = {
 
 	publishTarballInsteadOfProvideRepositoryUrl?: boolean;
 
+	setupPassword?: string;
+
 	proxy?: string;
 	proxySmtp?: string;
 	proxyBypassHosts?: string[];
@@ -103,9 +105,6 @@ type Source = {
 	};
 
 	pidFile: string;
-
-	bskHost?: string;
-	bskSystemWebhookSecret: string;
 };
 
 export type Config = {
@@ -161,6 +160,7 @@ export type Config = {
 
 	version: string;
 	publishTarballInsteadOfProvideRepositoryUrl: boolean;
+	setupPassword: string | undefined;
 	host: string;
 	hostname: string;
 	scheme: string;
@@ -194,9 +194,6 @@ export type Config = {
 	} | undefined;
 
 	pidFile: string;
-
-	bskHost: string;
-	bskSystemWebhookSecret: string;
 };
 
 const _filename = fileURLToPath(import.meta.url);
@@ -250,6 +247,7 @@ export function loadConfig(): Config {
 	return {
 		version,
 		publishTarballInsteadOfProvideRepositoryUrl: !!config.publishTarballInsteadOfProvideRepositoryUrl,
+		setupPassword: config.setupPassword,
 		url: url.origin,
 		port: config.port ?? parseInt(process.env.PORT ?? '', 10),
 		socket: config.socket,
@@ -308,8 +306,6 @@ export function loadConfig(): Config {
 		deactivateAntennaThreshold: config.deactivateAntennaThreshold ?? (1000 * 60 * 60 * 24 * 7),
 		import: config.import,
 		pidFile: config.pidFile,
-		bskHost: config.bskHost ?? 'misskey.backspace.fm',
-		bskSystemWebhookSecret: config.bskSystemWebhookSecret,
 	};
 }
 
@@ -329,5 +325,12 @@ function convertRedisOptions(options: RedisOptionsSource, host: string): RedisOp
 		family: options.family ?? 0,
 		keyPrefix: `${options.prefix ?? host}:`,
 		db: options.db ?? 0,
+		reconnectOnError(err: any) {
+			const targetError = 'READONLY';
+			if (err.message.includes(targetError)) {
+				return 2; // 再接続を行った後にクエリを実行する、そこでエラーがなければアプリケーション側にはエラーを伝えない。
+			}
+			return false;
+		},
 	};
 }

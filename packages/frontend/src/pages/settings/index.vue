@@ -17,7 +17,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 				</div>
 				<div v-if="!(narrow && currentPage?.route.name == null)" class="main">
 					<div class="bkzroven" style="container-type: inline-size;">
-						<RouterView/>
+						<RouterView nested/>
 					</div>
 				</div>
 			</div>
@@ -105,11 +105,6 @@ const menuDef = computed(() => [{
 		text: i18n.ts._hana.hanaMode,
 		to: '/settings/hanamode',
 		active: currentPage.value?.route.name === 'hanamode',
-	}, {
-		icon: 'ti ti-plane',
-		text: i18n.ts._hana.migrateFromBackspaceKey,
-		to: '/settings/migrate-from-bsk',
-		active: currentPage.value?.route.name === 'migrate-from-bsk',
 	}],
 }, {
 	title: i18n.ts.clientSettings,
