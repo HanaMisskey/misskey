@@ -117,9 +117,10 @@ redis:
 meilisearch:
   host: meilisearch
   port: 7700
-  apiKey: ''
+  apiKey: 'LeEBwDGYe3q3AcXocAcwfHRLcXZTpjmhvuu7tfd7ctTtkjdt2eXaGin4JGRxZLYxVpjj23bWrrXkkcP7DEJUiPbonmCcUPyE9Ddz'
   ssl: false
-  index: ''
+  index: 'meili'
+  scope: global
 
 #   ┌────────────────────────────┐
 #───┘ HanamiSearch configuration └─────────────────────────────
@@ -127,9 +128,10 @@ meilisearch:
 hanamisearch:
   host: hanamisearch
   port: 7700
-  apiKey: ''
+  apiKey: 'LeEBwDGYe3q3AcXocAcwfHRLcXZTpjmhvuu7tfd7ctTtkjdt2eXaGin4JGRxZLYxVpjj23bWrrXkkcP7DEJUiPbonmCcUPyE9Ddz'
   ssl: false
-  index: ''
+  index: 'hanami'
+  scope: global
 
 #   ┌───────────────┐
 #───┘ ID generation └───────────────────────────────────────────
