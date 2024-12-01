@@ -58,6 +58,14 @@ type Source = {
 		index: string;
 		scope?: 'local' | 'global' | string[];
 	};
+	hanamisearch?: {
+		host: string;
+		port: string;
+		apiKey: string;
+		ssl?: boolean;
+		index: string;
+		scope?: 'local' | 'global' | string[];
+	};
 	sentryForBackend?: { options: Partial<Sentry.NodeOptions>; enableNodeProfiling: boolean; };
 	sentryForFrontend?: { options: Partial<Sentry.NodeOptions> };
 
@@ -111,9 +119,6 @@ type Source = {
 	};
 
 	pidFile: string;
-
-	bskHost?: string;
-	bskSystemWebhookSecret: string;
 };
 
 export type Config = {
@@ -147,7 +152,15 @@ export type Config = {
 		index: string;
 		scope?: 'local' | 'global' | string[];
 	} | undefined;
-	stripe: {
+	hanamisearch: {
+		host: string;
+		port: string;
+		apiKey: string;
+		ssl?: boolean;
+		index: string;
+		scope?: 'local' | 'global' | string[];
+	} | undefined;
+  stripe: {
 		secretKey: string;
 		webhookSecret?: string;
 		customerPortalUrl?: string;
@@ -208,9 +221,6 @@ export type Config = {
 	} | undefined;
 
 	pidFile: string;
-
-	bskHost: string;
-	bskSystemWebhookSecret: string;
 };
 
 const _filename = fileURLToPath(import.meta.url);
@@ -282,6 +292,7 @@ export function loadConfig(): Config {
 		dbReplications: config.dbReplications,
 		dbSlaves: config.dbSlaves,
 		meilisearch: config.meilisearch,
+		hanamisearch: config.hanamisearch,
 		stripe: config.stripe,
 		redis,
 		redisForPubsub: config.redisForPubsub ? convertRedisOptions(config.redisForPubsub, host) : redis,
@@ -324,8 +335,6 @@ export function loadConfig(): Config {
 		deactivateAntennaThreshold: config.deactivateAntennaThreshold ?? (1000 * 60 * 60 * 24 * 7),
 		import: config.import,
 		pidFile: config.pidFile,
-		bskHost: config.bskHost ?? 'misskey.backspace.fm',
-		bskSystemWebhookSecret: config.bskSystemWebhookSecret,
 	};
 }
 

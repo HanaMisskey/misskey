@@ -331,8 +331,6 @@ import type {
 	IAppsResponse,
 	IAuthorizedAppsRequest,
 	IAuthorizedAppsResponse,
-	IBskMigrateGetMiauthIdResponse,
-	IBskMigrateStatusResponse,
 	IClaimAchievementRequest,
 	IChangePasswordRequest,
 	IDeleteAccountRequest,
@@ -455,6 +453,8 @@ import type {
 	NotesSearchByTagResponse,
 	NotesSearchRequest,
 	NotesSearchResponse,
+	NotesHanamisearchV1Request,
+	NotesHanamisearchV1Response,
 	NotesShowRequest,
 	NotesShowResponse,
 	NotesStateRequest,
@@ -816,10 +816,6 @@ export type Endpoints = {
 	'i/2fa/unregister': { req: I2faUnregisterRequest; res: EmptyResponse };
 	'i/apps': { req: IAppsRequest; res: IAppsResponse };
 	'i/authorized-apps': { req: IAuthorizedAppsRequest; res: IAuthorizedAppsResponse };
-	'i/bsk-migrate/get-miauth-id': { req: EmptyRequest; res: IBskMigrateGetMiauthIdResponse };
-	'i/bsk-migrate/remove': { req: EmptyRequest; res: EmptyResponse };
-	'i/bsk-migrate/status': { req: EmptyRequest; res: IBskMigrateStatusResponse };
-	'i/bsk-migrate/verify': { req: EmptyRequest; res: EmptyResponse };
 	'i/claim-achievement': { req: IClaimAchievementRequest; res: EmptyResponse };
 	'i/change-password': { req: IChangePasswordRequest; res: EmptyResponse };
 	'i/delete-account': { req: IDeleteAccountRequest; res: EmptyResponse };
@@ -906,6 +902,7 @@ export type Endpoints = {
 	'notes/replies': { req: NotesRepliesRequest; res: NotesRepliesResponse };
 	'notes/search-by-tag': { req: NotesSearchByTagRequest; res: NotesSearchByTagResponse };
 	'notes/search': { req: NotesSearchRequest; res: NotesSearchResponse };
+	'notes/hanamisearch-v1': { req: NotesHanamisearchV1Request; res: NotesHanamisearchV1Response };
 	'notes/show': { req: NotesShowRequest; res: NotesShowResponse };
 	'notes/state': { req: NotesStateRequest; res: NotesStateResponse };
 	'notes/thread-muting/create': { req: NotesThreadMutingCreateRequest; res: EmptyResponse };

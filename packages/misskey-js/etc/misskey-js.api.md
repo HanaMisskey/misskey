@@ -1577,8 +1577,6 @@ declare namespace entities {
         IAppsResponse,
         IAuthorizedAppsRequest,
         IAuthorizedAppsResponse,
-        IBskMigrateGetMiauthIdResponse,
-        IBskMigrateStatusResponse,
         IClaimAchievementRequest,
         IChangePasswordRequest,
         IDeleteAccountRequest,
@@ -1701,6 +1699,8 @@ declare namespace entities {
         NotesSearchByTagResponse,
         NotesSearchRequest,
         NotesSearchResponse,
+        NotesHanamisearchV1Request,
+        NotesHanamisearchV1Response,
         NotesShowRequest,
         NotesShowResponse,
         NotesStateRequest,
@@ -2207,12 +2207,6 @@ type IAuthorizedAppsRequest = operations['i___authorized-apps']['requestBody']['
 
 // @public (undocumented)
 type IAuthorizedAppsResponse = operations['i___authorized-apps']['responses']['200']['content']['application/json'];
-
-// @public (undocumented)
-type IBskMigrateGetMiauthIdResponse = operations['i___bsk-migrate___get-miauth-id']['responses']['200']['content']['application/json'];
-
-// @public (undocumented)
-type IBskMigrateStatusResponse = operations['i___bsk-migrate___status']['responses']['200']['content']['application/json'];
 
 // @public (undocumented)
 type IChangePasswordRequest = operations['i___change-password']['requestBody']['content']['application/json'];
@@ -2748,6 +2742,12 @@ type NotesGlobalTimelineRequest = operations['notes___global-timeline']['request
 
 // @public (undocumented)
 type NotesGlobalTimelineResponse = operations['notes___global-timeline']['responses']['200']['content']['application/json'];
+
+// @public (undocumented)
+type NotesHanamisearchV1Request = operations['notes___hanamisearch-v1']['requestBody']['content']['application/json'];
+
+// @public (undocumented)
+type NotesHanamisearchV1Response = operations['notes___hanamisearch-v1']['responses']['200']['content']['application/json'];
 
 // @public (undocumented)
 type NotesHanamiTimelineRequest = operations['notes___hanami-timeline']['requestBody']['content']['application/json'];

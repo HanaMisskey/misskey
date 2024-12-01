@@ -227,10 +227,6 @@ import * as ep___i_2fa_removeKey from './endpoints/i/2fa/remove-key.js';
 import * as ep___i_2fa_unregister from './endpoints/i/2fa/unregister.js';
 import * as ep___i_apps from './endpoints/i/apps.js';
 import * as ep___i_authorizedApps from './endpoints/i/authorized-apps.js';
-import * as ep___i_bskMigrate_getMiauthId from './endpoints/i/bsk-migrate/get-miauth-id.js';
-import * as ep___i_bskMigrate_remove from './endpoints/i/bsk-migrate/remove.js';
-import * as ep___i_bskMigrate_status from './endpoints/i/bsk-migrate/status.js';
-import * as ep___i_bskMigrate_verify from './endpoints/i/bsk-migrate/verify.js';
 import * as ep___i_claimAchievement from './endpoints/i/claim-achievement.js';
 import * as ep___i_changePassword from './endpoints/i/change-password.js';
 import * as ep___i_deleteAccount from './endpoints/i/delete-account.js';
@@ -317,6 +313,7 @@ import * as ep___notes_renotes from './endpoints/notes/renotes.js';
 import * as ep___notes_replies from './endpoints/notes/replies.js';
 import * as ep___notes_searchByTag from './endpoints/notes/search-by-tag.js';
 import * as ep___notes_search from './endpoints/notes/search.js';
+import * as ep___notes_hanamiseach_v1 from './endpoints/notes/hanamisearch-v1.js';
 import * as ep___notes_show from './endpoints/notes/show.js';
 import * as ep___notes_state from './endpoints/notes/state.js';
 import * as ep___notes_threadMuting_create from './endpoints/notes/thread-muting/create.js';
@@ -628,10 +625,6 @@ const eps = [
 	['i/2fa/unregister', ep___i_2fa_unregister],
 	['i/apps', ep___i_apps],
 	['i/authorized-apps', ep___i_authorizedApps],
-	['i/bsk-migrate/get-miauth-id', ep___i_bskMigrate_getMiauthId],
-	['i/bsk-migrate/remove', ep___i_bskMigrate_remove],
-	['i/bsk-migrate/status', ep___i_bskMigrate_status],
-	['i/bsk-migrate/verify', ep___i_bskMigrate_verify],
 	['i/claim-achievement', ep___i_claimAchievement],
 	['i/change-password', ep___i_changePassword],
 	['i/delete-account', ep___i_deleteAccount],
@@ -718,6 +711,7 @@ const eps = [
 	['notes/replies', ep___notes_replies],
 	['notes/search-by-tag', ep___notes_searchByTag],
 	['notes/search', ep___notes_search],
+	['notes/hanamisearch-v1', ep___notes_hanamiseach_v1],
 	['notes/show', ep___notes_show],
 	['notes/state', ep___notes_state],
 	['notes/thread-muting/create', ep___notes_threadMuting_create],

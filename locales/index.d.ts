@@ -1563,10 +1563,6 @@ export interface Locale extends ILocale {
      */
     "registration": string;
     /**
-     * 誰でも新規登録できるようにする
-     */
-    "enableRegistration": string;
-    /**
      * 招待
      */
     "invite": string;
@@ -2383,6 +2379,10 @@ export interface Locale extends ILocale {
      */
     "details": string;
     /**
+     * リノートの詳細
+     */
+    "renoteDetails": string;
+    /**
      * 絵文字を選択
      */
     "chooseEmoji": string;
@@ -2601,7 +2601,7 @@ export interface Locale extends ILocale {
     /**
      * ポストを展開する
      */
-    "expandTweet": string;
+    "expandPost": string;
     /**
      * テーマエディター
      */
@@ -5235,6 +5235,10 @@ export interface Locale extends ILocale {
      */
     "availableRoles": string;
     /**
+     * 注意事項を理解した上でオンにします。
+     */
+    "acknowledgeNotesAndEnable": string;
+    /**
      * 文字数
      */
     "textCount": string;
@@ -5891,6 +5895,14 @@ export interface Locale extends ILocale {
          * サーバー運営者へのお問い合わせフォームのURLや、運営者の連絡先等が記載されたWebページのURLを指定します。
          */
         "inquiryUrlDescription": string;
+        /**
+         * アカウントの作成をオープンにする
+         */
+        "openRegistration": string;
+        /**
+         * 登録を開放することはリスクが伴います。サーバーを常に監視し、トラブルが発生した際にすぐに対応できる体制がある場合のみオンにすることを推奨します。
+         */
+        "openRegistrationWarning": string;
         /**
          * 一定期間モデレーターのアクティビティが検出されなかった場合、スパム防止のためこの設定は自動でオフになります。
          */
@@ -7104,6 +7116,10 @@ export interface Locale extends ILocale {
              * ノート検索の利用
              */
             "canSearchNotes": string;
+            /**
+             * HanamiSearchV1の利用
+             */
+            "canSearchWithHanamiSearchV1": string;
             /**
              * 翻訳機能の利用
              */
@@ -10770,10 +10786,6 @@ export interface Locale extends ILocale {
          */
         "flowerEffect": string;
         /**
-         * BackspaceKeyからの移行
-         */
-        "migrateFromBackspaceKey": string;
-        /**
          * 独自検索エンジンは現在開発中です。今ご利用いただけるのは通常のMisskeyと同じ検索エンジン（Meilisearch）です。今後の進化にご期待ください！
          */
         "searchIsInBeta": string;
@@ -10781,6 +10793,10 @@ export interface Locale extends ILocale {
          * {x}で見る
          */
         "showOnX": ParameterizedString<"x">;
+        /**
+         * 読み込みに時間がかかっています。
+         */
+        "takingTooLongToLoad": string;
         /**
          * 特定商取引法に基づく表記
          */
@@ -10807,87 +10823,6 @@ export interface Locale extends ILocale {
              * どんな機能が実装されるかはお楽しみ。
              */
             "description": string;
-        };
-        "_welcome": {
-            /**
-             * 「{x}」とは？
-             */
-            "whatAboutX": ParameterizedString<"x">;
-            "_aboutHana": {
-                /**
-                 * はなみすきー
-                 */
-                "title": string;
-                /**
-                 * はなみすきーは、Misskeyベースの分散型SNSサービスです。
-                 * あなたのSNS体験に「はな」を添える、数々の独自機能を備えています。
-                 */
-                "description": string;
-            };
-            "_aboutDecentralized": {
-                /**
-                 * 分散型SNS
-                 */
-                "title": string;
-                /**
-                 * 一般的なSNSサービス（X, Instagram, YouTubeなど）はそのサービス内で投稿データなどが完結するようになっています。しかし、分散型SNSは、サービス同士が共通の仕組みを通して連携しており、他のサービスのユーザーの投稿を見たり、フォローしたりできるのです。
-                 * はなみすきーは標準で分散型テクノロジーのActivityPubに対応しており、他のMisskey/Mastodon等を利用したサービスやThreadsなどと通信することができます。
-                 */
-                "description": string;
-            };
-            "_features": {
-                /**
-                 * 近日提供予定
-                 */
-                "inDevelopment": string;
-                "_hanaMode": {
-                    /**
-                     * はなモードで、あなただけのSNS体験を
-                     */
-                    "title": string;
-                    /**
-                     * はなみすきー独自機能「はなモード」をオンにすると、投稿内容がローカルタイムライン（LTL）に流れないようになります。ただし、「ホーム」投稿とは違い、LTLへのリノートが可能なほか、外部サーバーには通常のパブリックの投稿として配信されます。
-                     * これにより、おひとりさまサーバーに近い分散SNS体験をワンクリックで構築することができます。
-                     */
-                    "description": string;
-                };
-                "_reactionAbundance": {
-                    /**
-                     * リアクションで、もっと気軽につながろう
-                     */
-                    "title": string;
-                    /**
-                     * はなみすきーではユーザー同士の交流をより楽しめる「リアクション」機能を搭載。ユーザーの投稿に「いいね」ではなく絵文字を送ることができます。はなみすきーに標準搭載の豊富なリアクション絵文字で、リプライを送るよりも気軽に自分の気持ちを伝えられます。もちろん、リアクションよりいいねボタンがお好みならそのように設定することも可能です。
-                     */
-                    "description": string;
-                };
-                "_easyMigration": {
-                    /**
-                     * 他サービスから簡単移行
-                     */
-                    "title": string;
-                    /**
-                     * 他のMisskeyサーバーなどからの移行が簡単になる機能を提供！過去の投稿もはなみすきー上に引き継ぐことができます。
-                     */
-                    "description": string;
-                };
-                "_preciseSearching": {
-                    /**
-                     * 最新技術を活用した高精度な検索
-                     */
-                    "title": string;
-                    /**
-                     * 機械学習や最新の学術研究をもとに、はなみすきーのためにチューニングされた高精度で高速な検索機能を利用できます。また、はなみすきーの検索機能そのものが学術研究プロジェクトとなっているため、検索精度は日進月歩となることが期待できます。
-                     */
-                    "description": string;
-                };
-            };
-            "_cta": {
-                /**
-                 * はなみすきーで、かわいいSNS体験を
-                 */
-                "title": string;
-            };
         };
         "_hanaModeSwitcher": {
             /**
@@ -10930,52 +10865,6 @@ export interface Locale extends ILocale {
              * 一定期間にモードを変更できる回数には制限があります。
              */
             "saveConfirmDescription": string;
-        };
-        "_migrateFromBackspaceKey": {
-            /**
-             * BackspaceKey上のコンテンツを簡単に移行できます。
-             */
-            "about": string;
-            /**
-             * BackspaceKeyとこのアカウントを連携する
-             */
-            "step1": string;
-            /**
-             * 以下のボタンを押して、移行元のBackspaceKeyアカウントを連携してください。
-             */
-            "step1Description": string;
-            /**
-             * 移行したいコンテンツをエクスポートする
-             */
-            "step2": string;
-            /**
-             * BackspaceKey側で移行したいコンテンツの「エクスポート」ボタンを押してください。
-             */
-            "step2Description": string;
-            /**
-             * 連携中は、BackspaceKeyでエクスポートしたものすべてがはなみすきーにインポートされます。エクスポートだけしたい場合は、はなみすきー連携前に行ってください。
-             */
-            "step2Description2": string;
-            /**
-             * 通知を待つ
-             */
-            "step3": string;
-            /**
-             * コンテンツの移行が完了すると、それぞれに対して通知が送信されます。すべての移行が完了するまでしばらくお待ちください。
-             */
-            "step3Description": string;
-            /**
-             * アカウントの移行を行う
-             */
-            "step4": string;
-            /**
-             * {hana}で移行元のアカウントを指定したあと、{bsk}で移行先のアカウントを指定します。これにより、フォロワーが自動で引き継がれます。
-             */
-            "step4Description": ParameterizedString<"hana" | "bsk">;
-            /**
-             * この時点でBackspaceKeyのアカウントは利用できなくなります。必ずすべての移行が完了するまで待ってください。
-             */
-            "step4Description2": string;
         };
         "_subscription": {
             /**
@@ -11183,6 +11072,24 @@ export interface Locale extends ILocale {
              * 未成年の方は、おうちの方といっしょに確認してください。この設定は後からいつでも変更できます。
              */
             "forMinor": string;
+        };
+        "_searchMode": {
+            /**
+             * 検索モード
+             */
+            "title": string;
+            /**
+             * 新登場
+             */
+            "new": string;
+            /**
+             * 通常のMisskeyと同じ検索システム
+             */
+            "v0Description": string;
+            /**
+             * 精度が大幅改善 / 演算子などで高度な検索が可能
+             */
+            "v1Description": string;
         };
     };
 }

@@ -221,10 +221,6 @@ import * as ep___i_2fa_removeKey from './endpoints/i/2fa/remove-key.js';
 import * as ep___i_2fa_unregister from './endpoints/i/2fa/unregister.js';
 import * as ep___i_apps from './endpoints/i/apps.js';
 import * as ep___i_authorizedApps from './endpoints/i/authorized-apps.js';
-import * as ep___i_bskMigrate_getMiauthId from './endpoints/i/bsk-migrate/get-miauth-id.js';
-import * as ep___i_bskMigrate_remove from './endpoints/i/bsk-migrate/remove.js';
-import * as ep___i_bskMigrate_status from './endpoints/i/bsk-migrate/status.js';
-import * as ep___i_bskMigrate_verify from './endpoints/i/bsk-migrate/verify.js';
 import * as ep___i_claimAchievement from './endpoints/i/claim-achievement.js';
 import * as ep___i_changePassword from './endpoints/i/change-password.js';
 import * as ep___i_deleteAccount from './endpoints/i/delete-account.js';
@@ -311,6 +307,7 @@ import * as ep___notes_renotes from './endpoints/notes/renotes.js';
 import * as ep___notes_replies from './endpoints/notes/replies.js';
 import * as ep___notes_searchByTag from './endpoints/notes/search-by-tag.js';
 import * as ep___notes_search from './endpoints/notes/search.js';
+import * as ep___notes_hanamiseach_v1 from './endpoints/notes/hanamisearch-v1.js';
 import * as ep___notes_show from './endpoints/notes/show.js';
 import * as ep___notes_state from './endpoints/notes/state.js';
 import * as ep___notes_threadMuting_create from './endpoints/notes/thread-muting/create.js';
@@ -624,10 +621,6 @@ const $i_2fa_removeKey: Provider = { provide: 'ep:i/2fa/remove-key', useClass: e
 const $i_2fa_unregister: Provider = { provide: 'ep:i/2fa/unregister', useClass: ep___i_2fa_unregister.default };
 const $i_apps: Provider = { provide: 'ep:i/apps', useClass: ep___i_apps.default };
 const $i_authorizedApps: Provider = { provide: 'ep:i/authorized-apps', useClass: ep___i_authorizedApps.default };
-const $i_bskMigrate_getMiauthId: Provider = { provide: 'ep:i/bsk-migrate/get-miauth-id', useClass: ep___i_bskMigrate_getMiauthId.default };
-const $i_bskMigrate_remove: Provider = { provide: 'ep:i/bsk-migrate/remove', useClass: ep___i_bskMigrate_remove.default };
-const $i_bskMigrate_status: Provider = { provide: 'ep:i/bsk-migrate/status', useClass: ep___i_bskMigrate_status.default };
-const $i_bskMigrate_verify: Provider = { provide: 'ep:i/bsk-migrate/verify', useClass: ep___i_bskMigrate_verify.default };
 const $i_claimAchievement: Provider = { provide: 'ep:i/claim-achievement', useClass: ep___i_claimAchievement.default };
 const $i_changePassword: Provider = { provide: 'ep:i/change-password', useClass: ep___i_changePassword.default };
 const $i_deleteAccount: Provider = { provide: 'ep:i/delete-account', useClass: ep___i_deleteAccount.default };
@@ -714,6 +707,7 @@ const $notes_renotes: Provider = { provide: 'ep:notes/renotes', useClass: ep___n
 const $notes_replies: Provider = { provide: 'ep:notes/replies', useClass: ep___notes_replies.default };
 const $notes_searchByTag: Provider = { provide: 'ep:notes/search-by-tag', useClass: ep___notes_searchByTag.default };
 const $notes_search: Provider = { provide: 'ep:notes/search', useClass: ep___notes_search.default };
+const $notes_hanamisearch_v1: Provider = { provide: 'ep:notes/hanamisearch-v1', useClass: ep___notes_hanamiseach_v1.default };
 const $notes_show: Provider = { provide: 'ep:notes/show', useClass: ep___notes_show.default };
 const $notes_state: Provider = { provide: 'ep:notes/state', useClass: ep___notes_state.default };
 const $notes_threadMuting_create: Provider = { provide: 'ep:notes/thread-muting/create', useClass: ep___notes_threadMuting_create.default };
@@ -1031,10 +1025,6 @@ const $reversi_verify: Provider = { provide: 'ep:reversi/verify', useClass: ep__
 		$i_2fa_unregister,
 		$i_apps,
 		$i_authorizedApps,
-		$i_bskMigrate_getMiauthId,
-		$i_bskMigrate_remove,
-		$i_bskMigrate_status,
-		$i_bskMigrate_verify,
 		$i_claimAchievement,
 		$i_changePassword,
 		$i_deleteAccount,
@@ -1121,6 +1111,7 @@ const $reversi_verify: Provider = { provide: 'ep:reversi/verify', useClass: ep__
 		$notes_replies,
 		$notes_searchByTag,
 		$notes_search,
+		$notes_hanamisearch_v1,
 		$notes_show,
 		$notes_state,
 		$notes_threadMuting_create,
@@ -1431,10 +1422,6 @@ const $reversi_verify: Provider = { provide: 'ep:reversi/verify', useClass: ep__
 		$i_2fa_unregister,
 		$i_apps,
 		$i_authorizedApps,
-		$i_bskMigrate_getMiauthId,
-		$i_bskMigrate_remove,
-		$i_bskMigrate_status,
-		$i_bskMigrate_verify,
 		$i_claimAchievement,
 		$i_changePassword,
 		$i_deleteAccount,
@@ -1521,6 +1508,7 @@ const $reversi_verify: Provider = { provide: 'ep:reversi/verify', useClass: ep__
 		$notes_replies,
 		$notes_searchByTag,
 		$notes_search,
+		$notes_hanamisearch_v1,
 		$notes_show,
 		$notes_state,
 		$notes_threadMuting_create,

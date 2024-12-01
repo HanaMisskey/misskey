@@ -59,7 +59,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				throw new ApiError(meta.errors.subscriptionIsActive);
 			}
 
-			await this.deleteAccoountService.deleteAccount(user);
+			await this.deleteAccoountService.deleteAccount(user, me);
 		});
 	}
 }
