@@ -72,6 +72,7 @@ import { $i } from '@/account.js';
 import { instance } from '@/instance.js';
 
 import MkInfo from '@/components/MkInfo.vue';
+import type { SearchMode } from '@/hana/types/search.js';
 
 const props = withDefaults(defineProps<{
 	query?: string;
@@ -88,7 +89,7 @@ const props = withDefaults(defineProps<{
 const router = useRouter();
 const key = ref(0);
 const searchQuery = ref(toRef(props, 'query').value);
-const searchMode = ref<'v0' | 'v1'>($i?.policies.canSearchWithHanamiSearchV1 ? 'v1' : 'v0');
+const searchMode = ref<SearchMode>($i?.policies.canSearchWithHanamiSearchV1 ? 'v1' : 'v0');
 const notePagination = ref<Paging>();
 const user = ref<UserDetailed | null>(null);
 const hostInput = ref(toRef(props, 'host').value);

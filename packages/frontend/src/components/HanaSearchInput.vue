@@ -77,6 +77,7 @@ import * as os from '@/os.js';
 import { $i } from '@/account.js';
 import { useInterval } from '@@/js/use-interval.js';
 import type { SuggestionType } from '@/scripts/autocomplete.js';
+import type { SearchMode } from '@/hana/types/search.js';
 
 const props = defineProps<{
 	modelValue: string | number | null;
@@ -102,7 +103,7 @@ const props = defineProps<{
 }>();
 
 const v = defineModel<string>({ required: true });
-const searchMode = defineModel<'v0' | 'v1'>('mode');
+const searchMode = defineModel<SearchMode>('mode');
 
 type Token = {
 	value: string;
@@ -241,7 +242,7 @@ function setSearchMode(ev: MouseEvent) {
 		currentMode: searchMode.value,
 		src: ev.currentTarget as HTMLElement,
 	}, {
-		changeMode: (mode: 'v0' | 'v1') => {
+		changeMode: (mode: SearchMode) => {
 			searchMode.value = mode;
 		},
 		closed: () => {

@@ -26,30 +26,29 @@
 
 <script lang="ts" setup>
 import { nextTick, shallowRef, ref } from 'vue';
-import * as Misskey from 'misskey-js';
 import MkModal from '@/components/MkModal.vue';
 import { i18n } from '@/i18n.js';
-
 import { signinRequired } from '@/account.js';
+import type { SearchMode } from '@/hana/types/search.js';
 
 const $i = signinRequired();
 
 const modal = shallowRef<InstanceType<typeof MkModal>>();
 
 const props = withDefaults(defineProps<{
-	currentMode: 'v0' | 'v1';
+	currentMode: SearchMode;
 	src?: HTMLElement;
 }>(), {
 });
 
 const emit = defineEmits<{
-	(ev: 'changeMode', v: 'v0' | 'v1'): void;
+	(ev: 'changeMode', v: SearchMode): void;
 	(ev: 'closed'): void;
 }>();
 
 const v = ref(props.currentMode);
 
-function choose(mode: 'v0' | 'v1'): void {
+function choose(mode: SearchMode): void {
 	v.value = mode;
 	emit('changeMode', mode);
 	nextTick(() => {
