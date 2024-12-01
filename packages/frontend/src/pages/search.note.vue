@@ -198,7 +198,7 @@ async function search() {
 		}
 	}
 
-	if ($i?.policies.canSearchWithHanamiSearchV1 === true) {
+	if ($i?.policies.canSearchWithHanamiSearchV1 === true && searchMode.value === 'v1') {
 		notePagination.value = {
 			endpoint: 'notes/hanamisearch-v1',
 			limit: 10,
