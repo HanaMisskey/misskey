@@ -58,7 +58,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 	) {
 		super(meta, paramDef, async (ps, me) => {
 			const policies = await this.roleService.getUserPolicies(me ? me.id : null);
-			if (!policies.canSearchWithHanamiSeachV1) {
+			if (!policies.canSearchWithHanamiSearchV1) {
 				throw new ApiError(meta.errors.unavailable);
 			}
 
