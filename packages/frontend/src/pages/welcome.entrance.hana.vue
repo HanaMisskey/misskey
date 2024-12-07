@@ -57,7 +57,15 @@ const dev = _DEV_ ? '?debug' : '';
 
 const lang = miLocalStorage.getItem('lang')?.includes('ja') ? 'ja' : 'en';
 
-const frameUrl = `https://frame-static-assets.misskey.flowers/${lang}/${dev}`;
+let path = '/';
+
+const qs = new URLSearchParams(location.search);
+
+if (qs.has('__path')) {
+	path = qs.get('__path')!;
+}
+
+const frameUrl = `https://frame-static-assets.misskey.flowers/${lang}${path}${dev}`;
 
 const frameEl = useTemplateRef('frameEl');
 
