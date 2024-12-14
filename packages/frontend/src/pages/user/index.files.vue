@@ -10,22 +10,6 @@ SPDX-License-Identifier: AGPL-3.0-only
 	<div :class="$style.root">
 		<MkLoading v-if="fetching"/>
 		<div v-if="!fetching && notes.length > 0" :class="$style.stream">
-			<!--
-			<template v-for="file in files" :key="file.note.id + file.file.id">
-				<div v-if="file.file.isSensitive && !showingFiles.includes(file.file.id)" :class="$style.img" @click="showingFiles.push(file.file.id)">
-					<ImgWithBlurhash :class="$style.sensitiveImg" :hash="file.file.blurhash" :src="thumbnail(file.file)" :title="file.file.name" :forceBlurhash="true"/>
-					<div :class="$style.sensitive">
-						<div>
-							<div><i class="ti ti-eye-exclamation"></i> {{ i18n.ts.sensitive }}</div>
-							<div>{{ i18n.ts.clickToShow }}</div>
-						</div>
-					</div>
-				</div>
-				<MkA v-else :class="$style.img" :to="notePage(file.note)">
-					<ImgWithBlurhash :hash="file.file.blurhash" :src="thumbnail(file.file)" :title="file.file.name"/>
-				</MkA>
-			</template>
-			-->
 			<MkNoteMediaGrid v-for="note in notes" :note="note" bgIsPanel/>
 		</div>
 		<p v-if="!fetching && notes.length == 0" :class="$style.empty">{{ i18n.ts.nothing }}</p>
