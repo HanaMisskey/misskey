@@ -30,7 +30,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 	>
 		<div v-show="showBody" ref="contentEl" :class="[$style.content, { [$style.omitted]: omitted }]">
 			<slot></slot>
-			<button v-if="omitted" :class="$style.fade" class="_button" @click="showMore">
+			<button v-if="omitted" :class="$style.fade" class="_button" @click="() => { ignoreOmit = true; omitted = false; }">
 				<span :class="$style.fadeLabel">{{ i18n.ts.showMore }}</span>
 			</button>
 		</div>
@@ -48,7 +48,6 @@ const props = withDefaults(defineProps<{
 	thin?: boolean;
 	naked?: boolean;
 	foldable?: boolean;
-	onUnfold?: () => boolean; // return false to prevent unfolding
 	scrollable?: boolean;
 	expanded?: boolean;
 	maxHeight?: number | null;
@@ -101,13 +100,6 @@ const calcOmit = () => {
 const omitObserver = new ResizeObserver((entries, observer) => {
 	calcOmit();
 });
-
-function showMore() {
-	if (props.onUnfold && !props.onUnfold()) return;
-
-	ignoreOmit.value = true;
-	omitted.value = false;
-}
 
 onMounted(() => {
 	watch(showBody, v => {

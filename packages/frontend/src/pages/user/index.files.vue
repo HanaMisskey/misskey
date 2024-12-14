@@ -4,7 +4,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 -->
 
 <template>
-<MkContainer :max-height="300" :foldable="true" :onUnfold="unfoldContainer">
+<MkContainer :max-height="300" :foldable="true">
 	<template #icon><i class="ti ti-photo"></i></template>
 	<template #header>{{ i18n.ts.files }}</template>
 	<div :class="$style.root">
@@ -20,10 +20,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue';
 import * as Misskey from 'misskey-js';
-import { getProxiedImageUrl, getStaticImageUrl } from '@/scripts/media-proxy.js';
 import { misskeyApi } from '@/scripts/misskey-api.js';
 import MkContainer from '@/components/MkContainer.vue';
-import { defaultStore } from '@/store.js';
 import { i18n } from '@/i18n.js';
 import MkNoteMediaGrid from '@/components/MkNoteMediaGrid.vue';
 
@@ -31,23 +29,8 @@ const props = defineProps<{
 	user: Misskey.entities.UserDetailed;
 }>();
 
-const emit = defineEmits<{
-	(ev: 'unfold'): void;
-}>();
-
 const fetching = ref(true);
 const notes = ref<Misskey.entities.Note[]>([]);
-
-function unfoldContainer(): boolean {
-	emit('unfold');
-	return false;
-}
-
-function thumbnail(image: Misskey.entities.DriveFile): string {
-	return defaultStore.state.disableShowingAnimatedImages
-		? getStaticImageUrl(image.url)
-		: image.thumbnailUrl ?? getProxiedImageUrl(image.url, 'preview');
-}
 
 onMounted(() => {
 	misskeyApi('users/notes', {

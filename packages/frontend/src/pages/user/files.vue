@@ -8,7 +8,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 		<div :class="$style.root">
 			<MkPagination v-slot="{items}" :pagination="pagination">
 				<div :class="$style.stream">
-					<MkMedias v-for="note in items" :note="note" square/>
+					<MkMedias v-for="note in items" :note="note"/>
 				</div>
 			</MkPagination>
 		</div>
