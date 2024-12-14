@@ -40,9 +40,9 @@ import * as Misskey from 'misskey-js';
 // import { notePage } from '@/filters/note.js';
 import { misskeyApi } from '@/scripts/misskey-api.js';
 import MkContainer from '@/components/MkContainer.vue';
-import { i18n } from '@/i18n.js';
 // import ImgWithBlurhash from '@/components/MkImgWithBlurhash.vue';
 // import { defaultStore } from '@/store.js';
+import { i18n } from '@/i18n.js';
 import MkNoteMediaGrid from '@/components/MkNoteMediaGrid.vue';
 
 const props = defineProps<{
