@@ -36,7 +36,7 @@ onMounted(() => {
 	misskeyApi('users/notes', {
 		userId: props.user.id,
 		withFiles: true,
-		limit: 15,
+		limit: 10,
 	}).then(_notes => {
 		notes.value = _notes;
 		fetching.value = false;
