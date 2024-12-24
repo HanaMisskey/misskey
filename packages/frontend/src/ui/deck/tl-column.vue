@@ -100,7 +100,7 @@ async function setType() {
 		title: i18n.ts.timeline,
 		items: [{
 			value: 'home' as const, text: i18n.ts._timelines.home,
-		}, ...($i.isInHanaMode ? [{
+		}, ...($i.policies.hanamiTlAvailable ? [{
 			value: 'hanami' as const, text: i18n.ts._timelines.hanami,
 		}] : []), {
 			value: 'local' as const, text: i18n.ts._timelines.local,
