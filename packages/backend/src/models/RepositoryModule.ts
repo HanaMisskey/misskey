@@ -77,7 +77,8 @@ import {
 	MiUserProfile,
 	MiUserPublickey,
 	MiUserSecurityKey,
-	MiWebhook
+	MiWebhook,
+	MiSubscriptionPlan,
 } from './_.js';
 import type { DataSource } from 'typeorm';
 
@@ -495,6 +496,12 @@ const $reversiGamesRepository: Provider = {
 	inject: [DI.db],
 };
 
+const $subscriptionPlansRepository: Provider = {
+	provide: DI.subscriptionPlansRepository,
+	useFactory: (db: DataSource) => db.getRepository(MiSubscriptionPlan),
+	inject: [DI.db],
+};
+
 @Module({
 	imports: [],
 	providers: [
@@ -567,6 +574,7 @@ const $reversiGamesRepository: Provider = {
 		$userMemosRepository,
 		$bubbleGameRecordsRepository,
 		$reversiGamesRepository,
+		$subscriptionPlansRepository,
 	],
 	exports: [
 		$usersRepository,
@@ -638,6 +646,7 @@ const $reversiGamesRepository: Provider = {
 		$userMemosRepository,
 		$bubbleGameRecordsRepository,
 		$reversiGamesRepository,
+		$subscriptionPlansRepository,
 	],
 })
 export class RepositoryModule {

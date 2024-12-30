@@ -100,6 +100,10 @@ SPDX-License-Identifier: AGPL-3.0-only
 							<MkButton v-if="user.host == null" inline style="margin-right: 8px;" @click="resetPassword"><i class="ti ti-key"></i> {{ i18n.ts.resetPassword }}</MkButton>
 						</div>
 
+						<div>
+							<MkButton inline @click="refreshSubscriptionStatus"><i class="ti ti-refresh"></i> {{ i18n.ts._hana._subscription.refresh }}</MkButton>
+						</div>
+
 						<MkFolder>
 							<template #icon><i class="ti ti-license"></i></template>
 							<template #label>{{ i18n.ts._role.policies }}</template>
@@ -372,6 +376,11 @@ async function unsetUserBanner() {
 		});
 	});
 	refreshUser();
+}
+
+function refreshSubscriptionStatus() {
+	if (!user.value) return;
+	os.apiWithDialog('admin/refresh-user-subscription-status', { userId: user.value.id });
 }
 
 async function deleteAllFiles() {

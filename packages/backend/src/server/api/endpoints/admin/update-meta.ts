@@ -8,6 +8,7 @@ import type { MiMeta } from '@/models/Meta.js';
 import { ModerationLogService } from '@/core/ModerationLogService.js';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { MetaService } from '@/core/MetaService.js';
+import { Column } from 'typeorm';
 
 export const meta = {
 	tags: ['admin'],
@@ -152,6 +153,7 @@ export const paramDef = {
 		perUserListTimelineCacheMax: { type: 'integer' },
 		enableReactionsBuffering: { type: 'boolean' },
 		notesPerOneAd: { type: 'integer' },
+		commerceDisclosureUrl: { type: 'string', nullable: true },
 		silencedHosts: {
 			type: 'array',
 			nullable: true,
@@ -186,6 +188,7 @@ export const paramDef = {
 				type: 'string',
 			},
 		},
+		enableSubscriptions: { type: 'boolean' },
 	},
 	required: [],
 } as const;
@@ -640,6 +643,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				set.notesPerOneAd = ps.notesPerOneAd;
 			}
 
+			if (ps.commerceDisclosureUrl !== undefined) {
+				set.commerceDisclosureUrl = ps.commerceDisclosureUrl;
+			}
+
 			if (ps.bannedEmailDomains !== undefined) {
 				set.bannedEmailDomains = ps.bannedEmailDomains;
 			}
@@ -676,6 +683,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 
 			if (Array.isArray(ps.federationHosts)) {
 				set.federationHosts = ps.federationHosts.filter(Boolean).map(x => x.toLowerCase());
+			}
+
+			if (ps.enableSubscriptions !== undefined) {
+				set.enableSubscriptions = ps.enableSubscriptions;
 			}
 
 			const before = await this.metaService.fetch(true);

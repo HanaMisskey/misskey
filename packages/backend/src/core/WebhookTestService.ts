@@ -93,6 +93,9 @@ function generateDummyUser(override?: Partial<MiUser>): MiUser {
 		bskUserId: null,
 		bskAccessToken: null,
 		bskMigratedEntities: [],
+		stripeSubscriptionId: null,
+		subscriptionPlanId: null,
+		subscriptionStatus: 'none',
 		...override,
 	};
 }
@@ -203,6 +206,8 @@ function toPackedUserLite(user: MiUser, override?: Packed<'UserLite'>): Packed<'
 		emojis: user.emojis,
 		onlineStatus: 'active',
 		badgeRoles: [],
+		subscriptionPlanId: user.subscriptionPlanId,
+		subscriptionStatus: user.subscriptionStatus,
 		...override,
 	};
 }

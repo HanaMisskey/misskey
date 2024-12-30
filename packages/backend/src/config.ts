@@ -73,6 +73,12 @@ type Source = {
 
 	setupPassword?: string;
 
+	stripe?: {
+		secretKey: string;
+		webhookSecret: string;
+		customerPortalUrl: string;
+	};
+
 	proxy?: string;
 	proxySmtp?: string;
 	proxyBypassHosts?: string[];
@@ -153,6 +159,11 @@ export type Config = {
 		ssl?: boolean;
 		index: string;
 		scope?: 'local' | 'global' | string[];
+	} | undefined;
+  stripe: {
+		secretKey: string;
+		webhookSecret?: string;
+		customerPortalUrl?: string;
 	} | undefined;
 	proxy: string | undefined;
 	proxySmtp: string | undefined;
@@ -282,6 +293,7 @@ export function loadConfig(): Config {
 		dbSlaves: config.dbSlaves,
 		meilisearch: config.meilisearch,
 		hanamisearch: config.hanamisearch,
+		stripe: config.stripe,
 		redis,
 		redisForPubsub: config.redisForPubsub ? convertRedisOptions(config.redisForPubsub, host) : redis,
 		redisForJobQueue: config.redisForJobQueue ? convertRedisOptions(config.redisForJobQueue, host) : redis,

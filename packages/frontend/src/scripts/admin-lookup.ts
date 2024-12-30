@@ -86,3 +86,21 @@ export async function lookupFile() {
 		}
 	});
 }
+
+export async function lookupUserByCustomer() {
+	const { canceled, result } = await os.inputText({
+		title: 'Stripe Customer ID',
+		type: 'text',
+	});
+	if (canceled || result == null) return;
+
+	os.apiWithDialog('admin/accounts/find-by-stripe-customer', {
+		customerId: result,
+	}, undefined, {
+		'cb865949-8af5-4062-a88c-ef55e8786d1d': {
+			text: i18n.ts.noSuchUser,
+		}
+	}).then((user) => {
+		os.pageWindow(`/admin/user/${user.id}`);
+	});
+}

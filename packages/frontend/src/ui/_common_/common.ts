@@ -124,7 +124,17 @@ export function openInstanceMenu(ev: MouseEvent) {
 		});
 	}
 
-	if (instance.impressumUrl != null || instance.tosUrl != null || instance.privacyPolicyUrl != null) {
+	if (instance.commerceDisclosureUrl) {
+		menuItems.push({
+			type: 'a',
+			text: i18n.ts._hana.commerceDisclosure,
+			icon: 'ti ti-shield-lock',
+			href: instance.commerceDisclosureUrl,
+			target: '_blank',
+		});
+	}
+
+	if (instance.impressumUrl != null || instance.tosUrl != null || instance.privacyPolicyUrl != null || instance.commerceDisclosureUrl != null) {
 		menuItems.push({ type: 'divider' });
 	}
 

@@ -29,7 +29,7 @@ import { FeedService } from './web/FeedService.js';
 import { UrlPreviewService } from './web/UrlPreviewService.js';
 import { ClientLoggerService } from './web/ClientLoggerService.js';
 import { OAuth2ProviderService } from './oauth/OAuth2ProviderService.js';
-
+import { StripeWebhookServerService } from './StripeWebhookServerService.js';
 import { MainChannelService } from './api/stream/channels/main.js';
 import { AdminChannelService } from './api/stream/channels/admin.js';
 import { AntennaChannelService } from './api/stream/channels/antenna.js';
@@ -96,6 +96,7 @@ import { SigninWithPasskeyApiService } from './api/SigninWithPasskeyApiService.j
 		UserListChannelService,
 		OpenApiServerService,
 		OAuth2ProviderService,
+		StripeWebhookServerService,
 	],
 	exports: [
 		ServerService,

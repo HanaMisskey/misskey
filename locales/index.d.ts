@@ -10864,6 +10864,22 @@ export interface Locale extends ILocale {
          * 読み込みに時間がかかっています。
          */
         "takingTooLongToLoad": string;
+        /**
+         * 特定商取引法に基づく表記
+         */
+        "commerceDisclosure": string;
+        /**
+         * 特定商取引法に基づく表記URL
+         */
+        "commerceDisclosureUrl": string;
+        /**
+         * サブスクリプション
+         */
+        "subscription": string;
+        /**
+         * サブスクリプションの状態
+         */
+        "subscriptionStatus": string;
         "_inDevelopment": {
             /**
              * この機能は開発中です
@@ -10916,6 +10932,80 @@ export interface Locale extends ILocale {
              * 一定期間にモードを変更できる回数には制限があります。
              */
             "saveConfirmDescription": string;
+        };
+        "_subscription": {
+            /**
+             * 現在のプラン
+             */
+            "current": string;
+            /**
+             * 価格
+             */
+            "price": string;
+            /**
+             * 通貨
+             */
+            "currency": string;
+            /**
+             * Stripeの価格ID
+             */
+            "stripePriceId": string;
+            /**
+             * 購入
+             */
+            "subscribe": string;
+            /**
+             * 管理
+             */
+            "manage": string;
+            /**
+             * プランを変更
+             */
+            "changePlan": string;
+            /**
+             * プランを変更しますか？
+             */
+            "confirmChangePlan": string;
+            /**
+             * 未完了
+             */
+            "incomplete": string;
+            /**
+             * 期限切れ
+             */
+            "incomplete_expired": string;
+            /**
+             * トライアル中
+             */
+            "trialing": string;
+            /**
+             * 有効
+             */
+            "active": string;
+            /**
+             * 支払い期限切れ
+             */
+            "past_due": string;
+            /**
+             * キャンセル済み
+             */
+            "canceled": string;
+            /**
+             * 未払い
+             */
+            "unpaid": string;
+            /**
+             * なし
+             */
+            "none": string;
+            /**
+             * サブスクリプションの状態を更新
+             */
+            "refresh": string;
+            /**
+             * このslugを持つプランが既に存在します。
+             */
+            "planWithThisSlugAlreadyExists": string;
         };
         "_welcomeCardGen": {
             /**

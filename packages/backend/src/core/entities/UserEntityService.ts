@@ -515,6 +515,14 @@ export class UserEntityService implements OnModuleInit {
 				})),
 			) : undefined,
 
+			...(isMe ? {
+				subscriptionStatus: user.subscriptionStatus,
+				subscriptionPlanId: user.subscriptionPlanId,
+			} : {
+				subscriptionStatus: 'none' as const,
+				subscriptionPlanId: null,
+			}),
+
 			...(isDetailed ? {
 				url: profile!.url,
 				uri: user.uri,
@@ -636,6 +644,8 @@ export class UserEntityService implements OnModuleInit {
 						},
 					})
 					: [],
+					stripeCustomerId: profile?.stripeCustomerId,
+					stripeSubscriptionId: user.stripeSubscriptionId,
 			} : {}),
 
 			...(relation ? {

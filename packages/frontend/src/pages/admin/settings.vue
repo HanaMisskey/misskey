@@ -72,6 +72,11 @@ SPDX-License-Identifier: AGPL-3.0-only
 							<template #caption>{{ i18n.ts.impressumDescription }}</template>
 							<template #prefix><i class="ti ti-link"></i></template>
 						</MkInput>
+
+						<MkInput v-model="infoForm.state.commerceDisclosureUrl" type="url">
+							<template #label>{{ i18n.ts._hana.commerceDisclosureUrl }}<span v-if="infoForm.modifiedStates.commerceDisclosureUrl" class="_modified">{{ i18n.ts.modified }}</span></template>
+							<template #prefix><i class="ti ti-link"></i></template>
+						</MkInput>
 					</div>
 				</MkFolder>
 
@@ -290,6 +295,7 @@ const infoForm = useForm({
 	inquiryUrl: meta.inquiryUrl ?? '',
 	repositoryUrl: meta.repositoryUrl ?? '',
 	impressumUrl: meta.impressumUrl ?? '',
+	commerceDisclosureUrl: meta.commerceDisclosureUrl ?? '',
 }, async (state) => {
 	await os.apiWithDialog('admin/update-meta', {
 		name: state.name,
@@ -302,6 +308,7 @@ const infoForm = useForm({
 		inquiryUrl: state.inquiryUrl,
 		repositoryUrl: state.repositoryUrl,
 		impressumUrl: state.impressumUrl,
+		commerceDisclosureUrl: state.commerceDisclosureUrl,
 	});
 	fetchInstance(true);
 });
