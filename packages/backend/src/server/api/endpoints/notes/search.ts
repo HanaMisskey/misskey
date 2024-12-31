@@ -9,6 +9,7 @@ import { SearchService } from '@/core/SearchService.js';
 import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
 import { RoleService } from '@/core/RoleService.js';
 import { ApiError } from '../../error.js';
+import { isMustRemove } from '@/misc/is-hidden-or-visibilityModified.js';
 
 export const meta = {
 	tags: ['notes'],
@@ -77,7 +78,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				limit: ps.limit,
 			});
 
-			return await this.noteEntityService.packMany(notes, me);
+			return (await this.noteEntityService.packMany(notes, me)).filter(note => !isMustRemove(note,'home'));;
 		});
 	}
 }
