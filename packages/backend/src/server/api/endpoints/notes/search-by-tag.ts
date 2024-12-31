@@ -12,7 +12,7 @@ import { Endpoint } from '@/server/api/endpoint-base.js';
 import { QueryService } from '@/core/QueryService.js';
 import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
 import { DI } from '@/di-symbols.js';
-import { isMustRemove } from '@/misc/is-hidden-or-visibilityModified.js';
+import { isMustRemove } from '@/misc/is-hidden-or-visibility-modified.js';
 
 export const meta = {
 	tags: ['notes', 'hashtags'],

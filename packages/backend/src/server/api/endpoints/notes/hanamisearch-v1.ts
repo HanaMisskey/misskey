@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { SearchService } from '@/core/SearchService.js';
 import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
-import { isMustRemove } from '@/misc/is-hidden-or-visibilityModified.js';
+import { isMustRemove } from '@/misc/is-hidden-or-visibility-modified.js';
 
 export const meta = {
 	tags: ['notes'],

@@ -15,7 +15,7 @@ import { IdService } from '@/core/IdService.js';
 import { FanoutTimelineService } from '@/core/FanoutTimelineService.js';
 import { GlobalEventService } from '@/core/GlobalEventService.js';
 import { trackPromise } from '@/misc/promise-tracker.js';
-import { isMustRemove } from '@/misc/is-hidden-or-visibilityModified.js';
+import { isMustRemove } from '@/misc/is-hidden-or-visibility-modified.js';
 import { ApiError } from '../../error.js';
 
 export const meta = {
