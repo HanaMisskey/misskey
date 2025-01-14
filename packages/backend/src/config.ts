@@ -50,6 +50,9 @@ type Source = {
 	redisForJobQueue?: RedisOptionsSource;
 	redisForTimelines?: RedisOptionsSource;
 	redisForReactions?: RedisOptionsSource;
+	fulltextSearch?: {
+		provider?: FulltextSearchProvider;
+	};
 	meilisearch?: {
 		host: string;
 		port: string;
@@ -145,6 +148,9 @@ export type Config = {
 		user: string;
 		pass: string;
 	}[] | undefined;
+	fulltextSearch?: {
+		provider?: FulltextSearchProvider;
+	};
 	meilisearch: {
 		host: string;
 		port: string;
@@ -225,6 +231,8 @@ export type Config = {
 	pidFile: string;
 };
 
+export type FulltextSearchProvider = 'sqlLike' | 'sqlPgroonga' | 'meilisearch';
+
 const _filename = fileURLToPath(import.meta.url);
 const _dirname = dirname(_filename);
 
@@ -293,6 +301,7 @@ export function loadConfig(): Config {
 		db: { ...config.db, db: dbDb, user: dbUser, pass: dbPass },
 		dbReplications: config.dbReplications,
 		dbSlaves: config.dbSlaves,
+		fulltextSearch: config.fulltextSearch,
 		meilisearch: config.meilisearch,
 		hanamisearch: config.hanamisearch,
 		redis,
