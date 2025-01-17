@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
-import { HanamiSearchService } from '@/core/HanamiSearchService.js';
+import { HanamiSearchService } from '@/core/hanamisearch/HanamiSearchService.js';
 import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
 import { isMustRemove } from '@/misc/is-hidden-or-visibility-modified.js';
 
