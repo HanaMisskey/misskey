@@ -14,4 +14,8 @@ db:
 redis:
   host: 127.0.0.1
   port: 56312
+meilisearch:
+  host: 127.0.0.1
+  port: 77000
+  index: 'test'
 id: aidx
