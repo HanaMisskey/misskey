@@ -3,15 +3,15 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import type { Repository } from "typeorm";
+import type { Repository } from 'typeorm';
 
 process.env.NODE_ENV = 'test';
 
 import * as assert from 'assert';
+import type * as misskey from 'misskey-js';
 import { MiNote } from '@/models/Note.js';
 import { MAX_NOTE_TEXT_LENGTH } from '@/const.js';
 import { api, castAsError, initTestDb, post, role, signup, uploadFile, uploadUrl } from '../utils.js';
-import type * as misskey from 'misskey-js';
 
 describe('Note', () => {
 	let Notes: Repository<MiNote>;
@@ -40,6 +40,17 @@ describe('Note', () => {
 		assert.strictEqual(res.status, 200);
 		assert.strictEqual(typeof res.body === 'object' && !Array.isArray(res.body), true);
 		assert.strictEqual(res.body.createdNote.text, post.text);
+	});
+
+	test('検索できる', async () => {
+		const res = await api('notes/search', {
+			query: 'test',
+		}, alice);
+
+		assert.strictEqual(res.status, 200);
+		assert.strictEqual(Array.isArray(res.body), true);
+		assert.strictEqual(res.body.length, 1);
+		assert.strictEqual(res.body[0].text, 'test');
 	});
 
 	test('ファイルを添付できる', async () => {
