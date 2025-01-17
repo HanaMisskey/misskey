@@ -117,8 +117,9 @@ export class HanamiSearchService {
 		if (note.text == null && note.cw == null) return;
 		if (!['home', 'public'].includes(note.visibility)) return;
 
-		// 配列が空の場合は null にする（パフォーマンスのためにインデックスしない）
+		// 配列が空の場合は null にする（検索時のパフォーマンスのためにインデックスしない）
 		const fileIds = (note.fileIds.length > 0) ? note.fileIds : null;
+		const tags = (note.tags.length > 0) ? note.tags : null;
 
 		const createdAt = this.idService.parse(note.id).date.getTime();
 		const noteData = {
@@ -129,7 +130,7 @@ export class HanamiSearchService {
 			channelId: note.channelId,
 			cw: note.cw,
 			text: note.text,
-			tags: note.tags,
+			tags: tags,
 			fileIds: fileIds,
 		};
 
