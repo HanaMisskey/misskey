@@ -21,6 +21,8 @@ describe('Note', () => {
 	let bob: misskey.entities.SignupResponse;
 	let tom: misskey.entities.SignupResponse;
 
+	const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 	beforeAll(async () => {
 		const connection = await initTestDb(true);
 		Notes = connection.getRepository(MiNote);
@@ -48,6 +50,8 @@ describe('Note', () => {
 		};
 
 		await api('notes/create', post, alice);
+		// indexに反映されるまで待つ(indexが終わったことを確認できないので時間を目分量で決める)
+		await wait(10000);
 		const res = await api('notes/search', {
 			query: 'あ',
 		}, alice);
@@ -55,7 +59,7 @@ describe('Note', () => {
 		assert.strictEqual(res.status, 200);
 		assert.strictEqual(Array.isArray(res.body), true);
 		assert.strictEqual(res.body.length, 1);
-		assert.strictEqual(res.body[0].text, 'test');
+		assert.strictEqual(res.body[0].text, 'あ');
 	});
 
 	test('ファイルを添付できる', async () => {
