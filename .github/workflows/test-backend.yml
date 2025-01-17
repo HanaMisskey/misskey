@@ -9,14 +9,17 @@ on:
       # for permissions
       - packages/misskey-js/**
       - .github/workflows/test-backend.yml
+      - .github/misskey/test.yml
   pull_request:
     paths:
       - packages/backend/**
       # for permissions
       - packages/misskey-js/**
       - .github/workflows/test-backend.yml
+      - .github/misskey/test.yml
 jobs:
   unit:
+    name: Unit tests (backend)
     runs-on: ubuntu-latest
 
     strategy:
@@ -35,6 +38,20 @@ jobs:
         image: redis:7
         ports:
           - 56312:6379
+      meilisearch:
+        image: getmeili/meilisearch:latest
+        ports:
+          - 17700:7700
+        env:
+          MEILI_NO_ANALYTICS: 'true'
+          MEILI_ENV: 'development'
+      hanamisearch:
+        image: getmeili/meilisearch:latest
+        ports:
+          - 17701:7700
+        env:
+          MEILI_NO_ANALYTICS: 'true'
+          MEILI_ENV: 'development'
 
     steps:
     - uses: actions/checkout@v4.1.1
@@ -79,6 +96,7 @@ jobs:
         files: ./packages/backend/coverage/coverage-final.json
 
   e2e:
+    name: E2E tests (backend)
     runs-on: ubuntu-latest
 
     strategy:
@@ -97,6 +115,20 @@ jobs:
         image: redis:7
         ports:
           - 56312:6379
+      meilisearch:
+        image: getmeili/meilisearch:latest
+        ports:
+          - 17700:7700
+        env:
+          MEILI_NO_ANALYTICS: 'true'
+          MEILI_ENV: 'development'
+      hanamisearch:
+        image: getmeili/meilisearch:latest
+        ports:
+          - 17701:7700
+        env:
+          MEILI_NO_ANALYTICS: 'true'
+          MEILI_ENV: 'development'
 
     steps:
       - uses: actions/checkout@v4.1.1
