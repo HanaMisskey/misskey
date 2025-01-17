@@ -76,7 +76,6 @@ export class HanamiSearchService {
 		private notesRepository: NotesRepository,
 
 		private cacheService: CacheService,
-		private queryService: QueryService,
 		private idService: IdService,
 	) {
 		this.hanamisearchIndexScope = config.hanamisearch?.scope || 'global';
