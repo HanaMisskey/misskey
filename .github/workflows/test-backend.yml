@@ -38,7 +38,7 @@ jobs:
       meilisearch:
         image: getmeili/meilisearch:latest
         ports:
-          - 77000:7700
+          - 17700:7700
         env:
           MEILI_NO_ANALYTICS: 'true'
           MEILI_ENV: 'development'
@@ -107,7 +107,7 @@ jobs:
       meilisearch:
         image: getmeili/meilisearch:latest
         ports:
-          - 77000:7700
+          - 17700:7700
         env:
           MEILI_NO_ANALYTICS: 'true'
           MEILI_ENV: 'development'
