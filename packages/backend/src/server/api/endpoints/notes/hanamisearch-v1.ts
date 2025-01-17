@@ -43,6 +43,7 @@ export const paramDef = {
 		},
 		userId: { type: 'string', format: 'misskey:id', nullable: true, default: null },
 		channelId: { type: 'string', format: 'misskey:id', nullable: true, default: null },
+		onlyWithFiles: { type: 'boolean', default: false },
 	},
 	required: ['query'],
 } as const;
@@ -61,6 +62,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				channelId: ps.channelId,
 				host: ps.host,
 				preferredMethod: 'hanamisearchv1',
+				onlyWithFiles: ps.onlyWithFiles,
 			}, {
 				untilId: ps.untilId,
 				sinceId: ps.sinceId,
