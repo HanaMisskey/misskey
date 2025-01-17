@@ -42,6 +42,13 @@ jobs:
         env:
           MEILI_NO_ANALYTICS: 'true'
           MEILI_ENV: 'development'
+      hanamisearch:
+        image: getmeili/meilisearch:latest
+        ports:
+          - 17701:7700
+        env:
+          MEILI_NO_ANALYTICS: 'true'
+          MEILI_ENV: 'development'
 
     steps:
     - uses: actions/checkout@v4.1.1

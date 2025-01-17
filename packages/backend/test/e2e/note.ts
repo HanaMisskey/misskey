@@ -52,14 +52,23 @@ describe('Note', () => {
 		await api('notes/create', post, alice);
 		// indexに反映されるまで待つ(indexが終わったことを確認できないので時間を目分量で決める)
 		await wait(10000);
-		const res = await api('notes/search', {
+		// TODO: HanamiSearchのテストは別にして並列実行できるようにする
+		const resMeili = await api('notes/search', {
+			query: 'あ',
+		}, alice);
+		const resHanami = await api('notes/hanamisearch-v1', {
 			query: 'あ',
 		}, alice);
 
-		assert.strictEqual(res.status, 200);
-		assert.strictEqual(Array.isArray(res.body), true);
-		assert.strictEqual(res.body.length, 1);
-		assert.strictEqual(res.body[0].text, 'あ');
+		assert.strictEqual(resMeili.status, 200);
+		assert.strictEqual(Array.isArray(resMeili.body), true);
+		assert.strictEqual(resMeili.body.length, 1);
+		assert.strictEqual(resMeili.body[0].text, 'あ');
+
+		assert.strictEqual(resHanami.status, 200);
+		assert.strictEqual(Array.isArray(resHanami.body), true);
+		assert.strictEqual(resHanami.body.length, 1);
+		assert.strictEqual(resHanami.body[0].text, 'あ');
 	});
 
 	test('ファイルを添付できる', async () => {
