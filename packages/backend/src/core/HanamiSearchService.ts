@@ -62,7 +62,7 @@ function compileQuery(q: Q): string {
 }
 
 @Injectable()
-export class SearchService {
+export class HanamiSearchService {
 	private readonly meilisearchIndexScope: 'local' | 'global' | string[] = 'local';
 	private readonly hanamisearchIndexScope: 'local' | 'global' | string[] = 'global';
 	private meilisearchNoteIndex: Index | null = null;

@@ -13,7 +13,7 @@ import type { MiDriveFile } from '@/models/DriveFile.js';
 import type { MiNote } from '@/models/Note.js';
 import { EmailService } from '@/core/EmailService.js';
 import { bindThis } from '@/decorators.js';
-import { SearchService } from '@/core/SearchService.js';
+import { HanamiSearchService } from '@/core/HanamiSearchService.js';
 import { QueueLoggerService } from '../QueueLoggerService.js';
 import type * as Bull from 'bullmq';
 import type { DbUserDeleteJobData } from '../types.js';
@@ -38,7 +38,7 @@ export class DeleteAccountProcessorService {
 		private driveService: DriveService,
 		private emailService: EmailService,
 		private queueLoggerService: QueueLoggerService,
-		private searchService: SearchService,
+		private hanamiSearchService: HanamiSearchService,
 	) {
 		this.logger = this.queueLoggerService.logger.createSubLogger('delete-account');
 	}
@@ -76,7 +76,7 @@ export class DeleteAccountProcessorService {
 				await this.notesRepository.delete(notes.map(note => note.id));
 
 				for (const note of notes) {
-					await this.searchService.unindexNote(note);
+					await this.hanamiSearchService.unindexNote(note);
 				}
 			}
 
