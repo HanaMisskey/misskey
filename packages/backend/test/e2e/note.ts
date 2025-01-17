@@ -43,8 +43,13 @@ describe('Note', () => {
 	});
 
 	test('検索できる', async () => {
+		const post = {
+			text: 'あ',
+		};
+
+		await api('notes/create', post, alice);
 		const res = await api('notes/search', {
-			query: 'test',
+			query: 'あ',
 		}, alice);
 
 		assert.strictEqual(res.status, 200);
