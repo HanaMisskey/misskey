@@ -11,7 +11,6 @@ import { bindThis } from '@/decorators.js';
 import { MiNote } from '@/models/Note.js';
 import { MiUser } from '@/models/_.js';
 import type { NotesRepository } from '@/models/_.js';
-import { sqlLikeEscape } from '@/misc/sql-like-escape.js';
 import { isUserRelated } from '@/misc/is-user-related.js';
 import { CacheService } from '@/core/CacheService.js';
 import { QueryService } from '@/core/QueryService.js';
@@ -63,17 +62,12 @@ function compileQuery(q: Q): string {
 
 @Injectable()
 export class HanamiSearchService {
-	private readonly meilisearchIndexScope: 'local' | 'global' | string[] = 'local';
 	private readonly hanamisearchIndexScope: 'local' | 'global' | string[] = 'global';
-	private meilisearchNoteIndex: Index | null = null;
 	private hanamisearchNoteIndex: Index | null = null;
 
 	constructor(
 		@Inject(DI.config)
 		private config: Config,
-
-		@Inject(DI.meilisearch)
-		private meilisearch: MeiliSearch | null,
 
 		@Inject(DI.hanamisearch)
 		private hanamisearch: MeiliSearch | null,
@@ -85,15 +79,7 @@ export class HanamiSearchService {
 		private queryService: QueryService,
 		private idService: IdService,
 	) {
-		this.meilisearchIndexScope = config.meilisearch?.scope || 'local';
 		this.hanamisearchIndexScope = config.hanamisearch?.scope || 'global';
-
-		if (this.meilisearch) {
-			this.meilisearchNoteIndex = this.initializeIndex(
-				this.meilisearch,
-				`${config.meilisearch!.index}---notes`,
-			);
-		}
 
 		if (this.hanamisearch) {
 			this.hanamisearchNoteIndex = this.initializeIndex(
@@ -149,13 +135,6 @@ export class HanamiSearchService {
 			return false;
 		};
 
-		const indexMeilisearch = async () => {
-			if (!this.meilisearch || !this.meilisearchNoteIndex) return;
-			if (!shouldIndex(this.meilisearchIndexScope, note.userHost)) return;
-
-			await this.meilisearchNoteIndex.addDocuments([noteData], { primaryKey: 'id' });
-		};
-
 		const indexHanamisearch = async () => {
 			if (!this.hanamisearch || !this.hanamisearchNoteIndex) return;
 			if (!shouldIndex(this.hanamisearchIndexScope, note.userHost)) return;
@@ -164,7 +143,6 @@ export class HanamiSearchService {
 		};
 
 		await Promise.all([
-			indexMeilisearch(),
 			indexHanamisearch(),
 		]);
 	}
@@ -172,10 +150,6 @@ export class HanamiSearchService {
 	@bindThis
 	public async unindexNote(note: MiNote): Promise<void> {
 		if (!['home', 'public'].includes(note.visibility)) return;
-
-		if (this.meilisearch) {
-			this.meilisearchNoteIndex!.deleteDocument(note.id);
-		}
 
 		if (this.hanamisearch) {
 			this.hanamisearchNoteIndex!.deleteDocument(note.id);
@@ -190,7 +164,7 @@ export class HanamiSearchService {
 			userId?: MiNote['userId'] | null;
 			channelId?: MiNote['channelId'] | null;
 			host?: string | null;
-			preferredMethod?: 'meilisearch' | 'hanamisearchv1' | 'hanamisearchv2' | null;
+			preferredMethod?: 'hanamisearchv1' | 'hanamisearchv2' | null;
 		},
 		pagination: {
 			untilId?: MiNote['id'];
@@ -198,22 +172,18 @@ export class HanamiSearchService {
 			limit?: number;
 		},
 	): Promise<MiNote[]> {
-		const preferredMethod = opts.preferredMethod ?? 'meilisearch';
+		const preferredMethod = opts.preferredMethod ?? 'hanamisearchv1';
 
-		if ((preferredMethod === 'meilisearch' && this.meilisearch) || (preferredMethod === 'hanamisearchv1' && this.hanamisearch)) {
-			const searchClient = preferredMethod === 'meilisearch' ? this.meilisearchNoteIndex! : this.hanamisearchNoteIndex!;
+		if ((preferredMethod === 'hanamisearchv1' && this.hanamisearch)) {
+			const searchClient = this.hanamisearchNoteIndex!;
 			const shouldTimeSeriesSort = true;
-			return this.searchWithExternalEngine(searchClient, q, me, opts, pagination, shouldTimeSeriesSort);
-		}
-
-		if (!this.meilisearch && !this.hanamisearch && preferredMethod === 'meilisearch') {
-			return this.searchWithInternalDB(q, me, opts, pagination);
+			return this.searchNoteWithHanamiSearchv1(searchClient, q, me, opts, pagination, shouldTimeSeriesSort);
 		}
 
 		throw new Error('no search engine available');
 	}
 
-	private async searchWithExternalEngine(
+	private async searchNoteWithHanamiSearchv1(
 		searchClient: Index,
 		q: string,
 		me: MiUser | null,
@@ -264,49 +234,6 @@ export class HanamiSearchService {
 			return true;
 		});
 
-		// ソートは MeiliSearch の場合のみ適用
 		return shouldTimeSeriesSort ? notes.sort((a, b) => (a.id > b.id ? -1 : 1)) : notes;
-	}
-
-	private async searchWithInternalDB(
-		q: string,
-		me: MiUser | null,
-		opts: {
-			userId?: MiNote['userId'] | null;
-			channelId?: MiNote['channelId'] | null;
-			host?: string | null;
-		},
-		pagination: {
-			untilId?: MiNote['id'];
-			sinceId?: MiNote['id'];
-			limit?: number;
-		},
-	): Promise<MiNote[]> {
-		const query = this.queryService.makePaginationQuery(
-			this.notesRepository.createQueryBuilder('note'),
-			pagination.sinceId,
-			pagination.untilId,
-		);
-
-		if (opts.userId) query.andWhere('note.userId = :userId', { userId: opts.userId });
-		if (opts.channelId) query.andWhere('note.channelId = :channelId', { channelId: opts.channelId });
-		query.andWhere('LOWER(note.text) LIKE :q', { q: `%${sqlLikeEscape(q.toLowerCase())}%` });
-
-		query
-			.innerJoinAndSelect('note.user', 'user')
-			.leftJoinAndSelect('note.reply', 'reply')
-			.leftJoinAndSelect('note.renote', 'renote')
-			.leftJoinAndSelect('reply.user', 'replyUser')
-			.leftJoinAndSelect('renote.user', 'renoteUser');
-
-		if (opts.host) {
-			query.andWhere(opts.host === '.' ? 'user.host IS NULL' : 'user.host = :host', { host: opts.host });
-		}
-
-		this.queryService.generateVisibilityQuery(query, me);
-		if (me) this.queryService.generateMutedUserQuery(query, me);
-		if (me) this.queryService.generateBlockedUserQuery(query, me);
-
-		return await query.limit(pagination.limit).getMany();
 	}
 }

@@ -281,6 +281,9 @@ export function loadConfig(): Config {
 	const internalMediaProxy = `${scheme}://${host}/proxy`;
 	const redis = convertRedisOptions(config.redis, host);
 
+	const fulltextSearch = config.fulltextSearch ?? {};
+	fulltextSearch.provider = fulltextSearch.provider ?? 'meilisearch';
+
 	return {
 		version,
 		publishTarballInsteadOfProvideRepositoryUrl: !!config.publishTarballInsteadOfProvideRepositoryUrl,
@@ -301,7 +304,7 @@ export function loadConfig(): Config {
 		db: { ...config.db, db: dbDb, user: dbUser, pass: dbPass },
 		dbReplications: config.dbReplications,
 		dbSlaves: config.dbSlaves,
-		fulltextSearch: config.fulltextSearch,
+		fulltextSearch,
 		meilisearch: config.meilisearch,
 		hanamisearch: config.hanamisearch,
 		redis,

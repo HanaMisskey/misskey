@@ -57,6 +57,7 @@ import { trackPromise } from '@/misc/promise-tracker.js';
 import { IdentifiableError } from '@/misc/identifiable-error.js';
 import { CollapsedQueue } from '@/misc/collapsed-queue.js';
 import { CacheService } from '@/core/CacheService.js';
+import { SearchService } from './SearchService.js';
 
 type NotificationType = 'reply' | 'renote' | 'quote' | 'mention';
 
@@ -212,6 +213,7 @@ export class NoteCreateService implements OnApplicationShutdown {
 		private apDeliverManagerService: ApDeliverManagerService,
 		private apRendererService: ApRendererService,
 		private roleService: RoleService,
+		private searchService: SearchService,
 		private hanamiSearchService: HanamiSearchService,
 		private notesChart: NotesChart,
 		private perUserNotesChart: PerUserNotesChart,
@@ -1081,6 +1083,7 @@ export class NoteCreateService implements OnApplicationShutdown {
 	private index(note: MiNote) {
 		if (note.text == null && note.cw == null) return;
 
+		this.searchService.indexNote(note);
 		this.hanamiSearchService.indexNote(note);
 	}
 

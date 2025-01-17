@@ -23,6 +23,7 @@ import { bindThis } from '@/decorators.js';
 import { HanamiSearchService } from '@/core/HanamiSearchService.js';
 import { ModerationLogService } from '@/core/ModerationLogService.js';
 import { isQuote, isRenote } from '@/misc/is-renote.js';
+import { SearchService } from './SearchService.js';
 
 @Injectable()
 export class NoteDeleteService {
@@ -48,6 +49,7 @@ export class NoteDeleteService {
 		private federatedInstanceService: FederatedInstanceService,
 		private apRendererService: ApRendererService,
 		private apDeliverManagerService: ApDeliverManagerService,
+		private searchService: SearchService,
 		private hanamiSearchService: HanamiSearchService,
 		private moderationLogService: ModerationLogService,
 		private notesChart: NotesChart,
@@ -119,8 +121,10 @@ export class NoteDeleteService {
 		}
 
 		for (const cascadingNote of cascadingNotes) {
+			this.searchService.unindexNote(cascadingNote);
 			this.hanamiSearchService.unindexNote(cascadingNote);
 		}
+		this.searchService.unindexNote(note);
 		this.hanamiSearchService.unindexNote(note);
 
 		await this.notesRepository.delete({
