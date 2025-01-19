@@ -98,7 +98,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 					<div :class="$style.searchOptionGroupRoot">
 						<div :class="$style.searchOptionGroupLabel">{{ i18n.ts.filter }}</div>
-						<MkSwitch :disabled="!($i != null && $i.policies.canSearchWithHanamiSearchV1 === true && searchMode === 'v1')" v-model="onlyWithFiles">{{ i18n.ts.withFiles }}<span class="_beta">{{ i18n.ts._hana._search.v1Only }}</span></MkSwitch>
+						<MkSwitch v-model="onlyWithFiles" :disabled="!($i != null && $i.policies.canSearchWithHanamiSearchV1 === true && searchMode === 'v1')">{{ i18n.ts.withFiles }}<span class="_beta">{{ i18n.ts._hana._search.v1Only }}</span></MkSwitch>
 					</div>
 				</div>
 			</MkFoldableSection>
