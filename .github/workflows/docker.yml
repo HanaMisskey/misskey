@@ -67,7 +67,7 @@ jobs:
       - name: Download digests
         uses: actions/download-artifact@v4
         with:
-          path: /tmp/digests
+          path: /tmp/digests/linux
           pattern: digests-*
           merge-multiple: true
       - name: Set up Docker Buildx
@@ -80,7 +80,7 @@ jobs:
       - name: Create manifest list and push
         run: |
           # Collect all digests
-          digests=$(find /tmp/digests -type f -name '*.digest' -exec cat {} +)
+          digests=$(find /tmp/digests/linux -type f -name '*.digest' -exec cat {} +)
           # Create the manifest
           docker buildx imagetools create --tag ${{ env.REGISTRY_IMAGE }}:${{ env.IMAGE_TAG }} $digests
       - name: Inspect image
