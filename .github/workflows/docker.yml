@@ -80,6 +80,8 @@ jobs:
       - name: Create manifest list and push
         run: |
           # Collect all digests
+          ls -R /tmp/digests
+          ls -R /tmp/digests/linux
           digests=$(find /tmp/digests/linux -type f -name '*.digest' -exec cat {} +)
           # Create the manifest
           docker buildx imagetools create --tag ${{ env.REGISTRY_IMAGE }}:${{ env.IMAGE_TAG }} $digests
