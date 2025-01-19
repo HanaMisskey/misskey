@@ -48,7 +48,7 @@ const props = withDefaults(defineProps<{
 	host: undefined,
 	type: 'note',
 	origin: 'combined',
-	ignoreNotesSearchAvailable: true,
+	ignoreNotesSearchAvailable: false,
 });
 
 const XNote = defineAsyncComponent(() => import('./search.note.hana.vue'));
