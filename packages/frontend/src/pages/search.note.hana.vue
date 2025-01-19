@@ -10,6 +10,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 		<HanaSearchInput
 			v-model="searchQuery"
+			v-model:mode="searchMode"
 			large
 			autofocus
 			@enter.prevent="search"
