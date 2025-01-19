@@ -48,7 +48,7 @@ jobs:
           outputs: type=image,name=${{ env.REGISTRY_IMAGE }}:${{ env.IMAGE_TAG }}
       - name: Export digest
         run: |
-          mkdir -p /tmp/digests
+          mkdir -p /tmp/digests/linux
           digest="${{ steps.build.outputs.digest }}"
           echo $digest > "/tmp/digests/${{ matrix.platform }}.digest"
       - name: Upload digest
