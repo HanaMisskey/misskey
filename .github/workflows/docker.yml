@@ -35,8 +35,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Build and push by digest
-        id: build
+      - name: Build and push by tag
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -46,12 +45,12 @@ jobs:
           labels: ${{ env.IMAGE_TAG }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          outputs: type=image,name=${{ env.REGISTRY_IMAGE }}:${{ env.IMAGE_TAG }},push-by-digest=true,name-canonical=true,push=true
+          outputs: type=image,name=${{ env.REGISTRY_IMAGE }}:${{ env.IMAGE_TAG }}
       - name: Export digest
         run: |
           mkdir -p /tmp/digests
           digest="${{ steps.build.outputs.digest }}"
-          touch "/tmp/digests/${digest#sha256:}"
+          echo $digest > "/tmp/digests/${{ matrix.platform }}.digest"
       - name: Upload digest
         uses: actions/upload-artifact@v4
         with:
@@ -79,10 +78,11 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Create manifest list and push
-        working-directory: /tmp/digests
         run: |
-          docker buildx imagetools create --tag ${{ env.REGISTRY_IMAGE }}:${{ env.IMAGE_TAG }} \
-            $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
+          # Collect all digests
+          digests=$(find /tmp/digests -type f -name '*.digest' -exec cat {} +)
+          # Create the manifest
+          docker buildx imagetools create --tag ${{ env.REGISTRY_IMAGE }}:${{ env.IMAGE_TAG }} $digests
       - name: Inspect image
         run: |
           docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${{ env.IMAGE_TAG }}
