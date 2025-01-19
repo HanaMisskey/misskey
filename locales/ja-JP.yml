@@ -2971,6 +2971,7 @@ _hana:
     confirmWhenRevealingSensitiveMediaDescription: "センシティブなコンテンツはぼかしがかかった状態で表示されますが、誤操作防止のために、中身をクリックして開く際に追加で確認ダイアログを表示させることができます。"
     forMinor: "未成年の方は、おうちの方といっしょに確認してください。この設定は後からいつでも変更できます。"
   _search:
+    searchSource: "検索のデータセット"
     searchScopeAll: "全て"
     searchScopeLocal: "ローカル"
     searchScopeServer: "サーバー指定"
@@ -2978,6 +2979,8 @@ _hana:
     pleaseEnterServerHost: "サーバーのホストを入力してください"
     pleaseSelectUser: "ユーザーを選択してください"
     serverHostPlaceholder: "例: misskey.example.com"
+    v1Only: "v1限定"
+    showAsGrid: "グリッドビュー"
   _searchMode:
     title: "検索モード"
     new: "新登場"

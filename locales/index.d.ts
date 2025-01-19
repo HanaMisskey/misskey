@@ -11123,6 +11123,10 @@ export interface Locale extends ILocale {
         };
         "_search": {
             /**
+             * 検索のデータセット
+             */
+            "searchSource": string;
+            /**
              * 全て
              */
             "searchScopeAll": string;
@@ -11150,6 +11154,14 @@ export interface Locale extends ILocale {
              * 例: misskey.example.com
              */
             "serverHostPlaceholder": string;
+            /**
+             * v1限定
+             */
+            "v1Only": string;
+            /**
+             * グリッドビュー
+             */
+            "showAsGrid": string;
         };
         "_searchMode": {
             /**

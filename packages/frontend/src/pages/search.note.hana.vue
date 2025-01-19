@@ -5,115 +5,149 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 <template>
 <div class="_gaps">
-	<div class="_gaps">
-		<MkInfo v-if="!$i || !$i.policies.canSearchWithHanamiSearchV1">{{ i18n.ts._hana.searchIsInBeta }}</MkInfo>
+	<MkSpacer :contentMax="800">
+		<div class="_gaps">
+			<MkInfo v-if="!$i || !$i.policies.canSearchWithHanamiSearchV1">{{ i18n.ts._hana.searchIsInBeta }}</MkInfo>
 
-		<HanaSearchInput
-			v-model="searchQuery"
-			v-model:mode="searchMode"
-			large
-			autofocus
-			@enter.prevent="search"
-		>
-			<template #prefix><i class="ti ti-search"></i></template>
-		</HanaSearchInput>
-		<MkFoldableSection expanded>
-			<template #header>{{ i18n.ts.options }}</template>
+			<HanaSearchInput
+				v-model="searchQuery"
+				v-model:mode="searchMode"
+				large
+				autofocus
+				@enter.prevent="search"
+			>
+				<template #prefix><i class="ti ti-search"></i></template>
+			</HanaSearchInput>
+			<MkFoldableSection expanded>
+				<template #header>{{ i18n.ts.options }}</template>
 
-			<div class="_gaps_m">
-				<MkRadios v-model="searchScope">
-					<option v-if="noteSearchableScope === 'global'" value="all">{{ i18n.ts._hana._search.searchScopeAll }}</option>
-					<option value="local">{{ i18n.ts._hana._search.searchScopeLocal }}</option>
-					<option v-if="noteSearchableScope === 'global'" value="server">{{ i18n.ts._hana._search.searchScopeServer }}</option>
-					<option value="user">{{ i18n.ts._hana._search.searchScopeUser }}</option>
-				</MkRadios>
+				<div class="_gaps">
+					<div :class="$style.searchOptionGroupRoot">
+						<div :class="$style.searchOptionGroupLabel">{{ i18n.ts._hana._search.searchSource }}</div>
 
-				<div v-if="searchScope === 'server'" :class="$style.subOptionRoot">
-					<MkInput
-						v-model="hostInput"
-						:placeholder="i18n.ts._hana._search.serverHostPlaceholder"
-						@enter.prevent="search"
-					>
-						<template #label>{{ i18n.ts._hana._search.pleaseEnterServerHost }}</template>
-						<template #prefix><i class="ti ti-server"></i></template>
-					</MkInput>
-				</div>
+						<div class="_gaps_s">
+							<MkRadios v-model="searchScope">
+								<option v-if="noteSearchableScope === 'global'" value="all">{{ i18n.ts._hana._search.searchScopeAll }}</option>
+								<option value="local">{{ i18n.ts._hana._search.searchScopeLocal }}</option>
+								<option v-if="noteSearchableScope === 'global'" value="server">{{ i18n.ts._hana._search.searchScopeServer }}</option>
+								<option value="user">{{ i18n.ts._hana._search.searchScopeUser }}</option>
+							</MkRadios>
 
-				<div v-if="searchScope === 'user'" :class="$style.subOptionRoot">
-					<div :class="$style.userSelectLabel">{{ i18n.ts._hana._search.pleaseSelectUser }}</div>
-					<div class="_gaps">
-						<div v-if="user == null" :class="$style.userSelectButtons">
-							<div v-if="$i != null">
-								<MkButton
-									transparent
-									:class="$style.userSelectButton"
-									@click="selectSelf"
+							<div v-if="searchScope === 'server'" :class="$style.subOptionRoot">
+								<MkInput
+									v-model="hostInput"
+									:placeholder="i18n.ts._hana._search.serverHostPlaceholder"
+									@enter.prevent="search"
 								>
-									<div :class="$style.userSelectButtonInner">
-										<span><i class="ti ti-plus"></i><i class="ti ti-user"></i></span>
-										<span>{{ i18n.ts.selectSelf }}</span>
+									<template #label>{{ i18n.ts._hana._search.pleaseEnterServerHost }}</template>
+									<template #prefix><i class="ti ti-server"></i></template>
+								</MkInput>
+							</div>
+
+							<div v-if="searchScope === 'user'" :class="$style.subOptionRoot">
+								<div :class="$style.userSelectLabel">{{ i18n.ts._hana._search.pleaseSelectUser }}</div>
+								<div class="_gaps">
+									<div v-if="user == null" :class="$style.userSelectButtons">
+										<div v-if="$i != null">
+											<MkButton
+												transparent
+												:class="$style.userSelectButton"
+												@click="selectSelf"
+											>
+												<div :class="$style.userSelectButtonInner">
+													<span><i class="ti ti-plus"></i><i class="ti ti-user"></i></span>
+													<span>{{ i18n.ts.selectSelf }}</span>
+												</div>
+											</MkButton>
+										</div>
+										<div :style="$i == null ? 'grid-column: span 2;' : undefined">
+											<MkButton
+												transparent
+												:class="$style.userSelectButton"
+												@click="selectUser"
+											>
+												<div :class="$style.userSelectButtonInner">
+													<span><i class="ti ti-plus"></i></span>
+													<span>{{ i18n.ts.selectUser }}</span>
+												</div>
+											</MkButton>
+										</div>
 									</div>
-								</MkButton>
-							</div>
-							<div :style="$i == null ? 'grid-column: span 2;' : undefined">
-								<MkButton
-									transparent
-									:class="$style.userSelectButton"
-									@click="selectUser"
-								>
-									<div :class="$style.userSelectButtonInner">
-										<span><i class="ti ti-plus"></i></span>
-										<span>{{ i18n.ts.selectUser }}</span>
+									<div v-else :class="$style.userSelectedButtons">
+										<div style="overflow: hidden;">
+											<MkUserCardMini
+												:user="user"
+												:withChart="false"
+												:class="$style.userSelectedCard"
+											/>
+										</div>
+										<div>
+											<button
+												class="_button"
+												:class="$style.userSelectedRemoveButton"
+												@click="removeUser"
+											>
+												<i class="ti ti-x"></i>
+											</button>
+										</div>
 									</div>
-								</MkButton>
-							</div>
-						</div>
-						<div v-else :class="$style.userSelectedButtons">
-							<div style="overflow: hidden;">
-								<MkUserCardMini
-									:user="user"
-									:withChart="false"
-									:class="$style.userSelectedCard"
-								/>
-							</div>
-							<div>
-								<button
-									class="_button"
-									:class="$style.userSelectedRemoveButton"
-									@click="removeUser"
-								>
-									<i class="ti ti-x"></i>
-								</button>
+								</div>
 							</div>
 						</div>
 					</div>
-				</div>
-			</div>
-		</MkFoldableSection>
-		<div>
-			<MkButton
-				large
-				primary
-				gradate
-				rounded
-				:disabled="searchParams == null"
-				style="margin: 0 auto;"
-				@click="search"
-			>
-				{{ i18n.ts.search }}
-			</MkButton>
-		</div>
-	</div>
 
-	<MkFoldableSection v-if="notePagination">
-		<template #header>{{ i18n.ts.searchResult }}</template>
-		<MkNotes :key="`searchNotes:${key}`" :pagination="notePagination"/>
-	</MkFoldableSection>
+					<div :class="$style.searchOptionGroupRoot">
+						<div :class="$style.searchOptionGroupLabel">{{ i18n.ts.filter }}</div>
+						<MkSwitch :disabled="!($i != null && $i.policies.canSearchWithHanamiSearchV1 === true && searchMode === 'v1')" v-model="onlyWithFiles">{{ i18n.ts.withFiles }}<span class="_beta">{{ i18n.ts._hana._search.v1Only }}</span></MkSwitch>
+					</div>
+				</div>
+			</MkFoldableSection>
+			<div>
+				<MkButton
+					large
+					primary
+					gradate
+					rounded
+					:disabled="searchParams == null"
+					style="margin: 0 auto;"
+					@click="search"
+				>
+					{{ i18n.ts.search }}
+				</MkButton>
+			</div>
+		</div>
+	</MkSpacer>
+
+		<MkStickyContainer v-if="notePagination">
+			<template #header>
+				<div ref="searchResultStickyContainer" :class="$style.searchResultStickyRoot">
+					<div :class="$style.searchResultStickyContainer">
+						<div :class="$style.searchResultStickyTitle"><i class="ti ti-list-search"></i> {{ i18n.ts.searchResult }}</div>
+						<div v-if="searchMode === 'v1' && onlyWithFiles" :class="$style.searchResultStickyViewRoot">
+							<MkSwitch v-model="showAsGrid"><i class="ti ti-layout-grid"></i><span :class="$style.searchResultStickyViewLabelText">&nbsp;{{ i18n.ts._hana._search.showAsGrid }}</span></MkSwitch>
+						</div>
+					</div>
+				</div>
+			</template>
+			<MkSpacer :contentMax="showAsGrid ? null : 800">
+				<MkPagination
+					v-if="searchMode === 'v1' && onlyWithFiles && showAsGrid"
+					v-slot="{ items }"
+					:pagination="notePagination"
+					:key="`searchNotes:${key}:grid`"
+				>
+					<div :class="$style.stream">
+						<MkNoteMediaGrid v-for="note in items" :note="note" square/>
+					</div>
+				</MkPagination>
+				<MkNotes v-else :key="`searchNotes:${key}:note`" :pagination="notePagination"/>
+			</MkSpacer>
+		</MkStickyContainer>
 </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, shallowRef, toRef } from 'vue';
+import { computed, ref, shallowRef, useTemplateRef, toRef } from 'vue';
 import type * as Misskey from 'misskey-js';
 import type { Paging } from '@/components/MkPagination.vue';
 import { $i } from '@/account.js';
@@ -132,6 +166,10 @@ import MkUserCardMini from '@/components/MkUserCardMini.vue';
 
 import HanaSearchInput from '@/components/HanaSearchInput.vue';
 import MkInfo from '@/components/MkInfo.vue';
+import MkSwitch from '@/components/MkSwitch.vue';
+import MkPagination from '@/components/MkPagination.vue';
+import MkNoteMediaGrid from '@/components/MkNoteMediaGrid.vue';
+import { getBgColor } from '@/scripts/get-bg-color.js';
 import type { SearchMode } from '@/hana/types/search.js';
 
 const props = withDefaults(defineProps<{
@@ -149,12 +187,15 @@ const props = withDefaults(defineProps<{
 const router = useRouter();
 
 const key = ref(0);
-const notePagination = ref<Paging<'notes/search' | 'notes/hanamisearch-v1'>>();
+const notePagination = ref<Paging>();
 
 const searchQuery = ref(toRef(props, 'query').value);
 const hostInput = ref(toRef(props, 'host').value);
 
 const searchMode = ref<SearchMode>('v1');
+const showAsGrid = ref(false);
+const onlyWithFiles = ref(false);
+
 const user = shallowRef<Misskey.entities.UserDetailed | null>(null);
 
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
@@ -257,6 +298,10 @@ function removeUser() {
 	user.value = null;
 }
 
+const searchResultStickyContainer = useTemplateRef('searchResultStickyContainer');
+
+const parentBg = ref<string | null>(null);
+
 async function search() {
 	if (searchParams.value == null) return;
 
@@ -317,6 +362,7 @@ async function search() {
 			limit: 10,
 			params: {
 				...searchParams.value,
+				onlyWithFiles: onlyWithFiles.value,
 			},
 		};
 	} else {
@@ -330,9 +376,30 @@ async function search() {
 	}
 
 	key.value++;
+
+	parentBg.value = getBgColor(searchResultStickyContainer.value?.parentElement);
 }
 </script>
 <style lang="scss" module>
+.searchOptionGroupRoot {
+	margin-top: 16px;
+	padding: 16px;
+	border-radius: var(--MI-radius);
+	border: 1px solid var(--MI_THEME-divider);
+}
+
+.searchOptionGroupLabel {
+	width: fit-content;
+	font-size: 12px;
+	line-height: 14px;
+	margin-top: -23px; /* 16px + 7px */
+	padding-left: 8px;
+	padding-right: 8px;
+	padding-bottom: 14px; /* 16px - (14px - 12px) */
+	user-select: none;
+	background-color: var(--MI_THEME-bg);
+}
+
 .subOptionRoot {
 	background: var(--MI_THEME-panel);
 	border-radius: var(--MI-radius);
@@ -376,5 +443,42 @@ async function search() {
 	width: 32px;
 	height: 32px;
 	color: #ff2a2a;
+}
+
+.searchResultStickyRoot {
+	-webkit-backdrop-filter: var(--MI-blur, blur(8px));
+	backdrop-filter: var(--MI-blur, blur(20px));
+	background-color: color(from v-bind("parentBg ?? 'var(--MI_THEME-bg)'") srgb r g b / 0.85);
+	border-bottom: 1px solid var(--MI_THEME-divider);
+	padding: 16px 0;
+	box-sizing: border-box;
+}
+
+.searchResultStickyContainer {
+	max-width: 800px;
+	margin: 0 auto;
+	padding: 0 16px;
+	display: flex;
+	align-items: center;
+}
+
+.searchResultStickyTitle {
+	font-weight: 700;
+}
+
+.searchResultStickyViewRoot {
+	margin-left: auto;
+}
+
+@container (max-width: 400px) {
+	.searchResultStickyViewLabelText {
+		display: none;
+	}
+}
+
+.stream {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+	grid-gap: 6px;
 }
 </style>
