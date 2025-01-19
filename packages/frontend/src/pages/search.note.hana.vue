@@ -133,8 +133,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 			<MkPagination
 				v-if="searchMode === 'v1' && onlyWithFiles && showAsGrid"
 				v-slot="{ items }"
-				:pagination="notePagination"
 				:key="`searchNotes:${key}:grid`"
+				:pagination="notePagination"
 			>
 				<div :class="$style.stream">
 					<MkNoteMediaGrid v-for="note in items" :note="note" square/>
