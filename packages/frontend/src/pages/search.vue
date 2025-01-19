@@ -17,15 +17,6 @@ SPDX-License-Identifier: AGPL-3.0-only
 			</div>
 		</MkSpacer>
 
-		<MkSpacer v-if="tab === 'media'" key="media" :contentMax="800">
-			<div v-if="notesSearchAvailable || ignoreNotesSearchAvailable">
-				<XMedia v-bind="props"/>
-			</div>
-			<div v-else>
-				<MkInfo warn>{{ i18n.ts.notesSearchNotAvailable }}</MkInfo>
-			</div>
-		</MkSpacer>
-
 		<MkSpacer v-else-if="tab === 'user'" key="user" :contentMax="800">
 			<XUser v-bind="props"/>
 		</MkSpacer>
@@ -46,7 +37,7 @@ const props = withDefaults(defineProps<{
 	userId?: string,
 	username?: string,
 	host?: string | null,
-	type?: 'note' | 'media' | 'user',
+	type?: 'note' | 'user',
 	origin?: 'combined' | 'local' | 'remote',
 	// For storybook only
 	ignoreNotesSearchAvailable?: boolean,
@@ -61,7 +52,6 @@ const props = withDefaults(defineProps<{
 });
 
 const XNote = defineAsyncComponent(() => import('./search.note.vue'));
-const XMedia = defineAsyncComponent(() => import('./search.media.vue'));
 const XUser = defineAsyncComponent(() => import('./search.user.vue'));
 
 const tab = ref(toRef(props, 'type').value);
@@ -72,10 +62,6 @@ const headerTabs = computed(() => [{
 	key: 'note',
 	title: i18n.ts.notes,
 	icon: 'ti ti-pencil',
-}, {
-	key: 'media',
-	title: i18n.ts.media,
-	icon: 'ti ti-photo',
 }, {
 	key: 'user',
 	title: i18n.ts.users,
