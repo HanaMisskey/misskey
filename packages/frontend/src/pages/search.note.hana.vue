@@ -118,31 +118,31 @@ SPDX-License-Identifier: AGPL-3.0-only
 		</div>
 	</MkSpacer>
 
-		<MkStickyContainer v-if="notePagination">
-			<template #header>
-				<div ref="searchResultStickyContainer" :class="$style.searchResultStickyRoot">
-					<div :class="$style.searchResultStickyContainer">
-						<div :class="$style.searchResultStickyTitle"><i class="ti ti-list-search"></i> {{ i18n.ts.searchResult }}</div>
-						<div v-if="searchMode === 'v1' && onlyWithFiles" :class="$style.searchResultStickyViewRoot">
-							<MkSwitch v-model="showAsGrid"><i class="ti ti-layout-grid"></i><span :class="$style.searchResultStickyViewLabelText">&nbsp;{{ i18n.ts._hana._search.showAsGrid }}</span></MkSwitch>
-						</div>
+	<MkStickyContainer v-if="notePagination">
+		<template #header>
+			<div ref="searchResultStickyContainer" :class="$style.searchResultStickyRoot">
+				<div :class="$style.searchResultStickyContainer">
+					<div :class="$style.searchResultStickyTitle"><i class="ti ti-list-search"></i> {{ i18n.ts.searchResult }}</div>
+					<div v-if="searchMode === 'v1' && onlyWithFiles" :class="$style.searchResultStickyViewRoot">
+						<MkSwitch v-model="showAsGrid"><i class="ti ti-layout-grid"></i><span :class="$style.searchResultStickyViewLabelText">&nbsp;{{ i18n.ts._hana._search.showAsGrid }}</span></MkSwitch>
 					</div>
 				</div>
-			</template>
-			<MkSpacer :contentMax="showAsGrid ? null : 800">
-				<MkPagination
-					v-if="searchMode === 'v1' && onlyWithFiles && showAsGrid"
-					v-slot="{ items }"
-					:pagination="notePagination"
-					:key="`searchNotes:${key}:grid`"
-				>
-					<div :class="$style.stream">
-						<MkNoteMediaGrid v-for="note in items" :note="note" square/>
-					</div>
-				</MkPagination>
-				<MkNotes v-else :key="`searchNotes:${key}:note`" :pagination="notePagination"/>
-			</MkSpacer>
-		</MkStickyContainer>
+			</div>
+		</template>
+		<MkSpacer :contentMax="showAsGrid ? null : 800">
+			<MkPagination
+				v-if="searchMode === 'v1' && onlyWithFiles && showAsGrid"
+				v-slot="{ items }"
+				:pagination="notePagination"
+				:key="`searchNotes:${key}:grid`"
+			>
+				<div :class="$style.stream">
+					<MkNoteMediaGrid v-for="note in items" :note="note" square/>
+				</div>
+			</MkPagination>
+			<MkNotes v-else :key="`searchNotes:${key}:note`" :pagination="notePagination"/>
+		</MkSpacer>
+	</MkStickyContainer>
 </div>
 </template>
 
