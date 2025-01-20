@@ -69,6 +69,11 @@ jobs:
     needs:
       - build
     steps:
+      - name: Prepare
+        run: |
+          platform=${{ matrix.platform }}
+          echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
+          echo "IMAGE_TAG=${GITHUB_REF_NAME}" >> $GITHUB_ENV
       - name: Download digests
         uses: actions/download-artifact@v4
         with:
