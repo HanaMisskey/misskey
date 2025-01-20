@@ -84,10 +84,11 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Create manifest list and push
         run: |
-          # Collect all digests
           echo "Collecting digests from /tmp/digests/linux"
           ls -l /tmp/digests/linux
           cat /tmp/digests/linux/*.digest
+
+          # Collect all digests
           digests=$(find /tmp/digests/linux -type f -name '*.digest' -exec cat {} +)
 
           # Debugging the collected digests
@@ -101,7 +102,13 @@ jobs:
           fi
 
           # Create the manifest
-          docker buildx imagetools create --tag ${{ env.REGISTRY_IMAGE }}:${{ env.IMAGE_TAG }} $digests
+          for digest in $digests; do
+            echo "Adding digest: $digest"
+            docker buildx imagetools create --append --tag ${{ env.REGISTRY_IMAGE }}:${{ env.IMAGE_TAG }} $digest
+          done
+
+          # Finalize the manifest
+          docker buildx imagetools create --tag ${{ env.REGISTRY_IMAGE }}:${{ env.IMAGE_TAG }}
       - name: Inspect image
         run: |
           docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${{ env.IMAGE_TAG }}
