@@ -81,6 +81,8 @@ jobs:
         run: |
           # Collect all digests
           echo "Collecting digests from /tmp/digests/linux"
+          ls -l /tmp/digests/linux
+          cat /tmp/digests/linux/*.digest
           digests=$(find /tmp/digests/linux -type f -name '*.digest' -exec cat {} +)
 
           # Debugging the collected digests
