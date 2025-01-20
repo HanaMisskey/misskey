@@ -35,7 +35,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Build and push by tag
+      - name: Build and push image
         id: build-image
         uses: docker/build-push-action@v6
         with:
@@ -88,19 +88,10 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Create manifest list and push
+        working-directory: /tmp/digests/linux
         run: |
-          echo "Collecting digests from /tmp/digests/linux"
-          digests=$(find /tmp/digests/linux -type f -name '*.digest' -exec cat {} +)
-          
-          if [ -z "$digests" ]; then
-            echo "No digests found. Exiting with error."
-            exit 1
-          fi
-
-          for digest in $digests; do
-            echo "Adding digest: $digest"
-            docker buildx imagetools create --append --tag "${{ env.REGISTRY_IMAGE }}:${{ env.IMAGE_TAG }}" $digest
-          done
+          docker buildx imagetools create --tag ${{ env.REGISTRY_IMAGE }}:${{ env.IMAGE_TAG }} \
+            $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
       - name: Inspect image
         run: |
           docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${{ env.IMAGE_TAG }}
