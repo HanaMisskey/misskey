@@ -90,30 +90,17 @@ jobs:
       - name: Create manifest list and push
         run: |
           echo "Collecting digests from /tmp/digests/linux"
-          ls -l /tmp/digests/linux
-          cat /tmp/digests/linux/*.digest
-
-          # Collect all digests
           digests=$(find /tmp/digests/linux -type f -name '*.digest' -exec cat {} +)
           
-          # Debugging the collected digests
-          echo "Collected digests:"
-          echo "$digests"
-
-          # Check if digests are empty
           if [ -z "$digests" ]; then
             echo "No digests found. Exiting with error."
             exit 1
           fi
 
-          # Create the manifest list
           for digest in $digests; do
             echo "Adding digest: $digest"
             docker buildx imagetools create --append --tag "${{ env.REGISTRY_IMAGE }}:${{ env.IMAGE_TAG }}" $digest
           done
-
-          # Finalize the manifest
-          docker buildx imagetools create --tag "${{ env.REGISTRY_IMAGE }}:${{ env.IMAGE_TAG }}"
       - name: Inspect image
         run: |
           docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${{ env.IMAGE_TAG }}
