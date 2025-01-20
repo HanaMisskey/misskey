@@ -36,6 +36,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Build and push by tag
+        id: build-image
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -49,8 +50,12 @@ jobs:
       - name: Export digest
         run: |
           mkdir -p /tmp/digests/linux
-          digest="${{ steps.build.outputs.digest }}"
-          echo $digest > "/tmp/digests/${{ matrix.platform }}.digest"
+          digest="${{ steps.build-image.outputs.digest }}"
+          if [ -z "$digest" ]; then
+            echo "Digest is empty. Exiting with error."
+            exit 1
+          fi
+          echo "$digest" > "/tmp/digests/${{ matrix.platform }}.digest"
       - name: Upload digest
         uses: actions/upload-artifact@v4
         with:
