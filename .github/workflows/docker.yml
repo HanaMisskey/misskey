@@ -90,8 +90,12 @@ jobs:
       - name: Create manifest list and push
         working-directory: /tmp/digests/linux
         run: |
-          docker buildx imagetools create --tag ${{ env.REGISTRY_IMAGE }}:${{ env.IMAGE_TAG }} \
-            $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
+        docker buildx imagetools create --tag "${{ env.REGISTRY_IMAGE }}:${{ env.IMAGE_TAG }}" \
+          $f(or f in *.digest; do
+              digest_contents=$(cat "$f")
+              echo "${{ env.REGISTRY_IMAGE }}@${digest_contents}"
+            done
+          )
       - name: Inspect image
         run: |
           docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${{ env.IMAGE_TAG }}
