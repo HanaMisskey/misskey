@@ -444,7 +444,7 @@ if (!props.mock) {
 	}
 }
 
-//#region MkNoteSkippable用Hook
+//#region 仮想スクロール（JS）用のHook
 onMounted(() => {
 	emit('mounted', rootEl.value!);
 });
