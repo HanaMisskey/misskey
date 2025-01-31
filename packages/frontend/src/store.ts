@@ -469,7 +469,7 @@ export const defaultStore = markRaw(new Storage('base', {
 	},
 	skipNoteRender: {
 		where: 'device',
-		default: false,
+		default: 'css' as 'css' | 'js' | 'none',
 	},
 	alwaysUseAbsoluteTime: {
 		where: 'device',
