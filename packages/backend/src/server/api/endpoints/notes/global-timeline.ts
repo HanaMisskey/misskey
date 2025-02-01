@@ -111,7 +111,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				}));
 			}
 
-			const notes = (await query.getMany()).filter(note => {
+			const notes = (await query.limit(ps.limit).getMany()).filter(note => {
 				if (me && isUserRelated(note, userIdsWhoBlockingMe)) return false;
 				if (me && isUserRelated(note, userIdsWhoMeMuting)) return false;
 				if (me && isInstanceMuted(note, userMutedInstances)) return false;
