@@ -128,7 +128,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 
 			this.queryService.generateVisibilityQuery(query, me);
 
-			const notes = (await query.limit(ps.limit).getMany()).filter(note => {
+			const notes = (await query.getMany()).filter(note => {
 				if (isUserRelated(note, userIdsWhoBlockingMe)) return false;
 				if (isUserRelated(note, userIdsWhoMeMuting)) return false;
 
