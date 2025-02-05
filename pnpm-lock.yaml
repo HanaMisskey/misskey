@@ -142,7 +142,7 @@ importers:
         version: 10.4.7(@nestjs/common@10.4.7(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/platform-express@10.4.7)(encoding@0.1.13)(reflect-metadata@0.2.2)(rxjs@7.8.1)
       '@nestjs/testing':
         specifier: 10.4.7
-        version: 10.4.7(@nestjs/common@10.4.7(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/core@10.4.7)(@nestjs/platform-express@10.4.7)
+        version: 10.4.7(@nestjs/common@10.4.7(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/core@10.4.7(@nestjs/common@10.4.7(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/platform-express@10.4.7)(encoding@0.1.13)(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/platform-express@10.4.7(@nestjs/common@10.4.7(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/core@10.4.7))
       '@peertube/http-signature':
         specifier: 1.7.0
         version: 1.7.0
@@ -699,13 +699,13 @@ importers:
         version: 2024.1.0
       '@rollup/plugin-json':
         specifier: 6.1.0
-        version: 6.1.0(rollup@4.26.0)
+        version: 6.1.0(rollup@4.34.3)
       '@rollup/plugin-replace':
         specifier: 5.0.7
-        version: 5.0.7(rollup@4.26.0)
+        version: 5.0.7(rollup@4.34.3)
       '@rollup/pluginutils':
         specifier: 5.1.3
-        version: 5.1.3(rollup@4.26.0)
+        version: 5.1.3(rollup@4.34.3)
       '@syuilo/aiscript':
         specifier: 0.19.0
         version: 0.19.0
@@ -720,7 +720,7 @@ importers:
         version: 3.5.12
       aiscript-vscode:
         specifier: github:aiscript-dev/aiscript-vscode#v0.1.15
-        version: https://codeload.github.com/aiscript-dev/aiscript-vscode/tar.gz/c3cde89e79a41d93540cf8a48cd619c3f2dcb1b7
+        version: git+https://git@github.com:aiscript-dev/aiscript-vscode.git#c3cde89e79a41d93540cf8a48cd619c3f2dcb1b7
       astring:
         specifier: 1.9.0
         version: 1.9.0
@@ -807,7 +807,7 @@ importers:
         version: 2.3.1
       rollup:
         specifier: 4.26.0
-        version: 4.26.0
+        version: 4.34.3
       sanitize-html:
         specifier: 2.13.1
         version: 2.13.1
@@ -898,7 +898,7 @@ importers:
         version: 8.4.4(@storybook/test@8.4.4(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4))(typescript@5.6.3)
       '@storybook/react-vite':
         specifier: 8.4.4
-        version: 8.4.4(@storybook/test@8.4.4(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rollup@4.26.0)(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4))(typescript@5.6.3)(vite@5.4.11(@types/node@22.9.0)(sass@1.79.3)(terser@5.36.0))
+        version: 8.4.4(@storybook/test@8.4.4(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rollup@4.34.3)(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4))(typescript@5.6.3)(vite@5.4.11(@types/node@22.9.0)(sass@1.79.3)(terser@5.36.0))
       '@storybook/test':
         specifier: 8.4.4
         version: 8.4.4(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4))
@@ -1024,7 +1024,7 @@ importers:
         version: 8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)
       storybook-addon-misskey-theme:
         specifier: github:misskey-dev/storybook-addon-misskey-theme
-        version: https://codeload.github.com/misskey-dev/storybook-addon-misskey-theme/tar.gz/cf583db098365b2ccc81a82f63ca9c93bc32b640(@storybook/blocks@8.4.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)))(@storybook/components@8.4.4(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)))(@storybook/core-events@8.4.4(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)))(@storybook/manager-api@8.4.4(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)))(@storybook/preview-api@8.4.4(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)))(@storybook/theming@8.4.4(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)))(@storybook/types@8.4.4(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: git+https://git@github.com:misskey-dev/storybook-addon-misskey-theme.git#cf583db098365b2ccc81a82f63ca9c93bc32b640(@storybook/blocks@8.4.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)))(@storybook/components@8.4.4(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)))(@storybook/core-events@8.4.4(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)))(@storybook/manager-api@8.4.4(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)))(@storybook/preview-api@8.4.4(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)))(@storybook/theming@8.4.4(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)))(@storybook/types@8.4.4(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       vite-plugin-turbosnap:
         specifier: 1.0.3
         version: 1.0.3
@@ -1051,13 +1051,13 @@ importers:
         version: 15.1.0
       '@rollup/plugin-json':
         specifier: 6.1.0
-        version: 6.1.0(rollup@4.26.0)
+        version: 6.1.0(rollup@4.34.3)
       '@rollup/plugin-replace':
         specifier: 5.0.7
-        version: 5.0.7(rollup@4.26.0)
+        version: 5.0.7(rollup@4.34.3)
       '@rollup/pluginutils':
         specifier: 5.1.3
-        version: 5.1.3(rollup@4.26.0)
+        version: 5.1.3(rollup@4.34.3)
       '@twemoji/parser':
         specifier: 15.1.1
         version: 15.1.1
@@ -1096,7 +1096,7 @@ importers:
         version: 2.3.1
       rollup:
         specifier: 4.26.0
-        version: 4.26.0
+        version: 4.34.3
       sass:
         specifier: 1.79.4
         version: 1.79.4
@@ -1163,7 +1163,7 @@ importers:
         version: 7.17.0(eslint@9.14.0)(typescript@5.6.3)
       '@vitest/coverage-v8':
         specifier: 1.6.0
-        version: 1.6.0(vitest@1.6.0(@types/node@22.9.0)(happy-dom@10.0.3)(jsdom@24.1.1(bufferutil@4.0.8)(utf-8-validate@6.0.4))(sass@1.79.4)(terser@5.36.0))
+        version: 1.6.0(vitest@1.6.0(@types/node@22.9.0)(happy-dom@10.0.3)(jsdom@24.1.1)(sass@1.79.4)(terser@5.36.0))
       '@vue/runtime-core':
         specifier: 3.5.12
         version: 3.5.12
@@ -3378,93 +3378,98 @@ packages:
       rollup:
         optional: true
 
-  '@rollup/rollup-android-arm-eabi@4.26.0':
-    resolution: {integrity: sha512-gJNwtPDGEaOEgejbaseY6xMFu+CPltsc8/T+diUTTbOQLqD+bnrJq9ulH6WD69TqwqWmrfRAtUv30cCFZlbGTQ==}
+  '@rollup/rollup-android-arm-eabi@4.34.3':
+    resolution: {integrity: sha512-8kq/NjMKkMTGKMPldWihncOl62kgnLYk7cW+/4NCUWfS70/wz4+gQ7rMxMMpZ3dIOP/xw7wKNzIuUnN/H2GfUg==}
     cpu: [arm]
     os: [android]
 
-  '@rollup/rollup-android-arm64@4.26.0':
-    resolution: {integrity: sha512-YJa5Gy8mEZgz5JquFruhJODMq3lTHWLm1fOy+HIANquLzfIOzE9RA5ie3JjCdVb9r46qfAQY/l947V0zfGJ0OQ==}
+  '@rollup/rollup-android-arm64@4.34.3':
+    resolution: {integrity: sha512-1PqMHiuRochQ6++SDI7SaRDWJKr/NgAlezBi5nOne6Da6IWJo3hK0TdECBDwd92IUDPG4j/bZmWuwOnomNT8wA==}
     cpu: [arm64]
     os: [android]
 
-  '@rollup/rollup-darwin-arm64@4.26.0':
-    resolution: {integrity: sha512-ErTASs8YKbqTBoPLp/kA1B1Um5YSom8QAc4rKhg7b9tyyVqDBlQxy7Bf2wW7yIlPGPg2UODDQcbkTlruPzDosw==}
+  '@rollup/rollup-darwin-arm64@4.34.3':
+    resolution: {integrity: sha512-fqbrykX4mGV3DlCDXhF4OaMGcchd2tmLYxVt3On5oOZWVDFfdEoYAV2alzNChl8OzNaeMAGqm1f7gk7eIw/uDg==}
     cpu: [arm64]
     os: [darwin]
 
-  '@rollup/rollup-darwin-x64@4.26.0':
-    resolution: {integrity: sha512-wbgkYDHcdWW+NqP2mnf2NOuEbOLzDblalrOWcPyY6+BRbVhliavon15UploG7PpBRQ2bZJnbmh8o3yLoBvDIHA==}
+  '@rollup/rollup-darwin-x64@4.34.3':
+    resolution: {integrity: sha512-8Wxrx/KRvMsTyLTbdrMXcVKfpW51cCNW8x7iQD72xSEbjvhCY3b+w83Bea3nQfysTMR7K28esc+ZFITThXm+1w==}
     cpu: [x64]
     os: [darwin]
 
-  '@rollup/rollup-freebsd-arm64@4.26.0':
-    resolution: {integrity: sha512-Y9vpjfp9CDkAG4q/uwuhZk96LP11fBz/bYdyg9oaHYhtGZp7NrbkQrj/66DYMMP2Yo/QPAsVHkV891KyO52fhg==}
+  '@rollup/rollup-freebsd-arm64@4.34.3':
+    resolution: {integrity: sha512-lpBmV2qSiELh+ATQPTjQczt5hvbTLsE0c43Rx4bGxN2VpnAZWy77we7OO62LyOSZNY7CzjMoceRPc+Lt4e9J6A==}
     cpu: [arm64]
     os: [freebsd]
 
-  '@rollup/rollup-freebsd-x64@4.26.0':
-    resolution: {integrity: sha512-A/jvfCZ55EYPsqeaAt/yDAG4q5tt1ZboWMHEvKAH9Zl92DWvMIbnZe/f/eOXze65aJaaKbL+YeM0Hz4kLQvdwg==}
+  '@rollup/rollup-freebsd-x64@4.34.3':
+    resolution: {integrity: sha512-sNPvBIXpgaYcI6mAeH13GZMXFrrw5mdZVI1M9YQPRG2LpjwL8DSxSIflZoh/B5NEuOi53kxsR/S2GKozK1vDXA==}
     cpu: [x64]
     os: [freebsd]
 
-  '@rollup/rollup-linux-arm-gnueabihf@4.26.0':
-    resolution: {integrity: sha512-paHF1bMXKDuizaMODm2bBTjRiHxESWiIyIdMugKeLnjuS1TCS54MF5+Y5Dx8Ui/1RBPVRE09i5OUlaLnv8OGnA==}
+  '@rollup/rollup-linux-arm-gnueabihf@4.34.3':
+    resolution: {integrity: sha512-MW6N3AoC61OfE1VgnN5O1OW0gt8VTbhx9s/ZEPLBM11wEdHjeilPzOxVmmsrx5YmejpGPvez8QwGGvMU+pGxpw==}
     cpu: [arm]
     os: [linux]
 
-  '@rollup/rollup-linux-arm-musleabihf@4.26.0':
-    resolution: {integrity: sha512-cwxiHZU1GAs+TMxvgPfUDtVZjdBdTsQwVnNlzRXC5QzIJ6nhfB4I1ahKoe9yPmoaA/Vhf7m9dB1chGPpDRdGXg==}
+  '@rollup/rollup-linux-arm-musleabihf@4.34.3':
+    resolution: {integrity: sha512-2SQkhr5xvatYq0/+H6qyW0zvrQz9LM4lxGkpWURLoQX5+yP8MsERh4uWmxFohOvwCP6l/+wgiHZ1qVwLDc7Qmw==}
     cpu: [arm]
     os: [linux]
 
-  '@rollup/rollup-linux-arm64-gnu@4.26.0':
-    resolution: {integrity: sha512-4daeEUQutGRCW/9zEo8JtdAgtJ1q2g5oHaoQaZbMSKaIWKDQwQ3Yx0/3jJNmpzrsScIPtx/V+1AfibLisb3AMQ==}
+  '@rollup/rollup-linux-arm64-gnu@4.34.3':
+    resolution: {integrity: sha512-R3JLYt8YoRwKI5shJsovLpcR6pwIMui/MGG/MmxZ1DYI3iRSKI4qcYrvYgDf4Ss2oCR3RL3F3dYK7uAGQgMIuQ==}
     cpu: [arm64]
     os: [linux]
 
-  '@rollup/rollup-linux-arm64-musl@4.26.0':
-    resolution: {integrity: sha512-eGkX7zzkNxvvS05ROzJ/cO/AKqNvR/7t1jA3VZDi2vRniLKwAWxUr85fH3NsvtxU5vnUUKFHKh8flIBdlo2b3Q==}
+  '@rollup/rollup-linux-arm64-musl@4.34.3':
+    resolution: {integrity: sha512-4XQhG8v/t3S7Rxs7rmFUuM6j09hVrTArzONS3fUZ6oBRSN/ps9IPQjVhp62P0W3KhqJdQADo/MRlYRMdgxr/3w==}
     cpu: [arm64]
     os: [linux]
 
-  '@rollup/rollup-linux-powerpc64le-gnu@4.26.0':
-    resolution: {integrity: sha512-Odp/lgHbW/mAqw/pU21goo5ruWsytP7/HCC/liOt0zcGG0llYWKrd10k9Fj0pdj3prQ63N5yQLCLiE7HTX+MYw==}
+  '@rollup/rollup-linux-loongarch64-gnu@4.34.3':
+    resolution: {integrity: sha512-QlW1jCUZ1LHUIYCAK2FciVw1ptHsxzApYVi05q7bz2A8oNE8QxQ85NhM4arLxkAlcnS42t4avJbSfzSQwbIaKg==}
+    cpu: [loong64]
+    os: [linux]
+
+  '@rollup/rollup-linux-powerpc64le-gnu@4.34.3':
+    resolution: {integrity: sha512-kMbLToizVeCcN69+nnm20Dh0hrRIAjgaaL+Wh0gWZcNt8e542d2FUGtsyuNsHVNNF3gqTJrpzUGIdwMGLEUM7g==}
     cpu: [ppc64]
     os: [linux]
 
-  '@rollup/rollup-linux-riscv64-gnu@4.26.0':
-    resolution: {integrity: sha512-MBR2ZhCTzUgVD0OJdTzNeF4+zsVogIR1U/FsyuFerwcqjZGvg2nYe24SAHp8O5sN8ZkRVbHwlYeHqcSQ8tcYew==}
+  '@rollup/rollup-linux-riscv64-gnu@4.34.3':
+    resolution: {integrity: sha512-YgD0DnZ3CHtvXRH8rzjVSxwI0kMTr0RQt3o1N92RwxGdx7YejzbBO0ELlSU48DP96u1gYYVWfUhDRyaGNqJqJg==}
     cpu: [riscv64]
     os: [linux]
 
-  '@rollup/rollup-linux-s390x-gnu@4.26.0':
-    resolution: {integrity: sha512-YYcg8MkbN17fMbRMZuxwmxWqsmQufh3ZJFxFGoHjrE7bv0X+T6l3glcdzd7IKLiwhT+PZOJCblpnNlz1/C3kGQ==}
+  '@rollup/rollup-linux-s390x-gnu@4.34.3':
+    resolution: {integrity: sha512-dIOoOz8altjp6UjAi3U9EW99s8nta4gzi52FeI45GlPyrUH4QixUoBMH9VsVjt+9A2RiZBWyjYNHlJ/HmJOBCQ==}
     cpu: [s390x]
     os: [linux]
 
-  '@rollup/rollup-linux-x64-gnu@4.26.0':
-    resolution: {integrity: sha512-ZuwpfjCwjPkAOxpjAEjabg6LRSfL7cAJb6gSQGZYjGhadlzKKywDkCUnJ+KEfrNY1jH5EEoSIKLCb572jSiglA==}
+  '@rollup/rollup-linux-x64-gnu@4.34.3':
+    resolution: {integrity: sha512-lOyG3aF4FTKrhpzXfMmBXgeKUUXdAWmP2zSNf8HTAXPqZay6QYT26l64hVizBjq+hJx3pl0DTEyvPi9sTA6VGA==}
     cpu: [x64]
     os: [linux]
 
-  '@rollup/rollup-linux-x64-musl@4.26.0':
-    resolution: {integrity: sha512-+HJD2lFS86qkeF8kNu0kALtifMpPCZU80HvwztIKnYwym3KnA1os6nsX4BGSTLtS2QVAGG1P3guRgsYyMA0Yhg==}
+  '@rollup/rollup-linux-x64-musl@4.34.3':
+    resolution: {integrity: sha512-usztyYLu2i+mYzzOjqHZTaRXbUOqw3P6laNUh1zcqxbPH1P2Tz/QdJJCQSnGxCtsRQeuU2bCyraGMtMumC46rw==}
     cpu: [x64]
     os: [linux]
 
-  '@rollup/rollup-win32-arm64-msvc@4.26.0':
-    resolution: {integrity: sha512-WUQzVFWPSw2uJzX4j6YEbMAiLbs0BUysgysh8s817doAYhR5ybqTI1wtKARQKo6cGop3pHnrUJPFCsXdoFaimQ==}
+  '@rollup/rollup-win32-arm64-msvc@4.34.3':
+    resolution: {integrity: sha512-ojFOKaz/ZyalIrizdBq2vyc2f0kFbJahEznfZlxdB6pF9Do6++i1zS5Gy6QLf8D7/S57MHrmBLur6AeRYeQXSA==}
     cpu: [arm64]
     os: [win32]
 
-  '@rollup/rollup-win32-ia32-msvc@4.26.0':
-    resolution: {integrity: sha512-D4CxkazFKBfN1akAIY6ieyOqzoOoBV1OICxgUblWxff/pSjCA2khXlASUx7mK6W1oP4McqhgcCsu6QaLj3WMWg==}
+  '@rollup/rollup-win32-ia32-msvc@4.34.3':
+    resolution: {integrity: sha512-K/V97GMbNa+Da9mGcZqmSl+DlJmWfHXTuI9V8oB2evGsQUtszCl67+OxWjBKpeOnYwox9Jpmt/J6VhpeRCYqow==}
     cpu: [ia32]
     os: [win32]
 
-  '@rollup/rollup-win32-x64-msvc@4.26.0':
-    resolution: {integrity: sha512-2x8MO1rm4PGEP0xWbubJW5RtbNLk3puzAMaLQd3B3JHVw4KcHlmXcO+Wewx9zCoo7EUFiMlu/aZbCJ7VjMzAag==}
+  '@rollup/rollup-win32-x64-msvc@4.34.3':
+    resolution: {integrity: sha512-CUypcYP31Q8O04myV6NKGzk9GVXslO5EJNfmARNSzLF2A+5rmZUlDJ4et6eoJaZgBT9wrC2p4JZH04Vkic8HdQ==}
     cpu: [x64]
     os: [win32]
 
@@ -4512,8 +4517,8 @@ packages:
   '@types/pg@8.6.1':
     resolution: {integrity: sha512-1Kc4oAGzAl7uqUStZCDvaLFqZrW9qWSjXOmBfdgyBP5La7Us6Mg4GBvRlSoaZMhQF/zSj1C8CtKMBkoiT8eL8w==}
 
-  '@types/prop-types@15.7.5':
-    resolution: {integrity: sha512-JCB8C6SnDoQf0cNycqd/35A7MjcnK+ZTqE7judS6o7utxUCg6imJg3QK2qzHKszlTjcj2cn+NwMB2i96ubpj7w==}
+  '@types/prop-types@15.7.14':
+    resolution: {integrity: sha512-gNMvNH49DJ7OJYv+KAKn0Xp45p8PLl6zo2YnvDIbTd4J6MER2BmWN49TG7n9LvkyihINxeKW8+3bfS2yDC9dzQ==}
 
   '@types/pug@2.0.10':
     resolution: {integrity: sha512-Sk/uYFOBAB7mb74XcpizmH0KOR2Pv3D2Hmrh1Dmy5BmK3MpdSa5kqZcg6EKBdklU0bFXX9gCfzvpnyUehrPIuA==}
@@ -4554,8 +4559,8 @@ packages:
   '@types/sanitize-html@2.13.0':
     resolution: {integrity: sha512-X31WxbvW9TjIhZZNyNBZ/p5ax4ti7qsNDBDEnH4zAgmEh35YnFD1UiS6z9Cd34kKm0LslFW0KPmTQzu/oGtsqQ==}
 
-  '@types/scheduler@0.16.2':
-    resolution: {integrity: sha512-hppQEBDmlwhFAXKJX2KnWLYu5yMfi91yazPb2l+lbJiwW+wdo1gNeRA+3RgNSO39WYX2euey41KEwnqesU2Jew==}
+  '@types/scheduler@0.23.0':
+    resolution: {integrity: sha512-YIoDCTH3Af6XM5VuwGG/QL/CJqga1Zm3NkU3HZ4ZHK2fRMPYP1VczsTUqtsf43PH/iJNVlPHAo2oWX7BSdB2Hw==}
 
   '@types/seedrandom@2.4.34':
     resolution: {integrity: sha512-ytDiArvrn/3Xk6/vtylys5tlY6eo7Ane0hvcx++TKo6RxQXuVfW0AF/oeWqAj9dN29SyhtawuXstgmPlwNcv/A==}
@@ -4964,8 +4969,8 @@ packages:
     resolution: {integrity: sha512-gOsf2YwSlleG6IjRYG2A7k0HmBMEo6qVNk9Bp/EaLgAJT5ngH6PXbqa4ItvnEwCm/velL5jAnQgsHsWnjhGmvw==}
     engines: {node: '>=18'}
 
-  aiscript-vscode@https://codeload.github.com/aiscript-dev/aiscript-vscode/tar.gz/c3cde89e79a41d93540cf8a48cd619c3f2dcb1b7:
-    resolution: {tarball: https://codeload.github.com/aiscript-dev/aiscript-vscode/tar.gz/c3cde89e79a41d93540cf8a48cd619c3f2dcb1b7}
+  aiscript-vscode@git+https://git@github.com:aiscript-dev/aiscript-vscode.git#c3cde89e79a41d93540cf8a48cd619c3f2dcb1b7:
+    resolution: {commit: c3cde89e79a41d93540cf8a48cd619c3f2dcb1b7, repo: git@github.com:aiscript-dev/aiscript-vscode.git, type: git}
     version: 0.1.15
     engines: {vscode: ^1.83.0}
 
@@ -7897,6 +7902,7 @@ packages:
 
   lodash.get@4.4.2:
     resolution: {integrity: sha512-z+Uw/vLuy6gQe8cfaFWD7p0wVv8fJl3mbzXh33RS+0oW2wvUqiRXiQ69gLWSLpgB5/6sU+r6BlQR0MBILadqTQ==}
+    deprecated: This package is deprecated. Use the optional chaining (?.) operator instead.
 
   lodash.isarguments@3.1.0:
     resolution: {integrity: sha512-chi4NHZlZqZD18a0imDHnZPrDeBbTtVN7GXMwuGdRH9qotxAjYs3aVLKc7zNOG9eddR5Ksd8rvFEBc9SsggPpg==}
@@ -8413,8 +8419,8 @@ packages:
   nan@2.20.0:
     resolution: {integrity: sha512-bk3gXBZDGILuuo/6sKtr0DQmSThYHLtNCdSdXk9YkxD/jK6X2vmCyyXBBxyqZ4XcnzTyYEAThfX3DCEnLf6igw==}
 
-  nanoid@3.3.7:
-    resolution: {integrity: sha512-eSRppjcPIatRIMC1U6UngP8XFcz8MQWGQdt1MTBQ7NaAmvXDfvNxbvWV3x2y6CdEUciCSsDHDQZbhYaB8QEo2g==}
+  nanoid@3.3.8:
+    resolution: {integrity: sha512-WNLf5Sd8oZxOm+TzppcYk8gVOgP+l58xNy58D0nbUnOxOWRWvlcCV4kUF7ltmI6PsrLl/BgKEyS4mqsGChFN0w==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
@@ -8495,6 +8501,10 @@ packages:
 
   node-gyp-build@4.6.0:
     resolution: {integrity: sha512-NTZVKn9IylLwUzaKjkas1e4u2DLNcV4rdYagA4PWdPwW87Bi7z+BznyKSRwS/761tV/lzCGXplWsiaMjLqP2zQ==}
+    hasBin: true
+
+  node-gyp-build@4.8.4:
+    resolution: {integrity: sha512-LA4ZjwlnUblHVgq0oBF3Jl/6h/Nvs5fzBLwdEF4nuxnFdsfajde4WfxtJr3CaiH+F6ewcIB/q4jQ4UzPyid+CQ==}
     hasBin: true
 
   node-gyp@10.2.0:
@@ -9619,8 +9629,8 @@ packages:
     deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
 
-  rollup@4.26.0:
-    resolution: {integrity: sha512-ilcl12hnWonG8f+NxU6BlgysVA0gvY2l8N0R84S1HcINbW20bvwuCngJkkInV6LXhwRpucsW5k1ovDwEdBVrNg==}
+  rollup@4.34.3:
+    resolution: {integrity: sha512-ORCtU0UBJyiAIn9m0llUXJXAswG/68pZptCrqxHG7//Z2DDzAUeyyY5hqf4XrsGlUxscMr9GkQ2QI7KTLqeyPw==}
     engines: {node: '>=18.0.0', npm: '>=8.0.0'}
     hasBin: true
 
@@ -10036,8 +10046,8 @@ packages:
     resolution: {integrity: sha512-iCGQj+0l0HOdZ2AEeBADlsRC+vsnDsZsbdSiH1yNSjcfKM7fdpCMfqAL/dwF5BLiw/XhRft/Wax6zQbhq2BcjQ==}
     engines: {node: '>= 0.4'}
 
-  storybook-addon-misskey-theme@https://codeload.github.com/misskey-dev/storybook-addon-misskey-theme/tar.gz/cf583db098365b2ccc81a82f63ca9c93bc32b640:
-    resolution: {tarball: https://codeload.github.com/misskey-dev/storybook-addon-misskey-theme/tar.gz/cf583db098365b2ccc81a82f63ca9c93bc32b640}
+  storybook-addon-misskey-theme@git+https://git@github.com:misskey-dev/storybook-addon-misskey-theme.git#cf583db098365b2ccc81a82f63ca9c93bc32b640:
+    resolution: {commit: cf583db098365b2ccc81a82f63ca9c93bc32b640, repo: git@github.com:misskey-dev/storybook-addon-misskey-theme.git, type: git}
     version: 0.0.0
     peerDependencies:
       '@storybook/blocks': ^7.0.0-rc.4
@@ -10850,8 +10860,8 @@ packages:
   vscode-languageserver-protocol@3.17.5:
     resolution: {integrity: sha512-mb1bvRJN8SVznADSGWM9u/b07H7Ecg0I3OgXDuLdn307rl/J3A9YD6/eYOssqhecL27hK1IPZAsaqh00i/Jljg==}
 
-  vscode-languageserver-textdocument@1.0.11:
-    resolution: {integrity: sha512-X+8T3GoiwTVlJbicx/sIAF+yuJAqz8VvwJyoMVhwEMoEKE/fkDmrqUgDMyBECcM2A2frVZIUj5HI/ErRXCfOeA==}
+  vscode-languageserver-textdocument@1.0.12:
+    resolution: {integrity: sha512-cxWNPesCnQCcMPeenjKKsOCKQZ/L6Tv19DTRIGuLWe32lyzWhihGVJ/rcckZXJxfdKCFvRLS3fpBIsV/ZGX4zA==}
 
   vscode-languageserver-types@3.17.5:
     resolution: {integrity: sha512-Ld1VelNuX9pdF39h2Hgaeb5hEZM2Z3jUrrMgWQAu82jMtZp7p3vJT3BzToKtZI7NgQssZje5o0zryOrhQvzQAg==}
@@ -11181,7 +11191,7 @@ snapshots:
       stringz: 2.1.0
       uuid: 9.0.1
       vscode-languageserver: 9.0.1
-      vscode-languageserver-textdocument: 1.0.11
+      vscode-languageserver-textdocument: 1.0.12
 
   '@ampproject/remapping@2.2.1':
     dependencies:
@@ -13124,7 +13134,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@nestjs/testing@10.4.7(@nestjs/common@10.4.7(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/core@10.4.7)(@nestjs/platform-express@10.4.7)':
+  '@nestjs/testing@10.4.7(@nestjs/common@10.4.7(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/core@10.4.7(@nestjs/common@10.4.7(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/platform-express@10.4.7)(encoding@0.1.13)(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/platform-express@10.4.7(@nestjs/common@10.4.7(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/core@10.4.7))':
     dependencies:
       '@nestjs/common': 10.4.7(reflect-metadata@0.2.2)(rxjs@7.8.1)
       '@nestjs/core': 10.4.7(@nestjs/common@10.4.7(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/platform-express@10.4.7)(encoding@0.1.13)(reflect-metadata@0.2.2)(rxjs@7.8.1)
@@ -13561,79 +13571,82 @@ snapshots:
 
   '@readme/openapi-schemas@3.1.0': {}
 
-  '@rollup/plugin-json@6.1.0(rollup@4.26.0)':
+  '@rollup/plugin-json@6.1.0(rollup@4.34.3)':
     dependencies:
-      '@rollup/pluginutils': 5.1.3(rollup@4.26.0)
+      '@rollup/pluginutils': 5.1.3(rollup@4.34.3)
     optionalDependencies:
-      rollup: 4.26.0
+      rollup: 4.34.3
 
-  '@rollup/plugin-replace@5.0.7(rollup@4.26.0)':
+  '@rollup/plugin-replace@5.0.7(rollup@4.34.3)':
     dependencies:
-      '@rollup/pluginutils': 5.1.3(rollup@4.26.0)
+      '@rollup/pluginutils': 5.1.3(rollup@4.34.3)
       magic-string: 0.30.10
     optionalDependencies:
-      rollup: 4.26.0
+      rollup: 4.34.3
 
-  '@rollup/pluginutils@5.1.3(rollup@4.26.0)':
+  '@rollup/pluginutils@5.1.3(rollup@4.34.3)':
     dependencies:
       '@types/estree': 1.0.6
       estree-walker: 2.0.2
       picomatch: 4.0.2
     optionalDependencies:
-      rollup: 4.26.0
+      rollup: 4.34.3
 
-  '@rollup/rollup-android-arm-eabi@4.26.0':
+  '@rollup/rollup-android-arm-eabi@4.34.3':
     optional: true
 
-  '@rollup/rollup-android-arm64@4.26.0':
+  '@rollup/rollup-android-arm64@4.34.3':
     optional: true
 
-  '@rollup/rollup-darwin-arm64@4.26.0':
+  '@rollup/rollup-darwin-arm64@4.34.3':
     optional: true
 
-  '@rollup/rollup-darwin-x64@4.26.0':
+  '@rollup/rollup-darwin-x64@4.34.3':
     optional: true
 
-  '@rollup/rollup-freebsd-arm64@4.26.0':
+  '@rollup/rollup-freebsd-arm64@4.34.3':
     optional: true
 
-  '@rollup/rollup-freebsd-x64@4.26.0':
+  '@rollup/rollup-freebsd-x64@4.34.3':
     optional: true
 
-  '@rollup/rollup-linux-arm-gnueabihf@4.26.0':
+  '@rollup/rollup-linux-arm-gnueabihf@4.34.3':
     optional: true
 
-  '@rollup/rollup-linux-arm-musleabihf@4.26.0':
+  '@rollup/rollup-linux-arm-musleabihf@4.34.3':
     optional: true
 
-  '@rollup/rollup-linux-arm64-gnu@4.26.0':
+  '@rollup/rollup-linux-arm64-gnu@4.34.3':
     optional: true
 
-  '@rollup/rollup-linux-arm64-musl@4.26.0':
+  '@rollup/rollup-linux-arm64-musl@4.34.3':
     optional: true
 
-  '@rollup/rollup-linux-powerpc64le-gnu@4.26.0':
+  '@rollup/rollup-linux-loongarch64-gnu@4.34.3':
     optional: true
 
-  '@rollup/rollup-linux-riscv64-gnu@4.26.0':
+  '@rollup/rollup-linux-powerpc64le-gnu@4.34.3':
     optional: true
 
-  '@rollup/rollup-linux-s390x-gnu@4.26.0':
+  '@rollup/rollup-linux-riscv64-gnu@4.34.3':
     optional: true
 
-  '@rollup/rollup-linux-x64-gnu@4.26.0':
+  '@rollup/rollup-linux-s390x-gnu@4.34.3':
     optional: true
 
-  '@rollup/rollup-linux-x64-musl@4.26.0':
+  '@rollup/rollup-linux-x64-gnu@4.34.3':
     optional: true
 
-  '@rollup/rollup-win32-arm64-msvc@4.26.0':
+  '@rollup/rollup-linux-x64-musl@4.34.3':
     optional: true
 
-  '@rollup/rollup-win32-ia32-msvc@4.26.0':
+  '@rollup/rollup-win32-arm64-msvc@4.34.3':
     optional: true
 
-  '@rollup/rollup-win32-x64-msvc@4.26.0':
+  '@rollup/rollup-win32-ia32-msvc@4.34.3':
+    optional: true
+
+  '@rollup/rollup-win32-x64-msvc@4.34.3':
     optional: true
 
   '@rtsao/scc@1.1.0': {}
@@ -14394,10 +14407,10 @@ snapshots:
       react-dom: 18.3.1(react@18.3.1)
       storybook: 8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)
 
-  '@storybook/react-vite@8.4.4(@storybook/test@8.4.4(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rollup@4.26.0)(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4))(typescript@5.6.3)(vite@5.4.11(@types/node@22.9.0)(sass@1.79.3)(terser@5.36.0))':
+  '@storybook/react-vite@8.4.4(@storybook/test@8.4.4(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rollup@4.34.3)(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4))(typescript@5.6.3)(vite@5.4.11(@types/node@22.9.0)(sass@1.79.3)(terser@5.36.0))':
     dependencies:
       '@joshwooding/vite-plugin-react-docgen-typescript': 0.3.0(typescript@5.6.3)(vite@5.4.11(@types/node@22.9.0)(sass@1.79.3)(terser@5.36.0))
-      '@rollup/pluginutils': 5.1.3(rollup@4.26.0)
+      '@rollup/pluginutils': 5.1.3(rollup@4.34.3)
       '@storybook/builder-vite': 8.4.4(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4))(vite@5.4.11(@types/node@22.9.0)(sass@1.79.3)(terser@5.36.0))
       '@storybook/react': 8.4.4(@storybook/test@8.4.4(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4))(typescript@5.6.3)
       find-up: 5.0.0
@@ -14996,7 +15009,7 @@ snapshots:
       pg-protocol: 1.7.0
       pg-types: 2.2.0
 
-  '@types/prop-types@15.7.5': {}
+  '@types/prop-types@15.7.14': {}
 
   '@types/pug@2.0.10': {}
 
@@ -15016,8 +15029,8 @@ snapshots:
 
   '@types/react@18.0.28':
     dependencies:
-      '@types/prop-types': 15.7.5
-      '@types/scheduler': 0.16.2
+      '@types/prop-types': 15.7.14
+      '@types/scheduler': 0.23.0
       csstype: 3.1.3
 
   '@types/readdir-glob@1.1.1':
@@ -15036,7 +15049,7 @@ snapshots:
     dependencies:
       htmlparser2: 8.0.1
 
-  '@types/scheduler@0.16.2': {}
+  '@types/scheduler@0.23.0': {}
 
   '@types/seedrandom@2.4.34': {}
 
@@ -15314,7 +15327,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vitest/coverage-v8@1.6.0(vitest@1.6.0(@types/node@22.9.0)(happy-dom@10.0.3)(jsdom@24.1.1(bufferutil@4.0.8)(utf-8-validate@6.0.4))(sass@1.79.4)(terser@5.36.0))':
+  '@vitest/coverage-v8@1.6.0(vitest@1.6.0(@types/node@22.9.0)(happy-dom@10.0.3)(jsdom@24.1.1)(sass@1.79.4)(terser@5.36.0))':
     dependencies:
       '@ampproject/remapping': 2.2.1
       '@bcoe/v8-coverage': 0.2.3
@@ -15329,7 +15342,7 @@ snapshots:
       std-env: 3.7.0
       strip-literal: 2.1.0
       test-exclude: 6.0.0
-      vitest: 1.6.0(@types/node@22.9.0)(happy-dom@10.0.3)(jsdom@24.1.1(bufferutil@4.0.8)(utf-8-validate@6.0.4))(sass@1.79.4)(terser@5.36.0)
+      vitest: 1.6.0(@types/node@22.9.0)(happy-dom@10.0.3)(jsdom@24.1.1)(sass@1.79.4)(terser@5.36.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -15588,7 +15601,7 @@ snapshots:
       clean-stack: 5.2.0
       indent-string: 5.0.0
 
-  aiscript-vscode@https://codeload.github.com/aiscript-dev/aiscript-vscode/tar.gz/c3cde89e79a41d93540cf8a48cd619c3f2dcb1b7:
+  aiscript-vscode@git+https://git@github.com:aiscript-dev/aiscript-vscode.git#c3cde89e79a41d93540cf8a48cd619c3f2dcb1b7:
     dependencies:
       '@aiscript-dev/aiscript-languageserver': https://github.com/aiscript-dev/aiscript-languageserver/releases/download/0.1.6/aiscript-dev-aiscript-languageserver-0.1.6.tgz
       vscode-languageclient: 9.0.1
@@ -16066,7 +16079,7 @@ snapshots:
 
   bufferutil@4.0.8:
     dependencies:
-      node-gyp-build: 4.6.0
+      node-gyp-build: 4.8.4
     optional: true
 
   bullmq@5.26.1:
@@ -19100,6 +19113,35 @@ snapshots:
 
   jsdoc-type-pratt-parser@4.1.0: {}
 
+  jsdom@24.1.1:
+    dependencies:
+      cssstyle: 4.0.1
+      data-urls: 5.0.0
+      decimal.js: 10.4.3
+      form-data: 4.0.1
+      html-encoding-sniffer: 4.0.0
+      http-proxy-agent: 7.0.2
+      https-proxy-agent: 7.0.5
+      is-potential-custom-element-name: 1.0.1
+      nwsapi: 2.2.12
+      parse5: 7.2.1
+      rrweb-cssom: 0.7.1
+      saxes: 6.0.0
+      symbol-tree: 3.2.4
+      tough-cookie: 4.1.4
+      w3c-xmlserializer: 5.0.0
+      webidl-conversions: 7.0.0
+      whatwg-encoding: 3.1.1
+      whatwg-mimetype: 4.0.0
+      whatwg-url: 14.0.0
+      ws: 8.18.0(bufferutil@4.0.8)(utf-8-validate@6.0.4)
+      xml-name-validator: 5.0.0
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - utf-8-validate
+    optional: true
+
   jsdom@24.1.1(bufferutil@4.0.7)(utf-8-validate@6.0.3):
     dependencies:
       cssstyle: 4.0.1
@@ -20029,7 +20071,7 @@ snapshots:
 
   nan@2.20.0: {}
 
-  nanoid@3.3.7: {}
+  nanoid@3.3.8: {}
 
   nanoid@5.0.8: {}
 
@@ -20098,6 +20140,9 @@ snapshots:
     optional: true
 
   node-gyp-build@4.6.0:
+    optional: true
+
+  node-gyp-build@4.8.4:
     optional: true
 
   node-gyp@10.2.0:
@@ -20745,13 +20790,13 @@ snapshots:
 
   postcss@8.4.47:
     dependencies:
-      nanoid: 3.3.7
+      nanoid: 3.3.8
       picocolors: 1.1.0
       source-map-js: 1.2.1
 
   postcss@8.4.49:
     dependencies:
-      nanoid: 3.3.7
+      nanoid: 3.3.8
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
@@ -21250,28 +21295,29 @@ snapshots:
       glob: 7.2.3
     optional: true
 
-  rollup@4.26.0:
+  rollup@4.34.3:
     dependencies:
       '@types/estree': 1.0.6
     optionalDependencies:
-      '@rollup/rollup-android-arm-eabi': 4.26.0
-      '@rollup/rollup-android-arm64': 4.26.0
-      '@rollup/rollup-darwin-arm64': 4.26.0
-      '@rollup/rollup-darwin-x64': 4.26.0
-      '@rollup/rollup-freebsd-arm64': 4.26.0
-      '@rollup/rollup-freebsd-x64': 4.26.0
-      '@rollup/rollup-linux-arm-gnueabihf': 4.26.0
-      '@rollup/rollup-linux-arm-musleabihf': 4.26.0
-      '@rollup/rollup-linux-arm64-gnu': 4.26.0
-      '@rollup/rollup-linux-arm64-musl': 4.26.0
-      '@rollup/rollup-linux-powerpc64le-gnu': 4.26.0
-      '@rollup/rollup-linux-riscv64-gnu': 4.26.0
-      '@rollup/rollup-linux-s390x-gnu': 4.26.0
-      '@rollup/rollup-linux-x64-gnu': 4.26.0
-      '@rollup/rollup-linux-x64-musl': 4.26.0
-      '@rollup/rollup-win32-arm64-msvc': 4.26.0
-      '@rollup/rollup-win32-ia32-msvc': 4.26.0
-      '@rollup/rollup-win32-x64-msvc': 4.26.0
+      '@rollup/rollup-android-arm-eabi': 4.34.3
+      '@rollup/rollup-android-arm64': 4.34.3
+      '@rollup/rollup-darwin-arm64': 4.34.3
+      '@rollup/rollup-darwin-x64': 4.34.3
+      '@rollup/rollup-freebsd-arm64': 4.34.3
+      '@rollup/rollup-freebsd-x64': 4.34.3
+      '@rollup/rollup-linux-arm-gnueabihf': 4.34.3
+      '@rollup/rollup-linux-arm-musleabihf': 4.34.3
+      '@rollup/rollup-linux-arm64-gnu': 4.34.3
+      '@rollup/rollup-linux-arm64-musl': 4.34.3
+      '@rollup/rollup-linux-loongarch64-gnu': 4.34.3
+      '@rollup/rollup-linux-powerpc64le-gnu': 4.34.3
+      '@rollup/rollup-linux-riscv64-gnu': 4.34.3
+      '@rollup/rollup-linux-s390x-gnu': 4.34.3
+      '@rollup/rollup-linux-x64-gnu': 4.34.3
+      '@rollup/rollup-linux-x64-musl': 4.34.3
+      '@rollup/rollup-win32-arm64-msvc': 4.34.3
+      '@rollup/rollup-win32-ia32-msvc': 4.34.3
+      '@rollup/rollup-win32-x64-msvc': 4.34.3
       fsevents: 2.3.3
 
   rrweb-cssom@0.6.0: {}
@@ -21739,7 +21785,7 @@ snapshots:
     dependencies:
       internal-slot: 1.0.5
 
-  storybook-addon-misskey-theme@https://codeload.github.com/misskey-dev/storybook-addon-misskey-theme/tar.gz/cf583db098365b2ccc81a82f63ca9c93bc32b640(@storybook/blocks@8.4.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)))(@storybook/components@8.4.4(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)))(@storybook/core-events@8.4.4(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)))(@storybook/manager-api@8.4.4(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)))(@storybook/preview-api@8.4.4(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)))(@storybook/theming@8.4.4(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)))(@storybook/types@8.4.4(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  storybook-addon-misskey-theme@git+https://git@github.com:misskey-dev/storybook-addon-misskey-theme.git#cf583db098365b2ccc81a82f63ca9c93bc32b640(@storybook/blocks@8.4.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)))(@storybook/components@8.4.4(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)))(@storybook/core-events@8.4.4(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)))(@storybook/manager-api@8.4.4(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)))(@storybook/preview-api@8.4.4(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)))(@storybook/theming@8.4.4(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)))(@storybook/types@8.4.4(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       '@storybook/blocks': 8.4.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4))
       '@storybook/components': 8.4.4(storybook@8.4.4(bufferutil@4.0.8)(prettier@3.3.3)(utf-8-validate@6.0.4))
@@ -22398,7 +22444,7 @@ snapshots:
 
   utf-8-validate@6.0.4:
     dependencies:
-      node-gyp-build: 4.6.0
+      node-gyp-build: 4.8.4
     optional: true
 
   util-deprecate@1.0.2: {}
@@ -22501,7 +22547,7 @@ snapshots:
     dependencies:
       esbuild: 0.21.5
       postcss: 8.4.49
-      rollup: 4.26.0
+      rollup: 4.34.3
     optionalDependencies:
       '@types/node': 22.9.0
       fsevents: 2.3.3
@@ -22512,7 +22558,7 @@ snapshots:
     dependencies:
       esbuild: 0.21.5
       postcss: 8.4.49
-      rollup: 4.26.0
+      rollup: 4.34.3
     optionalDependencies:
       '@types/node': 22.9.0
       fsevents: 2.3.3
@@ -22562,7 +22608,7 @@ snapshots:
       - supports-color
       - terser
 
-  vitest@1.6.0(@types/node@22.9.0)(happy-dom@10.0.3)(jsdom@24.1.1(bufferutil@4.0.8)(utf-8-validate@6.0.4))(sass@1.79.4)(terser@5.36.0):
+  vitest@1.6.0(@types/node@22.9.0)(happy-dom@10.0.3)(jsdom@24.1.1)(sass@1.79.4)(terser@5.36.0):
     dependencies:
       '@vitest/expect': 1.6.0
       '@vitest/runner': 1.6.0
@@ -22587,7 +22633,7 @@ snapshots:
     optionalDependencies:
       '@types/node': 22.9.0
       happy-dom: 10.0.3
-      jsdom: 24.1.1(bufferutil@4.0.8)(utf-8-validate@6.0.4)
+      jsdom: 24.1.1
     transitivePeerDependencies:
       - less
       - lightningcss
@@ -22613,7 +22659,7 @@ snapshots:
       vscode-jsonrpc: 8.2.0
       vscode-languageserver-types: 3.17.5
 
-  vscode-languageserver-textdocument@1.0.11: {}
+  vscode-languageserver-textdocument@1.0.12: {}
 
   vscode-languageserver-types@3.17.5: {}
 
