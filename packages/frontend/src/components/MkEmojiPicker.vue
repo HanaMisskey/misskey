@@ -117,6 +117,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 <script lang="ts" setup>
 import { ref, shallowRef, computed, watch, onMounted } from 'vue';
 import * as Misskey from 'misskey-js';
+import { toHiragana } from 'wanakana';
 import {
 	emojilist,
 	emojiCharByCategory,
@@ -209,6 +210,10 @@ customEmojiCategories.value.forEach(ec => {
 
 parseAndMergeCategories('', customEmojiFolderRoot);
 
+function includes(base: string, query: string): boolean {
+	return base.includes(query) || toHiragana(base).includes(toHiragana(query));
+}
+
 watch(q, () => {
 	if (emojisEl.value) emojisEl.value.scrollTop = 0;
 
@@ -233,7 +238,7 @@ watch(q, () => {
 
 			// 名前にキーワードが含まれている
 			for (const emoji of emojis) {
-				if (keywords.every(keyword => emoji.name.includes(keyword))) {
+				if (keywords.every(keyword => includes(emoji.name, keyword))) {
 					matches.add(emoji);
 					if (matches.size >= max) break;
 				}
@@ -242,7 +247,7 @@ watch(q, () => {
 
 			// 名前またはエイリアスにキーワードが含まれている
 			for (const emoji of emojis) {
-				if (keywords.every(keyword => emoji.name.includes(keyword) || emoji.aliases.some(alias => alias.includes(keyword)))) {
+				if (keywords.every(keyword => includes(emoji.name, keyword) || emoji.aliases.some(alias => includes(alias, keyword)))) {
 					matches.add(emoji);
 					if (matches.size >= max) break;
 				}
@@ -278,7 +283,7 @@ watch(q, () => {
 			if (matches.size >= max) return matches;
 
 			for (const emoji of emojis) {
-				if (emoji.name.includes(newQ)) {
+				if (includes(emoji.name, newQ)) {
 					matches.add(emoji);
 					if (matches.size >= max) break;
 				}
@@ -286,7 +291,7 @@ watch(q, () => {
 			if (matches.size >= max) return matches;
 
 			for (const emoji of emojis) {
-				if (emoji.aliases.some(alias => alias.includes(newQ))) {
+				if (emoji.aliases.some(alias => includes(alias, newQ))) {
 					matches.add(emoji);
 					if (matches.size >= max) break;
 				}
