@@ -135,6 +135,7 @@
 		"jsonld": "8.3.2",
 		"jsrsasign": "11.1.0",
 		"juice": "11.0.0",
+		"kafkajs": "^2.2.4",
 		"meilisearch": "0.45.0",
 		"mfm-js": "0.24.0",
 		"microformats-parser": "2.0.2",
