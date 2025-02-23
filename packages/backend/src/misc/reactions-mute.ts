@@ -1,4 +1,3 @@
-import { Logger } from '@nestjs/common';
 import { Packed } from '@/misc/json-schema.js';
 
 export async function removeMutedUsersReactions(
@@ -55,7 +54,6 @@ export async function removeMutedUsersReactions(
 	// note と renote（存在する場合）に対して処理を適用
 	removeMutedUserReactionCounts(note);
 	if (note.renote) {
-		Logger.log('note.renote', note.renote);
 		removeMutedUserReactionCounts(note.renote);
 	}
 
