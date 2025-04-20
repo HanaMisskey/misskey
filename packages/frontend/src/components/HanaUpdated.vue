@@ -4,7 +4,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 -->
 
 <template>
-<MkModal ref="modal" :zPriority="'middle'" @closed="$emit('closed')" @click="onBgClick" v-slot="{ maxHeight }">
+<MkModal ref="modal" :zPriority="'middle'" @closed="$emit('closed')" @click="onBgClick">
 	<div ref="rootEl" :class="$style.root">
 		<div :class="$style.header">
 			<span :class="$style.icon">
@@ -66,7 +66,7 @@ function onFrameMessage(ev: MessageEvent) {
 	if (ev.origin !== IFRAME_ORIGIN) return;
 	switch (ev.data.type) {
 		case 'ready': {
-			const theme = getComputedStyle(document.documentElement);
+			const theme = getComputedStyle(window.document.documentElement);
 
 			frameEl.value?.contentWindow?.postMessage({
 				type: 'theme',
@@ -93,7 +93,7 @@ onMounted(() => {
 	});
 
 	watch(store.r.darkMode, () => {
-		const theme = getComputedStyle(document.documentElement);
+		const theme = getComputedStyle(window.document.documentElement);
 
 		frameEl.value?.contentWindow?.postMessage({
 			type: 'theme',
