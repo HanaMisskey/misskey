@@ -4,7 +4,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 -->
 
 <template>
-<MkModal ref="modal" :zPriority="'middle'" @closed="$emit('closed')" @click="onBgClick">
+<MkModal ref="modal" :zPriority="'middle'" :preferType="'dialog'" @closed="$emit('closed')" @click="onBgClick">
 	<div ref="rootEl" :class="$style.root">
 		<div :class="$style.header">
 			<span :class="$style.icon">
@@ -15,6 +15,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 		<div :class="$style.text">
 			<iframe
 				ref="frameEl"
+				scrolling="no"
 				:src="`${IFRAME_ORIGIN}/_app_changelog/web.html${flags}`"
 				:class="$style.frame"
 			></iframe>
@@ -152,6 +153,13 @@ onBeforeUnmount(() => {
 	border: none;
 	background: transparent;
 	color-scheme: light dark;
+	overflow: hidden;
+}
+
+@media (pointer: coarse) {
+	.frame {
+		pointer-events: none;
+	}
 }
 
 .footer {
