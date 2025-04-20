@@ -15,7 +15,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 		<div :class="$style.text">
 			<iframe
 				ref="frameEl"
-				:src="`${IFRAME_ORIGIN}/_app_changelog/web.html`"
+				:src="`${IFRAME_ORIGIN}/_app_changelog/web.html${flags}`"
 				:class="$style.frame"
 			></iframe>
 		</div>
@@ -36,6 +36,7 @@ import { store } from '@/store.js';
 import { confetti } from '@/utility/confetti.js';
 
 const IFRAME_ORIGIN = 'https://docs.misskey.flowers';
+const flags = _DEV_ ? '?dev=true' : '';
 
 const rootEl = useTemplateRef('rootEl');
 const modal = useTemplateRef('modal');
