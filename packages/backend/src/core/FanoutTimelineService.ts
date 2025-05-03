@@ -120,7 +120,6 @@ export class FanoutTimelineService {
 		const timeLinePatterns = [
 			'*list:homeTimeline*',
 			'*list:localTimeline*',
-			'*list:antennaTimeline*',
 			'*list:userTimeline*',
 			'*list:userListTimeline*',
 			'*list:channelTimeline*',
