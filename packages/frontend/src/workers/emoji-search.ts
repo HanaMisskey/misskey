@@ -64,12 +64,10 @@ onmessage = async (event: MessageEvent) => {
 		};
 		case 'updateIndex': {
 			if (!searchEngine) throw new Error('Search engine not initialized');
-			if (
-				'name' in event.data && typeof event.data.name === 'string' &&
-				'aliases' in event.data && Array.isArray(event.data.aliases) &&
-				event.data.aliases.every((alias) => typeof alias === 'string')
-			) {
-				searchEngine.updateDocument(event.data.name, event.data.aliases);
+			if ('emojis' in event.data && assertIsEmoji(event.data.emojis)) {
+				for (const emoji of event.data.emojis.emojis) {
+					searchEngine.updateDocument(emoji.name, emoji.aliases);
+				}
 				postMessage({ id: event.data.id, type: 'updateIndex', success: true });
 				return;
 			}
@@ -78,8 +76,10 @@ onmessage = async (event: MessageEvent) => {
 		};
 		case 'deleteIndex': {
 			if (!searchEngine) throw new Error('Search engine not initialized');
-			if ('name' in event.data && typeof event.data.name === 'string') {
-				searchEngine.removeDocument(event.data.name);
+			if ('emojis' in event.data && assertIsEmoji(event.data.emojis)) {
+				for (const emoji of event.data.emojis.emojis) {
+					searchEngine.removeDocument(emoji.name);
+				}
 				postMessage({ id: event.data.id, type: 'deleteIndex', success: true });
 				return;
 			}

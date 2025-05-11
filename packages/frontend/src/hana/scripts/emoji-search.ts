@@ -122,26 +122,46 @@ export async function addCustomEmojiToSearchIndex(emoji: Misskey.entities.EmojiS
 		message: { type: 'insertIndex', name: emoji.name, aliases: emoji.aliases },
 		expectedType: 'insertIndex',
 	});
+
+	await saveEmojiSearchIndex();
 }
 
-export async function updateCustomEmojiOnSearchIndex(emoji: Misskey.entities.EmojiSimple) {
+export async function updateCustomEmojiOnSearchIndex(emojis: Misskey.entities.EmojiSimple[]) {
 	if (!emojiSearchWorker || !hasInitialized) return;
+
+	const emojisToBeIndexed = {
+		emojis: emojis.map((emoji) => ({
+			name: emoji.name,
+			aliases: emoji.aliases,
+		})),
+	} satisfies SearchIndex;
 
 	await postMessageWithHandler({
 		worker: emojiSearchWorker,
-		message: { type: 'updateIndex', name: emoji.name, aliases: emoji.aliases },
+		message: { type: 'updateIndex', emojis: emojisToBeIndexed },
 		expectedType: 'updateIndex',
 	});
+
+	await saveEmojiSearchIndex();
 }
 
-export async function removeCustomEmojiFromSearchIndex(emoji: Misskey.entities.EmojiSimple) {
+export async function removeCustomEmojiFromSearchIndex(emojis: Misskey.entities.EmojiSimple[]) {
 	if (!emojiSearchWorker || !hasInitialized) return;
+
+	const emojisToBeIndexed = {
+		emojis: emojis.map((emoji) => ({
+			name: emoji.name,
+			aliases: emoji.aliases,
+		})),
+	} satisfies SearchIndex;
 
 	await postMessageWithHandler({
 		worker: emojiSearchWorker,
-		message: { type: 'removeIndex', name: emoji.name },
+		message: { type: 'removeIndex', emojis: emojisToBeIndexed },
 		expectedType: 'removeIndex',
 	});
+
+	await saveEmojiSearchIndex();
 }
 
 export async function clearEmojiSearchIndex() {
@@ -154,6 +174,7 @@ export async function clearEmojiSearchIndex() {
 	}
 
 	await del('emojiSearchIndex');
+	await saveEmojiSearchIndex();
 }
 
 export async function regenerateCustomEmojiSearchIndex(emojis: Misskey.entities.EmojiSimple[]) {
@@ -177,6 +198,12 @@ export async function regenerateCustomEmojiSearchIndex(emojis: Misskey.entities.
 		message: { type: 'createIndex', emojis: emojisToBeIndexed },
 		expectedType: 'createIndex',
 	});
+
+	await saveEmojiSearchIndex();
+}
+
+export async function saveEmojiSearchIndex() {
+	if (!emojiSearchWorker || !hasInitialized) return;
 
 	await postMessageWithHandler({
 		worker: emojiSearchWorker,
