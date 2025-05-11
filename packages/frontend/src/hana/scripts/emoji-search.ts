@@ -6,7 +6,7 @@ import type { SearchIndex } from '@hanamisskey/browser-search';
 let emojiSearchWorker: Worker | null = null;
 let hasInitialized = false;
 
-if (import.meta.env.MODE !== 'test' && window.localStorage.getItem('enableWasmEmojiSearch') === 'true') {
+if (import.meta.env.MODE !== 'test') {
 	emojiSearchWorker = new EmojiSearch();
 }
 
