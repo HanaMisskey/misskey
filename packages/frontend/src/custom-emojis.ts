@@ -6,7 +6,6 @@
 import { shallowRef, computed, markRaw, watch } from 'vue';
 import * as Misskey from 'misskey-js';
 import { misskeyApi, misskeyApiGet } from '@/utility/misskey-api.js';
-import { hanaStore } from '@/hana/store.js';
 import { regenerateCustomEmojiSearchIndex } from '@/hana/scripts/emoji-search.js';
 import { get, set } from '@/utility/idb-proxy.js';
 
@@ -60,6 +59,10 @@ export async function fetchCustomEmojis(force = false) {
 	customEmojis.value = res.emojis;
 	set('emojis', res.emojis);
 	set('lastEmojisFetchedAt', now);
+
+	// 初期化前に参照される問題への対処
+	const { hanaStore } = await import('@/hana/store.js');
+	await hanaStore.ready;
 
 	if (hanaStore.s.enableWasmEmojiSearch) {
 		regenerateCustomEmojiSearchIndex(res.emojis);
