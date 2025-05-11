@@ -1,13 +1,12 @@
 import * as Misskey from 'misskey-js';
 import EmojiSearch from '@/workers/emoji-search.js?worker';
 import { get, set, del } from '@/utility/idb-proxy.js';
-import { hanaStore } from '@/hana/store.js';
 import type { SearchIndex } from '@hanamisskey/browser-search';
 
 let emojiSearchWorker: Worker | null = null;
 let hasInitialized = false;
 
-if (import.meta.env.MODE !== 'test' && hanaStore.s.enableWasmEmojiSearch) {
+if (import.meta.env.MODE !== 'test') {
 	emojiSearchWorker = new EmojiSearch();
 }
 
