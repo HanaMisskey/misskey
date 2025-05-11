@@ -152,7 +152,6 @@ export async function clearEmojiSearchIndex() {
 	await del('emojiSearchIndex');
 }
 
-
 export async function regenerateCustomEmojiSearchIndex(emojis: Misskey.entities.EmojiSimple[]) {
 	if (!emojiSearchWorker || !hasInitialized) return;
 

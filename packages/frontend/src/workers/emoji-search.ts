@@ -73,6 +73,8 @@ onmessage = async (event: MessageEvent) => {
 				postMessage({ id: event.data.id, type: 'updateIndex', success: true });
 				return;
 			}
+			postMessage({ id: event.data.id, type: 'updateIndex', success: false });
+			break;
 		};
 		case 'deleteIndex': {
 			if (!searchEngine) throw new Error('Search engine not initialized');
