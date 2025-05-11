@@ -114,5 +114,16 @@ onmessage = async (event: MessageEvent) => {
 			postMessage({ id: event.data.id, type: 'search', success: false });
 			break;
 		};
+
+		case 'searchUnlimited': {
+			if (!searchEngine) throw new Error('Search engine not initialized');
+			if ('query' in event.data && typeof event.data.query === 'string') {
+				const result = await searchEngine.searchNoLimit(event.data.query);
+				postMessage({ id: event.data.id, type: 'searchUnlimited', success: true, data: result });
+				return;
+			}
+			postMessage({ id: event.data.id, type: 'searchUnlimited', success: false });
+			break;
+		};
 	}
 };

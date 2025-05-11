@@ -43,7 +43,7 @@ import MkButton from '@/components/MkButton.vue';
 import MkInput from '@/components/MkInput.vue';
 import MkFoldableSection from '@/components/MkFoldableSection.vue';
 import { customEmojis, customEmojisMap, customEmojiCategories, getCustomEmojiTags } from '@/custom-emojis.js';
-import { searchCustomEmojis } from '@/hana/scripts/emoji-search.js';
+import { searchCustomEmojisUnlimited } from '@/hana/scripts/emoji-search.js';
 import { hanaStore } from '@/hana/store.js';
 import { i18n } from '@/i18n.js';
 import { $i } from '@/i.js';
@@ -60,7 +60,7 @@ async function search() {
 	}
 
 	if (hanaStore.s.enableWasmEmojiSearch) {
-		const res = await searchCustomEmojis(q.value);
+		const res = await searchCustomEmojisUnlimited(q.value);
 		console.log('emoji search result:', res);
 		if (res == null || res.length === 0) {
 			searchEmojis.value = null;

@@ -88,13 +88,24 @@ export function initEmojiSearch(emojis?: Misskey.entities.EmojiSimple[]) {
 	});
 }
 
-export async function searchCustomEmojis(query: string) {
+export async function searchCustomEmojis(query: string, limit = 10) {
 	if (!emojiSearchWorker || !hasInitialized) return;
 
 	return await postMessageWithHandler<string[]>({
 		worker: emojiSearchWorker,
-		message: { type: 'search', query },
+		message: { type: 'search', query, limit },
 		expectedType: 'search',
+		handler: (data) => data.data,
+	});
+}
+
+export async function searchCustomEmojisUnlimited(query: string) {
+	if (!emojiSearchWorker || !hasInitialized) return;
+
+	return await postMessageWithHandler<string[]>({
+		worker: emojiSearchWorker,
+		message: { type: 'searchUnlimited', query },
+		expectedType: 'searchUnlimited',
 		handler: (data) => data.data,
 	});
 }
