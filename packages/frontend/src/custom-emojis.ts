@@ -6,6 +6,8 @@
 import { shallowRef, computed, markRaw, watch } from 'vue';
 import * as Misskey from 'misskey-js';
 import { misskeyApi, misskeyApiGet } from '@/utility/misskey-api.js';
+import { hanaStore } from '@/hana/store.js';
+import { regenerateCustomEmojiSearchIndex } from '@/hana/scripts/emoji-search.js';
 import { get, set } from '@/utility/idb-proxy.js';
 
 const storageCache = await get('emojis');
@@ -46,7 +48,7 @@ export function removeCustomEmojis(emojis: Misskey.entities.EmojiSimple[]) {
 export async function fetchCustomEmojis(force = false) {
 	const now = Date.now();
 
-	let res;
+	let res: Misskey.entities.EmojisResponse;
 	if (force) {
 		res = await misskeyApi('emojis', {});
 	} else {
@@ -58,6 +60,10 @@ export async function fetchCustomEmojis(force = false) {
 	customEmojis.value = res.emojis;
 	set('emojis', res.emojis);
 	set('lastEmojisFetchedAt', now);
+
+	if (hanaStore.s.enableWasmEmojiSearch) {
+		regenerateCustomEmojiSearchIndex(res.emojis);
+	}
 }
 
 let cachedTags;
