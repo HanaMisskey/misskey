@@ -47,7 +47,7 @@ export function initEmojiSearch(emojis?: Misskey.entities.EmojiSimple[]) {
 
 		const preCompiledIndex = await get('emojiSearchIndex');
 
-		if (_DEV_) console.log('Initializing Emoji Search', { preCompiledIndex });
+		if (_DEV_) console.log('[Emoji Search] Initializing Emoji Search', { preCompiledIndex });
 
 		try {
 			await postMessageWithHandler({
@@ -58,9 +58,13 @@ export function initEmojiSearch(emojis?: Misskey.entities.EmojiSimple[]) {
 
 			hasInitialized = true;
 
-			if (preCompiledIndex == null && emojis != null) {
+			if (preCompiledIndex == null) {
+				if (_DEV_) console.log('[Emoji Search] No precompiled index found, creating a new one');
+
+				const _emojis: Misskey.entities.EmojiSimple[] = emojis ?? (await get('emojis')) ?? [];
+
 				const emojisToBeIndexed = {
-					emojis: emojis.map((emoji) => ({
+					emojis: _emojis.map((emoji) => ({
 						name: emoji.name,
 						aliases: emoji.aliases,
 					})),

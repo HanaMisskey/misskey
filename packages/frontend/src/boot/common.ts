@@ -270,12 +270,12 @@ export async function common(createVue: () => Promise<App<Element>>) {
 	//#endregion
 
 	try {
+		await fetchCustomEmojis();
 		if (hanaStore.s.enableWasmEmojiSearch) {
 			await initEmojiSearch();
 		} else {
 			await clearEmojiSearchIndex();
 		}
-		await fetchCustomEmojis();
 	} catch (err) { /* empty */ }
 
 	// analytics
