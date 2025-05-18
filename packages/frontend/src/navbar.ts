@@ -123,6 +123,11 @@ export const navbarItemDef = reactive({
 		show: computed(() => $i != null),
 		to: '/my/achievements',
 	},
+	premium: {
+		title: 'Premium',
+		icon: 'ti ti-hanamisskey-hanamode',
+		to: '/premium',
+	},
 	games: {
 		title: 'Misskey Games',
 		icon: 'ti ti-device-gamepad',

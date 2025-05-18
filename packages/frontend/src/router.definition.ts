@@ -72,6 +72,9 @@ export const ROUTE_DEF = [{
 	path: '/instance-info/:host',
 	component: page(() => import('@/pages/instance-info.vue')),
 }, {
+	path: '/premium',
+	component: page(() => import('@/pages/premium.vue')),
+}, {
 	name: 'settings',
 	path: '/settings',
 	component: page(() => import('@/pages/settings/index.vue')),
