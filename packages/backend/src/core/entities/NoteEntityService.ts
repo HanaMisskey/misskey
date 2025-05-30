@@ -249,7 +249,7 @@ export class NoteEntityService implements OnModuleInit {
 		const reactionsCount = Object.values(note.reactions).reduce((a, b) => a + b, 0);
 		if (reactionsCount === 0) return undefined;
 		if (note.reactionAndUserPairCache && reactionsCount <= note.reactionAndUserPairCache.length) {
-			const pair = note.reactionAndUserPairCache.find(p => p.startsWith(meId));
+                        const pair = note.reactionAndUserPairCache.find(p => p.startsWith(meId + '/'));
 			if (pair) {
 				return this.reactionService.convertLegacyReaction(pair.split('/')[1]);
 			} else {
@@ -503,7 +503,7 @@ export class NoteEntityService implements OnModuleInit {
 						if (pairInBuffer) {
 							myReactionsMap.set(note.renote.id, pairInBuffer[1]);
 						} else {
-							const pair = note.renote.reactionAndUserPairCache.find(p => p.startsWith(meId));
+                                                        const pair = note.renote.reactionAndUserPairCache.find(p => p.startsWith(meId + '/'));
 							myReactionsMap.set(note.renote.id, pair ? pair.split('/')[1] : null);
 						}
 					} else {
@@ -519,7 +519,7 @@ export class NoteEntityService implements OnModuleInit {
 							if (pairInBuffer) {
 								myReactionsMap.set(note.id, pairInBuffer[1]);
 							} else {
-								const pair = note.reactionAndUserPairCache.find(p => p.startsWith(meId));
+                                                        const pair = note.reactionAndUserPairCache.find(p => p.startsWith(meId + '/'));
 								myReactionsMap.set(note.id, pair ? pair.split('/')[1] : null);
 							}
 						} else {
