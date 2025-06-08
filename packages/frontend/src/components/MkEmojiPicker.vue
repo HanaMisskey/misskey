@@ -92,8 +92,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 				v-for="child in customEmojiFolderRoot.children"
 				:key="`custom:${child.value}`"
 				:initialShown="false"
-                                :emojis="computed(() => customEmojis.filter(e => filterCategory(e, child.value) && !isMuted(makeEmojiMuteKey({ name: e.name, host: e.host }))).map(e => `:${e.name}:`))"
-                                :disabledEmojis="computed(() => customEmojis.filter(e => filterCategory(e, child.value) && !isMuted(makeEmojiMuteKey({ name: e.name, host: e.host }))).filter(e => !canReact(e)).map(e => `:${e.name}:`))"
+				:emojis="computed(() => customEmojis.filter(e => filterCategory(e, child.value) && !isMuted(makeEmojiMuteKey({ name: e.name, host: e.host }))).map(e => `:${e.name}:`))"
+				:disabledEmojis="computed(() => customEmojis.filter(e => filterCategory(e, child.value) && !isMuted(makeEmojiMuteKey({ name: e.name, host: e.host }))).filter(e => !canReact(e)).map(e => `:${e.name}:`))"
 				:hasChildSection="child.children.length !== 0"
 				:customEmojiTree="child.children"
 				@chosen="chosen"
@@ -103,7 +103,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 		</div>
 		<div v-once class="group">
 			<header class="_acrylic">{{ i18n.ts.emoji }}</header>
-                        <XSection v-for="category in categories" :key="category" :emojis="(emojiCharByCategory.get(category) ?? []).filter(c => !isMuted(c))" :hasChildSection="false" @chosen="chosen">{{ category }}</XSection>
+			<XSection v-for="category in categories" :key="category" :emojis="(emojiCharByCategory.get(category) ?? []).filter(c => !isMuted(c))" :hasChildSection="false" @chosen="chosen">{{ category }}</XSection>
 		</div>
 	</div>
 	<div class="tabs">
