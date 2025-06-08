@@ -83,7 +83,7 @@ function canReact(reaction: string) {
 watch([() => props.reactions, () => props.maxNumber], ([newSource, maxNumber]) => {
 	const processed: Record<string, number> = {};
 	for (const [r, c] of Object.entries(newSource)) {
-		const key = isMuted(r) ? '❤' : r;
+		const key = isMuted(r) ? '❤️' : r;
 		processed[key] = (processed[key] ?? 0) + c;
 	}
 	newSource = processed;
