@@ -5,10 +5,10 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 <template>
 <button
-	ref="buttonEl"
-	v-ripple="canToggle"
-	class="_button"
-	:class="[$style.root, { [$style.reacted]: note.myReaction == reaction, [$style.canToggle]: canToggle, [$style.small]: prefer.s.reactionsDisplaySize === 'small', [$style.large]: prefer.s.reactionsDisplaySize === 'large' }]"
+        ref="buttonEl"
+        v-ripple="canToggle"
+        class="_button"
+        :class="[$style.root, { [$style.reacted]: displayMyReaction === reaction, [$style.canToggle]: canToggle, [$style.small]: prefer.s.reactionsDisplaySize === 'small', [$style.large]: prefer.s.reactionsDisplaySize === 'large' }]"
 	@click="toggleReaction()"
 	@contextmenu.prevent.stop="menu"
 >
@@ -38,10 +38,11 @@ import { prefer } from '@/preferences.js';
 import { DI } from '@/di.js';
 
 const props = defineProps<{
-	reaction: string;
-	count: number;
-	isInitial: boolean;
-	note: Misskey.entities.Note;
+        reaction: string;
+        count: number;
+        isInitial: boolean;
+        note: Misskey.entities.Note;
+        displayMyReaction: string | null;
 }>();
 
 const mock = inject(DI.mock, false);

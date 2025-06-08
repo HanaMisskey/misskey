@@ -13,17 +13,18 @@ SPDX-License-Identifier: AGPL-3.0-only
 	:moveClass="$style.transition_x_move"
 	tag="div" :class="$style.root"
 >
-	<XReaction v-for="[reaction, count] in reactions" :key="reaction" :reaction="reaction" :count="count" :isInitial="initialReactions.has(reaction)" :note="note" @reactionToggled="onMockToggleReaction"/>
+       <XReaction v-for="[reaction, count] in reactions" :key="reaction" :reaction="reaction" :count="count" :isInitial="initialReactions.value.has(reaction)" :note="note" :displayMyReaction="displayMyReaction" @reactionToggled="onMockToggleReaction"/>
 	<slot v-if="hasMoreReactions" name="more"/>
 </component>
 </template>
 
 <script lang="ts" setup>
 import * as Misskey from 'misskey-js';
-import { inject, watch, ref } from 'vue';
+import { inject, watch, ref, computed } from 'vue';
 import { TransitionGroup } from 'vue';
 import XReaction from '@/components/MkReactionsViewer.reaction.vue';
 import { prefer } from '@/preferences.js';
+import { mutedEmojis } from '@/muted-emojis.js';
 import { DI } from '@/di.js';
 
 const props = withDefaults(defineProps<{
@@ -39,13 +40,32 @@ const emit = defineEmits<{
 	(ev: 'mockUpdateMyReaction', emoji: string, delta: number): void;
 }>();
 
-const initialReactions = new Set(Object.keys(props.note.reactions));
+const displayReactionsSource = computed(() => {
+        const res: Record<string, number> = {};
+        for (const [k, v] of Object.entries(props.note.reactions)) {
+                const name = k.replace(/:/g, '').replace(/@\./, '');
+                if (mutedEmojis.value.includes(name)) {
+                        res['❤️'] = (res['❤️'] || 0) + v;
+                } else {
+                        res[k] = v;
+                }
+        }
+        return res;
+});
+
+const initialReactions = computed(() => new Set(Object.keys(displayReactionsSource.value)));
+
+const displayMyReaction = computed(() => {
+        if (!props.note.myReaction) return null;
+        const name = props.note.myReaction.replace(/:/g, '').replace(/@\./, '');
+        return mutedEmojis.value.includes(name) ? '❤️' : props.note.myReaction;
+});
 
 const reactions = ref<[string, number][]>([]);
 const hasMoreReactions = ref(false);
 
-if (props.note.myReaction && !Object.keys(reactions.value).includes(props.note.myReaction)) {
-	reactions.value[props.note.myReaction] = props.note.reactions[props.note.myReaction];
+if (displayMyReaction.value && !Object.keys(reactions.value).includes(displayMyReaction.value)) {
+        reactions.value[displayMyReaction.value] = displayReactionsSource.value[displayMyReaction.value];
 }
 
 function onMockToggleReaction(emoji: string, count: number) {
@@ -57,9 +77,9 @@ function onMockToggleReaction(emoji: string, count: number) {
 	emit('mockUpdateMyReaction', emoji, (count - reactions.value[i][1]));
 }
 
-watch([() => props.note.reactions, () => props.maxNumber], ([newSource, maxNumber]) => {
+watch([displayReactionsSource, () => props.maxNumber], ([newSource, maxNumber]) => {
 	let newReactions: [string, number][] = [];
-	hasMoreReactions.value = Object.keys(newSource).length > maxNumber;
+        hasMoreReactions.value = Object.keys(newSource).length > maxNumber;
 
 	for (let i = 0; i < reactions.value.length; i++) {
 		const reaction = reactions.value[i][0];
@@ -79,9 +99,9 @@ watch([() => props.note.reactions, () => props.maxNumber], ([newSource, maxNumbe
 
 	newReactions = newReactions.slice(0, props.maxNumber);
 
-	if (props.note.myReaction && !newReactions.map(([x]) => x).includes(props.note.myReaction)) {
-		newReactions.push([props.note.myReaction, newSource[props.note.myReaction]]);
-	}
+        if (displayMyReaction.value && !newReactions.map(([x]) => x).includes(displayMyReaction.value)) {
+                newReactions.push([displayMyReaction.value, newSource[displayMyReaction.value]]);
+        }
 
 	reactions.value = newReactions;
 }, { immediate: true, deep: true });

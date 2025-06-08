@@ -91,8 +91,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 				v-for="child in customEmojiFolderRoot.children"
 				:key="`custom:${child.value}`"
 				:initialShown="false"
-				:emojis="computed(() => customEmojis.filter(e => filterCategory(e, child.value)).map(e => `:${e.name}:`))"
-				:disabledEmojis="computed(() => customEmojis.filter(e => filterCategory(e, child.value)).filter(e => !canReact(e)).map(e => `:${e.name}:`))"
+                                :emojis="computed(() => availableCustomEmojis.value.filter(e => filterCategory(e, child.value)).map(e => `:${e.name}:`))"
+                                :disabledEmojis="computed(() => availableCustomEmojis.value.filter(e => filterCategory(e, child.value)).filter(e => !canReact(e)).map(e => `:${e.name}:`))"
 				:hasChildSection="child.children.length !== 0"
 				:customEmojiTree="child.children"
 				@chosen="chosen"
@@ -136,6 +136,7 @@ import { deviceKind } from '@/utility/device-kind.js';
 import { i18n } from '@/i18n.js';
 import { store } from '@/store.js';
 import { customEmojiCategories, customEmojis, customEmojisMap } from '@/custom-emojis.js';
+import { mutedEmojis } from '@/muted-emojis.js';
 import { $i } from '@/i.js';
 import { romajiIncludes } from '@/hana/scripts/romaji-includes.js';
 import { searchCustomEmojis } from '@/hana/scripts/emoji-search.js';
@@ -172,11 +173,19 @@ const {
 const recentlyUsedEmojis = store.r.recentlyUsedEmojis;
 
 const recentlyUsedEmojisDef = computed(() => {
-	return recentlyUsedEmojis.value.map(getDef);
+        return recentlyUsedEmojis.value
+                .filter(e => !mutedEmojis.value.includes(e.replace(/:/g, '')))
+                .map(getDef);
 });
 const pinnedEmojisDef = computed(() => {
-	return pinned.value?.map(getDef);
+        return pinned.value
+                ?.filter(e => !mutedEmojis.value.includes(e.replace(/:/g, '')))
+                .map(getDef);
 });
+
+const availableCustomEmojis = computed(() =>
+        customEmojis.value.filter(e => !mutedEmojis.value.includes(e.name))
+);
 
 const pinned = computed(() => props.pinnedEmojis);
 const size = computed(() => emojiPickerScale.value);
@@ -229,7 +238,7 @@ watch(q, async () => {
 
 	const searchCustom = () => {
 		const max = 100;
-		const emojis = customEmojis.value;
+                const emojis = availableCustomEmojis.value;
 		const matches = new Set<Misskey.entities.EmojiSimple>();
 
 		const exactMatch = emojis.find(emoji => emoji.name === newQ);
@@ -381,8 +390,8 @@ watch(q, async () => {
 		}
 	}
 
-	searchResultCustom.value = await _searchCustom();
-	searchResultUnicode.value = Array.from(searchUnicode());
+        searchResultCustom.value = (await _searchCustom()).filter(e => !mutedEmojis.value.includes(e.name));
+        searchResultUnicode.value = Array.from(searchUnicode());
 });
 
 function canReact(emoji: Misskey.entities.EmojiSimple | UnicodeEmojiDef | string): boolean {
