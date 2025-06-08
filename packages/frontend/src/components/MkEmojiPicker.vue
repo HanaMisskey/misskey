@@ -177,10 +177,10 @@ const {
 const recentlyUsedEmojis = store.r.recentlyUsedEmojis;
 
 const recentlyUsedEmojisDef = computed(() => {
-        return recentlyUsedEmojis.value.filter(e => !isMuted(e)).map(getDef);
+	return recentlyUsedEmojis.value.filter(e => !isMuted(e)).map(getDef);
 });
 const pinnedEmojisDef = computed(() => {
-        return pinned.value?.filter(e => !isMuted(e)).map(getDef);
+	return pinned.value?.filter(e => !isMuted(e)).map(getDef);
 });
 
 const pinned = computed(() => props.pinnedEmojis);
@@ -386,8 +386,8 @@ watch(q, async () => {
 		}
 	}
 
-        searchResultCustom.value = (await _searchCustom()).filter(e => !isMuted(makeEmojiMuteKey({ name: e.name, host: e.host }))); 
-        searchResultUnicode.value = Array.from(searchUnicode()).filter(e => !isMuted(e.char));
+	searchResultCustom.value = (await _searchCustom()).filter(e => !isMuted(makeEmojiMuteKey({ name: e.name, host: e.host })));
+	searchResultUnicode.value = Array.from(searchUnicode()).filter(e => !isMuted(e.char));
 });
 
 function canReact(emoji: Misskey.entities.EmojiSimple | UnicodeEmojiDef | string): boolean {

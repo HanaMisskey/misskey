@@ -61,9 +61,9 @@ export function checkMuted(emoji: string) {
 }
 
 export function isMuted(emoji: string): boolean {
-        const isCustomEmoji = emoji.startsWith(':') && emoji.endsWith(':');
-        const emojiMuteKey = isCustomEmoji ?
-                makeEmojiMuteKey({ name: extractCustomEmojiName(emoji), host: extractCustomEmojiHost(emoji) }) :
-                emoji;
-        return prefer.r.mutingEmojis.value.includes(emojiMuteKey);
+	const isCustomEmoji = emoji.startsWith(':') && emoji.endsWith(':');
+	const emojiMuteKey = isCustomEmoji ?
+		makeEmojiMuteKey({ name: extractCustomEmojiName(emoji), host: extractCustomEmojiHost(emoji) }) :
+		emoji;
+	return prefer.r.mutingEmojis.value.includes(emojiMuteKey);
 }

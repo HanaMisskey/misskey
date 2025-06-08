@@ -5,12 +5,12 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 <template>
 <span
-        v-if="shouldMute"
-        :class="[$style.root, { [$style.normal]: normal, [$style.noStyle]: noStyle }]"
-        :title="alt"
-        draggable="false"
-        style="-webkit-user-drag: none;"
-        @click="onClick"
+	v-if="shouldMute"
+	:class="[$style.root, { [$style.normal]: normal, [$style.noStyle]: noStyle }]"
+	:title="alt"
+	draggable="false"
+	style="-webkit-user-drag: none;"
+	@click="onClick"
 >❤️</span>
 <img
 	v-else-if="errored && fallbackToImage"
