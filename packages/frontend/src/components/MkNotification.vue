@@ -48,13 +48,13 @@ SPDX-License-Identifier: AGPL-3.0-only
 				<img v-if="notification.role.iconUrl" style="height: 1.3em; vertical-align: -22%;" :src="notification.role.iconUrl" alt=""/>
 				<i v-else class="ti ti-badges"></i>
 			</template>
-			<MkReactionIcon
-				v-else-if="notification.type === 'reaction'"
-				:withTooltip="true"
-				:reaction="notification.reaction.replace(/^:(\w+):$/, ':$1@.:')"
-				:noStyle="true"
-				style="width: 100%; height: 100% !important; object-fit: contain;"
-			/>
+                        <MkReactionIcon
+                                v-else-if="notification.type === 'reaction'"
+                                :withTooltip="true"
+                                :reaction="normalizeReaction(notification.reaction).replace(/^:(\w+):$/, ':$1@.:')"
+                                :noStyle="true"
+                                style="width: 100%; height: 100% !important; object-fit: contain;"
+                        />
 		</div>
 	</div>
 	<div :class="$style.tail">
@@ -145,12 +145,12 @@ SPDX-License-Identifier: AGPL-3.0-only
 				<div v-for="reaction of notification.reactions" :key="reaction.user.id + reaction.reaction" :class="$style.reactionsItem">
 					<MkAvatar :class="$style.reactionsItemAvatar" :user="reaction.user" link preview/>
 					<div :class="$style.reactionsItemReaction">
-						<MkReactionIcon
-							:withTooltip="true"
-							:reaction="reaction.reaction.replace(/^:(\w+):$/, ':$1@.:')"
-							:noStyle="true"
-							style="width: 100%; height: 100% !important; object-fit: contain;"
-						/>
+                                                <MkReactionIcon
+                                                        :withTooltip="true"
+                                                        :reaction="normalizeReaction(reaction.reaction).replace(/^:(\w+):$/, ':$1@.:')"
+                                                        :noStyle="true"
+                                                        style="width: 100%; height: 100% !important; object-fit: contain;"
+                                                />
 					</div>
 				</div>
 			</div>
@@ -175,6 +175,7 @@ import { userPage } from '@/filters/user.js';
 import { i18n } from '@/i18n.js';
 import { misskeyApi } from '@/utility/misskey-api.js';
 import { ensureSignin } from '@/i.js';
+import { isMuted } from '@/utility/emoji-mute.js';
 
 const $i = ensureSignin();
 
@@ -202,6 +203,10 @@ const exportEntityName = {
 } as const satisfies Record<ExportCompletedNotification['exportedEntity'], string>;
 
 const followRequestDone = ref(false);
+
+function normalizeReaction(r: string): string {
+        return isMuted(r) ? '❤️' : r;
+}
 
 const acceptFollowRequest = () => {
 	if (!('user' in props.notification)) return;
