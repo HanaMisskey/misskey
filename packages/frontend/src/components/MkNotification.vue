@@ -205,7 +205,7 @@ const exportEntityName = {
 const followRequestDone = ref(false);
 
 function normalizeReaction(r: string): string {
-	return isMuted(r) ? '❤️' : r;
+	return isMuted(r) ? '❤' : r;
 }
 
 const acceptFollowRequest = () => {
