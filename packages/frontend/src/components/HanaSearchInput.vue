@@ -241,7 +241,7 @@ function setSearchMode(ev: MouseEvent) {
 
 	const { dispose } = os.popup(defineAsyncComponent(() => import('@/components/HanaSearchModePicker.vue')), {
 		currentMode: searchMode.value,
-		src: ev.currentTarget as HTMLElement,
+		anchorElement: (ev.currentTarget ?? ev.target) as HTMLElement,
 	}, {
 		changeMode: (mode: SearchMode) => {
 			searchMode.value = mode;
