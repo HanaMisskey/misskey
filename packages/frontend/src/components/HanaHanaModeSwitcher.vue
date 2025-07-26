@@ -46,7 +46,6 @@ import { ref, computed } from 'vue';
 import { updateCurrentAccountPartial } from '@/accounts.js';
 import { ensureSignin } from '@/i.js';
 import { i18n } from '@/i18n.js';
-import { globalEvents } from '@/events.js';
 import { claimAchievement } from '@/utility/achievements.js';
 import * as os from '@/os.js';
 
@@ -97,7 +96,6 @@ async function setMode() {
 	}
 	emit('set');
 	onceSet.value = true;
-	globalEvents.emit('requestClearPageCache');
 	if (isInHanaMode) {
 		claimAchievement('markedAsHanaModeUser');
 	}
