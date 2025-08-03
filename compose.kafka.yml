@@ -1,0 +1,219 @@
+services:
+  web:
+    build: .
+    restart: always
+    links:
+      - db
+      - redis
+      - kafka1
+      - kafka2
+      - kafka3
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka1:
+        condition: service_healthy
+      kafka2:
+        condition: service_healthy
+      kafka3:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    networks:
+      - internal_network
+      - external_network
+    volumes:
+      - ./files:/misskey/files
+      - ./.config:/misskey/.config:ro
+    environment:
+      - KAFKA_BROKERS=kafka1:9092,kafka2:9092,kafka3:9092
+
+  redis:
+    restart: always
+    image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
+    command: ['--default_lua_flags=allow-undeclared-keys','--lock_on_hashtags']
+    networks:
+      - internal_network
+    ulimits:
+      memlock: -1
+    volumes:
+      - ./redis:/data
+    healthcheck:
+      test: "redis-cli ping"
+      interval: 5s
+      retries: 20
+
+  db:
+    restart: always
+    image: postgres:17-alpine
+    networks:
+      - internal_network
+    env_file:
+      - .config/docker.env
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db:/var/lib/postgresql/data
+    healthcheck:
+      test: "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"
+      interval: 5s
+      retries: 20
+
+  kafka1:
+    image: apache/kafka:latest
+    hostname: kafka1
+    container_name: kafka1
+    restart: always
+    networks:
+      - internal_network
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:9093,2@kafka2:9093,3@kafka3:9093'
+      KAFKA_LISTENERS: 'PLAINTEXT://kafka1:9092,CONTROLLER://kafka1:9093,PLAINTEXT_HOST://0.0.0.0:19092'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka1:9092,PLAINTEXT_HOST://localhost:19092'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LOG_DIRS: '/var/lib/kafka/data'
+      KAFKA_LOG_RETENTION_HOURS: 168
+      KAFKA_LOG_RETENTION_BYTES: 1073741824
+      KAFKA_LOG_SEGMENT_BYTES: 1073741824
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+      KAFKA_MIN_INSYNC_REPLICAS: 2
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+    volumes:
+      - ./kafka/kafka1:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-cluster.sh cluster-id --bootstrap-server localhost:9092 || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  kafka2:
+    image: apache/kafka:latest
+    hostname: kafka2
+    container_name: kafka2
+    restart: always
+    networks:
+      - internal_network
+    ports:
+      - "9094:9094"
+      - "9095:9095"
+    environment:
+      KAFKA_NODE_ID: 2
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:9093,2@kafka2:9093,3@kafka3:9093'
+      KAFKA_LISTENERS: 'PLAINTEXT://kafka2:9092,CONTROLLER://kafka2:9093,PLAINTEXT_HOST://0.0.0.0:19094'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka2:9092,PLAINTEXT_HOST://localhost:19094'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LOG_DIRS: '/var/lib/kafka/data'
+      KAFKA_LOG_RETENTION_HOURS: 168
+      KAFKA_LOG_RETENTION_BYTES: 1073741824
+      KAFKA_LOG_SEGMENT_BYTES: 1073741824
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+      KAFKA_MIN_INSYNC_REPLICAS: 2
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+    volumes:
+      - ./kafka/kafka2:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-cluster.sh cluster-id --bootstrap-server localhost:9092 || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  kafka3:
+    image: apache/kafka:latest
+    hostname: kafka3
+    container_name: kafka3
+    restart: always
+    networks:
+      - internal_network
+    ports:
+      - "9096:9096"
+      - "9097:9097"
+    environment:
+      KAFKA_NODE_ID: 3
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:9093,2@kafka2:9093,3@kafka3:9093'
+      KAFKA_LISTENERS: 'PLAINTEXT://kafka3:9092,CONTROLLER://kafka3:9093,PLAINTEXT_HOST://0.0.0.0:19096'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka3:9092,PLAINTEXT_HOST://localhost:19096'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LOG_DIRS: '/var/lib/kafka/data'
+      KAFKA_LOG_RETENTION_HOURS: 168
+      KAFKA_LOG_RETENTION_BYTES: 1073741824
+      KAFKA_LOG_SEGMENT_BYTES: 1073741824
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+      KAFKA_MIN_INSYNC_REPLICAS: 2
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+    volumes:
+      - ./kafka/kafka3:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-cluster.sh cluster-id --bootstrap-server localhost:9092 || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  kafka-init:
+    image: apache/kafka:latest
+    container_name: kafka-init
+    depends_on:
+      kafka1:
+        condition: service_healthy
+      kafka2:
+        condition: service_healthy
+      kafka3:
+        condition: service_healthy
+    networks:
+      - internal_network
+    volumes:
+      - ./scripts/init-kafka-topics.sh:/init-kafka-topics.sh
+    command: /init-kafka-topics.sh
+    restart: "no"
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    depends_on:
+      - kafka1
+      - kafka2
+      - kafka3
+    ports:
+      - "8080:8080"
+    restart: always
+    networks:
+      - internal_network
+      - external_network
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka1:9092,kafka2:9092,kafka3:9092
+      KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: PLAINTEXT
+
+networks:
+  internal_network:
+    internal: true
+  external_network:

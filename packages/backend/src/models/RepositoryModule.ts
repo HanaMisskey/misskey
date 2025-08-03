@@ -43,6 +43,7 @@ import {
 	MiNoteReaction,
 	MiNoteThreadMuting,
 	MiNoteDraft,
+	MiQueueJob,
 	MiPage,
 	MiPageLike,
 	MiPasswordResetRequest,
@@ -147,6 +148,11 @@ const $noteDraftsRepository: Provider = {
 	inject: [DI.db],
 };
 
+const $queueJobsRepository: Provider = {
+	provide: DI.queueJobsRepository,
+	useFactory: (db: DataSource) => db.getRepository(MiQueueJob).extend(miRepository as MiRepository<MiQueueJob>),
+	inject: [DI.db],
+};
 const $pollsRepository: Provider = {
 	provide: DI.pollsRepository,
 	useFactory: (db: DataSource) => db.getRepository(MiPoll).extend(miRepository as MiRepository<MiPoll>),
@@ -550,6 +556,7 @@ const $reversiGamesRepository: Provider = {
 		$noteThreadMutingsRepository,
 		$noteReactionsRepository,
 		$noteDraftsRepository,
+		$queueJobsRepository,
 		$pollsRepository,
 		$pollVotesRepository,
 		$userProfilesRepository,
@@ -627,6 +634,7 @@ const $reversiGamesRepository: Provider = {
 		$noteThreadMutingsRepository,
 		$noteReactionsRepository,
 		$noteDraftsRepository,
+		$queueJobsRepository,
 		$pollsRepository,
 		$pollVotesRepository,
 		$userProfilesRepository,

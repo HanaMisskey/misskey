@@ -56,6 +56,7 @@ import { MiModerationLog } from '@/models/ModerationLog.js';
 import { MiMuting } from '@/models/Muting.js';
 import { MiNote } from '@/models/Note.js';
 import { MiNoteDraft } from '@/models/NoteDraft.js';
+import { MiQueueJob } from '@/models/QueueJob.js';
 import { MiNoteFavorite } from '@/models/NoteFavorite.js';
 import { MiNoteReaction } from '@/models/NoteReaction.js';
 import { MiNoteThreadMuting } from '@/models/NoteThreadMuting.js';
@@ -190,6 +191,7 @@ export {
 	MiRenoteMuting,
 	MiNote,
 	MiNoteDraft,
+	MiQueueJob,
 	MiNoteFavorite,
 	MiNoteReaction,
 	MiNoteThreadMuting,
@@ -269,6 +271,7 @@ export type MutingsRepository = Repository<MiMuting> & MiRepository<MiMuting>;
 export type RenoteMutingsRepository = Repository<MiRenoteMuting> & MiRepository<MiRenoteMuting>;
 export type NotesRepository = Repository<MiNote> & MiRepository<MiNote>;
 export type NoteDraftsRepository = Repository<MiNoteDraft> & MiRepository<MiNoteDraft>;
+export type QueueJobsRepository = Repository<MiQueueJob> & MiRepository<MiQueueJob>;
 export type NoteFavoritesRepository = Repository<MiNoteFavorite> & MiRepository<MiNoteFavorite>;
 export type NoteReactionsRepository = Repository<MiNoteReaction> & MiRepository<MiNoteReaction>;
 export type NoteThreadMutingsRepository = Repository<MiNoteThreadMuting> & MiRepository<MiNoteThreadMuting>;

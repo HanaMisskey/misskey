@@ -126,6 +126,48 @@ type Source = {
 			enableQueryParamLogging?: boolean,
 		}
 	}
+
+	queue?: {
+		adapter?: 'bullmq' | 'kafka';
+		kafka?: {
+			brokers: string[];
+			clientId?: string;
+			ssl?: boolean;
+			sasl?: {
+				mechanism: 'plain' | 'scram-sha-256' | 'scram-sha-512';
+				username: string;
+				password: string;
+			};
+			connectionTimeout?: number;
+			requestTimeout?: number;
+			retry?: {
+				retries?: number;
+				initialRetryTime?: number;
+				maxRetryTime?: number;
+			};			dlq?: {
+				enabled?: boolean;
+				maxRetries?: number;
+				retryInterval?: number;
+				exponentialBackoff?: boolean;
+				maxRetryDelay?: number;
+				processInterval?: number;
+				batchSize?: number;
+			};
+			batching?: {
+				enabled?: boolean;
+				maxBatchSize?: number;
+				maxBatchDelay?: number;
+				maxBatchBytes?: number;
+			};
+			transactions?: {
+				enabled?: boolean;
+				transactionId?: string;
+				transactionTimeout?: number;
+				idempotent?: boolean;
+			};
+			replicationFactor?: number; // Number of replicas for topic creation
+		};
+	};
 };
 
 export type Config = {
@@ -235,6 +277,48 @@ export type Config = {
 	} | undefined;
 
 	pidFile: string;
+
+	queue: {
+		adapter: 'bullmq' | 'kafka';
+		kafka?: {
+			brokers: string[];
+			clientId?: string;
+			ssl?: boolean;
+			sasl?: {
+				mechanism: 'plain' | 'scram-sha-256' | 'scram-sha-512';
+				username: string;
+				password: string;
+			};
+			connectionTimeout?: number;
+			requestTimeout?: number;
+			retry?: {
+				retries?: number;
+				initialRetryTime?: number;
+				maxRetryTime?: number;
+			};			dlq?: {
+				enabled?: boolean;
+				maxRetries?: number;
+				retryInterval?: number;
+				exponentialBackoff?: boolean;
+				maxRetryDelay?: number;
+				processInterval?: number;
+				batchSize?: number;
+			};
+			batching?: {
+				enabled?: boolean;
+				maxBatchSize?: number;
+				maxBatchDelay?: number;
+				maxBatchBytes?: number;
+			};
+			transactions?: {
+				enabled?: boolean;
+				transactionId?: string;
+				transactionTimeout?: number;
+				idempotent?: boolean;
+			};
+			replicationFactor?: number; // Number of replicas for topic creation
+		};
+	};
 };
 
 export type FulltextSearchProvider = 'sqlLike' | 'sqlPgroonga' | 'meilisearch';
@@ -353,6 +437,10 @@ export function loadConfig(): Config {
 		import: config.import,
 		pidFile: config.pidFile,
 		logging: config.logging,
+		queue: {
+			adapter: config.queue?.adapter ?? 'bullmq',
+			kafka: config.queue?.kafka,
+		},
 	};
 }
 
