@@ -29,7 +29,7 @@
 		"nodemon": "3.1.10",
 		"typescript": "5.8.3",
 		"esbuild": "0.25.5",
-		"glob": "11.0.2"
+		"glob": "11.1.0"
 	},
 	"files": [
 		"built"
