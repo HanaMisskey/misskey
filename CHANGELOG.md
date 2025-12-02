@@ -1,4 +1,4 @@
-## Unreleased
+## 2025.12.0
 
 ### General
 -
@@ -7,7 +7,9 @@
 -
 
 ### Server
--
+- Enhance: メモリ使用量を削減しました
+- Enhance: ActivityPubアクティビティを送信する際のパフォーマンス向上
+- Enhance: 依存関係の更新
 
 
 ## 2025.11.1
