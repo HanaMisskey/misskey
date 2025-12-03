@@ -58,7 +58,7 @@
 		"fast-glob": "3.3.3",
 		"glob": "11.0.2",
 		"ignore-walk": "7.0.0",
-		"js-yaml": "4.1.0",
+		"js-yaml": "4.1.1",
 		"postcss": "8.5.4",
 		"tar": "7.4.3",
 		"terser": "5.42.0",
