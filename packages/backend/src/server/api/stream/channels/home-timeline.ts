@@ -93,7 +93,7 @@ class HomeTimelineChannel extends Channel {
 			if (isRenotePacked(reactionMutedNote) && reactionMutedNote.renote) {
 				const shouldHideRenote = await this.noteEntityService.shouldHideNote(reactionMutedNote.renote, this.user.id);
 
-				if (isQuotePacked(reactionMutedNote)) {
+				if (shouldHideRenote && isQuotePacked(reactionMutedNote)) {
 					// 引用リノートの場合、リノート部分だけ隠す
 					this.noteEntityService.hideNote(reactionMutedNote.renote);
 				} else if (shouldHideRenote) {
