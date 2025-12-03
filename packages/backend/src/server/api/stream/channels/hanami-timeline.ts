@@ -12,6 +12,7 @@ import { isRenotePacked, isQuotePacked } from '@/misc/is-renote.js';
 import type { JsonObject } from '@/misc/json-value.js';
 import { FeaturedService } from '@/core/FeaturedService.js';
 import Channel, { type MiChannelService } from '../channel.js';
+import { NoteStreamingFilterService } from '../NoteStreamingFilterService.js';
 
 class HanamiTimelineChannel extends Channel {
 	public readonly chName = 'hanamiTimeline';
@@ -29,6 +30,7 @@ class HanamiTimelineChannel extends Channel {
 		private noteEntityService: NoteEntityService,
 		private roleService: RoleService,
 		private featuredService: FeaturedService,
+		private noteStreamingFilterService: NoteStreamingFilterService,
 
 		id: string,
 		connection: Channel['connection'],
@@ -119,28 +121,14 @@ class HanamiTimelineChannel extends Channel {
 
 		const reactionMutedNote = await this.removeMutedReactions(note);
 
+		const filterResult = await this.noteStreamingFilterService.filterForStreaming(reactionMutedNote, this.user?.id ?? null);
+		if (filterResult === 'skip') return;
+
 		if (this.user) {
-			const shouldHideThisNote = await this.noteEntityService.shouldHideNote(note, this.user.id);
-			if (shouldHideThisNote) {
-				this.noteEntityService.hideNote(note);
-			}
-
-			if (isRenotePacked(note) && note.renote) {
-				const shouldHideRenote = await this.noteEntityService.shouldHideNote(note.renote, this.user.id);
-
-				if (shouldHideRenote && isQuotePacked(note)) {
-					// 引用リノートの場合、リノート部分だけ隠す
-					this.noteEntityService.hideNote(note.renote);
-				} else if (shouldHideRenote) {
-					// 純粋なリノートの場合、流さない
-					return;
-				}
-			}
-
-			if (isRenotePacked(note) && !isQuotePacked(note)) {
-				if (note.renote && Object.keys(note.renote.reactions).length > 0) {
-					const myRenoteReaction = await this.noteEntityService.populateMyReaction(note.renote, this.user.id);
-					note.renote.myReaction = myRenoteReaction;
+			if (isRenotePacked(reactionMutedNote) && !isQuotePacked(reactionMutedNote)) {
+				if (reactionMutedNote.renote && Object.keys(reactionMutedNote.renote.reactions).length > 0) {
+					const myRenoteReaction = await this.noteEntityService.populateMyReaction(reactionMutedNote.renote, this.user.id);
+					reactionMutedNote.renote.myReaction = myRenoteReaction;
 				}
 			}
 		}
@@ -165,6 +153,7 @@ export class HanamiTimelineChannelService implements MiChannelService<true> {
 		private noteEntityService: NoteEntityService,
 		private roleService: RoleService,
 		private featuredService: FeaturedService,
+		private noteStreamingFilterService: NoteStreamingFilterService,
 	) {
 	}
 
@@ -174,6 +163,7 @@ export class HanamiTimelineChannelService implements MiChannelService<true> {
 			this.noteEntityService,
 			this.roleService,
 			this.featuredService,
+			this.noteStreamingFilterService,
 			id,
 			connection,
 		);

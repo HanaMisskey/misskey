@@ -7,9 +7,10 @@ import { Injectable } from '@nestjs/common';
 import type { Packed } from '@/misc/json-schema.js';
 import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
 import { bindThis } from '@/decorators.js';
-import { isRenotePacked, isQuotePacked, isRenote } from '@/misc/is-renote.js';
+import { isRenotePacked, isQuotePacked } from '@/misc/is-renote.js';
 import type { JsonObject } from '@/misc/json-value.js';
 import Channel, { type MiChannelService } from '../channel.js';
+import { NoteStreamingFilterService } from '../NoteStreamingFilterService.js';
 
 class HomeTimelineChannel extends Channel {
 	public readonly chName = 'homeTimeline';
@@ -21,6 +22,7 @@ class HomeTimelineChannel extends Channel {
 
 	constructor(
 		private noteEntityService: NoteEntityService,
+		private noteStreamingFilterService: NoteStreamingFilterService,
 
 		id: string,
 		connection: Channel['connection'],
@@ -84,24 +86,10 @@ class HomeTimelineChannel extends Channel {
 
 		const reactionMutedNote = await this.removeMutedReactions(note);
 
+		const filterResult = await this.noteStreamingFilterService.filterForStreaming(reactionMutedNote, this.user?.id ?? null);
+		if (filterResult === 'skip') return;
+
 		if (this.user) {
-			const shouldHideThisNote = await this.noteEntityService.shouldHideNote(reactionMutedNote, this.user.id);
-			if (shouldHideThisNote) {
-				this.noteEntityService.hideNote(reactionMutedNote);
-			}
-
-			if (isRenotePacked(reactionMutedNote) && reactionMutedNote.renote) {
-				const shouldHideRenote = await this.noteEntityService.shouldHideNote(reactionMutedNote.renote, this.user.id);
-
-				if (shouldHideRenote && isQuotePacked(reactionMutedNote)) {
-					// 引用リノートの場合、リノート部分だけ隠す
-					this.noteEntityService.hideNote(reactionMutedNote.renote);
-				} else if (shouldHideRenote) {
-					// 純粋なリノートの場合、流さない
-					return;
-				}
-			}
-
 			if (isRenotePacked(reactionMutedNote) && !isQuotePacked(reactionMutedNote)) {
 				if (reactionMutedNote.renote && Object.keys(reactionMutedNote.renote.reactions).length > 0) {
 					const myRenoteReaction = await this.noteEntityService.populateMyReaction(reactionMutedNote.renote, this.user.id);
@@ -128,6 +116,7 @@ export class HomeTimelineChannelService implements MiChannelService<true> {
 
 	constructor(
 		private noteEntityService: NoteEntityService,
+		private noteStreamingFilterService: NoteStreamingFilterService,
 	) {
 	}
 
@@ -135,6 +124,7 @@ export class HomeTimelineChannelService implements MiChannelService<true> {
 	public create(id: string, connection: Channel['connection']): HomeTimelineChannel {
 		return new HomeTimelineChannel(
 			this.noteEntityService,
+			this.noteStreamingFilterService,
 			id,
 			connection,
 		);
