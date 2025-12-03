@@ -12,7 +12,7 @@ import { isRenotePacked, isQuotePacked } from '@/misc/is-renote.js';
 import type { JsonObject } from '@/misc/json-value.js';
 import { FeaturedService } from '@/core/FeaturedService.js';
 import Channel, { type MiChannelService } from '../channel.js';
-import { NoteStreamingFilterService } from '../NoteStreamingFilterService.js';
+import { NoteStreamingLockdownService } from '../NoteStreamingLockdownService.js';
 
 class HanamiTimelineChannel extends Channel {
 	public readonly chName = 'hanamiTimeline';
@@ -30,7 +30,7 @@ class HanamiTimelineChannel extends Channel {
 		private noteEntityService: NoteEntityService,
 		private roleService: RoleService,
 		private featuredService: FeaturedService,
-		private noteStreamingFilterService: NoteStreamingFilterService,
+		private noteStreamingFilterService: NoteStreamingLockdownService,
 
 		id: string,
 		connection: Channel['connection'],
@@ -121,8 +121,8 @@ class HanamiTimelineChannel extends Channel {
 
 		const reactionMutedNote = await this.removeMutedReactions(note);
 
-		const filterResult = await this.noteStreamingFilterService.filterForStreaming(reactionMutedNote, this.user?.id ?? null);
-		if (filterResult === 'skip') return;
+		const { shouldSkip: shouldSkipByLockdown } = await this.noteStreamingFilterService.processLockdown(reactionMutedNote, this.user?.id ?? null);
+		if (shouldSkipByLockdown) return;
 
 		if (this.user) {
 			if (isRenotePacked(reactionMutedNote) && !isQuotePacked(reactionMutedNote)) {
@@ -153,7 +153,7 @@ export class HanamiTimelineChannelService implements MiChannelService<true> {
 		private noteEntityService: NoteEntityService,
 		private roleService: RoleService,
 		private featuredService: FeaturedService,
-		private noteStreamingFilterService: NoteStreamingFilterService,
+		private noteStreamingFilterService: NoteStreamingLockdownService,
 	) {
 	}
 
