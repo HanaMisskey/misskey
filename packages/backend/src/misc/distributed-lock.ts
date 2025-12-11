@@ -5,6 +5,14 @@
 
 import * as Redis from 'ioredis';
 
+const deleteScript = `
+if redis.call("get", KEYS[1]) == ARGV[1] then
+	return redis.call("del", KEYS[1])
+else
+	return 0
+end
+`;
+
 export async function acquireDistributedLock(
 	redis: Redis.Redis,
 	name: string,
@@ -20,10 +28,7 @@ export async function acquireDistributedLock(
 		const result = await redis.set(lockKey, identifier, 'PX', timeout, 'NX');
 		if (result === 'OK') {
 			return async () => {
-				const currentIdentifier = await redis.get(lockKey);
-				if (currentIdentifier === identifier) {
-					await redis.del(lockKey);
-				}
+				await redis.eval(deleteScript, 1, lockKey, identifier);
 			};
 		}
 
