@@ -1166,7 +1166,7 @@ const hanaSafeBrowsingMessage = computed(() => {
 	if (hanaStore.r.safeBrowsingConsent.value === true) {
 		return i18n.ts._hana._safeBrowsing.youChose18OrOlder;
 	} else if (hanaStore.r.safeBrowsingConsent.value === false) {
-		return i18n.ts._hana._safeBrowsing.youChoseUnder18
+		return i18n.ts._hana._safeBrowsing.youChoseUnder18;
 	} else {
 		return i18n.ts._hana._safeBrowsing.needsConsent;
 	}
