@@ -13,7 +13,6 @@ import type { Ref } from 'vue';
 import { $i } from '@/i.js';
 import { misskeyApi } from '@/utility/misskey-api.js';
 import { get, set } from '@/utility/idb-proxy.js';
-import { store } from '@/store.js';
 import { deepClone } from '@/utility/clone.js';
 import { deepMerge } from '@/utility/merge.js';
 
@@ -137,6 +136,8 @@ export class Pizzax<T extends StateDef> {
 			if ($i) {
 				// api関数と循環参照なので一応setTimeoutしておく
 				window.setTimeout(async () => {
+					// NOTE: avoid circular dependency (store -> pizzax -> store)
+					const { store } = await import('@/store.js');
 					await store.ready;
 
 					misskeyApi('i/registry/get-all', { scope: ['client', this.key] })
