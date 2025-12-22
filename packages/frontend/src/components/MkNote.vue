@@ -239,6 +239,7 @@ import { isEnabledUrlPreview } from '@/utility/url-preview.js';
 import { focusPrev, focusNext } from '@/utility/focus.js';
 import { getAppearNote } from '@/utility/get-appear-note.js';
 import { prefer } from '@/preferences.js';
+import { hanaStore } from '@/hana/store.js';
 import { getPluginHandlers } from '@/plugin.js';
 import { DI } from '@/di.js';
 import { globalEvents } from '@/events.js';
@@ -345,7 +346,7 @@ function checkMute(noteToCheck: Misskey.entities.Note, mutedWords: Array<string 
 
 	if (checkOnly) return false;
 
-	if (inTimeline && tl_withSensitive.value === false && noteToCheck.files?.some((v) => v.isSensitive)) {
+	if (inTimeline && (tl_withSensitive.value === false || hanaStore.s.safeBrowsingConsent === false) && noteToCheck.files?.some((v) => v.isSensitive)) {
 		return 'sensitiveMute';
 	}
 
