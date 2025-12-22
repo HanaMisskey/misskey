@@ -717,7 +717,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 			<SearchMarker v-slot="slotProps" :keywords="['safety', 'sensitive']">
 				<MkFolder :defaultOpen="slotProps.isParentOfTarget">
 					<template #label><SearchLabel>{{ i18n.ts._hana.safeBrowsing }}</SearchLabel></template>
-					<template #icon><SearchIcon><i class="ti ti-shield-check"></i></SearchIcon></template>
+					<template #icon><SearchIcon><i class="ti ti-home-shield"></i></SearchIcon></template>
 
 					<div class="_gaps_m">
 						<MkInfo>
