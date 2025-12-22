@@ -3459,13 +3459,6 @@ _hana:
   _visitorLoginPopup:
     title: "Let Your SNS Experience Blossom with HanaMisskey"
     description: "Have fun with reactions. Be yourself with HanaMode. Dive into a whole new social networking experience on HanaMisskey."
-  _tutorialMinorSettings:
-    title: "Settings for Sensitive Content"
-    description: "You can configure how sensitive content is displayed."
-    muteSensitive: "Mute notes containing sensitive media"
-    muteSensitiveDescription: "Notes containing sensitive images, videos, or audio will be displayed in a minimized state. You can click to open and view the content, but the files themselves will remain blurred."
-    confirmWhenRevealingSensitiveMediaDescription: "Sensitive content is displayed in a blurred state by default, but you can enable an additional confirmation dialog to prevent accidental actions when clicking to reveal the content."
-    forMinor: "If you are underage, please review this with your parents or guardians. You can change this setting at any time."
   _searchMode:
     title: "Choose Search Engine"
     new: "NEW"
@@ -3475,3 +3468,13 @@ _hana:
     settingFutureDateToChangeNotesVisibilityIsProhibited: "Future dates are not allowed."
     settingFutureDateToChangeNotesVisibilityIsProhibitedDescription: "You cannot set a future date in the lockdown settings."
   notesCreatedInHanaModeWillBeExcluded: "Notes created in Hana Mode will be excluded when 'Local only' is enabled"
+  safeBrowsing: "Safe Browsing"
+  _safeBrowsing:
+    needsConsent: "To configure these settings, please provide your consent first."
+    youChose18OrOlder: "You have declared that you are 18 years or older."
+    youChoseUnder18: "You have declared that you are under 18 years old. These settings are not available."
+    doConsent: "Provide Consent"
+    consentAgain: "Provide Consent Again"
+    areYouAged18OrOlder: "Are you 18 years or older?"
+    youCanSetPreferencesLater: "You can change these settings later in the preferences page."
+    youCannotViewThisContent: "You cannot view this content"
