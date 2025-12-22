@@ -722,7 +722,6 @@ SPDX-License-Identifier: AGPL-3.0-only
 					<div class="_gaps_m">
 						<MkInfo>
 							{{ hanaSafeBrowsingMessage }} <button class="_textButton" @click="hanaSafeBrowsingDoConsent">{{ hanaStore.r.safeBrowsingConsent.value !== null ? i18n.ts._hana._safeBrowsing.consentAgain : i18n.ts._hana._safeBrowsing.doConsent }}</button>
-							<button v-if="isDev" class="_textButton" @click="hanaSafeBrowsingDoConsentReset">reset</button>
 						</MkInfo>
 
 						<MkDisableSection :disabled="hanaStore.r.safeBrowsingConsent.value !== true">
@@ -918,8 +917,6 @@ import { instance } from '@/instance.js';
 import { ensureSignin } from '@/i.js';
 import { genId } from '@/utility/id.js';
 import { suggestReload } from '@/utility/reload-suggest.js';
-
-const isDev = _DEV_;
 
 const $i = ensureSignin();
 
