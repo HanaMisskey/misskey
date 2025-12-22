@@ -45,11 +45,11 @@ SPDX-License-Identifier: AGPL-3.0-only
 		/>
 	</component>
 	<template v-if="hide">
-		<div :class="$style.hiddenText">
+		<div :class="[$style.hiddenText, { [$style.hiddenDisabled]: hanaStore.r.safeBrowsingConsent.value === false && image.isSensitive }]">
 			<div :class="$style.hiddenTextWrapper">
 				<b v-if="image.isSensitive" style="display: block;"><i class="ti ti-eye-exclamation"></i> {{ i18n.ts.sensitive }}{{ prefer.s.dataSaver.media ? ` (${i18n.ts.image}${image.size ? ' ' + bytes(image.size) : ''})` : '' }}</b>
 				<b v-else style="display: block;"><i class="ti ti-photo"></i> {{ prefer.s.dataSaver.media && image.size ? bytes(image.size) : i18n.ts.image }}</b>
-				<span v-if="controls" style="display: block;">{{ i18n.ts.clickToShow }}</span>
+				<span v-if="controls" style="display: block;">{{ hanaStore.r.safeBrowsingConsent.value === false ? i18n.ts._hana._safeBrowsing.youCannotViewThisContent : i18n.ts.clickToShow }}</span>
 			</div>
 		</div>
 	</template>
@@ -77,6 +77,7 @@ import { i18n } from '@/i18n.js';
 import * as os from '@/os.js';
 import { $i, iAmModerator } from '@/i.js';
 import { prefer } from '@/preferences.js';
+import { hanaStore } from '@/hana/store.js';
 
 const props = withDefaults(defineProps<{
 	image: Misskey.entities.DriveFile;
@@ -106,6 +107,26 @@ async function reveal(ev: MouseEvent) {
 
 	if (hide.value) {
 		ev.stopPropagation();
+		if (props.image.isSensitive) {
+			if (hanaStore.s.safeBrowsingConsent === null) {
+				const { canceled } = await os.confirm({
+					type: 'question',
+					title: i18n.ts._hana._safeBrowsing.areYouAged18OrOlder,
+					text: i18n.ts._hana._safeBrowsing.youCanSetPreferencesLater,
+					okText: i18n.ts.yes,
+					cancelText: i18n.ts.no,
+				});
+				if (canceled) {
+					await hanaStore.set('safeBrowsingConsent', false);
+					return;
+				} else {
+					await hanaStore.set('safeBrowsingConsent', true);
+				}
+			} else if (hanaStore.s.safeBrowsingConsent === false) {
+				// 18歳未満と回答済み
+				return;
+			}
+		}
 		if (props.image.isSensitive && prefer.s.confirmWhenRevealingSensitiveMedia) {
 			const { canceled } = await os.confirm({
 				type: 'question',
@@ -120,7 +141,7 @@ async function reveal(ev: MouseEvent) {
 
 // Plugin:register_note_view_interruptor を使って書き換えられる可能性があるためwatchする
 watch(() => props.image, () => {
-	hide.value = (prefer.s.nsfw === 'force' || prefer.s.dataSaver.media) ? true : (props.image.isSensitive && prefer.s.nsfw !== 'ignore');
+	hide.value = (prefer.s.nsfw === 'force' || prefer.s.dataSaver.media) ? true : (props.image.isSensitive && (hanaStore.s.safeBrowsingConsent !== true || prefer.s.nsfw !== 'ignore'));
 }, {
 	deep: true,
 	immediate: true,
@@ -228,6 +249,10 @@ function showMenu(ev: MouseEvent) {
 	justify-content: center;
 	align-items: center;
 	cursor: pointer;
+}
+
+.hiddenDisabled {
+	cursor: default;
 }
 
 .hide {

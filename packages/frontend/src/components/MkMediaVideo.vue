@@ -19,11 +19,11 @@ SPDX-License-Identifier: AGPL-3.0-only
 	@contextmenu.stop
 	@keydown.stop
 >
-	<button v-if="hide" :class="$style.hidden" @click="reveal">
+	<button v-if="hide" :class="[$style.hidden, { [$style.hiddenDisabled]: hanaStore.r.safeBrowsingConsent.value === false }]" @click="reveal">
 		<div :class="$style.hiddenTextWrapper">
 			<b v-if="video.isSensitive" style="display: block;"><i class="ti ti-eye-exclamation"></i> {{ i18n.ts.sensitive }}{{ prefer.s.dataSaver.media ? ` (${i18n.ts.video}${video.size ? ' ' + bytes(video.size) : ''})` : '' }}</b>
 			<b v-else style="display: block;"><i class="ti ti-movie"></i> {{ prefer.s.dataSaver.media && video.size ? bytes(video.size) : i18n.ts.video }}</b>
-			<span style="display: block;">{{ i18n.ts.clickToShow }}</span>
+			<span style="display: block;">{{ hanaStore.r.safeBrowsingConsent.value === false ? i18n.ts._hana._safeBrowsing.youCannotViewThisContent : i18n.ts.clickToShow }}</span>
 		</div>
 	</button>
 
@@ -124,6 +124,7 @@ import hasAudio from '@/utility/media-has-audio.js';
 import MkMediaRange from '@/components/MkMediaRange.vue';
 import { $i, iAmModerator } from '@/i.js';
 import { prefer } from '@/preferences.js';
+import { hanaStore } from '@/hana/store.js';
 
 const props = defineProps<{
 	video: Misskey.entities.DriveFile;
@@ -176,9 +177,29 @@ function hasFocus() {
 }
 
 // eslint-disable-next-line vue/no-setup-props-reactivity-loss
-const hide = ref((prefer.s.nsfw === 'force' || prefer.s.dataSaver.media) ? true : (props.video.isSensitive && prefer.s.nsfw !== 'ignore'));
+const hide = ref((prefer.s.nsfw === 'force' || prefer.s.dataSaver.media) ? true : (props.video.isSensitive && (hanaStore.s.safeBrowsingConsent !== true || prefer.s.nsfw !== 'ignore')));
 
 async function reveal() {
+	if (props.video.isSensitive) {
+		if (hanaStore.s.safeBrowsingConsent === null) {
+			const { canceled } = await os.confirm({
+				type: 'question',
+				title: i18n.ts._hana._safeBrowsing.areYouAged18OrOlder,
+				text: i18n.ts._hana._safeBrowsing.youCanSetPreferencesLater,
+				okText: i18n.ts.yes,
+				cancelText: i18n.ts.no,
+			});
+			if (canceled) {
+				await hanaStore.set('safeBrowsingConsent', false);
+				return;
+			} else {
+				await hanaStore.set('safeBrowsingConsent', true);
+			}
+		} else if (hanaStore.s.safeBrowsingConsent === false) {
+			// 18歳未満と回答済み
+			return;
+		}
+	}
 	if (props.video.isSensitive && prefer.s.confirmWhenRevealingSensitiveMedia) {
 		const { canceled } = await os.confirm({
 			type: 'question',
@@ -610,6 +631,10 @@ onDeactivated(() => {
 	display: flex;
 	align-items: center;
 	justify-content: center;
+}
+
+.hiddenDisabled {
+	cursor: default;
 }
 
 .hiddenTextWrapper {

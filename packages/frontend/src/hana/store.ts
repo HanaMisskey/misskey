@@ -21,4 +21,8 @@ export const hanaStore = markRaw(new Pizzax('hanaMain', {
 		where: 'device',
 		default: true,
 	},
+	safeBrowsingConsent: {
+		where: 'deviceAccount',
+		default: null as boolean | null, // null = 未設定, true = 18歳以上, false = 18歳未満
+	},
 }));

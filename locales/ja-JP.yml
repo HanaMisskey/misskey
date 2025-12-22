@@ -3619,3 +3619,13 @@ _hana:
     settingFutureDateToChangeNotesVisibilityIsProhibited: "未来の日付が選択されています。"
     settingFutureDateToChangeNotesVisibilityIsProhibitedDescription: "ロックダウン設定にて未来の日付を設定することはできません。"
   notesCreatedInHanaModeWillBeExcluded: "はなモード内で作成されたノートはローカルのみをオンにすると除外されます。"
+  safeBrowsing: "セーフブラウジング"
+  _safeBrowsing:
+    needsConsent: "これらの設定を行うには、まず確認を行ってください。"
+    youChose18OrOlder: "あなたは18歳以上であると申告しました。"
+    youChoseUnder18: "あなたは18歳未満であると申告しました。これらの設定は利用できません。"
+    doConsent: "確認を行う"
+    consentAgain: "再度確認を行う"
+    areYouAged18OrOlder: "あなたは18歳以上ですか？"
+    youCanSetPreferencesLater: "センシティブなコンテンツの表示設定は、後から設定ページで変更できます。"
+    youCannotViewThisContent: "このコンテンツは表示できません"

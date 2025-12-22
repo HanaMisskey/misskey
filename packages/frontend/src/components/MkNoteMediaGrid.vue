@@ -13,7 +13,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 			!showingFiles.has(file.id)
 		)"
 		:class="[$style.filePreview, { [$style.square]: square }]"
-		@click="showingFiles.add(file.id)"
+		@click="reveal(file)"
 	>
 		<MkDriveFileThumbnail
 			:file="file"
@@ -23,11 +23,11 @@ SPDX-License-Identifier: AGPL-3.0-only
 			:large="true"
 			:class="$style.file"
 		/>
-		<div :class="$style.sensitive">
+		<div :class="[$style.sensitive, { [$style.sensitiveDisabled]: hanaStore.r.safeBrowsingConsent.value === false }]">
 			<div>
 				<div v-if="file.isSensitive"><i class="ti ti-eye-exclamation"></i> {{ i18n.ts.sensitive }}{{ prefer.s.dataSaver.media && file.size ? ` (${bytes(file.size)})` : '' }}</div>
 				<div v-else><i class="ti ti-photo"></i> {{ prefer.s.dataSaver.media && file.size ? bytes(file.size) : i18n.ts.image }}</div>
-				<div>{{ i18n.ts.clickToShow }}</div>
+				<div>{{ hanaStore.r.safeBrowsingConsent.value === false ? i18n.ts._hana._safeBrowsing.youCannotViewThisContent : i18n.ts.clickToShow }}</div>
 			</div>
 		</div>
 	</div>
@@ -49,6 +49,8 @@ import * as Misskey from 'misskey-js';
 import { notePage } from '@/filters/note.js';
 import { i18n } from '@/i18n.js';
 import { prefer } from '@/preferences.js';
+import { hanaStore } from '@/hana/store.js';
+import * as os from '@/os.js';
 import bytes from '@/filters/bytes.js';
 
 import MkDriveFileThumbnail from '@/components/MkDriveFileThumbnail.vue';
@@ -59,6 +61,30 @@ defineProps<{
 }>();
 
 const showingFiles = ref<Set<string>>(new Set());
+
+async function reveal(file: Misskey.entities.DriveFile) {
+	if (file.isSensitive) {
+		if (hanaStore.s.safeBrowsingConsent === null) {
+			const { canceled } = await os.confirm({
+				type: 'question',
+				title: i18n.ts._hana._safeBrowsing.areYouAged18OrOlder,
+				text: i18n.ts._hana._safeBrowsing.youCanSetPreferencesLater,
+				okText: i18n.ts.yes,
+				cancelText: i18n.ts.no,
+			});
+			if (canceled) {
+				await hanaStore.set('safeBrowsingConsent', false);
+				return;
+			} else {
+				await hanaStore.set('safeBrowsingConsent', true);
+			}
+		} else if (hanaStore.s.safeBrowsingConsent === false) {
+			// 18歳未満と回答済み
+			return;
+		}
+	}
+	showingFiles.value.add(file.id);
+}
 </script>
 
 <style lang="scss" module>
@@ -106,5 +132,9 @@ const showingFiles = ref<Set<string>>(new Set());
 	background: rgba(0, 0, 0, 0.5);
 	backdrop-filter: blur(5px);
 	cursor: pointer;
+}
+
+.sensitiveDisabled {
+	cursor: default;
 }
 </style>

@@ -13524,6 +13524,44 @@ export interface Locale extends ILocale {
          * はなモード内で作成されたノートはローカルのみをオンにすると除外されます。
          */
         "notesCreatedInHanaModeWillBeExcluded": string;
+        /**
+         * セーフブラウジング
+         */
+        "safeBrowsing": string;
+        "_safeBrowsing": {
+            /**
+             * これらの設定を行うには、まず確認を行ってください。
+             */
+            "needsConsent": string;
+            /**
+             * あなたは18歳以上であると申告しました。
+             */
+            "youChose18OrOlder": string;
+            /**
+             * あなたは18歳未満であると申告しました。これらの設定は利用できません。
+             */
+            "youChoseUnder18": string;
+            /**
+             * 確認を行う
+             */
+            "doConsent": string;
+            /**
+             * 再度確認を行う
+             */
+            "consentAgain": string;
+            /**
+             * あなたは18歳以上ですか？
+             */
+            "areYouAged18OrOlder": string;
+            /**
+             * センシティブなコンテンツの表示設定は、後から設定ページで変更できます。
+             */
+            "youCanSetPreferencesLater": string;
+            /**
+             * このコンテンツは表示できません
+             */
+            "youCannotViewThisContent": string;
+        };
     };
 }
 declare const locales: {

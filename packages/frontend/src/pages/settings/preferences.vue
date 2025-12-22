@@ -85,6 +85,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 								</MkPreferenceContainer>
 							</SearchMarker>
 
+							<!--
 							<SearchMarker :keywords="['highlight', 'sensitive', 'nsfw', 'image', 'photo', 'picture', 'media', 'thumbnail']">
 								<MkPreferenceContainer k="highlightSensitiveMedia">
 									<MkSwitch v-model="highlightSensitiveMedia">
@@ -100,6 +101,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 									</MkSwitch>
 								</MkPreferenceContainer>
 							</SearchMarker>
+							-->
 
 							<SearchMarker :keywords="['mfm', 'enable', 'show', 'advanced']">
 								<MkPreferenceContainer k="advancedMfm">
@@ -285,6 +287,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 								</MkPreferenceContainer>
 							</SearchMarker>
 
+							<!--
 							<SearchMarker :keywords="['attachment', 'image', 'photo', 'picture', 'media', 'thumbnail', 'nsfw', 'sensitive', 'display', 'show', 'hide', 'visibility']">
 								<MkPreferenceContainer k="nsfw">
 									<MkSelect
@@ -299,6 +302,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 									</MkSelect>
 								</MkPreferenceContainer>
 							</SearchMarker>
+							-->
 						</div>
 					</div>
 				</MkFolder>
@@ -710,6 +714,55 @@ SPDX-License-Identifier: AGPL-3.0-only
 				</MkFolder>
 			</SearchMarker>
 
+			<SearchMarker v-slot="slotProps" :keywords="['safety', 'sensitive']">
+				<MkFolder :defaultOpen="slotProps.isParentOfTarget">
+					<template #label><SearchLabel>{{ i18n.ts._hana.safeBrowsing }}</SearchLabel></template>
+					<template #icon><SearchIcon><i class="ti ti-shield-check"></i></SearchIcon></template>
+
+					<div class="_gaps_m">
+						<MkInfo>
+							{{ hanaSafeBrowsingMessage }} <button class="_textButton" @click="hanaSafeBrowsingDoConsent">{{ hanaStore.r.safeBrowsingConsent.value !== null ? i18n.ts._hana._safeBrowsing.consentAgain : i18n.ts._hana._safeBrowsing.doConsent }}</button>
+							<button v-if="isDev" class="_textButton" @click="hanaSafeBrowsingDoConsentReset">reset</button>
+						</MkInfo>
+
+						<MkDisableSection :disabled="hanaStore.r.safeBrowsingConsent.value !== true">
+							<div class="_gaps_m">
+								<SearchMarker :keywords="['highlight', 'sensitive', 'nsfw', 'image', 'photo', 'picture', 'media', 'thumbnail']">
+									<MkPreferenceContainer k="highlightSensitiveMedia">
+										<MkSwitch v-model="highlightSensitiveMedia">
+											<template #label><SearchLabel>{{ i18n.ts.highlightSensitiveMedia }}</SearchLabel></template>
+										</MkSwitch>
+									</MkPreferenceContainer>
+								</SearchMarker>
+
+								<SearchMarker :keywords="['sensitive', 'nsfw', 'media', 'image', 'photo', 'picture', 'attachment', 'confirm']">
+									<MkPreferenceContainer k="confirmWhenRevealingSensitiveMedia">
+										<MkSwitch v-model="confirmWhenRevealingSensitiveMedia">
+											<template #label><SearchLabel>{{ i18n.ts.confirmWhenRevealingSensitiveMedia }}</SearchLabel></template>
+										</MkSwitch>
+									</MkPreferenceContainer>
+								</SearchMarker>
+
+								<SearchMarker :keywords="['attachment', 'image', 'photo', 'picture', 'media', 'thumbnail', 'nsfw', 'sensitive', 'display', 'show', 'hide', 'visibility']">
+									<MkPreferenceContainer k="nsfw">
+										<MkSelect
+											v-model="nsfw"
+											:items="[
+												{ label: i18n.ts._displayOfSensitiveMedia.respect, value: 'respect' },
+												{ label: i18n.ts._displayOfSensitiveMedia.ignore, value: 'ignore' },
+												{ label: i18n.ts._displayOfSensitiveMedia.force, value: 'force' },
+											]"
+										>
+											<template #label><SearchLabel>{{ i18n.ts.displayOfSensitiveMedia }}</SearchLabel></template>
+										</MkSelect>
+									</MkPreferenceContainer>
+								</SearchMarker>
+							</div>
+						</MkDisableSection>
+					</div>
+				</MkFolder>
+			</SearchMarker>
+
 			<SearchMarker v-slot="slotProps" :keywords="['other']">
 				<MkFolder :defaultOpen="slotProps.isParentOfTarget">
 					<template #label><SearchLabel>{{ i18n.ts.other }}</SearchLabel></template>
@@ -865,6 +918,8 @@ import { instance } from '@/instance.js';
 import { ensureSignin } from '@/i.js';
 import { genId } from '@/utility/id.js';
 import { suggestReload } from '@/utility/reload-suggest.js';
+
+const isDev = _DEV_;
 
 const $i = ensureSignin();
 
@@ -1105,6 +1160,32 @@ function testNotification(): void {
 		smashCount = 0;
 	}, 300);
 }
+
+//#region HANAMI: Safe Browsing
+const hanaSafeBrowsingMessage = computed(() => {
+	if (hanaStore.r.safeBrowsingConsent.value === true) {
+		return i18n.ts._hana._safeBrowsing.youChose18OrOlder;
+	} else if (hanaStore.r.safeBrowsingConsent.value === false) {
+		return i18n.ts._hana._safeBrowsing.youChoseUnder18
+	} else {
+		return i18n.ts._hana._safeBrowsing.needsConsent;
+	}
+});
+
+async function hanaSafeBrowsingDoConsent() {
+	const { canceled } = await os.confirm({
+		type: 'question',
+		text: i18n.ts._hana._safeBrowsing.areYouAged18OrOlder,
+		okText: i18n.ts.yes,
+		cancelText: i18n.ts.no,
+	});
+	await hanaStore.set('safeBrowsingConsent', canceled ? false : true);
+}
+
+async function hanaSafeBrowsingDoConsentReset() {
+	await hanaStore.set('safeBrowsingConsent', null);
+}
+//#endregion
 
 const headerActions = computed(() => []);
 
