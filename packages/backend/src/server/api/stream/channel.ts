@@ -24,7 +24,7 @@ export default abstract class Channel {
 	public abstract readonly chName: string;
 	public static readonly shouldShare: boolean;
 	public static readonly requireCredential: boolean;
-	public static readonly kind?: string | null;
+	public static readonly kind: string | null;
 
 	protected get user() {
 		return this.connection.user;
@@ -92,9 +92,9 @@ export default abstract class Channel {
 		return await removeMutedUsersReactions(cloned, this.userIdsWhoMeMuting, false);
 	}
 
-	constructor(id: string, connection: Connection) {
-		this.id = id;
-		this.connection = connection;
+	constructor(request: ChannelRequest) {
+		this.id = request.id;
+		this.connection = request.connection;
 	}
 
 	public send(payload: { type: string, body: JsonValue }): void;
@@ -118,9 +118,14 @@ export default abstract class Channel {
 	public onMessage?(type: string, body: JsonValue): void;
 }
 
-export type MiChannelService<T extends boolean> = {
+export interface ChannelRequest {
+	id: string,
+	connection: Connection,
+}
+
+export interface ChannelConstructor<T extends boolean> {
+	new(...args: any[]): Channel;
 	shouldShare: boolean;
 	requireCredential: T;
 	kind: T extends true ? string : string | null | undefined;
-	create: (id: string, connection: Connection) => Channel;
-};
+}
