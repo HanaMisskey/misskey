@@ -3620,5 +3620,5 @@ _hana:
     doConsent: "確認を行う"
     consentAgain: "再度確認を行う"
     areYouAged18OrOlder: "あなたは18歳以上ですか？"
-    youCanSetPreferencesLater: "センシティブなコンテンツの表示設定は、後から設定ページで変更できます。"
+    youCanSetPreferencesLater: "この確認は各デバイスごとに一度限りで行われます。センシティブなコンテンツの表示設定は、後から設定ページで変更できます。"
     youCannotViewThisContent: "このコンテンツは表示できません"

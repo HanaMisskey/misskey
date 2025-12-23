@@ -13528,7 +13528,7 @@ export interface Locale extends ILocale {
              */
             "areYouAged18OrOlder": string;
             /**
-             * センシティブなコンテンツの表示設定は、後から設定ページで変更できます。
+             * この確認は各デバイスごとに一度限りで行われます。センシティブなコンテンツの表示設定は、後から設定ページで変更できます。
              */
             "youCanSetPreferencesLater": string;
             /**

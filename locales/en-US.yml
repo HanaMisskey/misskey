@@ -3476,5 +3476,5 @@ _hana:
     doConsent: "Provide Consent"
     consentAgain: "Provide Consent Again"
     areYouAged18OrOlder: "Are you 18 years or older?"
-    youCanSetPreferencesLater: "You can change these settings later in the preferences page."
+    youCanSetPreferencesLater: "This confirmation is done only once per device. You can change your preferences later in the settings."
     youCannotViewThisContent: "You cannot view this content"
