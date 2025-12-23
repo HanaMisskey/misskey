@@ -1170,17 +1170,29 @@ const hanaSafeBrowsingMessage = computed(() => {
 });
 
 async function hanaSafeBrowsingDoConsent() {
-	const { canceled } = await os.confirm({
+	const { canceled, result } = await os.actions({
 		type: 'question',
 		text: i18n.ts._hana._safeBrowsing.areYouAged18OrOlder,
-		okText: i18n.ts.yes,
-		cancelText: i18n.ts.no,
+		actions: [{
+			text: i18n.ts.yes,
+			primary: true,
+			value: 'yes' as const,
+		}, {
+			text: i18n.ts.no,
+			value: 'no' as const,
+		}],
 	});
-	await hanaStore.set('safeBrowsingConsent', canceled ? false : true);
-}
 
-async function hanaSafeBrowsingDoConsentReset() {
-	await hanaStore.set('safeBrowsingConsent', null);
+	if (canceled) {
+		return;
+	}
+
+	if (result === 'no') {
+		await hanaStore.set('safeBrowsingConsent', false);
+		return;
+	} else if (result === 'yes') {
+		await hanaStore.set('safeBrowsingConsent', true);
+	}
 }
 //#endregion
 

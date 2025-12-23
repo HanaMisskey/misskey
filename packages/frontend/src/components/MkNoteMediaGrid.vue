@@ -65,17 +65,28 @@ const showingFiles = ref<Set<string>>(new Set());
 async function reveal(file: Misskey.entities.DriveFile) {
 	if (file.isSensitive) {
 		if (hanaStore.s.safeBrowsingConsent === null) {
-			const { canceled } = await os.confirm({
+			const { canceled, result } = await os.actions({
 				type: 'question',
 				title: i18n.ts._hana._safeBrowsing.areYouAged18OrOlder,
 				text: i18n.ts._hana._safeBrowsing.youCanSetPreferencesLater,
-				okText: i18n.ts.yes,
-				cancelText: i18n.ts.no,
+				actions: [{
+					text: i18n.ts.yes,
+					primary: true,
+					value: 'yes' as const,
+				}, {
+					text: i18n.ts.no,
+					value: 'no' as const,
+				}],
 			});
+
 			if (canceled) {
+				return;
+			}
+
+			if (result === 'no') {
 				await hanaStore.set('safeBrowsingConsent', false);
 				return;
-			} else {
+			} else if (result === 'yes') {
 				await hanaStore.set('safeBrowsingConsent', true);
 			}
 		} else if (hanaStore.s.safeBrowsingConsent === false) {
