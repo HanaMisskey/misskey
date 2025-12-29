@@ -1407,6 +1407,7 @@ youAreAdmin: "あなたは管理者です"
 frame: "フレーム"
 presets: "プリセット"
 zeroPadding: "ゼロ埋め"
+nothingToConfigure: "設定項目はありません"
 alwaysUseAbsoluteTime: "常に絶対時刻で表示する"
 prohibitSkippingInitialTutorial: "チュートリアルをスキップできないようにする"
 prohibitSkippingInitialTutorialDescription: "新規登録したユーザーに表示されるチュートリアルをスキップできないようにします。チュートリアルを完了しなかったりチュートリアルページを回避したりした場合でも、強制的にリダイレクトされます。"
@@ -3454,7 +3455,6 @@ _imageEffector:
   title: "エフェクト"
   addEffect: "エフェクトを追加"
   discardChangesConfirm: "変更を破棄して終了しますか？"
-  nothingToConfigure: "設定項目はありません"
   failedToLoadImage: "画像の読み込みに失敗しました"
 
   _fxs:

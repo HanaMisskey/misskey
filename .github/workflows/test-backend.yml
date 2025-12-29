@@ -50,14 +50,14 @@ jobs:
       meilisearch:
         image: getmeili/meilisearch:latest
         ports:
-          - 17700:7700
+          - 57712:7700
         env:
           MEILI_NO_ANALYTICS: 'true'
           MEILI_ENV: 'development'
       hanamisearch:
         image: getmeili/meilisearch:latest
         ports:
-          - 17701:7700
+          - 57713:7700
         env:
           MEILI_NO_ANALYTICS: 'true'
           MEILI_ENV: 'development'
@@ -143,14 +143,14 @@ jobs:
       meilisearch:
         image: getmeili/meilisearch:latest
         ports:
-          - 17700:7700
+          - 57712:7700
         env:
           MEILI_NO_ANALYTICS: 'true'
           MEILI_ENV: 'development'
       hanamisearch:
         image: getmeili/meilisearch:latest
         ports:
-          - 17701:7700
+          - 57713:7700
         env:
           MEILI_NO_ANALYTICS: 'true'
           MEILI_ENV: 'development'

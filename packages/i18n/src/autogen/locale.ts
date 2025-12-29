@@ -5644,6 +5644,10 @@ export interface Locale extends ILocale {
      */
     "zeroPadding": string;
     /**
+     * 設定項目はありません
+     */
+    "nothingToConfigure": string;
+    /**
      * 常に絶対時刻で表示する
      */
     "alwaysUseAbsoluteTime": string;
@@ -12898,10 +12902,6 @@ export interface Locale extends ILocale {
          * 変更を破棄して終了しますか？
          */
         "discardChangesConfirm": string;
-        /**
-         * 設定項目はありません
-         */
-        "nothingToConfigure": string;
         /**
          * 画像の読み込みに失敗しました
          */
