@@ -60,12 +60,14 @@ import kmg from '@/filters/kmg.js';
 import * as sound from '@/utility/sound.js';
 import { deepClone } from '@/utility/clone.js';
 import { genId } from '@/utility/id.js';
+import { i18n } from '@/i18n.js';
 
 const name = 'jobQueue';
 
 const widgetPropsDef = {
 	transparent: {
 		type: 'boolean',
+		label: i18n.ts._widgetOptions.transparent,
 		default: false,
 	},
 } satisfies FormWithDefault;
