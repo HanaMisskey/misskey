@@ -1,7 +1,12 @@
 ## Unreleased
 
+### Note
+- `users/following` の `birthday` プロパティは非推奨になりました。代わりに `users/get-following-birthday-users` をご利用ください。
+
 ### General
--
+- Enhance: 「もうすぐ誕生日のユーザー」ウィジェットで、誕生日が至近のユーザーも表示できるように  
+  (Cherry-picked from https://github.com/MisskeyIO/misskey)
+	- 「今日誕生日のユーザー」は「もうすぐ誕生日のユーザー」に名称変更されました
 
 ### Client
 - Enhance: ドライブのファイル一覧で自動でもっと見るを利用可能に

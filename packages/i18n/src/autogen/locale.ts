@@ -10016,7 +10016,7 @@ export interface Locale extends ILocale {
          */
         "clicker": string;
         /**
-         * 今日誕生日のユーザー
+         * もうすぐ誕生日のユーザー
          */
         "birthdayFollowings": string;
         /**
@@ -10154,6 +10154,12 @@ export interface Locale extends ILocale {
              * 逆方向にスクロール
              */
             "reverse": string;
+        };
+        "_birthdayFollowings": {
+            /**
+             * 期間
+             */
+            "period": string;
         };
     };
     "_cw": {
