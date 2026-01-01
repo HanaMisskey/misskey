@@ -13,6 +13,7 @@
 - Enhance: ウィジェットの表示設定をプレビューを見ながら行えるように
 - Enhance: ウィジェットの設定項目のラベルの多言語対応
 - Fix: ドライブクリーナーでファイルを削除しても画面に反映されない問題を修正 #16061
+- Fix: ドライブのソートが「登録日（昇順）」の場合に正しく動作しない問題を修正
 
 ### Server
 - Enhance: OAuthのクライアント情報取得（Client Information Discovery）において、IndieWeb Living Standard 11 July 2024で定義されているJSONドキュメント形式に対応しました
