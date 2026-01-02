@@ -27,7 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, useTemplateRef, ref, computed, watch } from 'vue';
+import { onMounted, onUnmounted, onDeactivated, useTemplateRef, ref, computed, watch } from 'vue';
 import { instance } from '@/instance.js';
 import { miLocalStorage } from '@/local-storage.js';
 import { store } from '@/store.js';
@@ -99,6 +99,10 @@ function eventHandler(event: MessageEvent) {
 
 onMounted(() => {
 	window.addEventListener('message', eventHandler);
+});
+
+onDeactivated(() => {
+	iframeLoaded.value = false;
 });
 
 onUnmounted(() => {
