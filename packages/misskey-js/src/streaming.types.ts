@@ -77,6 +77,17 @@ export type Channels = {
 		};
 		receives: null;
 	};
+	hanamiTimeline: {
+		params: {
+			withRenotes?: boolean;
+			withReplies?: boolean;
+			withFiles?: boolean;
+		};
+		events: {
+			note: (payload: Note) => void;
+		};
+		receives: null;
+	};
 	localTimeline: {
 		params: {
 			withRenotes?: boolean;
@@ -203,6 +214,14 @@ export type Channels = {
 				reporterId: string;
 				comment: string;
 			}
+		};
+		receives: null;
+	};
+	reversi: {
+		params: null;
+		events: {
+			matched: (payload: { game: ReversiGameDetailed }) => void;
+			invited: (payload: { user: User }) => void;
 		};
 		receives: null;
 	};

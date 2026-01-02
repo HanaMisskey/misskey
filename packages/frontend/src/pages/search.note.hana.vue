@@ -118,7 +118,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 		</div>
 	</div>
 
-	<MkStickyContainer v-if="notePagination">
+	<MkStickyContainer v-if="paginator">
 		<template #header>
 			<div ref="searchResultStickyContainer" :class="$style.searchResultStickyRoot">
 				<div :class="$style.searchResultStickyContainer">
@@ -136,22 +136,23 @@ SPDX-License-Identifier: AGPL-3.0-only
 				v-if="searchMode === 'v1' && onlyWithFiles && showAsGrid"
 				v-slot="{ items }"
 				:key="`searchNotes:${key}:grid`"
-				:pagination="notePagination"
+				:paginator="paginator"
 			>
 				<div :class="$style.stream">
-					<MkNoteMediaGrid v-for="note in items" :note="note" square/>
+					<MkNoteMediaGrid v-for="note in (items as Misskey.entities.Note[])" :key="note.id" :note="note" square/>
 				</div>
 			</MkPagination>
-			<MkNotes v-else :key="`searchNotes:${key}:note`" :pagination="notePagination"/>
+			<MkNotesTimeline v-else :key="`searchNotes:${key}:note`" :paginator="paginator" :withControl="false"/>
 		</div>
 	</MkStickyContainer>
 </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, shallowRef, useTemplateRef, toRef } from 'vue';
+import { computed, ref, shallowRef, useTemplateRef, toRef, markRaw } from 'vue';
 import type * as Misskey from 'misskey-js';
-import type { Paging } from '@/components/MkPagination.vue';
+import { Paginator } from '@/utility/paginator.js';
+import type { IPaginator } from '@/utility/paginator.js';
 import { $i } from '@/i.js';
 import { host as localHost } from '@@/js/config.js';
 import { i18n } from '@/i18n.js';
@@ -162,7 +163,7 @@ import { useRouter } from '@/router.js';
 import MkButton from '@/components/MkButton.vue';
 import MkFoldableSection from '@/components/MkFoldableSection.vue';
 import MkInput from '@/components/MkInput.vue';
-import MkNotes from '@/components/MkNotes.vue';
+import MkNotesTimeline from '@/components/MkNotesTimeline.vue';
 import MkRadios from '@/components/MkRadios.vue';
 import MkUserCardMini from '@/components/MkUserCardMini.vue';
 
@@ -189,7 +190,7 @@ const props = withDefaults(defineProps<{
 const router = useRouter();
 
 const key = ref(0);
-const notePagination = ref<Paging>();
+const paginator = shallowRef<IPaginator<Misskey.entities.Note> | null>(null);
 
 const searchQuery = ref(toRef(props, 'query').value);
 const hostInput = ref(toRef(props, 'host').value);
@@ -323,10 +324,18 @@ async function search() {
 			const res = await promise;
 
 			if (res.type === 'User') {
-				router.push(`/@${res.object.username}@${res.object.host}`);
+				router.push('/@:acct/:page?', {
+					params: {
+						acct: `${res.object.username}@${res.object.host}`,
+					},
+				});
 			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 			} else if (res.type === 'Note') {
-				router.push(`/notes/${res.object.id}`);
+				router.push('/notes/:noteId/:initialTab?', {
+					params: {
+						noteId: res.object.id,
+					},
+				});
 			}
 
 			return;
@@ -341,7 +350,7 @@ async function search() {
 				text: i18n.ts.lookupConfirm,
 			});
 			if (!confirm.canceled) {
-				router.push(`/${searchParams.value.query}`);
+				router.pushByPath(`/${searchParams.value.query}`);
 				return;
 			}
 		}
@@ -352,29 +361,31 @@ async function search() {
 				text: i18n.ts.openTagPageConfirm,
 			});
 			if (!confirm.canceled) {
-				router.push(`/tags/${encodeURIComponent(searchParams.value.query.substring(1))}`);
+				router.push('/tags/:tag', {
+					params: {
+						tag: searchParams.value.query.substring(1),
+					},
+				});
 				return;
 			}
 		}
 	}
 
 	if ($i?.policies.canSearchWithHanamiSearchV1 === true && searchMode.value === 'v1') {
-		notePagination.value = {
-			endpoint: 'notes/hanamisearch-v1',
+		paginator.value = markRaw(new Paginator('notes/hanamisearch-v1', {
 			limit: 10,
 			params: {
 				...searchParams.value,
 				onlyWithFiles: onlyWithFiles.value,
 			},
-		};
+		}));
 	} else {
-		notePagination.value = {
-			endpoint: 'notes/search',
+		paginator.value = markRaw(new Paginator('notes/search', {
 			limit: 10,
 			params: {
 				...searchParams.value,
 			},
-		};
+		}));
 	}
 
 	key.value++;
@@ -424,7 +435,7 @@ async function search() {
 	width: 100%;
 	height: 100%;
 	padding: 12px;
-	border: 2px dashed var(--MI_THEME-fgTransparent);
+	border: 2px dashed color(from var(--MI_THEME-fg) srgb r g b / 0.5);
 }
 
 .userSelectButtonInner {

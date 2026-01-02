@@ -174,7 +174,7 @@ import { host } from '@@/js/config.js';
 import { claimAchievement } from '@/utility/achievements.js';
 
 import type { Component } from 'vue';
-import type { Tuple } from '@/type.js';
+import type { Tuple } from '@/types/misc.js';
 
 const props = defineProps<{
 	initialPage?: number;
@@ -431,13 +431,14 @@ defineExpose({
 	position: sticky;
 	bottom: 0;
 	left: 0;
+	z-index: 5;
 	width: 100%;
 	height: 56px;
 	box-sizing: border-box;
 	flex-shrink: 0;
 	padding: 12px;
 	border-top: solid 0.5px var(--MI_THEME-divider);
-	background: var(--MI_THEME-acrylicBg);
+	background: color(from var(--MI_THEME-bg) srgb r g b / .5);
 
 	transition: transform 0.3s cubic-bezier(0,0,.35,1);
 	transform: translateY(100%);

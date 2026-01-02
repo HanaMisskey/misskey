@@ -3,6 +3,8 @@ import EmojiSearch from '@/workers/emoji-search.js?worker';
 import { get, set, del } from '@/utility/idb-proxy.js';
 import type { SearchIndex } from '@hanamisskey/browser-search';
 
+const INDEX_NAME = 'emojiSearchIndexV2';
+
 let emojiSearchWorker: Worker | null = null;
 let hasInitialized = false;
 
@@ -38,27 +40,33 @@ function postMessageWithHandler<T>(opts: {
 	});
 }
 
-export function initEmojiSearch(emojis?: Misskey.entities.EmojiSimple[]) {
+export function initEmojiSearch(regenerateIndex = false, emojis?: Misskey.entities.EmojiSimple[]) {
 	return new Promise<void>(async (resolve) => {
 		if (!emojiSearchWorker || import.meta.env.MODE === 'test') {
 			resolve();
 			return;
 		}
 
-		const preCompiledIndex = await get('emojiSearchIndex');
+		const preCompiledIndexV1 = await get('emojiSearchIndex');
+
+		if (preCompiledIndexV1 != null) {
+			await del('emojiSearchIndex');
+		}
+
+		const preCompiledIndex = await get(INDEX_NAME);
 
 		if (_DEV_) console.log('[Emoji Search] Initializing Emoji Search', { preCompiledIndex });
 
 		try {
 			await postMessageWithHandler({
 				worker: emojiSearchWorker,
-				message: { type: 'init', preCompiledIndex: preCompiledIndex instanceof Uint8Array ? preCompiledIndex : undefined },
+				message: { type: 'init', preCompiledIndex: !regenerateIndex && preCompiledIndex instanceof Uint8Array ? preCompiledIndex : undefined },
 				expectedType: 'init',
 			});
 
 			hasInitialized = true;
 
-			if (preCompiledIndex == null) {
+			if (regenerateIndex || preCompiledIndex == null || !(preCompiledIndex instanceof Uint8Array)) {
 				if (_DEV_) console.log('[Emoji Search] No precompiled index found, creating a new one');
 
 				const _emojis: Misskey.entities.EmojiSimple[] = emojis ?? (await get('emojis')) ?? [];
@@ -80,7 +88,7 @@ export function initEmojiSearch(emojis?: Misskey.entities.EmojiSimple[]) {
 					worker: emojiSearchWorker!,
 					message: { type: 'dumpIndex' },
 					expectedType: 'dumpIndex',
-					handler: (dumpData) => set('emojiSearchIndex', dumpData.data),
+					handler: (dumpData) => set(INDEX_NAME, dumpData.data),
 				});
 			}
 
@@ -173,7 +181,7 @@ export async function clearEmojiSearchIndex() {
 		});
 	}
 
-	await del('emojiSearchIndex');
+	await del(INDEX_NAME);
 	await saveEmojiSearchIndex();
 }
 
@@ -209,6 +217,6 @@ export async function saveEmojiSearchIndex() {
 		worker: emojiSearchWorker,
 		message: { type: 'dumpIndex' },
 		expectedType: 'dumpIndex',
-		handler: (dumpData) => set('emojiSearchIndex', dumpData.data),
+		handler: (dumpData) => set(INDEX_NAME, dumpData.data),
 	});
 }

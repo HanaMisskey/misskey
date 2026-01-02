@@ -35,6 +35,8 @@ export function getPreferencesProfileMenu(): MenuItem[] {
 			}
 
 			store.set('enablePreferencesAutoCloudBackup', true);
+
+			cloudBackup();
 		} else {
 			store.set('enablePreferencesAutoCloudBackup', false);
 		}
@@ -140,7 +142,7 @@ function importProfile() {
 export async function cloudBackup() {
 	if ($i == null) return;
 	if (!canAutoBackup()) {
-		throw new Error('Profile name is not set');
+		throw new Error('cannot auto backup for this profile');
 	}
 
 	await misskeyApi('i/registry/set', {
@@ -184,8 +186,9 @@ export async function restoreFromCloudBackup() {
 
 	const select = await os.select({
 		title: i18n.ts._preferencesBackup.selectBackupToRestore,
+		text: 'ℹ️ ' + i18n.ts._preferencesProfile.shareSameProfileBetweenDevicesIsNotRecommended + ' ' + i18n.ts._preferencesProfile.useSyncBetweenDevicesOptionIfYouWantToSyncSetting,
 		items: backups.map(backup => ({
-			text: backup.name,
+			label: backup.name,
 			value: backup.name,
 		})),
 	});
