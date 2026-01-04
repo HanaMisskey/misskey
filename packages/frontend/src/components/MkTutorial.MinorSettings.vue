@@ -27,7 +27,7 @@ import type { TutorialPageCommonExpose } from '@/components/MkTutorial.vue';
 // センシティブをミュートするほうがONなので、storeとは逆にする
 const tlMuteSensitive = ref(!store.s.tl.filter.withSensitive);
 
-const confirmWhenRevealingSensitiveMedia = computed(store.makeGetterSetter('confirmWhenRevealingSensitiveMedia'));
+const confirmWhenRevealingSensitiveMedia = store.model('confirmWhenRevealingSensitiveMedia');
 
 watch(tlMuteSensitive, (to) => {
 	const out = deepMerge({ filter: { withSensitive: !to } }, store.s.tl);
