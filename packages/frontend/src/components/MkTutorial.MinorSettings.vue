@@ -16,7 +16,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { i18n } from '@/i18n.js';
 import { store } from '@/store.js';
 import { deepMerge } from '@/utility/merge.js';
