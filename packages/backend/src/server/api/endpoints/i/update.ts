@@ -331,7 +331,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 
 					try {
 						new RE2(regexp[1], regexp[2]);
-					} catch (err) {
+					} catch (_) {
 						throw new ApiError(meta.errors.invalidRegexp);
 					}
 				}
@@ -606,7 +606,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 					})
 					.execute();
 			}
-		} catch (err) {
+		} catch (_) {
 			// なにもしない
 		}
 	}

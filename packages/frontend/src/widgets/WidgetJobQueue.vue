@@ -52,6 +52,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 <script lang="ts" setup>
 import { onUnmounted, reactive, ref } from 'vue';
+import * as Misskey from 'misskey-js';
 import { useWidgetPropsManager } from './widget.js';
 import type { WidgetComponentEmits, WidgetComponentExpose, WidgetComponentProps } from './widget.js';
 import type { FormWithDefault, GetFormResultType } from '@/utility/form.js';
@@ -101,20 +102,22 @@ const current = reactive({
 const prev = reactive({} as typeof current);
 
 for (const domain of ['inbox', 'deliver']) {
-	prev[domain] = deepClone(current[domain]);
+	const d = domain as 'inbox' | 'deliver';
+	prev[d] = deepClone(current[d]);
 }
 
-const onStats = (stats) => {
+const onStats = (stats: Misskey.entities.QueueStats) => {
 	for (const domain of ['inbox', 'deliver']) {
-		prev[domain] = deepClone(current[domain]);
-		current[domain].activeSincePrevTick = stats[domain].activeSincePrevTick;
-		current[domain].active = stats[domain].active;
-		current[domain].waiting = stats[domain].waiting;
-		current[domain].delayed = stats[domain].delayed;
+		const d = domain as 'inbox' | 'deliver';
+		prev[d] = deepClone(current[d]);
+		current[d].activeSincePrevTick = stats[d].activeSincePrevTick;
+		current[d].active = stats[d].active;
+		current[d].waiting = stats[d].waiting;
+		current[d].delayed = stats[d].delayed;
 	}
 };
 
-const onStatsLog = (statsLog) => {
+const onStatsLog = (statsLog: Misskey.entities.QueueStatsLog) => {
 	for (const stats of [...statsLog].reverse()) {
 		onStats(stats);
 	}

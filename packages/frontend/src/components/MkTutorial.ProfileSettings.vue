@@ -70,7 +70,7 @@ watch(description, () => {
 	updateCurrentAccountPartial({ description: description.value });
 });
 
-async function setAvatar(ev) {
+async function setAvatar(ev: PointerEvent) {
 	const files = await os.chooseFileFromPc({ multiple: false });
 	const file = files[0];
 
