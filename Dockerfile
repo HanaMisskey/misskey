@@ -1,4 +1,4 @@
-# syntax = docker/dockerfile:1.4
+# syntax = docker/dockerfile:1.20
 
 ARG NODE_VERSION=22.21.1-bookworm
 
