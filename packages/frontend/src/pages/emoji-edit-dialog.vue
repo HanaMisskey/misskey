@@ -176,6 +176,7 @@ async function done() {
 			license: params.license,
 			isSensitive: params.isSensitive,
 			localOnly: params.localOnly,
+			remarks: params.remarks,
 			roleIdsThatCanBeUsedThisEmojiAsReaction: params.roleIdsThatCanBeUsedThisEmojiAsReaction,
 		} satisfies Misskey.entities.EmojiDetailed;
 

@@ -4,7 +4,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 -->
 
 <template>
-<MkModal ref="modal" :zPriority="'middle'" :preferType="'dialog'" @closed="$emit('closed')" @click="onBgClick">
+<MkModal ref="modal" :zPriority="'middle'" :preferType="'dialog'" @closed="emit('closed')" @click="onBgClick">
 	<div ref="rootEl" :class="$style.root">
 		<div :class="$style.header">
 			<span :class="$style.icon">
@@ -35,6 +35,10 @@ import MkSparkle from '@/components/MkSparkle.vue';
 import { i18n } from '@/i18n.js';
 import { store } from '@/store.js';
 import { confetti } from '@/utility/confetti.js';
+
+const emit = defineEmits<{
+	(ev: 'closed'): void;
+}>();
 
 const IFRAME_ORIGIN = 'https://docs.misskey.flowers';
 const flags = _DEV_ ? '?dev=true' : '';

@@ -56,7 +56,7 @@ onmessage = async (event: MessageEvent) => {
 			if (
 				'name' in event.data && typeof event.data.name === 'string' &&
 				'aliases' in event.data && Array.isArray(event.data.aliases) &&
-				event.data.aliases.every((alias) => typeof alias === 'string')
+				event.data.aliases.every((alias: unknown) => typeof alias === 'string')
 			) {
 				searchEngine.addDocument(event.data.name, event.data.aliases);
 				self.postMessage({ id: event.data.id, type: 'insertIndex', success: true });
