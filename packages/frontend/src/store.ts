@@ -83,7 +83,7 @@ export const store = markRaw(new Pizzax('base', {
 	},
 	menuDisplay: {
 		where: 'device',
-		default: 'sideFull' as 'sideFull' | 'sideIcon' | 'top',
+		default: 'sideFull' as 'sideFull' | 'sideIcon'/* | 'top' */,
 	},
 	postFormWithHashtags: {
 		where: 'device',
@@ -254,7 +254,7 @@ export const store = markRaw(new Pizzax('base', {
 	},
 	emojiStyle: {
 		where: 'device',
-		default: 'twemoji', // twemoji / fluentEmoji / native
+		default: 'twemoji' as 'twemoji' | 'fluentEmoji' | 'native',
 	},
 	menuStyle: {
 		where: 'device',
