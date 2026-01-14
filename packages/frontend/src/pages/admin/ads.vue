@@ -33,15 +33,6 @@ SPDX-License-Identifier: AGPL-3.0-only
 					<template #label>Form</template>
 				</MkRadios>
 
-				<!--
-			<div style="margin: 32px 0;">
-				{{ i18n.ts.priority }}
-				<MkRadio v-model="ad.priority" value="high">{{ i18n.ts.high }}</MkRadio>
-				<MkRadio v-model="ad.priority" value="middle">{{ i18n.ts.middle }}</MkRadio>
-				<MkRadio v-model="ad.priority" value="low">{{ i18n.ts.low }}</MkRadio>
-			</div>
-			-->
-
 				<FormSplit>
 					<MkInput v-model="ad.ratio" type="number">
 						<template #label>{{ i18n.ts.ratio }}</template>

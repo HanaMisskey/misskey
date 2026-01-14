@@ -5475,7 +5475,7 @@ export type components = {
             feedbackUrl: string | null;
             defaultDarkTheme: string | null;
             defaultLightTheme: string | null;
-            clientOptions: Record<string, never>;
+            clientOptions: components['schemas']['MetaClientOptions'];
             disableRegistration: boolean;
             emailRequiredForSignup: boolean;
             canSkipInitialTutorial: boolean;
@@ -5576,6 +5576,12 @@ export type components = {
             cacheRemoteSensitiveFiles: boolean;
         };
         MetaDetailed: components['schemas']['MetaLite'] & components['schemas']['MetaDetailedOnly'];
+        MetaClientOptions: {
+            /** @enum {string} */
+            entrancePageStyle: 'classic' | 'simple';
+            showTimelineForVisitor: boolean;
+            showActivitiesForVisitor: boolean;
+        };
         UserWebhook: {
             /** Format: id */
             id: string;
@@ -9507,7 +9513,7 @@ export interface operations {
                         deeplIsPro: boolean;
                         defaultDarkTheme: string | null;
                         defaultLightTheme: string | null;
-                        clientOptions: Record<string, never>;
+                        clientOptions: components['schemas']['MetaClientOptions'];
                         description: string | null;
                         disableRegistration: boolean;
                         impressumUrl: string | null;
@@ -12763,7 +12769,12 @@ export interface operations {
                     description?: string | null;
                     defaultLightTheme?: string | null;
                     defaultDarkTheme?: string | null;
-                    clientOptions?: Record<string, never>;
+                    clientOptions?: {
+                        /** @enum {string} */
+                        entrancePageStyle?: 'classic' | 'simple';
+                        showTimelineForVisitor?: boolean;
+                        showActivitiesForVisitor?: boolean;
+                    };
                     cacheRemoteFiles?: boolean;
                     cacheRemoteSensitiveFiles?: boolean;
                     emailRequiredForSignup?: boolean;
