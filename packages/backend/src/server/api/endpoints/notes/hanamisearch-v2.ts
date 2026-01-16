@@ -75,7 +75,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 
 			return {
 				items: sres,
-				nextToken: 'foo', // TODO
+				nextToken: 'foo', // ← 返せるものがなくなった（終わりに到達した）らnullにすること
 			};
 		});
 	}
