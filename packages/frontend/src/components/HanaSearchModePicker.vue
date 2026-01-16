@@ -105,11 +105,15 @@ function choose(mode: SearchMode): void {
 	width: 100%;
 	box-sizing: border-box;
 
-	&:hover {
+	&:disabled {
+		opacity: 0.7;
+	}
+
+	&:not(:disabled):hover {
 		background: rgba(0, 0, 0, 0.05);
 	}
 
-	&:active {
+	&:not(:disabled):active {
 		background: rgba(0, 0, 0, 0.1);
 	}
 
