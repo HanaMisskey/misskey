@@ -13509,6 +13509,10 @@ export interface Locale extends ILocale {
              * 精度が大幅改善 / 演算子などで高度な検索が可能
              */
             "v1Description": string;
+            /**
+             * v1の機能＋類義語考慮でもっと見つけやすく
+             */
+            "v2Description": string;
         };
         "_willBeMergedToUpstream": {
             /**

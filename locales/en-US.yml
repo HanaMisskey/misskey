@@ -3470,6 +3470,7 @@ _hana:
     new: "NEW"
     v0Description: "Same search engine as normal Misskey"
     v1Description: "Improved accuracy / OR, NOT operator support"
+    v2Description: "Everything in v1 + Enhanced Paraphrasing and Typo tolerance"
   _willBeMergedToUpstream:
     settingFutureDateToChangeNotesVisibilityIsProhibited: "Future dates are not allowed."
     settingFutureDateToChangeNotesVisibilityIsProhibitedDescription: "You cannot set a future date in the lockdown settings."

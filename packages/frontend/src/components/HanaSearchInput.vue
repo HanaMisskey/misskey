@@ -53,15 +53,16 @@
 				<button
 					class="_button"
 					:class="[$style.modeSwitchButton, {
-						[$style.v1]: searchMode === 'v1',
-						[$style.v2]: searchMode === 'v2',
+						[$style.accented]: searchMode === 'v2',
 					}]"
-					:disabled="disabled"
+					:disabled="disabled || $i == null || !$i.policies.canSearchWithHanamiSearchV2"
 					@click.stop="setSearchMode"
 				>
 					<div><i class="ti ti-sparkles"></i></div>
 					<div :class="$style.modeSwitchValue">{{ searchMode }}</div>
-					<div><i class="ti ti-chevron-down"></i></div>
+					<div v-if="!disabled && $i != null && $i.policies.canSearchWithHanamiSearchV2">
+						<i class="ti ti-chevron-down"></i>
+					</div>
 				</button>
 			</slot>
 		</div>
@@ -72,6 +73,7 @@
 
 <script setup lang="ts">
 import { defineAsyncComponent, useTemplateRef, ref, computed, watch } from 'vue';
+import { $i } from '@/i.js';
 import * as os from '@/os.js';
 import { useInterval } from '@@/js/use-interval.js';
 import type { InputHTMLAttributes } from 'vue';
@@ -421,11 +423,15 @@ html[data-color-scheme=dark] .hl {
 	padding: 0 4px;
 	font-size: .9em;
 
-	&:hover {
+	&:not(:disabled):hover {
 		opacity: 0.8;
 	}
 
-	&.v1 {
+	&:disabled {
+		cursor: not-allowed !important;
+	}
+
+	&.accented {
 		color: var(--MI_THEME-fgOnAccent);
 		font-weight: 700;
 

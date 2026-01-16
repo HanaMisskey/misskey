@@ -9,13 +9,23 @@ export const meta = {
 	requiredRolePolicy: 'canSearchWithHanamiSearchV2',
 
 	res: {
-		type: 'array',
+		type: 'object',
 		optional: false, nullable: false,
-		items: {
-			type: 'object',
-			optional: false, nullable: false,
-			ref: 'Note',
-		},
+		properties: {
+			items: {
+				type: 'array',
+				optional: false, nullable: false,
+				items: {
+					type: 'object',
+					optional: false, nullable: false,
+					ref: 'Note',
+				},
+			},
+			nextToken: {
+				type: 'string',
+				optional: true, nullable: true,
+			},
+		}
 	},
 
 	errors: {
@@ -52,7 +62,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private hanamiSearchService: HanamiSearchService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
-			return await this.hanamiSearchService.searchNote(ps.query, me, {
+			const sres = await this.hanamiSearchService.searchNote(ps.query, me, {
 				userId: ps.userId,
 				channelId: ps.channelId,
 				host: ps.host,
@@ -62,6 +72,11 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				// TODO: nextToken対応
 				limit: ps.limit,
 			});
+
+			return {
+				items: sres,
+				nextToken: 'foo', // TODO
+			};
 		});
 	}
 }

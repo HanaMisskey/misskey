@@ -30370,7 +30370,10 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['Note'][];
+                    'application/json': {
+                        items: components['schemas']['Note'][];
+                        nextToken?: string | null;
+                    };
                 };
             };
             /** @description Client error */
