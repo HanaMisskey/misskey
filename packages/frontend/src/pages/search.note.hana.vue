@@ -192,7 +192,7 @@ const paginator = shallowRef<IPaginator<Misskey.entities.Note> | null>(null);
 const searchQuery = ref(toRef(props, 'query').value);
 const hostInput = ref(toRef(props, 'host').value);
 
-const searchMode = ref<SearchMode>($i?.policies.canSearchWithHanamiSearchV2 === true ? 'v2' : 'v1' );
+const searchMode = ref<SearchMode>($i?.policies.canSearchWithHanamiSearchV2 ? 'v2' : 'v1' );
 const showAsGrid = ref(false);
 const onlyWithFiles = ref(false);
 
@@ -371,25 +371,25 @@ async function search() {
 		}
 	}
 
-	if ($i?.policies.canSearchWithHanamiSearchV1 === true && searchMode.value === 'v1') {
-		if (NormalPaginator == null) {
-			const mod = await import('@/utility/paginator.js');
-			NormalPaginator = mod.Paginator;
-		}
-		paginator.value = markRaw(new NormalPaginator('notes/hanamisearch-v1', {
-			limit: 10,
-			params: {
-				...searchParams.value,
-				onlyWithFiles: onlyWithFiles.value,
-			},
-		}));
-	} else if ($i?.policies.canSearchWithHanamiSearchV2 === true && searchMode.value === 'v2') {
+	if ($i?.policies.canSearchWithHanamiSearchV2 === true && searchMode.value === 'v2') {
 		if (TokenPaginator == null) {
 			const mod = await import('@/hana/scripts/token-paginator.js');
 			TokenPaginator = mod.TokenPaginator;
 		}
 		paginator.value = markRaw(new TokenPaginator('notes/hanamisearch-v2', {
 			limit: 20,
+			params: {
+				...searchParams.value,
+				onlyWithFiles: onlyWithFiles.value,
+			},
+		}));
+	} else if ($i?.policies.canSearchWithHanamiSearchV1 === true && searchMode.value === 'v1') {
+		if (NormalPaginator == null) {
+			const mod = await import('@/utility/paginator.js');
+			NormalPaginator = mod.Paginator;
+		}
+		paginator.value = markRaw(new NormalPaginator('notes/hanamisearch-v1', {
+			limit: 10,
 			params: {
 				...searchParams.value,
 				onlyWithFiles: onlyWithFiles.value,

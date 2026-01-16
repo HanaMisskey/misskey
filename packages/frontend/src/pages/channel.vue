@@ -101,6 +101,8 @@ import { miLocalStorage } from '@/local-storage.js';
 import { useRouter } from '@/router.js';
 import type { SearchMode } from '@/hana/types/search.js';
 import { Paginator } from '@/utility/paginator.js';
+import type { IPaginator } from '@/utility/paginator.js';
+import type { TokenPaginator as TokenPaginatorClassType } from '@/hana/scripts/token-paginator.js';
 
 const router = useRouter();
 
@@ -114,7 +116,7 @@ const channel = ref<Misskey.entities.Channel | null>(null);
 const favorited = ref(false);
 const searchQuery = ref('');
 const searchMode = ref<SearchMode>($i?.policies.canSearchWithHanamiSearchV2 ? 'v2' : 'v1');
-const searchPaginator = shallowRef();
+const searchPaginator = shallowRef<IPaginator<Misskey.entities.Note> | null>(null);
 const searchKey = ref('');
 const featuredPaginator = markRaw(new Paginator('notes/featured', {
 	limit: 10,
@@ -241,6 +243,8 @@ async function unmute() {
 	});
 }
 
+let TokenPaginatorClass: typeof TokenPaginatorClassType | null = null;
+
 async function search() {
 	if (!channel.value) return;
 
@@ -248,7 +252,19 @@ async function search() {
 
 	if (query == null) return;
 
-	if (searchMode.value === 'v1') {
+	if (searchMode.value === 'v2') {
+		if (TokenPaginatorClass == null) {
+			const mod = await import('@/hana/scripts/token-paginator.js');
+			TokenPaginatorClass = mod.TokenPaginator;
+		}
+		searchPaginator.value = markRaw(new TokenPaginatorClass('notes/hanamisearch-v2', {
+			limit: 10,
+			params: {
+				query: query,
+				channelId: channel.value.id,
+			},
+		}));
+	} else if (searchMode.value === 'v1') {
 		searchPaginator.value = markRaw(new Paginator('notes/hanamisearch-v1', {
 			limit: 10,
 			params: {
