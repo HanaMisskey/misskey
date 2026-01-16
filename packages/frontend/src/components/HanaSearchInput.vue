@@ -51,12 +51,11 @@
 					<i class="ti ti-x"></i>
 				</button>
 				<button
-					v-if="$i != null && $i.policies.canSearchWithHanamiSearchV1 === true"
 					class="_button"
-					:class="[
-						$style.modeSwitchButton,
-						{ [$style.v1]: searchMode === 'v1' },
-					]"
+					:class="[$style.modeSwitchButton, {
+						[$style.v1]: searchMode === 'v1',
+						[$style.v2]: searchMode === 'v2',
+					}]"
 					:disabled="disabled"
 					@click.stop="setSearchMode"
 				>
@@ -74,7 +73,6 @@
 <script setup lang="ts">
 import { defineAsyncComponent, useTemplateRef, ref, computed, watch } from 'vue';
 import * as os from '@/os.js';
-import { $i } from '@/i.js';
 import { useInterval } from '@@/js/use-interval.js';
 import type { InputHTMLAttributes } from 'vue';
 import type { SuggestionType } from '@/utility/autocomplete.js';
@@ -112,53 +110,49 @@ type Token = {
 };
 const rawV = ref<string>(v.value);
 const parsedRawV = computed<Token[]>(() => {
-	if (searchMode.value === 'v0') {
-		return [{ value: rawV.value, type: 'text' }];
-	} else {
-		const _rawV = rawV.value.split(/(\s)/);
-		const tokens: Token[] = [];
+	const _rawV = rawV.value.split(/(\s)/);
+	const tokens: Token[] = [];
 
-		let nextToken: 'or' | 'not' | null = null;
-		let inExactMatch = false;
-		for (let i = 0; i < _rawV.length; i++) {
-			const token = _rawV[i];
-			if (inExactMatch) {
-				tokens[tokens.length - 1].value += token;
-				if (token.endsWith('\'')) {
-					inExactMatch = false;
-				}
-			} else if (/^\s$/.test(token)) {
-				tokens.push({ value: token, type: 'text' });
-			} else if (token === 'OR') {
-				tokens.push({ value: 'OR', type: 'orOperator' });
-				tokens[i - 2].type = 'orText';
-				nextToken = 'or';
-			} else if (token.startsWith('-')) {
-				tokens.push({ value: '-', type: 'notOperator' });
-				tokens.push({ value: token.slice(1), type: 'notText' });
-			} else if (token.startsWith('\'') && token !== '\'') {
-				tokens.push({ value: token, type: 'exactMatch' });
-				if (!token.endsWith('\'')) {
-					inExactMatch = true;
-				}
-			} else if (nextToken === 'or') {
-				tokens.push({ value: token, type: 'orText' });
-				nextToken = null;
-			} else if (nextToken === 'not') {
-				tokens.push({ value: token, type: 'notText' });
-				nextToken = null;
-			} else {
-				tokens.push({ value: token, type: 'text' });
-			}
-		}
-
+	let nextToken: 'or' | 'not' | null = null;
+	let inExactMatch = false;
+	for (let i = 0; i < _rawV.length; i++) {
+		const token = _rawV[i];
 		if (inExactMatch) {
-			// タグが適切に閉じられず終わっているのでテキスト扱いにする
-			tokens[tokens.length - 1].type = 'text';
+			tokens[tokens.length - 1].value += token;
+			if (token.endsWith('\'')) {
+				inExactMatch = false;
+			}
+		} else if (/^\s$/.test(token)) {
+			tokens.push({ value: token, type: 'text' });
+		} else if (token === 'OR') {
+			tokens.push({ value: 'OR', type: 'orOperator' });
+			tokens[i - 2].type = 'orText';
+			nextToken = 'or';
+		} else if (token.startsWith('-')) {
+			tokens.push({ value: '-', type: 'notOperator' });
+			tokens.push({ value: token.slice(1), type: 'notText' });
+		} else if (token.startsWith('\'') && token !== '\'') {
+			tokens.push({ value: token, type: 'exactMatch' });
+			if (!token.endsWith('\'')) {
+				inExactMatch = true;
+			}
+		} else if (nextToken === 'or') {
+			tokens.push({ value: token, type: 'orText' });
+			nextToken = null;
+		} else if (nextToken === 'not') {
+			tokens.push({ value: token, type: 'notText' });
+			nextToken = null;
+		} else {
+			tokens.push({ value: token, type: 'text' });
 		}
-
-		return tokens;
 	}
+
+	if (inExactMatch) {
+		// タグが適切に閉じられず終わっているのでテキスト扱いにする
+		tokens[tokens.length - 1].type = 'text';
+	}
+
+	return tokens;
 });
 
 const focused = ref(false);
@@ -444,6 +438,24 @@ html[data-color-scheme=dark] .hl {
 			width: 100%;
 			height: 2em;
 			background: linear-gradient(90deg, var(--MI_THEME-buttonGradateA) 0%, var(--MI_THEME-buttonGradateB) 100%);
+			border-radius: 999px;
+			z-index: -1;
+		}
+	}
+
+	&.v2 {
+		color: var(--MI_THEME-fgOnAccent);
+		font-weight: 700;
+
+		&::before {
+			content: '';
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			width: 100%;
+			height: 2em;
+			background: linear-gradient(90deg, var(--MI_THEME-accentGradateB) 0%, var(--MI_THEME-accentGradateA) 100%);
 			border-radius: 999px;
 			z-index: -1;
 		}

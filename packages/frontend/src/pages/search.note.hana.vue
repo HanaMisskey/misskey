@@ -7,8 +7,6 @@ SPDX-License-Identifier: AGPL-3.0-only
 <div class="_gaps">
 	<div class="_spacer" :class="$style.pageMain" style="--MI_SPACER-w: 800px;">
 		<div class="_gaps">
-			<MkInfo v-if="!$i || !$i.policies.canSearchWithHanamiSearchV1">{{ i18n.ts._hana.searchIsInBeta }}</MkInfo>
-
 			<HanaSearchInput
 				v-model="searchQuery"
 				v-model:mode="searchMode"
@@ -98,7 +96,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 					<div :class="$style.searchOptionGroupRoot">
 						<div :class="$style.searchOptionGroupLabel">{{ i18n.ts.filter }}</div>
-						<MkSwitch v-model="onlyWithFiles" :disabled="!($i != null && $i.policies.canSearchWithHanamiSearchV1 === true && searchMode === 'v1')">{{ i18n.ts.withFiles }}<span class="_beta">{{ i18n.ts._hana._search.v1Only }}</span></MkSwitch>
+						<MkSwitch v-model="onlyWithFiles">{{ i18n.ts.withFiles }}</MkSwitch>
 					</div>
 				</div>
 			</MkFoldableSection>
@@ -142,7 +140,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 					<MkNoteMediaGrid v-for="note in (items as Misskey.entities.Note[])" :key="note.id" :note="note" square/>
 				</div>
 			</MkPagination>
-			<MkNotesTimeline v-else :key="`searchNotes:${key}:note`" :paginator="paginator" :withControl="false"/>
+			<MkNotesTimeline v-else :key="`searchNotes:${key}:note`" :paginator="paginator" :withControl="searchMode === 'v1'"/>
 		</div>
 	</MkStickyContainer>
 </div>
@@ -379,6 +377,8 @@ async function search() {
 				onlyWithFiles: onlyWithFiles.value,
 			},
 		}));
+	} else if ($i?.policies.canSearchWithHanamiSearchV2 === true && searchMode.value === 'v2') {
+		// todo
 	} else {
 		paginator.value = markRaw(new Paginator('notes/search', {
 			limit: 10,

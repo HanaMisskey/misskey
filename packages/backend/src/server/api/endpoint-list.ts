@@ -447,3 +447,4 @@ export * as 'v2/admin/emoji/list' from './endpoints/v2/admin/emoji/list.js';
 export * as 'i/import-notes' from './endpoints/i/import-notes.js';
 export * as 'notes/hanami-timeline' from './endpoints/notes/hanami-timeline.js';
 export * as 'notes/hanamisearch-v1' from './endpoints/notes/hanamisearch-v1.js';
+export * as 'notes/hanamisearch-v2' from './endpoints/notes/hanamisearch-v2.js';

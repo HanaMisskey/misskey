@@ -113,7 +113,7 @@ const tab = ref('overview');
 const channel = ref<Misskey.entities.Channel | null>(null);
 const favorited = ref(false);
 const searchQuery = ref('');
-const searchMode = ref<SearchMode>($i?.policies.canSearchWithHanamiSearchV1 ? 'v1' : 'v0');
+const searchMode = ref<SearchMode>($i?.policies.canSearchWithHanamiSearchV2 ? 'v2' : 'v1');
 const searchPaginator = shallowRef();
 const searchKey = ref('');
 const featuredPaginator = markRaw(new Paginator('notes/featured', {
@@ -248,7 +248,7 @@ async function search() {
 
 	if (query == null) return;
 
-	if ($i?.policies.canSearchWithHanamiSearchV1 === true && searchMode.value === 'v1') {
+	if (searchMode.value === 'v1') {
 		searchPaginator.value = markRaw(new Paginator('notes/hanamisearch-v1', {
 			limit: 10,
 			params: {
