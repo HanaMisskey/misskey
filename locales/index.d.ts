@@ -13424,32 +13424,6 @@ export interface Locale extends ILocale {
              */
             "description": string;
         };
-        "_tutorialMinorSettings": {
-            /**
-             * センシティブなコンテンツに関する設定
-             */
-            "title": string;
-            /**
-             * センシティブなコンテンツをどのように表示するかを設定できます。
-             */
-            "descriotion": string;
-            /**
-             * センシティブなメディアを含むノートをミュート
-             */
-            "muteSensitive": string;
-            /**
-             * センシティブな画像・動画・音声などを含むノートをすべて最小化した状態で表示します。クリックすると開いて中身を見ることができますが、開いたとしてもファイル自体にはぼかしがかかった状態で表示されます。
-             */
-            "muteSensitiveDescription": string;
-            /**
-             * センシティブなコンテンツはぼかしがかかった状態で表示されますが、誤操作防止のために、中身をクリックして開く際に追加で確認ダイアログを表示させることができます。
-             */
-            "confirmWhenRevealingSensitiveMediaDescription": string;
-            /**
-             * 未成年の方は、おうちの方といっしょに確認してください。この設定は後からいつでも変更できます。
-             */
-            "forMinor": string;
-        };
         "_search": {
             /**
              * 検索のデータセット
@@ -13524,6 +13498,44 @@ export interface Locale extends ILocale {
          * はなモード内で作成されたノートはローカルのみをオンにすると除外されます。
          */
         "notesCreatedInHanaModeWillBeExcluded": string;
+        /**
+         * セーフブラウジング
+         */
+        "safeBrowsing": string;
+        "_safeBrowsing": {
+            /**
+             * これらの設定を行うには、まず確認を行ってください。
+             */
+            "needsConsent": string;
+            /**
+             * あなたは18歳以上であると申告しました。
+             */
+            "youChose18OrOlder": string;
+            /**
+             * あなたは18歳未満であると申告しました。これらの設定は利用できません。
+             */
+            "youChoseUnder18": string;
+            /**
+             * 確認を行う
+             */
+            "doConsent": string;
+            /**
+             * 再度確認を行う
+             */
+            "consentAgain": string;
+            /**
+             * あなたは18歳以上ですか？
+             */
+            "areYouAged18OrOlder": string;
+            /**
+             * この確認は各デバイスごとに一度限りで行われます。センシティブなコンテンツの表示設定は、後から設定ページで変更できます。
+             */
+            "youCanSetPreferencesLater": string;
+            /**
+             * このコンテンツは表示できません
+             */
+            "youCannotViewThisContent": string;
+        };
     };
 }
 declare const locales: {

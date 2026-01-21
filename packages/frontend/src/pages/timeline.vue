@@ -44,6 +44,7 @@ import { deepMerge } from '@/utility/merge.js';
 import { miLocalStorage } from '@/local-storage.js';
 import { availableBasicTimelines, hasWithReplies, isAvailableBasicTimeline, isBasicTimeline, basicTimelineIconClass } from '@/timelines.js';
 import { prefer } from '@/preferences.js';
+import { hanaStore } from '@/hana/store.js';
 
 const tlComponent = useTemplateRef('tlComponent');
 
@@ -231,6 +232,7 @@ const headerActions = computed(() => {
 				type: 'switch',
 				icon: 'ti ti-eye-exclamation',
 				text: i18n.ts.withSensitive,
+				disabled: hanaStore.r.safeBrowsingConsent.value === false,
 				ref: withSensitive,
 			}, {
 				type: 'switch',
