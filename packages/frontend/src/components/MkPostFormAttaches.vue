@@ -19,7 +19,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 				tabindex="0"
 				@click="handleClick(item, $event)"
 				@keydown.space.enter="showFileMenu(item, $event)"
-				@contextmenu.prevent="showFileMenu(item, $event)"
+				@contextmenu.prevent.stop="showFileMenu(item, $event)"
 			>
 				<MkDriveFileThumbnail v-if="item.type === 'driveFile'" :data-id="item.id" :class="$style.thumbnail" :file="item.file" fit="cover"/>
 				<template v-else-if="item.type === 'uploaderItem'">
