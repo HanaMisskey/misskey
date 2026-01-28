@@ -2236,6 +2236,7 @@ declare namespace entities {
         RoleCondFormulaValueUserSettingBooleanSchema,
         RoleCondFormulaValueAssignedRole,
         RoleCondFormulaValueCreated,
+        RoleCondFormulaValueCreatedBefore,
         RoleCondFormulaFollowersOrFollowingOrNotes,
         RoleCondFormulaValue,
         RoleLite,
@@ -3482,6 +3483,9 @@ type RoleCondFormulaValueAssignedRole = components['schemas']['RoleCondFormulaVa
 type RoleCondFormulaValueCreated = components['schemas']['RoleCondFormulaValueCreated'];
 
 // @public (undocumented)
+type RoleCondFormulaValueCreatedBefore = components['schemas']['RoleCondFormulaValueCreatedBefore'];
+
+// @public (undocumented)
 type RoleCondFormulaValueIsLocalOrRemote = components['schemas']['RoleCondFormulaValueIsLocalOrRemote'];
 
 // @public (undocumented)
@@ -3497,7 +3501,7 @@ type RoleLite = components['schemas']['RoleLite'];
 type RolePolicies = components['schemas']['RolePolicies'];
 
 // @public (undocumented)
-export const rolePolicies: readonly ["gtlAvailable", "ltlAvailable", "hanamiTlAvailable", "canPublicNote", "mentionLimit", "canInvite", "inviteLimit", "inviteLimitCycle", "inviteExpirationTime", "canManageCustomEmojis", "canManageAvatarDecorations", "canSearchNotes", "canSearchUsers", "canUseTranslator", "canHideAds", "driveCapacityMb", "maxFileSizeMb", "alwaysMarkNsfw", "canUpdateBioMedia", "pinLimit", "antennaLimit", "wordMuteLimit", "webhookLimit", "clipLimit", "noteEachClipsLimit", "userListLimit", "userEachUserListsLimit", "rateLimitFactor", "avatarDecorationLimit", "canImportAntennas", "canImportBlocking", "canImportFollowing", "canImportMuting", "canImportUserLists", "chatAvailability", "uploadableFileTypes", "noteDraftLimit", "scheduledNoteLimit", "watermarkAvailable"];
+export const rolePolicies: readonly ["gtlAvailable", "ltlAvailable", "hanamiTlAvailable", "canPublicNote", "mentionLimit", "canInvite", "inviteLimit", "inviteLimitCycle", "inviteExpirationTime", "canManageCustomEmojis", "canManageAvatarDecorations", "canSearchNotes", "canSearchWithHanamiSearchV1", "canSearchUsers", "canUseTranslator", "canHideAds", "driveCapacityMb", "maxFileSizeMb", "alwaysMarkNsfw", "canUpdateBioMedia", "pinLimit", "antennaLimit", "wordMuteLimit", "webhookLimit", "clipLimit", "noteEachClipsLimit", "userListLimit", "userEachUserListsLimit", "rateLimitFactor", "avatarDecorationLimit", "canImportAntennas", "canImportBlocking", "canImportFollowing", "canImportMuting", "canImportNotes", "canImportUserLists", "chatAvailability", "uploadableFileTypes", "noteDraftLimit", "scheduledNoteLimit", "watermarkAvailable", "durationBasedLockdownAvailable"];
 
 // @public (undocumented)
 type RolesListResponse = operations['roles___list']['responses']['200']['content']['application/json'];

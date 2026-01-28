@@ -49,6 +49,10 @@ SPDX-License-Identifier: AGPL-3.0-only
 		<template #suffix>sec</template>
 	</MkInput>
 
+	<MkInput v-else-if="type === 'createdBefore'" v-model="v.timestamp" type="number">
+		<template #suffix>ms</template>
+	</MkInput>
+
 	<MkInput v-else-if="v.type === 'followersLessThanOrEq' || v.type === 'followersMoreThanOrEq' || v.type === 'followingLessThanOrEq' || v.type === 'followingMoreThanOrEq' || v.type === 'notesLessThanOrEq' || v.type === 'notesMoreThanOrEq'" v-model="v.value" type="number">
 	</MkInput>
 
@@ -115,6 +119,7 @@ const typeDef = [
 	{ label: i18n.ts._role._condition.and, value: 'and' },
 	{ label: i18n.ts._role._condition.or, value: 'or' },
 	{ label: i18n.ts._role._condition.not, value: 'not' },
+	{ label: i18n.ts._hana._roles.createdBefore, value: 'createdBefore' },
 ] as const satisfies MkSelectItem[];
 
 type KeyOfUnion<T> = T extends T ? keyof T : never;
@@ -140,6 +145,7 @@ const typeModelForMkSelect = computed<GetMkSelectValueTypesFromDef<typeof typeDe
 			case 'followingMoreThanOrEq': newValue = { type: 'followingMoreThanOrEq', value: 10 }; break;
 			case 'notesLessThanOrEq': newValue = { type: 'notesLessThanOrEq', value: 10 }; break;
 			case 'notesMoreThanOrEq': newValue = { type: 'notesMoreThanOrEq', value: 10 }; break;
+			case 'createdBefore': newValue = { type: 'createdBefore', timestamp: Date.now() }; break;
 			default: newValue = { type: t }; break;
 		}
 		v.value = { id: v.value.id, ...newValue };
