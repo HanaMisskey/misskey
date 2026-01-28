@@ -49,7 +49,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 		<template #suffix>sec</template>
 	</MkInput>
 
-	<MkInput v-else-if="type === 'createdBefore'" v-model="v.timestamp" type="number">
+	<MkInput v-else-if="v.type === 'createdBefore'" v-model="v.timestamp" type="number">
 		<template #suffix>ms</template>
 	</MkInput>
 
