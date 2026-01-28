@@ -339,6 +339,10 @@ export const packedRolePoliciesSchema = {
 			type: 'boolean',
 			optional: false, nullable: false,
 		},
+		durationBasedLockdownAvailable: {
+			type: 'boolean',
+			optional: false, nullable: false,
+		},
 	},
 } as const;
 

@@ -5345,6 +5345,7 @@ export type components = {
             noteDraftLimit: number;
             scheduledNoteLimit: number;
             watermarkAvailable: boolean;
+            durationBasedLockdownAvailable: boolean;
         };
         ReversiGameLite: {
             /** Format: id */
