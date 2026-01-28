@@ -114,6 +114,26 @@ export const packedRoleCondFormulaValueCreatedSchema = {
 	},
 } as const;
 
+export const packedRoleCondFormulaValueCreatedBeforeSchema = {
+	type: 'object',
+	properties: {
+		id: {
+			type: 'string', optional: false,
+		},
+		type: {
+			type: 'string',
+			nullable: false, optional: false,
+			enum: [
+				'createdBefore',
+			],
+		},
+		timestamp: {
+			type: 'number',
+			nullable: false, optional: false,
+		},
+	},
+} as const;
+
 export const packedRoleCondFormulaFollowersOrFollowingOrNotesSchema = {
 	type: 'object',
 	properties: {
@@ -159,6 +179,9 @@ export const packedRoleCondFormulaValueSchema = {
 		},
 		{
 			ref: 'RoleCondFormulaValueCreated',
+		},
+		{
+			ref: 'RoleCondFormulaValueCreatedBefore',
 		},
 		{
 			ref: 'RoleCondFormulaFollowersOrFollowingOrNotes',
