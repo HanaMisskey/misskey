@@ -226,6 +226,7 @@ export const rolePolicies = [
 	'canImportBlocking',
 	'canImportFollowing',
 	'canImportMuting',
+	'canImportNotes',
 	'canImportUserLists',
 	'chatAvailability',
 	'uploadableFileTypes',
