@@ -204,6 +204,7 @@ export const rolePolicies = [
 	'canManageCustomEmojis',
 	'canManageAvatarDecorations',
 	'canSearchNotes',
+	'canSearchWithHanamiSearchV1',
 	'canSearchUsers',
 	'canUseTranslator',
 	'canHideAds',
