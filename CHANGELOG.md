@@ -25,12 +25,14 @@
 - Fix: `Mk:C:container` の `borderWidth` が正しく反映されない問題を修正
 - Fix: mCaptchaが正しく動作しない問題を修正
 - Fix: 非ログイン時にリバーシの対局が表示されない問題を修正
+- Fix: ノートの詳細表示でリアクションが全件表示されない問題を修正
 
 ### Server
 - Enhance: OAuthのクライアント情報取得（Client Information Discovery）において、IndieWeb Living Standard 11 July 2024で定義されているJSONドキュメント形式に対応しました
   - JSONによるClient Information Discoveryを行うには、レスポンスの`Content-Type`ヘッダーが`application/json`である必要があります
   - 従来の実装（12 February 2022版・HTML Microformat形式）も引き続きサポートされます
 - Enhance: メモリ使用量を削減
+- Fix: `/admin/get-user-ips` エンドポイントのアクセス権限を管理者のみに修正
 
 ## 2025.12.2
 
