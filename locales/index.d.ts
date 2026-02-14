@@ -2203,6 +2203,10 @@ export interface Locale extends ILocale {
      */
     "limitTo": ParameterizedString<"x">;
     /**
+     * 画面幅が広いときはメディアリストを横並びで表示する
+     */
+    "showMediaListByGridInWideArea": string;
+    /**
      * フォロー申請はありません
      */
     "noFollowRequests": string;
@@ -13264,6 +13268,16 @@ export interface Locale extends ILocale {
          * 読み込みに時間がかかっています。
          */
         "takingTooLongToLoad": string;
+        "_roles": {
+            /**
+             * 作成日時（タイムスタンプ）が～以前
+             */
+            "createdBefore": string;
+            /**
+             * 期間ベースのロックダウンの利用を許可
+             */
+            "durationBasedLockdownAvailable": string;
+        };
         "_inDevelopment": {
             /**
              * この機能は開発中です
