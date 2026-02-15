@@ -400,7 +400,14 @@ describe('SearchService', () => {
 		let ctx: TestContext;
 
 		beforeAll(async () => {
-			ctx = await buildContext();
+			// はなみすきー: fulltextSearch.provider は meilisearch になっている
+			const baseConfig = loadConfig();
+			ctx = await buildContext({
+				...baseConfig,
+				fulltextSearch: {
+					provider: 'sqlLike',
+				},
+			});
 		});
 
 		afterAll(async () => {
