@@ -1,4 +1,4 @@
-## 2026.1.0
+## 2026.2.0
 
 ### Note
 - `users/following` の `birthday` プロパティは非推奨になりました。代わりに `users/get-following-birthday-users` をご利用ください。
@@ -7,6 +7,7 @@
 - Enhance: 「もうすぐ誕生日のユーザー」ウィジェットで、誕生日が至近のユーザーも表示できるように  
   (Cherry-picked from https://github.com/MisskeyIO/misskey)
 	- 「今日誕生日のユーザー」は「もうすぐ誕生日のユーザー」に名称変更されました
+- Fix: ユーザーハッシュタグページでユーザーの読み込みが重複する問題を修正
 - 依存関係の更新
 
 ### Client
@@ -31,6 +32,7 @@
   - モザイクの格子のサイズが画像の縦横比によって長方形となる問題を修正
   - モザイクの色味がより自然になるように修正
   - ぼかしに不自然な縦線が入る問題を修正
+- Fix: フォロー承認通知でフォローされた際のメッセージの絵文字が表示されない問題を修正
 
 ### Server
 - Enhance: OAuthのクライアント情報取得（Client Information Discovery）において、IndieWeb Living Standard 11 July 2024で定義されているJSONドキュメント形式に対応しました
