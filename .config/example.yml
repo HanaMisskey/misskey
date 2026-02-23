@@ -248,6 +248,13 @@ fulltextSearch:
 #  ssl: true
 #  index: ''
 
+#   ┌────────────────────────────┐
+#───┘ Hanami Billing configuration └─────────────────────────────
+
+#hanamiBilling:
+#  host: https://billing.example.com
+#  apiKey: ''
+
 #   ┌───────────────┐
 #───┘ ID generation └───────────────────────────────────────────
 

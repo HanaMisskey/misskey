@@ -13538,6 +13538,12 @@ export interface Locale extends ILocale {
          * はなモード内で作成されたノートはローカルのみをオンにすると除外されます。
          */
         "notesCreatedInHanaModeWillBeExcluded": string;
+        "_premium": {
+            /**
+             * 決済の開始に失敗しました。
+             */
+            "failedToInitiatePayment": string;
+        };
     };
 }
 declare const locales: {

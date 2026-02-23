@@ -2082,6 +2082,12 @@ declare namespace entities {
         PagesUpdateRequest,
         PingResponse,
         PinnedUsersResponse,
+        PremiumPlansResponse,
+        PremiumPortalRequest,
+        PremiumPortalResponse,
+        PremiumStatusResponse,
+        PremiumSubscribeRequest,
+        PremiumSubscribeResponse,
         PromoReadRequest,
         RenoteMuteCreateRequest,
         RenoteMuteDeleteRequest,
@@ -3340,6 +3346,24 @@ type PingResponse = operations['ping']['responses']['200']['content']['applicati
 
 // @public (undocumented)
 type PinnedUsersResponse = operations['pinned-users']['responses']['200']['content']['application/json'];
+
+// @public (undocumented)
+type PremiumPlansResponse = operations['premium___plans']['responses']['200']['content']['application/json'];
+
+// @public (undocumented)
+type PremiumPortalRequest = operations['premium___portal']['requestBody']['content']['application/json'];
+
+// @public (undocumented)
+type PremiumPortalResponse = operations['premium___portal']['responses']['200']['content']['application/json'];
+
+// @public (undocumented)
+type PremiumStatusResponse = operations['premium___status']['responses']['200']['content']['application/json'];
+
+// @public (undocumented)
+type PremiumSubscribeRequest = operations['premium___subscribe']['requestBody']['content']['application/json'];
+
+// @public (undocumented)
+type PremiumSubscribeResponse = operations['premium___subscribe']['responses']['200']['content']['application/json'];
 
 // @public (undocumented)
 type PromoReadRequest = operations['promo___read']['requestBody']['content']['application/json'];

@@ -33,9 +33,13 @@ import { miLocalStorage } from '@/local-storage.js';
 import { store } from '@/store.js';
 import { useRouter } from '@/router.js';
 import { definePage } from '@/page.js';
+import { misskeyApi } from '@/utility/misskey-api.js';
+import { i18n } from '@/i18n.js';
+import { alert as osAlert, waiting } from '@/os.js';
 
 const devFlag = _DEV_ ? '?debug' : '';
 const origin = _DEV_ ? 'http://localhost:4321' : 'https://frame-static-assets.misskey.flowers';
+const lpTier = ['hana', 'dango', 'bluesheet', 'ozashiki'];
 
 const lang = miLocalStorage.getItem('lang')?.includes('ja') ? 'ja' : 'en';
 
@@ -47,7 +51,7 @@ const rootEl = useTemplateRef('rootEl');
 const iframeLoaded = ref(false);
 const iframeHeight = ref(0);
 
-function onFrameLoad() {
+async function onFrameLoad() {
 	if (!iframeLoaded.value) {
 		iframeLoaded.value = true;
 	} else if (frameEl.value) {
@@ -69,6 +73,24 @@ function onFrameLoad() {
 			payload: stickyTop,
 		}, origin);
 	}
+
+	const [planRes, statusRes] = await Promise.all([
+		misskeyApi('premium/plans'),
+		misskeyApi('premium/status'),
+	]);
+
+	frameEl.value?.contentWindow?.postMessage({
+		type: 'hanamisskey:premium:buttonState',
+		payload: Object.fromEntries(lpTier.map((tier) => {
+			let state = 'notAvailable';
+			if (statusRes.subscription?.plan.slug === tier) {
+				state = 'manage';
+			} else if (planRes.some((p) => p.slug === tier)) {
+				state = 'canSubscribe';
+			}
+			return [tier, state];
+		})),
+	}, origin);
 }
 
 watch(store.r.darkMode, (to) => {
@@ -81,7 +103,7 @@ watch(store.r.darkMode, (to) => {
 
 const router = useRouter();
 
-function eventHandler(event: MessageEvent) {
+async function eventHandler(event: MessageEvent) {
 	if (event.origin !== origin) return;
 
 	if (event.data?.type === 'hanamisskey:lp:clicked') {
@@ -94,6 +116,28 @@ function eventHandler(event: MessageEvent) {
 
 	if (event.data?.type === 'hanamisskey:changeHeight') {
 		iframeHeight.value = event.data.payload.height;
+	}
+
+	if (event.data?.type === 'hanamisskey:premium:clicked') {
+		const planSlug = event.data.payload.button;
+		const returnUrl = `${window.location.origin}/premium`;
+
+		const hide = waiting();
+
+		const res = await misskeyApi('premium/subscribe', {
+			planSlug,
+			returnUrl,
+		}).catch(() => null);
+
+		if (res != null && res.url != null) {
+			location.href = res.url;
+		} else {
+			hide();
+			osAlert({
+				type: 'error',
+				text: i18n.ts._hana._premium.failedToInitiatePayment,
+			});
+		}
 	}
 }
 

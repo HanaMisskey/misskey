@@ -72,6 +72,10 @@ type Source = {
 		index: string;
 		scope?: 'local' | 'global' | string[];
 	};
+	hanamiBilling?: {
+		host: string;
+		apiKey: string;
+	};
 	sentryForBackend?: { options: Partial<Sentry.NodeOptions>; enableNodeProfiling: boolean; };
 	sentryForFrontend?: {
 		options: Partial<SentryVue.BrowserOptions> & { dsn: string };
@@ -172,6 +176,10 @@ export type Config = {
 		ssl?: boolean;
 		index: string;
 		scope?: 'local' | 'global' | string[];
+	} | undefined;
+	hanamiBilling: {
+		host: string;
+		apiKey: string;
 	} | undefined;
 	proxy: string | undefined;
 	proxySmtp: string | undefined;
@@ -317,6 +325,7 @@ export function loadConfig(): Config {
 		fulltextSearch,
 		meilisearch: config.meilisearch,
 		hanamisearch: config.hanamisearch,
+		hanamiBilling: config.hanamiBilling,
 		redis,
 		redisForPubsub: config.redisForPubsub ? convertRedisOptions(config.redisForPubsub, host) : redis,
 		redisForJobQueue: config.redisForJobQueue ? convertRedisOptions(config.redisForJobQueue, host) : redis,
