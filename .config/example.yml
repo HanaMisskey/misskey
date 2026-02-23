@@ -252,7 +252,7 @@ fulltextSearch:
 #───┘ Hanami Billing configuration └─────────────────────────────
 
 #hanamiBilling:
-#  host: https://billing.example.com
+#  host: https://billing.example.com # No trailing slash
 #  apiKey: ''
 
 #   ┌───────────────┐
