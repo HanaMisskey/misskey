@@ -38,7 +38,7 @@ import { i18n } from '@/i18n.js';
 import { alert as osAlert, waiting } from '@/os.js';
 
 const devFlag = _DEV_ ? '?debug' : '';
-const origin = _DEV_ ? 'http://localhost:4321' : 'https://frame-static-assets.misskey.flowers';
+const origin = _DEV_ ? 'http://localhost:4321' : 'https://premium-lp.hanami-lp.pages.dev/'; // ← マージ前にもとに戻す！！！
 const lpTier = ['hana', 'dango', 'bluesheet', 'ozashiki'];
 
 const lang = miLocalStorage.getItem('lang')?.includes('ja') ? 'ja' : 'en';
