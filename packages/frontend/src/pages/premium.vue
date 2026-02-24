@@ -129,31 +129,29 @@ async function eventHandler(event: MessageEvent) {
 		const planSlug = event.data.payload.button;
 		const returnUrl = `${window.location.origin}/premium`;
 
-		const hide = waiting();
-
 		let url: string | null = null;
 
 		if (buttonsState.value?.[planSlug] === 'canSubscribe') {
+			const hide = waiting();
+
 			const res = await misskeyApi('premium/subscribe', {
 				planSlug,
 				returnUrl,
 			}).catch(() => null);
-			url = res?.url ?? null;
-		} else if (buttonsState.value?.[planSlug] === 'manage') {
-			const res = await misskeyApi('premium/portal', {
-				returnUrl,
-			}).catch(() => null);
-			url = res?.url ?? null;
-		}
 
-		if (url != null) {
-			location.href = url;
-		} else {
-			hide();
-			osAlert({
-				type: 'error',
-				text: i18n.ts._hana._premium.failedToInitiatePayment,
-			});
+			url = res?.url ?? null;
+
+			if (url != null) {
+				location.href = url;
+			} else {
+				hide();
+				osAlert({
+					type: 'error',
+					text: i18n.ts._hana._premium.failedToInitiatePayment,
+				});
+			}
+		} else if (buttonsState.value?.[planSlug] === 'manage') {
+			router.push('/settings/premium');
 		}
 	}
 }
