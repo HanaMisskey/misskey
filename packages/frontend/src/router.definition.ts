@@ -200,6 +200,10 @@ export const ROUTE_DEF = [{
 		name: 'hanamode',
 		component: page(() => import('@/pages/settings/hanamode.vue')),
 	}, {
+		path: '/subscription',
+		name: 'subscription',
+		component: page(() => import('@/pages/settings/subscription.vue')),
+	}, {
 		path: '/',
 		component: page(() => import('@/pages/_empty_.vue')),
 	}],

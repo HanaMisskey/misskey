@@ -13538,7 +13538,47 @@ export interface Locale extends ILocale {
          * はなモード内で作成されたノートはローカルのみをオンにすると除外されます。
          */
         "notesCreatedInHanaModeWillBeExcluded": string;
-        "_premium": {
+        "_subscription": {
+            /**
+             * はなみすきープレミアム
+             */
+            "premium": string;
+            /**
+             * 加入する
+             */
+            "join": string;
+            /**
+             * プランを変更する
+             */
+            "changePlan": string;
+            /**
+             * 解約する
+             */
+            "cancelSubscription": string;
+            /**
+             * プランの紹介はこちら
+             */
+            "goToIntroductionPage": string;
+            /**
+             * 現在のプラン
+             */
+            "currentPlan": string;
+            /**
+             * 無料プラン
+             */
+            "none": string;
+            /**
+             * 次回請求日
+             */
+            "nextBillingDate": string;
+            /**
+             * お支払い方法
+             */
+            "paymentMethod": string;
+            /**
+             * お支払い情報の設定をウィンドウから行うことはできません。
+             */
+            "paymentMethodSettingsNotAvailableInWindow": string;
             /**
              * 決済の開始に失敗しました。
              */

@@ -107,6 +107,11 @@ const menuDef = computed<SuperMenuDef[]>(() => [{
 		text: i18n.ts._hana.hanaMode,
 		to: '/settings/hanamode',
 		active: currentPage.value?.route.name === 'hanamode',
+	}, {
+		icon: 'ti ti-device-desktop-star',
+		text: i18n.ts._hana._subscription.premium,
+		to: '/settings/subscription',
+		active: currentPage.value?.route.name === 'subscription',
 	}],
 }, {
 	items: [{
