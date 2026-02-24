@@ -151,7 +151,7 @@ async function eventHandler(event: MessageEvent) {
 				});
 			}
 		} else if (buttonsState.value?.[planSlug] === 'manage') {
-			router.push('/settings/premium');
+			router.push('/settings/subscription');
 		}
 	}
 }
