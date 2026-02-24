@@ -7,6 +7,7 @@
 				:src="frameUrl"
 				:class="$style.frame"
 				:style="{ height: iframeHeight + 'px' }"
+				scrolling="no"
 				@load="onFrameLoad"
 			></iframe>
 		</div>
@@ -27,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, onDeactivated, useTemplateRef, ref, computed, watch } from 'vue';
+import { onMounted, onUnmounted, onDeactivated, useTemplateRef, ref, computed, watch, toRaw } from 'vue';
 import { instance } from '@/instance.js';
 import { miLocalStorage } from '@/local-storage.js';
 import { store } from '@/store.js';
@@ -39,7 +40,7 @@ import { alert as osAlert, waiting } from '@/os.js';
 
 const devFlag = _DEV_ ? '?debug' : '';
 const origin = _DEV_ ? 'http://localhost:4321' : 'https://premium-lp.hanami-lp.pages.dev'; // ← マージ前にもとに戻す！！！
-const lpTier = ['hana', 'dango', 'bluesheet', 'ozashiki'];
+const lpTier = ['hana', 'dango', 'bluesheet', 'ozashiki'] as const;
 
 const lang = miLocalStorage.getItem('lang')?.includes('ja') ? 'ja' : 'en';
 
@@ -50,6 +51,10 @@ const rootEl = useTemplateRef('rootEl');
 
 const iframeLoaded = ref(false);
 const iframeHeight = ref(0);
+
+type ButtonState = 'notAvailable' | 'canSubscribe' | 'manage';
+
+const buttonsState = ref<Record<typeof lpTier[number], ButtonState> | null>(null);
 
 async function onFrameLoad() {
 	if (!iframeLoaded.value) {
@@ -79,17 +84,19 @@ async function onFrameLoad() {
 		misskeyApi('premium/status'),
 	]);
 
+	buttonsState.value = Object.fromEntries(lpTier.map((tier) => {
+		let state: ButtonState = 'notAvailable';
+		if (statusRes.subscription?.plan.slug === tier) {
+			state = 'manage';
+		} else if (planRes.some((p) => p.slug === tier)) {
+			state = 'canSubscribe';
+		}
+		return [tier, state];
+	})) as Record<typeof lpTier[number], ButtonState>;
+
 	frameEl.value?.contentWindow?.postMessage({
 		type: 'hanamisskey:premium:buttonState',
-		payload: Object.fromEntries(lpTier.map((tier) => {
-			let state = 'notAvailable';
-			if (statusRes.subscription?.plan.slug === tier) {
-				state = 'manage';
-			} else if (planRes.some((p) => p.slug === tier)) {
-				state = 'canSubscribe';
-			}
-			return [tier, state];
-		})),
+		payload: toRaw(buttonsState.value),
 	}, origin);
 }
 
@@ -124,13 +131,23 @@ async function eventHandler(event: MessageEvent) {
 
 		const hide = waiting();
 
-		const res = await misskeyApi('premium/subscribe', {
-			planSlug,
-			returnUrl,
-		}).catch(() => null);
+		let url: string | null = null;
 
-		if (res != null && res.url != null) {
-			location.href = res.url;
+		if (buttonsState.value?.[planSlug] === 'canSubscribe') {
+			const res = await misskeyApi('premium/subscribe', {
+				planSlug,
+				returnUrl,
+			}).catch(() => null);
+			url = res?.url ?? null;
+		} else if (buttonsState.value?.[planSlug] === 'manage') {
+			const res = await misskeyApi('premium/portal', {
+				returnUrl,
+			}).catch(() => null);
+			url = res?.url ?? null;
+		}
+
+		if (url != null) {
+			location.href = url;
 		} else {
 			hide();
 			osAlert({
@@ -181,6 +198,7 @@ definePage(() => ({
 	width: 100%;
 	min-height: 100cqh;
 	border: none;
+	touch-action: none;
 	overflow: hidden;
 	overflow: clip;
 }
