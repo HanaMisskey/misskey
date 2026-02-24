@@ -28,6 +28,19 @@
 			</template>
 			{{ i18n.ts._hana._subscription.goToIntroductionPage }}
 		</FormLink>
+		<FormSection>
+			<template #label>
+				<SearchLabel>{{ i18n.ts._hana._subscription.manage }}</SearchLabel>
+			</template>
+			<div class="_gaps_s">
+				<FormLink @click="initiateCustomerPortal">
+					<template #icon>
+						<i class="ti ti-wallet"></i>
+					</template>
+					{{ i18n.ts._hana._subscription.configurePaymentMethod }}
+				</FormLink>
+			</div>
+		</FormSection>
 	</div>
 </SearchMarker>
 </template>
@@ -35,9 +48,30 @@
 <script setup lang="ts">
 import MkButton from '@/components/MkButton.vue';
 import FormLink from '@/components/form/link.vue';
+import FormSection from '@/components/form/section.vue';
 
 import { i18n } from '@/i18n.js';
 import { definePage } from '@/page.js';
+import { waiting, alert as osAlert } from '@/os.js';
+import { misskeyApi } from '@/utility/misskey-api.js';
+
+async function initiateCustomerPortal() {
+	const hide = waiting();
+	const res = await misskeyApi('premium/portal', {
+		returnUrl: `${window.location.origin}/settings/subscription`,
+	}).catch(() => null);
+
+	if (res?.url) {
+		location.href = res.url;
+	} else {
+		hide();
+		osAlert({
+			type: 'error',
+			title: i18n.ts._hana._subscription.failedToInitiateCustomersPortal,
+			text: i18n.ts._hana._subscription.failedDescription,
+		});
+	}
+}
 
 definePage(() => ({
 	title: i18n.ts._hana._subscription.premium,

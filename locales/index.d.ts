@@ -13572,17 +13572,25 @@ export interface Locale extends ILocale {
              */
             "nextBillingDate": string;
             /**
-             * お支払い方法
+             * 管理
              */
-            "paymentMethod": string;
+            "manage": string;
             /**
-             * お支払い情報の設定をウィンドウから行うことはできません。
+             * お支払い方法を設定
              */
-            "paymentMethodSettingsNotAvailableInWindow": string;
+            "configurePaymentMethod": string;
             /**
-             * 決済の開始に失敗しました。
+             * 決済の開始に失敗しました
              */
             "failedToInitiatePayment": string;
+            /**
+             * お支払い情報管理ページの起動に失敗しました
+             */
+            "failedToInitiateCustomersPortal": string;
+            /**
+             * 時間をおいてから再度お試しください。問題が解決しない場合はお問い合わせください。
+             */
+            "failedDescription": string;
         };
     };
 }

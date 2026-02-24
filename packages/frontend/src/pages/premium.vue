@@ -147,7 +147,8 @@ async function eventHandler(event: MessageEvent) {
 				hide();
 				osAlert({
 					type: 'error',
-					text: i18n.ts._hana._subscription.failedToInitiatePayment,
+					title: i18n.ts._hana._subscription.failedToInitiatePayment,
+					text: i18n.ts._hana._subscription.failedDescription,
 				});
 			}
 		} else if (buttonsState.value?.[planSlug] === 'manage') {
