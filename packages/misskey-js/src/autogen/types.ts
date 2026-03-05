@@ -3427,6 +3427,26 @@ export type paths = {
          */
         post: operations['pinned-users'];
     };
+    '/premium/cancel/execute': {
+        /**
+         * premium/cancel/execute
+         * @description No description provided.
+         *
+         *     **Internal Endpoint**: This endpoint is an API for the misskey mainframe and is not intended for use by third parties.
+         *     **Credential required**: *Yes*
+         */
+        post: operations['premium___cancel___execute'];
+    };
+    '/premium/cancel/preview': {
+        /**
+         * premium/cancel/preview
+         * @description No description provided.
+         *
+         *     **Internal Endpoint**: This endpoint is an API for the misskey mainframe and is not intended for use by third parties.
+         *     **Credential required**: *Yes*
+         */
+        post: operations['premium___cancel___preview'];
+    };
     '/premium/plans': {
         /**
          * premium/plans
@@ -3455,15 +3475,25 @@ export type paths = {
          */
         post: operations['premium___status'];
     };
-    '/premium/subscribe': {
+    '/premium/subscribe/execute': {
         /**
-         * premium/subscribe
+         * premium/subscribe/execute
          * @description No description provided.
          *
          *     **Internal Endpoint**: This endpoint is an API for the misskey mainframe and is not intended for use by third parties.
          *     **Credential required**: *Yes*
          */
-        post: operations['premium___subscribe'];
+        post: operations['premium___subscribe___execute'];
+    };
+    '/premium/subscribe/preview': {
+        /**
+         * premium/subscribe/preview
+         * @description No description provided.
+         *
+         *     **Internal Endpoint**: This endpoint is an API for the misskey mainframe and is not intended for use by third parties.
+         *     **Credential required**: *Yes*
+         */
+        post: operations['premium___subscribe___preview'];
     };
     '/promo/read': {
         /**
@@ -32872,6 +32902,144 @@ export interface operations {
             };
         };
     };
+    premium___cancel___execute: {
+        requestBody: {
+            content: {
+                'application/json': {
+                    sessionId: string;
+                    immediate: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description OK (with results) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': unknown;
+                };
+            };
+            /** @description Client error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Authentication error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Forbidden error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description I'm Ai */
+            418: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+        };
+    };
+    premium___cancel___preview: {
+        requestBody: {
+            content: {
+                'application/json': {
+                    immediate: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description OK (with results) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': {
+                        sessionId: string;
+                        preview: {
+                            currentPlanSlug: string;
+                            effectiveAt: string;
+                            immediate: boolean;
+                        };
+                    };
+                };
+            };
+            /** @description Client error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Authentication error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Forbidden error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description I'm Ai */
+            418: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+        };
+    };
     premium___plans: {
         responses: {
             /** @description OK (with results) */
@@ -33074,11 +33242,12 @@ export interface operations {
             };
         };
     };
-    premium___subscribe: {
+    premium___subscribe___execute: {
         requestBody: {
             content: {
                 'application/json': {
                     planSlug: string;
+                    sessionId: string;
                     returnUrl: string;
                 };
             };
@@ -33092,6 +33261,106 @@ export interface operations {
                 content: {
                     'application/json': {
                         url: string;
+                    };
+                };
+            };
+            /** @description Client error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Authentication error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Forbidden error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description I'm Ai */
+            418: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+        };
+    };
+    premium___subscribe___preview: {
+        requestBody: {
+            content: {
+                'application/json': {
+                    planSlug: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK (with results) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': {
+                        sessionId: string;
+                        preview: {
+                            /** @enum {string} */
+                            type: 'subscribe';
+                            targetPlanSlug: string;
+                            targetPlanDisplayName: string;
+                            targetPlanMonthlyPrice: number;
+                            currency: string;
+                        } | {
+                            /** @enum {string} */
+                            type: 'upgrade';
+                            currentPlanSlug: string;
+                            newPlanSlug: string;
+                            amountDue: number;
+                            credit: number;
+                            newPlanCharge: number;
+                            currency: string;
+                            prorationDate: number;
+                        } | {
+                            /** @enum {string} */
+                            type: 'downgrade';
+                            currentPlanSlug: string;
+                            newPlanSlug: string;
+                            effectiveAt: string;
+                            currentPlanMonthlyPrice: number;
+                            newPlanMonthlyPrice: number;
+                            currency: string;
+                        } | {
+                            /** @enum {string} */
+                            type: 'cancel_downgrade';
+                            currentPlanSlug: string;
+                            pendingDowngradeTargetSlug: string;
+                            pendingDowngradeEffectiveAt: string;
+                        };
                     };
                 };
             };

@@ -566,12 +566,18 @@ import type {
 	PagesUpdateRequest,
 	PingResponse,
 	PinnedUsersResponse,
+	PremiumCancelExecuteRequest,
+	PremiumCancelExecuteResponse,
+	PremiumCancelPreviewRequest,
+	PremiumCancelPreviewResponse,
 	PremiumPlansResponse,
 	PremiumPortalRequest,
 	PremiumPortalResponse,
 	PremiumStatusResponse,
-	PremiumSubscribeRequest,
-	PremiumSubscribeResponse,
+	PremiumSubscribeExecuteRequest,
+	PremiumSubscribeExecuteResponse,
+	PremiumSubscribePreviewRequest,
+	PremiumSubscribePreviewResponse,
 	PromoReadRequest,
 	RenoteMuteCreateRequest,
 	RenoteMuteDeleteRequest,
@@ -1046,10 +1052,13 @@ export type Endpoints = {
 	'pages/update': { req: PagesUpdateRequest; res: EmptyResponse };
 	'ping': { req: EmptyRequest; res: PingResponse };
 	'pinned-users': { req: EmptyRequest; res: PinnedUsersResponse };
+	'premium/cancel/execute': { req: PremiumCancelExecuteRequest; res: PremiumCancelExecuteResponse };
+	'premium/cancel/preview': { req: PremiumCancelPreviewRequest; res: PremiumCancelPreviewResponse };
 	'premium/plans': { req: EmptyRequest; res: PremiumPlansResponse };
 	'premium/portal': { req: PremiumPortalRequest; res: PremiumPortalResponse };
 	'premium/status': { req: EmptyRequest; res: PremiumStatusResponse };
-	'premium/subscribe': { req: PremiumSubscribeRequest; res: PremiumSubscribeResponse };
+	'premium/subscribe/execute': { req: PremiumSubscribeExecuteRequest; res: PremiumSubscribeExecuteResponse };
+	'premium/subscribe/preview': { req: PremiumSubscribePreviewRequest; res: PremiumSubscribePreviewResponse };
 	'promo/read': { req: PromoReadRequest; res: EmptyResponse };
 	'renote-mute/create': { req: RenoteMuteCreateRequest; res: EmptyResponse };
 	'renote-mute/delete': { req: RenoteMuteDeleteRequest; res: EmptyResponse };

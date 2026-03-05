@@ -2082,12 +2082,18 @@ declare namespace entities {
         PagesUpdateRequest,
         PingResponse,
         PinnedUsersResponse,
+        PremiumCancelExecuteRequest,
+        PremiumCancelExecuteResponse,
+        PremiumCancelPreviewRequest,
+        PremiumCancelPreviewResponse,
         PremiumPlansResponse,
         PremiumPortalRequest,
         PremiumPortalResponse,
         PremiumStatusResponse,
-        PremiumSubscribeRequest,
-        PremiumSubscribeResponse,
+        PremiumSubscribeExecuteRequest,
+        PremiumSubscribeExecuteResponse,
+        PremiumSubscribePreviewRequest,
+        PremiumSubscribePreviewResponse,
         PromoReadRequest,
         RenoteMuteCreateRequest,
         RenoteMuteDeleteRequest,
@@ -3348,6 +3354,18 @@ type PingResponse = operations['ping']['responses']['200']['content']['applicati
 type PinnedUsersResponse = operations['pinned-users']['responses']['200']['content']['application/json'];
 
 // @public (undocumented)
+type PremiumCancelExecuteRequest = operations['premium___cancel___execute']['requestBody']['content']['application/json'];
+
+// @public (undocumented)
+type PremiumCancelExecuteResponse = operations['premium___cancel___execute']['responses']['200']['content']['application/json'];
+
+// @public (undocumented)
+type PremiumCancelPreviewRequest = operations['premium___cancel___preview']['requestBody']['content']['application/json'];
+
+// @public (undocumented)
+type PremiumCancelPreviewResponse = operations['premium___cancel___preview']['responses']['200']['content']['application/json'];
+
+// @public (undocumented)
 type PremiumPlansResponse = operations['premium___plans']['responses']['200']['content']['application/json'];
 
 // @public (undocumented)
@@ -3360,10 +3378,16 @@ type PremiumPortalResponse = operations['premium___portal']['responses']['200'][
 type PremiumStatusResponse = operations['premium___status']['responses']['200']['content']['application/json'];
 
 // @public (undocumented)
-type PremiumSubscribeRequest = operations['premium___subscribe']['requestBody']['content']['application/json'];
+type PremiumSubscribeExecuteRequest = operations['premium___subscribe___execute']['requestBody']['content']['application/json'];
 
 // @public (undocumented)
-type PremiumSubscribeResponse = operations['premium___subscribe']['responses']['200']['content']['application/json'];
+type PremiumSubscribeExecuteResponse = operations['premium___subscribe___execute']['responses']['200']['content']['application/json'];
+
+// @public (undocumented)
+type PremiumSubscribePreviewRequest = operations['premium___subscribe___preview']['requestBody']['content']['application/json'];
+
+// @public (undocumented)
+type PremiumSubscribePreviewResponse = operations['premium___subscribe___preview']['responses']['200']['content']['application/json'];
 
 // @public (undocumented)
 type PromoReadRequest = operations['promo___read']['requestBody']['content']['application/json'];

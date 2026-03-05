@@ -29,6 +29,7 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, onDeactivated, useTemplateRef, ref, computed, watch, toRaw } from 'vue';
+import * as Misskey from 'misskey-js';
 import { instance } from '@/instance.js';
 import { miLocalStorage } from '@/local-storage.js';
 import { store } from '@/store.js';
@@ -36,7 +37,7 @@ import { useRouter } from '@/router.js';
 import { definePage } from '@/page.js';
 import { misskeyApi } from '@/utility/misskey-api.js';
 import { i18n } from '@/i18n.js';
-import { alert as osAlert, waiting } from '@/os.js';
+import { alert as osAlert, confirm as osConfirm, waiting } from '@/os.js';
 
 const devFlag = _DEV_ ? '?debug' : '';
 const origin = _DEV_ ? 'http://localhost:4321' : 'https://premium-lp.hanami-lp.pages.dev'; // ← マージ前にもとに戻す！！！
@@ -110,6 +111,40 @@ watch(store.r.darkMode, (to) => {
 
 const router = useRouter();
 
+function buildPreviewText(preview: Misskey.entities.PremiumSubscribePreviewResponse['preview']): string {
+	switch (preview.type) {
+		case 'subscribe':
+			return [
+				`プラン: ${preview.targetPlanDisplayName}`,
+				`月額: ${preview.targetPlanMonthlyPrice} ${preview.currency}`,
+			].join('\n');
+		case 'upgrade':
+			return [
+				`現在のプラン: ${preview.currentPlanSlug}`,
+				`変更後のプラン: ${preview.newPlanSlug}`,
+				`今回の請求額: ${preview.amountDue} ${preview.currency}`,
+				`クレジット: ${preview.credit} ${preview.currency}`,
+				`変更後の月額: ${preview.newPlanCharge} ${preview.currency}`,
+			].join('\n');
+		case 'downgrade':
+			return [
+				`現在のプラン: ${preview.currentPlanSlug}`,
+				`変更後のプラン: ${preview.newPlanSlug}`,
+				`反映日時: ${preview.effectiveAt}`,
+				`現在の月額: ${preview.currentPlanMonthlyPrice} ${preview.currency}`,
+				`変更後の月額: ${preview.newPlanMonthlyPrice} ${preview.currency}`,
+			].join('\n');
+		case 'cancel_downgrade':
+			return [
+				`現在のプラン: ${preview.currentPlanSlug}`,
+				`キャンセル対象: ${preview.pendingDowngradeTargetSlug}`,
+				`予定反映日: ${preview.pendingDowngradeEffectiveAt}`,
+			].join('\n');
+		default:
+			return '';
+	}
+}
+
 async function eventHandler(event: MessageEvent) {
 	if (event.origin !== origin) return;
 
@@ -129,27 +164,52 @@ async function eventHandler(event: MessageEvent) {
 		const planSlug = event.data.payload.button;
 		const returnUrl = `${window.location.origin}/premium`;
 
-		let url: string | null = null;
-
 		if (buttonsState.value?.[planSlug] === 'canSubscribe') {
-			const hide = waiting();
+			const hidePreview = waiting();
 
-			const res = await misskeyApi('premium/subscribe', {
+			const previewRes = await misskeyApi('premium/subscribe/preview', {
 				planSlug,
-				returnUrl,
 			}).catch(() => null);
 
-			url = res?.url ?? null;
+			hidePreview();
 
-			if (url != null) {
-				location.href = url;
-			} else {
-				hide();
+			if (!previewRes) {
 				osAlert({
 					type: 'error',
 					title: i18n.ts._hana._subscription.failedToInitiatePayment,
 					text: i18n.ts._hana._subscription.failedDescription,
 				});
+				return;
+			}
+
+			const { canceled } = await osConfirm({
+				type: 'question',
+				title: i18n.ts._hana._subscription.changePlan,
+				text: buildPreviewText(previewRes.preview),
+			});
+			if (canceled) return;
+
+			const hideExecute = waiting();
+			const executeRes = await misskeyApi('premium/subscribe/execute', {
+				planSlug,
+				sessionId: previewRes.sessionId,
+				returnUrl,
+			}).catch(() => null);
+
+			if (!executeRes) {
+				hideExecute();
+				osAlert({
+					type: 'error',
+					title: i18n.ts._hana._subscription.failedToInitiatePayment,
+					text: i18n.ts._hana._subscription.failedDescription,
+				});
+				return;
+			}
+
+			if (executeRes.url) {
+				location.href = executeRes.url;
+			} else {
+				hideExecute({ success: true });
 			}
 		} else if (buttonsState.value?.[planSlug] === 'manage') {
 			router.push('/settings/subscription');

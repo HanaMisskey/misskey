@@ -1,9 +1,8 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { ApiError } from '@/server/api/error.js';
-import { HttpRequestService } from '@/core/HttpRequestService.js';
-import type { Config } from '@/config.js';
-import { DI } from '@/di-symbols.js';
+import { SubscriptionManagementService } from '@/core/SubscriptionManagementService.js';
+import { IdentifiableError } from '@/misc/identifiable-error.js';
 
 export const meta = {
 	requireCredential: true,
@@ -61,51 +60,24 @@ export const paramDef = {
 @Injectable()
 export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-disable-line import/no-default-export
 	constructor(
-		@Inject(DI.config)
-		private config: Config,
-
-		private httpRequestService: HttpRequestService,
+		private subscriptionManagementService: SubscriptionManagementService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
-			if (!this.config.hanamiBilling) {
-				throw new ApiError(meta.errors.subscriptionDisabled);
+			try {
+				const { subscription, roleId } = await this.subscriptionManagementService.getSubscriptionStatus(me.id);
+				return {
+					subscription,
+					roleId,
+				};
+			} catch (error) {
+				if (error instanceof IdentifiableError) {
+					if (error.id === 'f4b8c624-4d20-4d14-a247-590d6251e5ce' || error.id === '7e1b4c51-0ef8-4d05-b2d6-3e9f8fc4c0b1') {
+						throw new ApiError(meta.errors.subscriptionDisabled);
+					}
+					throw new ApiError(meta.errors.fetchFailed);
+				}
+				throw error;
 			}
-
-			const { hanamiBilling } = this.config;
-			const res = await this.httpRequestService.send(`${hanamiBilling.host}/internal/status?misskeyUserId=${encodeURIComponent(me.id)}`, {
-				method: 'GET',
-				headers: {
-					Authorization: `Bearer ${hanamiBilling.apiKey}`,
-				},
-			});
-
-			if (!res.ok) {
-				throw new ApiError(meta.errors.fetchFailed);
-			}
-
-			const pRes = await res.json() as {
-				misskeyUserId: string;
-				subscription: {
-					plan: {
-						slug: string;
-						displayName: string;
-						description: string;
-						monthlyPrice: number;
-					};
-					status: 'incomplete' | 'incomplete_expired' | 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid' | 'paused';
-					currentPeriodEnd: string;
-					cancelAtPeriodEnd: boolean;
-				} | null;
-				roleId: string | null;
-				requestId: string;
-			};
-
-			return {
-				//@ts-expect-error
-				misskeyUserId: pRes.misskeyUserId,
-				subscription: pRes.subscription,
-				roleId: pRes.roleId,
-			};
 		});
 	}
 }
