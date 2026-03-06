@@ -95,6 +95,8 @@ type SubscriptionChangeResult =
 
 type SubscriptionChangeResponse = SubscriptionChangeResult & { requestId: string };
 
+const SUBSCRIPTION_SESSION_TTL = 120; // seconds
+
 @Injectable()
 export class SubscriptionManagementService {
 	constructor(
@@ -261,7 +263,7 @@ export class SubscriptionManagementService {
 
 		const { requestId, ...resJson } = await res.json() as SubscriptionPreviewResponse;
 
-		await this.redisClient.setex(`hanamiSubscriptionChangePreview:${userId}`, 120, JSON.stringify({
+		await this.redisClient.setex(`hanamiSubscriptionChangePreview:${userId}`, SUBSCRIPTION_SESSION_TTL, JSON.stringify({
 			sessionId,
 			newPlanSlug,
 			operationType: resJson.type,
@@ -341,14 +343,18 @@ export class SubscriptionManagementService {
 			immediate: boolean;
 		};
 
-		await this.redisClient.setex(`hanamiSubscriptionCancelPreview:${userId}`, 120, JSON.stringify({
+		await this.redisClient.setex(`hanamiSubscriptionCancelPreview:${userId}`, SUBSCRIPTION_SESSION_TTL, JSON.stringify({
 			sessionId,
 			immediate,
 		})); // 2m
 
 		return {
 			sessionId,
-			preview: resJson,
+			preview: {
+				currentPlanSlug: resJson.currentPlanSlug,
+				effectiveAt: resJson.effectiveAt,
+				immediate: resJson.immediate,
+			},
 		};
 	}
 
