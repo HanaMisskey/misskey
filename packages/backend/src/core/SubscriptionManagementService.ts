@@ -276,7 +276,7 @@ export class SubscriptionManagementService {
 
 	@bindThis
 	public async executePlanChangeSession(userId: string, newPlanSlug: string, sessionId: string, returnUrl: string): Promise<SubscriptionChangeResult> {
-		const sessionDataStr = await this.redisClient.get(`hanamiSubscriptionChangePreview:${sessionId}`);
+		const sessionDataStr = await this.redisClient.getdel(`hanamiSubscriptionChangePreview:${sessionId}`);
 		if (!sessionDataStr) {
 			throw new IdentifiableError('85c4d10b-6a1a-4b9f-a4b2-4d0f1515b5cf', 'Session not found or expired.');
 		}
@@ -354,7 +354,7 @@ export class SubscriptionManagementService {
 
 	@bindThis
 	public async executePlanCancelSession(userId: string, immediate: boolean, sessionId: string): Promise<void> {
-		const sessionDataStr = await this.redisClient.get(`hanamiSubscriptionCancelPreview:${sessionId}`);
+		const sessionDataStr = await this.redisClient.getdel(`hanamiSubscriptionCancelPreview:${sessionId}`);
 		if (!sessionDataStr) {
 			throw new IdentifiableError('0c705fa7-86d2-48aa-8b34-1cd4c6e6e1c8', 'Session not found or expired.');
 		}
