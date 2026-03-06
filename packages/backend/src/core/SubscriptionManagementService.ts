@@ -53,7 +53,7 @@ type SubscriptionPreviewResult =
 type SubscriptionPreviewResponse = SubscriptionPreviewResult & { requestId: string };
 
 interface SubscriptionChangeSessionData {
-	userId: string;
+	sessionId: string;
 	newPlanSlug: string;
 	operationType: SubscriptionPreviewResult['type'];
 	prorationDate?: number;
@@ -261,8 +261,8 @@ export class SubscriptionManagementService {
 
 		const { requestId, ...resJson } = await res.json() as SubscriptionPreviewResponse;
 
-		await this.redisClient.setex(`hanamiSubscriptionChangePreview:${sessionId}`, 120, JSON.stringify({
-			userId,
+		await this.redisClient.setex(`hanamiSubscriptionChangePreview:${userId}`, 120, JSON.stringify({
+			sessionId,
 			newPlanSlug,
 			operationType: resJson.type,
 			prorationDate: 'prorationDate' in resJson ? resJson.prorationDate : undefined,
@@ -276,13 +276,13 @@ export class SubscriptionManagementService {
 
 	@bindThis
 	public async executePlanChangeSession(userId: string, newPlanSlug: string, sessionId: string, returnUrl: string): Promise<SubscriptionChangeResult> {
-		const sessionDataStr = await this.redisClient.getdel(`hanamiSubscriptionChangePreview:${sessionId}`);
+		const sessionDataStr = await this.redisClient.getdel(`hanamiSubscriptionChangePreview:${userId}`);
 		if (!sessionDataStr) {
 			throw new IdentifiableError('85c4d10b-6a1a-4b9f-a4b2-4d0f1515b5cf', 'Session not found or expired.');
 		}
 		const sessionData = JSON.parse(sessionDataStr) as SubscriptionChangeSessionData;
 
-		if (sessionData.userId !== userId || sessionData.newPlanSlug !== newPlanSlug) {
+		if (sessionData.sessionId !== sessionId || sessionData.newPlanSlug !== newPlanSlug) {
 			throw new IdentifiableError('4d1b36ee-3286-4f1f-8b72-8ed8c1c5c4ab', 'Session data does not match the request.');
 		}
 
@@ -341,8 +341,8 @@ export class SubscriptionManagementService {
 			immediate: boolean;
 		};
 
-		await this.redisClient.setex(`hanamiSubscriptionCancelPreview:${sessionId}`, 120, JSON.stringify({
-			userId,
+		await this.redisClient.setex(`hanamiSubscriptionCancelPreview:${userId}`, 120, JSON.stringify({
+			sessionId,
 			immediate,
 		})); // 2m
 
@@ -354,16 +354,16 @@ export class SubscriptionManagementService {
 
 	@bindThis
 	public async executePlanCancelSession(userId: string, immediate: boolean, sessionId: string): Promise<void> {
-		const sessionDataStr = await this.redisClient.getdel(`hanamiSubscriptionCancelPreview:${sessionId}`);
+		const sessionDataStr = await this.redisClient.getdel(`hanamiSubscriptionCancelPreview:${userId}`);
 		if (!sessionDataStr) {
 			throw new IdentifiableError('0c705fa7-86d2-48aa-8b34-1cd4c6e6e1c8', 'Session not found or expired.');
 		}
 		const sessionData = JSON.parse(sessionDataStr) as {
-			userId: string;
+			sessionId: string;
 			immediate: boolean;
 		};
 
-		if (sessionData.userId !== userId || sessionData.immediate !== immediate) {
+		if (sessionData.sessionId !== sessionId || sessionData.immediate !== immediate) {
 			throw new IdentifiableError('d7f09f88-3fd1-4cd1-9b53-9f8c0e3b3f72', 'Session data does not match the request.');
 		}
 
