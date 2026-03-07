@@ -1,7 +1,19 @@
-## 2026.2.0
+## Unreleased
+
+### General
+-
+
+### Client
+-
+
+### Server
+-
+
+
+## 2026.3.0
 
 ### Note
-- `users/following` の `birthday` プロパティは非推奨になりました。代わりに `users/get-following-birthday-users` をご利用ください。
+- `users/following` の `birthday` プロパティは非推奨になりました。代わりに `users/get-following-users-by-birthday` をご利用ください。
 
 ### General
 - Enhance: 「もうすぐ誕生日のユーザー」ウィジェットで、誕生日が至近のユーザーも表示できるように  
