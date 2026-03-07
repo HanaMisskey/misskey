@@ -28,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, onDeactivated, useTemplateRef, ref, computed, watch, toRaw } from 'vue';
+import { onMounted, onUnmounted, onDeactivated, useTemplateRef, ref, computed, watch, toRaw, defineAsyncComponent } from 'vue';
 import * as Misskey from 'misskey-js';
 import { instance } from '@/instance.js';
 import { miLocalStorage } from '@/local-storage.js';
@@ -37,7 +37,8 @@ import { useRouter } from '@/router.js';
 import { definePage } from '@/page.js';
 import { misskeyApi } from '@/utility/misskey-api.js';
 import { i18n } from '@/i18n.js';
-import { alert as osAlert, confirm as osConfirm, waiting } from '@/os.js';
+import { alert as osAlert, waiting } from '@/os.js';
+import { planConfirm } from '@/hana/scripts/subscription.js';
 
 const devFlag = _DEV_ ? '?debug' : '';
 const origin = _DEV_ ? 'http://localhost:4321' : 'https://premium-lp.hanami-lp.pages.dev'; // ← マージ前にもとに戻す！！！
@@ -52,6 +53,8 @@ const rootEl = useTemplateRef('rootEl');
 
 const iframeLoaded = ref(false);
 const iframeHeight = ref(0);
+
+const currentPlan = ref<Misskey.entities.PremiumStatusResponse['subscription']>(null);
 
 type ButtonState = 'notAvailable' | 'canSubscribe' | 'manage';
 
@@ -87,13 +90,15 @@ async function onFrameLoad() {
 
 	buttonsState.value = Object.fromEntries(lpTier.map((tier) => {
 		let state: ButtonState = 'notAvailable';
-		if (statusRes.subscription?.plan.slug === tier) {
+		if (statusRes.subscription?.plan.slug === tier && statusRes.subscription?.status === 'active') {
 			state = 'manage';
 		} else if (planRes.some((p) => p.slug === tier)) {
 			state = 'canSubscribe';
 		}
 		return [tier, state];
 	})) as Record<typeof lpTier[number], ButtonState>;
+
+	currentPlan.value = statusRes.subscription;
 
 	frameEl.value?.contentWindow?.postMessage({
 		type: 'hanamisskey:premium:buttonState',
@@ -110,40 +115,6 @@ watch(store.r.darkMode, (to) => {
 });
 
 const router = useRouter();
-
-function buildPreviewText(preview: Misskey.entities.PremiumSubscribePreviewResponse['preview']): string {
-	switch (preview.type) {
-		case 'subscribe':
-			return [
-				`プラン: ${preview.targetPlanDisplayName}`,
-				`月額: ${preview.targetPlanMonthlyPrice} ${preview.currency}`,
-			].join('\n');
-		case 'upgrade':
-			return [
-				`現在のプラン: ${preview.currentPlanSlug}`,
-				`変更後のプラン: ${preview.newPlanSlug}`,
-				`今回の請求額: ${preview.amountDue} ${preview.currency}`,
-				`クレジット: ${preview.credit} ${preview.currency}`,
-				`変更後の月額: ${preview.newPlanCharge} ${preview.currency}`,
-			].join('\n');
-		case 'downgrade':
-			return [
-				`現在のプラン: ${preview.currentPlanSlug}`,
-				`変更後のプラン: ${preview.newPlanSlug}`,
-				`反映日時: ${preview.effectiveAt}`,
-				`現在の月額: ${preview.currentPlanMonthlyPrice} ${preview.currency}`,
-				`変更後の月額: ${preview.newPlanMonthlyPrice} ${preview.currency}`,
-			].join('\n');
-		case 'cancel_downgrade':
-			return [
-				`現在のプラン: ${preview.currentPlanSlug}`,
-				`キャンセル対象: ${preview.pendingDowngradeTargetSlug}`,
-				`予定反映日: ${preview.pendingDowngradeEffectiveAt}`,
-			].join('\n');
-		default:
-			return '';
-	}
-}
 
 async function eventHandler(event: MessageEvent) {
 	if (event.origin !== origin) return;
@@ -182,10 +153,12 @@ async function eventHandler(event: MessageEvent) {
 				return;
 			}
 
-			const { canceled } = await osConfirm({
-				type: 'question',
-				title: i18n.ts._hana._subscription.changePlan,
-				text: buildPreviewText(previewRes.preview),
+			const { canceled } = await planConfirm({
+				currentPlan: currentPlan.value,
+				planChange: {
+					type: 'change',
+					preview: previewRes.preview,
+				},
 			});
 			if (canceled) return;
 

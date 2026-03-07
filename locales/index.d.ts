@@ -13588,9 +13588,103 @@ export interface Locale extends ILocale {
              */
             "failedToInitiateCustomersPortal": string;
             /**
+             * 処理に失敗しました
+             */
+            "failedToProcess": string;
+            /**
              * 時間をおいてから再度お試しください。問題が解決しない場合はお問い合わせください。
              */
             "failedDescription": string;
+            /**
+             * はなみすきープレミアムに加入しますか？
+             */
+            "planNewConfirm": string;
+            /**
+             * プランを変更しますか？
+             */
+            "planChangeConfirm": string;
+            /**
+             * はなみすきープレミアムを解約しますか？
+             */
+            "cancelConfirm": string;
+            /**
+             * 加入する
+             */
+            "planNewOk": string;
+            /**
+             * 変更する
+             */
+            "planChangeOk": string;
+            /**
+             * 解約する
+             */
+            "cancelOk": string;
+            /**
+             * はなみすきープレミアムにかかる決済情報はStripeによって保管され、はなみすきーではお支払い情報を保持しません。システムの都合上、購入処理を完了してからプランが適用されるまで最大で2分程度かかりますのであらかじめご了承ください。
+             */
+            "newDescription": string;
+            /**
+             * ダウングレードする場合は、次回請求予定日までは現在のプランの機能を利用し続けることができます。次回請求予定日までの間はダウングレードを取り消すこともできます。
+             */
+            "downgradeDescription": string;
+            /**
+             * アップグレードする場合は、手続き完了後、変更が反映され次第、新しいプランの機能が利用可能になります（変更の反映には最大で2分程度かかります）。現在のプランの料金は日割りで精算され、差額が次回請求予定日に請求されます。
+             */
+            "upgradeDescription": string;
+            /**
+             * 解約しても、次回請求予定日までは現在のプランの機能を利用し続けることできます。アカウント削除などの都合ですぐにプレミアム機能の利用を終了したい場合は以下の「今すぐプレミアム機能を停止する」をオンにして解約処理を行ってください。
+             */
+            "cancelDescription": string;
+            /**
+             * 今すぐプレミアム機能を停止する
+             */
+            "cancelImmediately": string;
+            /**
+             * このオプションをオンにして解約処理を行うと、残りの期間を破棄して即座にプレミアム機能の提供を停止します。この操作は取り消すことができません。
+             */
+            "cancelImmediatelyDescription": string;
+            /**
+             * 処理を実行することで、各種規約および本画面上の注意事項を確認し、同意したものとみなされます。
+             */
+            "termsAndConditionsApply": string;
+            /**
+             * 手続き完了後から適用されるプラン
+             */
+            "newPlanFromToday": string;
+            /**
+             * {x}から適用されるプラン
+             */
+            "newPlanFromX": ParameterizedString<"x">;
+            /**
+             * 次回請求予定金額
+             */
+            "nextBillingAmount": string;
+            /**
+             * {x}円
+             */
+            "xYen": ParameterizedString<"x">;
+            /**
+             * {x}円/月
+             */
+            "xYenPerMonth": ParameterizedString<"x">;
+            "_plans": {
+                /**
+                 * はなプラン
+                 */
+                "hana": string;
+                /**
+                 * だんごプラン
+                 */
+                "dango": string;
+                /**
+                 * ブルーシートプラン
+                 */
+                "bluesheet": string;
+                /**
+                 * お座敷プラン
+                 */
+                "ozashiki": string;
+            };
         };
     };
 }

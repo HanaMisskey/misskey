@@ -14,7 +14,7 @@
 					</div>
 					<div class="_buttons">
 						<MkButton rounded link to="/premium" style="background: #fff; font-weight: 700; color: var(--MI_THEME-accent) !important;">{{ i18n.ts._hana._subscription.changePlan }}</MkButton>
-						<MkButton rounded danger style="background: #fff;">{{ i18n.ts._hana._subscription.cancelSubscription }}</MkButton>
+						<MkButton rounded danger style="background: #fff;" @click="cancelSubscription">{{ i18n.ts._hana._subscription.cancelSubscription }}</MkButton>
 					</div>
 				</div>
 				<div :class="$style.currentPlanImage">
@@ -46,6 +46,9 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
+import * as Misskey from 'misskey-js';
+
 import MkButton from '@/components/MkButton.vue';
 import FormLink from '@/components/form/link.vue';
 import FormSection from '@/components/form/section.vue';
@@ -54,6 +57,9 @@ import { i18n } from '@/i18n.js';
 import { definePage } from '@/page.js';
 import { waiting, alert as osAlert } from '@/os.js';
 import { misskeyApi } from '@/utility/misskey-api.js';
+import { planConfirm } from '@/hana/scripts/subscription.js';
+
+const currentPlan = ref<Misskey.entities.PremiumStatusResponse['subscription']>(null);
 
 async function initiateCustomerPortal() {
 	const hide = waiting();
@@ -70,6 +76,42 @@ async function initiateCustomerPortal() {
 			title: i18n.ts._hana._subscription.failedToInitiateCustomersPortal,
 			text: i18n.ts._hana._subscription.failedDescription,
 		});
+	}
+}
+
+async function cancelSubscription() {
+	const hide = waiting();
+	const res = await misskeyApi('premium/cancel/preview', {
+		immediate: false,
+	}).catch(() => null);
+
+	if (res != null) {
+		hide();
+		const planConfirmRes = await planConfirm({
+			currentPlan: currentPlan.value,
+			planChange: {
+				type: 'cancel',
+				preview: res.preview,
+			},
+		});
+
+		if (planConfirmRes.canceled) return;
+		const hideCancel = waiting();
+		const cancelRes = await misskeyApi('premium/cancel/execute', {
+			sessionId: res.sessionId,
+			immediate: planConfirmRes.cancelImmediately,
+		}).catch(() => null);
+
+		if (cancelRes) {
+			hideCancel({ success: true });
+		} else {
+			hideCancel();
+			osAlert({
+				type: 'error',
+				title: i18n.ts._hana._subscription.failedToProcess,
+				text: i18n.ts._hana._subscription.failedDescription,
+			});
+		}
 	}
 }
 
