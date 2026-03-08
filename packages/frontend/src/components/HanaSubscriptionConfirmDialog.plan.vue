@@ -27,6 +27,13 @@ defineProps<{
 const imageEl = useTemplateRef('imageEl');
 const imageLoadFailed = ref(false);
 
+function onImageLoad() {
+	if (imageEl.value == null) return;
+	if (imageEl.value.naturalWidth === 0) {
+		imageLoadFailed.value = true;
+	}
+}
+
 const watchStop = watch(imageEl, (el) => {
 	if (el == null) return;
 	if (el.complete) {
@@ -34,18 +41,16 @@ const watchStop = watch(imageEl, (el) => {
 			imageLoadFailed.value = true;
 		}
 	} else {
-		const onLoad = () => {
-			if (el.naturalWidth === 0) {
-				imageLoadFailed.value = true;
-			}
-		};
-		el.addEventListener('load', onLoad);
-		onBeforeUnmount(() => {
-			el.removeEventListener('load', onLoad);
-		});
+		el.addEventListener('load', onImageLoad);
 	}
 	watchStop();
 }, { immediate: true });
+
+onBeforeUnmount(() => {
+	const el = imageEl.value;
+	if (el == null) return;
+	el.removeEventListener('load', onImageLoad);
+});
 </script>
 
 <style module>

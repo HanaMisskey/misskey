@@ -112,6 +112,13 @@ async function cancelSubscription() {
 				text: i18n.ts._hana._subscription.failedDescription,
 			});
 		}
+	} else {
+		hide();
+		osAlert({
+			type: 'error',
+			title: i18n.ts._hana._subscription.failedToProcess,
+			text: i18n.ts._hana._subscription.failedDescription,
+		});
 	}
 }
 
