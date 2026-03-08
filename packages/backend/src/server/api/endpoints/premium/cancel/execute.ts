@@ -16,6 +16,16 @@ export const meta = {
 			code: 'SUBSCRIPTION_DISABLED',
 			id: '745fadf0-d823-43b0-b529-b04542f5e234',
 		},
+		noActiveSubscription: {
+			message: 'No active subscription.',
+			code: 'NO_ACTIVE_SUBSCRIPTION',
+			id: '2b4c8d1e-5f6a-4c9b-8d1e-2f3a4b5c6d7f',
+		},
+		currentPlanNotFound: {
+			message: 'Current plan not found.',
+			code: 'CURRENT_PLAN_NOT_FOUND',
+			id: '3c5d9e2f-6a7b-4d0c-9e2f-3a4b5c6d7e8f',
+		},
 		fetchFailed: {
 			message: 'Failed to fetch plans from Hanami Billing.',
 			code: 'FETCH_FAILED',
@@ -53,16 +63,20 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				await this.subscriptionManagementService.executePlanCancelSession(me.id, ps.immediate, ps.sessionId);
 			} catch (error) {
 				if (error instanceof IdentifiableError) {
-					if (error.id === 'f4b8c624-4d20-4d14-a247-590d6251e5ce' || error.id === '7e1b4c51-0ef8-4d05-b2d6-3e9f8fc4c0b1') {
-						throw new ApiError(meta.errors.subscriptionDisabled);
+					switch (error.id) {
+						case 'f4b8c624-4d20-4d14-a247-590d6251e5ce':
+							throw new ApiError(meta.errors.subscriptionDisabled);
+						case '3f4b2f7a-7e87-4fb4-92a9-8c7a2f6f2cb5':
+							throw new ApiError(meta.errors.noActiveSubscription);
+						case '6d7c6d1b-6b2f-4f2b-9a48-1b4ef6c8fefb':
+							throw new ApiError(meta.errors.currentPlanNotFound);
+						case '0c705fa7-86d2-48aa-8b34-1cd4c6e6e1c8':
+							throw new ApiError(meta.errors.sessionNotFound);
+						case 'd7f09f88-3fd1-4cd1-9b53-9f8c0e3b3f72':
+							throw new ApiError(meta.errors.sessionMismatch);
+						default:
+							throw new ApiError(meta.errors.fetchFailed);
 					}
-					if (error.id === '0c705fa7-86d2-48aa-8b34-1cd4c6e6e1c8') {
-						throw new ApiError(meta.errors.sessionNotFound);
-					}
-					if (error.id === 'd7f09f88-3fd1-4cd1-9b53-9f8c0e3b3f72') {
-						throw new ApiError(meta.errors.sessionMismatch);
-					}
-					throw new ApiError(meta.errors.fetchFailed);
 				}
 				throw error;
 			}

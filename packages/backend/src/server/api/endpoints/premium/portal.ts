@@ -51,7 +51,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				};
 			} catch (error) {
 				if (error instanceof IdentifiableError) {
-					if (error.id === 'f4b8c624-4d20-4d14-a247-590d6251e5ce' || error.id === '7e1b4c51-0ef8-4d05-b2d6-3e9f8fc4c0b1') {
+					if (error.id === 'f4b8c624-4d20-4d14-a247-590d6251e5ce') {
 						throw new ApiError(meta.errors.subscriptionDisabled);
 					}
 					throw new ApiError(meta.errors.fetchFailed);

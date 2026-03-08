@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import * as Redis from 'ioredis';
+import type { Response } from 'node-fetch';
 import { DI } from '@/di-symbols.js';
 import { bindThis } from '@/decorators.js';
 import { IdService } from '@/core/IdService.js';
@@ -95,7 +96,32 @@ type SubscriptionChangeResult =
 
 type SubscriptionChangeResponse = SubscriptionChangeResult & { requestId: string };
 
+interface SubscriptionErrorResponse {
+	error?: string;
+	message?: string;
+	requestId?: string;
+}
+
 const SUBSCRIPTION_SESSION_TTL = 120; // seconds
+
+const SUBSCRIPTION_ERROR_ID_MAP: Record<string, string> = {
+	no_active_subscription: '3f4b2f7a-7e87-4fb4-92a9-8c7a2f6f2cb5',
+	current_plan_not_found: '6d7c6d1b-6b2f-4f2b-9a48-1b4ef6c8fefb',
+	target_plan_not_found: '1c2e8d53-4f66-4c5f-9b6a-0b3f4322e5b8',
+	same_plan: '54f0b3a6-3f64-4a8d-8e6a-3e8b15c6f9af',
+	same_tier: '9d7e7a9d-1df4-4e64-8b8c-9c3b3f9d9e8a',
+	not_an_upgrade: '2c1a4b95-3f5d-4e03-9d26-0c6f17af8f78',
+	not_a_downgrade: 'b1a5f2a4-2f7b-4f0b-9a3a-8f6f28d6c8b7',
+	no_pending_downgrade: 'f9f1b0b8-3d52-4c1b-8f57-2a4b78f2cfb1',
+	stripe_price_not_found: '0f8d8f6a-2a1b-4ed2-9c47-6a4f0c5c9f2e',
+	no_subscription_items: '7e5b9f7c-6c4b-4a2e-9e8f-6b3a1c2f5a7b',
+	invalid_request: 'e6c1a4a5-2e5a-4c9a-8e4f-7b6a2c9f3d1e',
+	missing_target_plan: '8c2a5f6e-3d7a-4b3f-9f6d-1c2b5e7f9a3d',
+	missing_return_url: 'd2c9b8a1-5f6e-4f2a-9b8c-3a1d5f7e9c2b',
+	invalid_return_url: '4a3e6f8b-2c5d-4f9a-8b7c-1d3e5f7a9c4b',
+	downgrade_already_pending: 'b5a7c9d2-6e4f-4b2a-9c3d-5f7e1a2b4c6d',
+	schedule_already_exists: 'c7d2a5b9-4e6f-4c2b-8a3d-7f1e5b2c9d4a',
+};
 
 @Injectable()
 export class SubscriptionManagementService {
@@ -123,9 +149,35 @@ export class SubscriptionManagementService {
 	@bindThis
 	private getApiKey() {
 		if (!this.config.hanamiBilling) {
-			throw new IdentifiableError('7e1b4c51-0ef8-4d05-b2d6-3e9f8fc4c0b1', 'Hanami Billing is not configured.');
+			throw new IdentifiableError('f4b8c624-4d20-4d14-a247-590d6251e5ce', 'Hanami Billing is not configured.');
 		}
 		return this.config.hanamiBilling.apiKey;
+	}
+
+	@bindThis
+	private async throwSubscriptionError(res: Response, fallbackId: string, fallbackMessage: string): Promise<never> {
+		const errorText = await res.text();
+		let errorCode: string | undefined;
+		let errorMessage: string | undefined;
+		try {
+			const parsed = JSON.parse(errorText) as SubscriptionErrorResponse;
+			errorCode = parsed.error;
+			errorMessage = parsed.message;
+		} catch {
+			// Ignore parse errors and fall back to raw text.
+		}
+
+		if (errorCode && SUBSCRIPTION_ERROR_ID_MAP[errorCode]) {
+			throw new IdentifiableError(
+				SUBSCRIPTION_ERROR_ID_MAP[errorCode],
+				errorMessage ?? `Hanami Billing error: ${errorCode}`,
+			);
+		}
+
+		throw new IdentifiableError(
+			fallbackId,
+			`${fallbackMessage}: ${res.status} ${errorText}`,
+		);
 	}
 
 	@bindThis
@@ -140,7 +192,7 @@ export class SubscriptionManagementService {
 			headers: {
 				Authorization: `Bearer ${this.getApiKey()}`,
 			},
-		});
+		}, { throwErrorWhenResponseNotOk: false });
 
 		if (!res.ok) {
 			throw new IdentifiableError('2a11f21c-1e6f-4422-9561-4aab3a213402', `Failed to fetch plans from Hanami Billing: ${res.status} ${await res.text()}`);
@@ -177,7 +229,7 @@ export class SubscriptionManagementService {
 				misskeyUserId: userId,
 				returnUrl,
 			}),
-		});
+		}, { throwErrorWhenResponseNotOk: false });
 
 		if (!res.ok) {
 			throw new IdentifiableError('5c5a0ca6-1fb0-4b7c-83d9-3f30062edc63', `Failed to fetch customer portal URL from Hanami Billing: ${res.status} ${await res.text()}`);
@@ -211,7 +263,7 @@ export class SubscriptionManagementService {
 			headers: {
 				Authorization: `Bearer ${this.getApiKey()}`,
 			},
-		});
+		}, { throwErrorWhenResponseNotOk: false });
 
 		if (!res.ok) {
 			throw new IdentifiableError('6a29c1d3-7b47-4f2c-8f35-9002a4f34683', `Failed to fetch subscription status from Hanami Billing: ${res.status} ${await res.text()}`);
@@ -255,10 +307,10 @@ export class SubscriptionManagementService {
 				misskeyUserId: userId,
 				slug: newPlanSlug,
 			}),
-		});
+		}, { throwErrorWhenResponseNotOk: false });
 
 		if (!res.ok) {
-			throw new IdentifiableError('2d6b32d2-8e3b-487c-a238-b788ee0e4b68', `Failed to start subscription change session: ${res.status} ${await res.text()}`);
+			await this.throwSubscriptionError(res, '2d6b32d2-8e3b-487c-a238-b788ee0e4b68', 'Failed to start subscription change session');
 		}
 
 		const { requestId, ...resJson } = await res.json() as SubscriptionPreviewResponse;
@@ -300,10 +352,10 @@ export class SubscriptionManagementService {
 				returnUrl,
 				prorationDate: sessionData.prorationDate,
 			}),
-		});
+		}, { throwErrorWhenResponseNotOk: false });
 
 		if (!res.ok) {
-			throw new IdentifiableError('a64f0d08-0692-4772-b7fb-3a7bca1ae490', `Failed to execute subscription change session: ${res.status} ${await res.text()}`);
+			await this.throwSubscriptionError(res, 'a64f0d08-0692-4772-b7fb-3a7bca1ae490', 'Failed to execute subscription change session');
 		}
 
 		const { requestId, ...resJson } = await res.json() as SubscriptionChangeResponse;
@@ -331,10 +383,10 @@ export class SubscriptionManagementService {
 				misskeyUserId: userId,
 				immediate,
 			}),
-		});
+		}, { throwErrorWhenResponseNotOk: false });
 
 		if (!res.ok) {
-			throw new IdentifiableError('c24f07c2-6f78-4d94-8a13-ffb3e1a0cb9d', `Failed to start subscription cancel session: ${res.status} ${await res.text()}`);
+			await this.throwSubscriptionError(res, 'c24f07c2-6f78-4d94-8a13-ffb3e1a0cb9d', 'Failed to start subscription cancel session');
 		}
 
 		const resJson = await res.json() as {
@@ -383,10 +435,10 @@ export class SubscriptionManagementService {
 				misskeyUserId: userId,
 				immediate: sessionData.immediate,
 			}),
-		});
+		}, { throwErrorWhenResponseNotOk: false });
 
 		if (!res.ok) {
-			throw new IdentifiableError('336b8c70-d607-43ea-bd3c-f05e3a7596ef', `Failed to execute subscription cancel session: ${res.status} ${await res.text()}`);
+			await this.throwSubscriptionError(res, '336b8c70-d607-43ea-bd3c-f05e3a7596ef', 'Failed to execute subscription cancel session');
 		}
 	}
 }
