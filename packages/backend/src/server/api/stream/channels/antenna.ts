@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { DI } from '@/di-symbols.js';
+import type { AntennasRepository } from '@/models/_.js';
 import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
 import { NoteStreamingHidingService } from '../NoteStreamingHidingService.js';
 import { bindThis } from '@/decorators.js';
@@ -20,6 +22,7 @@ class AntennaChannel extends Channel {
 	private antennaId: string;
 
 	constructor(
+		private antennasReposiotry: AntennasRepository,
 		private noteEntityService: NoteEntityService,
 		private noteStreamingHidingService: NoteStreamingHidingService,
 
@@ -31,12 +34,25 @@ class AntennaChannel extends Channel {
 	}
 
 	@bindThis
-	public async init(params: JsonObject) {
-		if (typeof params.antennaId !== 'string') return;
+	public async init(params: JsonObject): Promise<boolean> {
+		if (typeof params.antennaId !== 'string') return false;
+		if (!this.user) return false;
+
 		this.antennaId = params.antennaId;
+
+		const antennaExists = await this.antennasReposiotry.exists({
+			where: {
+				id: this.antennaId,
+				userId: this.user.id,
+			},
+		});
+
+		if (!antennaExists) return false;
 
 		// Subscribe stream
 		this.subscriber.on(`antennaStream:${this.antennaId}`, this.onEvent);
+
+		return true;
 	}
 
 	@bindThis
@@ -80,6 +96,9 @@ export class AntennaChannelService implements MiChannelService<true> {
 	public readonly kind = AntennaChannel.kind;
 
 	constructor(
+		@Inject(DI.antennasRepository)
+		private antennasReposiotry: AntennasRepository,
+
 		private noteEntityService: NoteEntityService,
 		private noteStreamingHidingService: NoteStreamingHidingService,
 	) {
@@ -88,6 +107,7 @@ export class AntennaChannelService implements MiChannelService<true> {
 	@bindThis
 	public create(id: string, connection: Channel['connection']): AntennaChannel {
 		return new AntennaChannel(
+			this.antennasReposiotry,
 			this.noteEntityService,
 			this.noteStreamingHidingService,
 			id,
