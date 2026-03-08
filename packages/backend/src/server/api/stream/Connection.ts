@@ -185,6 +185,14 @@ export default class Connection {
 
 	@bindThis
 	private async onNoteStreamMessage(data: GlobalEvents['note']['payload']) {
+		if (data.body.visibility === 'specified' && !data.body.visibleUserIds.includes(this.user!.id)) {
+			return;
+		}
+
+		if (data.body.visibility === 'followers' && !Object.hasOwn(this.following, data.body.userId)) {
+			return;
+		}
+
 		if ((data.type === 'reacted' || data.type === 'unreacted') && this.user) {
 			const userIdReactedFrom = data.body.body.userId;
 			const mutings = await this.cacheService.userMutingsCache.fetch(this.user.id);
@@ -192,6 +200,7 @@ export default class Connection {
 				return;
 			}
 		}
+
 		this.sendMessageToWs('noteUpdated', {
 			id: data.body.id,
 			type: data.type,
