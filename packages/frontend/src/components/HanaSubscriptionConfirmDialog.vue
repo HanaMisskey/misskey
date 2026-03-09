@@ -154,21 +154,19 @@ function getPlanObjFromPreviewPlan(preview: Misskey.entities.PremiumSubscribePre
 	switch (preview.type) {
 		case 'subscribe':
 			return {
-				slug: preview.targetPlanSlug,
-				planName: preview.targetPlanDisplayName,
+				slug: preview.targetPlan.slug,
+				planName: preview.targetPlan.displayName,
 			};
 		case 'upgrade':
 		case 'downgrade':
 			return {
-				slug: preview.newPlanSlug,
-				// @ts-expect-error TODO
-				planName: preview.newPlanDisplayName ?? 'TODO',
+				slug: preview.newPlan.slug,
+				planName: preview.newPlan.displayName,
 			};
 		case 'cancel_downgrade':
 			return {
-				slug: preview.pendingDowngradeTargetSlug,
-				// @ts-expect-error TODO
-				planName: preview.pendingDowngradeTargetDisplayName ?? 'TODO',
+				slug: preview.pendingDowngradePlan.slug,
+				planName: preview.pendingDowngradePlan.displayName,
 			};
 		default:
 			return null;
