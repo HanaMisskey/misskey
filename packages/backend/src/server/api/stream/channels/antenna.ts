@@ -64,8 +64,7 @@ export class AntennaChannel extends Channel {
 		if (data.type === 'note') {
 			const note = await this.noteEntityService.pack(data.body.id, this.user, { detail: true });
 
-			if (note.isHidden) return;
-
+			if (!this.isNoteVisibleForMe(note)) return;
 			if (this.isNoteMutedOrBlocked(note)) return;
 
 			const { shouldSkip } = await this.noteStreamingHidingService.processHiding(note, this.user?.id ?? null);

@@ -77,12 +77,6 @@ export class HybridTimelineChannel extends Channel {
 			}
 		}
 
-		if (note.visibility === 'followers') {
-			if (!isMe && !Object.hasOwn(this.following, note.userId)) return;
-		} else if (note.visibility === 'specified') {
-			if (!isMe && !note.visibleUserIds!.includes(this.user!.id)) return;
-		}
-
 		// はなモードが有効な投稿はフォローしている人だけ配信
 		if (note.isNoteInHanaMode) {
 			if (!isMe && !Object.hasOwn(this.following, note.userId)) return;
