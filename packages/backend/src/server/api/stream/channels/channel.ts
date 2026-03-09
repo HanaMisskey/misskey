@@ -6,13 +6,13 @@
 import { Inject, Injectable, Scope } from '@nestjs/common';
 import type { Packed } from '@/misc/json-schema.js';
 import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
+import { NoteStreamingHidingService } from '../NoteStreamingHidingService.js';
 import { bindThis } from '@/decorators.js';
 import { isRenotePacked, isQuotePacked } from '@/misc/is-renote.js';
 import { isInstanceMuted } from '@/misc/is-instance-muted.js';
 import { isUserRelated } from '@/misc/is-user-related.js';
 import type { JsonObject } from '@/misc/json-value.js';
 import Channel, { type ChannelRequest } from '../channel.js';
-import { NoteStreamingLockdownService } from '../NoteStreamingLockdownService.js';
 import { REQUEST } from '@nestjs/core';
 
 @Injectable({ scope: Scope.TRANSIENT })
@@ -27,7 +27,7 @@ export class ChannelChannel extends Channel {
 		request: ChannelRequest,
 
 		private noteEntityService: NoteEntityService,
-		private noteStreamingFilterService: NoteStreamingLockdownService,
+		private noteStreamingHidingService: NoteStreamingHidingService,
 	) {
 		super(request);
 		//this.onNote = this.onNote.bind(this);
@@ -50,10 +50,11 @@ export class ChannelChannel extends Channel {
 		if (note.renote && note.renote.user.requireSigninToViewContents && this.user == null) return;
 		if (note.reply && note.reply.user.requireSigninToViewContents && this.user == null) return;
 
+		if (!this.isNoteVisibleForMe(note)) return;
 		if (this.isNoteMutedOrBlocked(note)) return;
 
-		const { shouldSkip: shouldSkipByLockdown } = await this.noteStreamingFilterService.processLockdown(note, this.user?.id ?? null);
-		if (shouldSkipByLockdown) return;
+		const { shouldSkip } = await this.noteStreamingHidingService.processHiding(note, this.user?.id ?? null);
+		if (shouldSkip) return;
 
 		if (this.user) {
 			if (isRenotePacked(note) && !isQuotePacked(note)) {

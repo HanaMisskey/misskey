@@ -7,12 +7,12 @@ import { Inject, Injectable, Scope } from '@nestjs/common';
 import type { MiUserListMembership, UserListMembershipsRepository, UserListsRepository } from '@/models/_.js';
 import type { Packed } from '@/misc/json-schema.js';
 import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
+import { NoteStreamingHidingService } from '../NoteStreamingHidingService.js';
 import { DI } from '@/di-symbols.js';
 import { bindThis } from '@/decorators.js';
 import { isRenotePacked, isQuotePacked } from '@/misc/is-renote.js';
 import type { JsonObject } from '@/misc/json-value.js';
 import Channel, { type ChannelRequest } from '../channel.js';
-import { NoteStreamingLockdownService } from '../NoteStreamingLockdownService.js';
 import { REQUEST } from '@nestjs/core';
 
 @Injectable({ scope: Scope.TRANSIENT })
@@ -37,7 +37,7 @@ export class UserListChannel extends Channel {
 		request: ChannelRequest,
 
 		private noteEntityService: NoteEntityService,
-		private noteStreamingFilterService: NoteStreamingLockdownService,
+		private noteStreamingHidingService: NoteStreamingHidingService,
 	) {
 		super(request);
 		//this.updateListUsers = this.updateListUsers.bind(this);
@@ -45,8 +45,8 @@ export class UserListChannel extends Channel {
 	}
 
 	@bindThis
-	public async init(params: JsonObject) {
-		if (typeof params.listId !== 'string') return;
+	public async init(params: JsonObject): Promise<boolean> {
+		if (typeof params.listId !== 'string') return false;
 		this.listId = params.listId;
 		this.withFiles = !!(params.withFiles ?? false);
 		this.withRenotes = !!(params.withRenotes ?? true);
@@ -58,7 +58,7 @@ export class UserListChannel extends Channel {
 				userId: this.user!.id,
 			},
 		});
-		if (!listExist) return;
+		if (!listExist) return false;
 
 		// Subscribe stream
 		this.subscriber.on(`userListStream:${this.listId}`, this.send);
@@ -67,6 +67,8 @@ export class UserListChannel extends Channel {
 
 		this.updateListUsers();
 		this.listUsersClock = setInterval(this.updateListUsers, 5000);
+
+		return true;
 	}
 
 	@bindThis
@@ -98,11 +100,7 @@ export class UserListChannel extends Channel {
 
 		if (!Object.hasOwn(this.membershipsMap, note.userId)) return;
 
-		if (note.visibility === 'followers') {
-			if (!isMe && !Object.hasOwn(this.following, note.userId)) return;
-		} else if (note.visibility === 'specified') {
-			if (!note.visibleUserIds!.includes(this.user!.id)) return;
-		}
+		if (!this.isNoteVisibleForMe(note)) return;
 
 		if (note.reply) {
 			const reply = note.reply;
@@ -119,8 +117,8 @@ export class UserListChannel extends Channel {
 
 		if (this.isNoteMutedOrBlocked(note)) return;
 
-		const { shouldSkip: shouldSkipByLockdown } = await this.noteStreamingFilterService.processLockdown(note, this.user?.id ?? null);
-		if (shouldSkipByLockdown) return;
+		const { shouldSkip } = await this.noteStreamingHidingService.processHiding(note, this.user?.id ?? null);
+		if (shouldSkip) return;
 
 		if (this.user) {
 			if (isRenotePacked(note) && !isQuotePacked(note)) {

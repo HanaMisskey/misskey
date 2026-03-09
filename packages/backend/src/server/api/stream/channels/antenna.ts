@@ -4,13 +4,15 @@
  */
 
 import { Inject, Injectable, Scope } from '@nestjs/common';
+import { DI } from '@/di-symbols.js';
+import type { AntennasRepository } from '@/models/_.js';
 import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
+import { NoteStreamingHidingService } from '../NoteStreamingHidingService.js';
 import { bindThis } from '@/decorators.js';
 import { isRenotePacked, isQuotePacked } from '@/misc/is-renote.js';
 import type { GlobalEvents } from '@/core/GlobalEventService.js';
 import type { JsonObject } from '@/misc/json-value.js';
 import Channel, { type ChannelRequest } from '../channel.js';
-import { NoteStreamingLockdownService } from '../NoteStreamingLockdownService.js';
 import { REQUEST } from '@nestjs/core';
 
 @Injectable({ scope: Scope.TRANSIENT })
@@ -25,20 +27,36 @@ export class AntennaChannel extends Channel {
 		@Inject(REQUEST)
 		request: ChannelRequest,
 
+		@Inject(DI.antennasRepository)
+		private antennasReposiotry: AntennasRepository,
+
 		private noteEntityService: NoteEntityService,
-		private noteStreamingFilterService: NoteStreamingLockdownService,
+		private noteStreamingHidingService: NoteStreamingHidingService,
 	) {
 		super(request);
 		//this.onEvent = this.onEvent.bind(this);
 	}
 
 	@bindThis
-	public async init(params: JsonObject) {
-		if (typeof params.antennaId !== 'string') return;
+	public async init(params: JsonObject): Promise<boolean> {
+		if (typeof params.antennaId !== 'string') return false;
+		if (!this.user) return false;
+
 		this.antennaId = params.antennaId;
+
+		const antennaExists = await this.antennasReposiotry.exists({
+			where: {
+				id: this.antennaId,
+				userId: this.user.id,
+			},
+		});
+
+		if (!antennaExists) return false;
 
 		// Subscribe stream
 		this.subscriber.on(`antennaStream:${this.antennaId}`, this.onEvent);
+
+		return true;
 	}
 
 	@bindThis
@@ -50,8 +68,8 @@ export class AntennaChannel extends Channel {
 
 			if (this.isNoteMutedOrBlocked(note)) return;
 
-			const { shouldSkip: shouldSkipByLockdown } = await this.noteStreamingFilterService.processLockdown(note, this.user?.id ?? null);
-			if (shouldSkipByLockdown) return;
+			const { shouldSkip } = await this.noteStreamingHidingService.processHiding(note, this.user?.id ?? null);
+			if (shouldSkip) return;
 
 			if (this.user) {
 				if (isRenotePacked(note) && !isQuotePacked(note)) {

@@ -6,13 +6,13 @@
 import { Inject, Injectable, Scope } from '@nestjs/common';
 import type { Packed } from '@/misc/json-schema.js';
 import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
+import { NoteStreamingHidingService } from '../NoteStreamingHidingService.js';
 import { bindThis } from '@/decorators.js';
 import { RoleService } from '@/core/RoleService.js';
 import { isRenotePacked, isQuotePacked } from '@/misc/is-renote.js';
 import type { JsonObject } from '@/misc/json-value.js';
 import { FeaturedService } from '@/core/FeaturedService.js';
 import Channel, { type ChannelRequest } from '../channel.js';
-import { NoteStreamingLockdownService } from '../NoteStreamingLockdownService.js';
 import { REQUEST } from '@nestjs/core';
 
 @Injectable({ scope: Scope.TRANSIENT })
@@ -35,7 +35,7 @@ export class HanamiTimelineChannel extends Channel {
 		private noteEntityService: NoteEntityService,
 		private roleService: RoleService,
 		private featuredService: FeaturedService,
-		private noteStreamingFilterService: NoteStreamingLockdownService,
+		private noteStreamingHidingService: NoteStreamingHidingService,
 	) {
 		super(request);
 		//this.onNote = this.onNote.bind(this);
@@ -123,8 +123,8 @@ export class HanamiTimelineChannel extends Channel {
 
 		const reactionMutedNote = await this.removeMutedReactions(note);
 
-		const { shouldSkip: shouldSkipByLockdown } = await this.noteStreamingFilterService.processLockdown(reactionMutedNote, this.user?.id ?? null);
-		if (shouldSkipByLockdown) return;
+		const { shouldSkip } = await this.noteStreamingHidingService.processHiding(reactionMutedNote, this.user?.id ?? null);
+		if (shouldSkip) return;
 
 		if (this.user) {
 			if (isRenotePacked(reactionMutedNote) && !isQuotePacked(reactionMutedNote)) {

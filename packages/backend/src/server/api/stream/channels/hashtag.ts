@@ -7,11 +7,11 @@ import { Inject, Injectable, Scope } from '@nestjs/common';
 import { normalizeForSearch } from '@/misc/normalize-for-search.js';
 import type { Packed } from '@/misc/json-schema.js';
 import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
+import { NoteStreamingHidingService } from '../NoteStreamingHidingService.js';
 import { bindThis } from '@/decorators.js';
 import { isRenotePacked, isQuotePacked } from '@/misc/is-renote.js';
 import type { JsonObject } from '@/misc/json-value.js';
 import Channel, { type ChannelRequest } from '../channel.js';
-import { NoteStreamingLockdownService } from '../NoteStreamingLockdownService.js';
 import { REQUEST } from '@nestjs/core';
 
 @Injectable({ scope: Scope.TRANSIENT })
@@ -26,20 +26,26 @@ export class HashtagChannel extends Channel {
 		request: ChannelRequest,
 
 		private noteEntityService: NoteEntityService,
-		private noteStreamingFilterService: NoteStreamingLockdownService,
+		private noteStreamingHidingService: NoteStreamingHidingService,
 	) {
 		super(request);
 		//this.onNote = this.onNote.bind(this);
 	}
 
 	@bindThis
-	public async init(params: JsonObject) {
-		if (!Array.isArray(params.q)) return;
-		if (!params.q.every(x => Array.isArray(x) && x.every(y => typeof y === 'string'))) return;
+	public async init(params: JsonObject): Promise<boolean> {
+		if (!Array.isArray(params.q)) return false;
+		if (!params.q.every((x): x is string[] => (
+			Array.isArray(x) &&
+			x.length >= 1 &&
+			x.every(y => typeof y === 'string')
+		))) return false;
 		this.q = params.q;
 
 		// Subscribe stream
 		this.subscriber.on('notesStream', this.onNote);
+
+		return true;
 	}
 
 	@bindThis
@@ -48,12 +54,16 @@ export class HashtagChannel extends Channel {
 		const matched = this.q.some(tags => tags.every(tag => noteTags.includes(normalizeForSearch(tag))));
 		if (!matched) return;
 
+		if (!this.isNoteVisibleForMe(note)) return;
+		if (note.user.requireSigninToViewContents && this.user == null) return;
+		if (note.renote && note.renote.user.requireSigninToViewContents && this.user == null) return;
+		if (note.reply && note.reply.user.requireSigninToViewContents && this.user == null) return;
 		if (this.isNoteMutedOrBlocked(note)) return;
 
 		const reactionMutedNote = await this.removeMutedReactions(note);
 
-		const { shouldSkip: shouldSkipByLockdown } = await this.noteStreamingFilterService.processLockdown(reactionMutedNote, this.user?.id ?? null);
-		if (shouldSkipByLockdown) return;
+		const { shouldSkip } = await this.noteStreamingHidingService.processHiding(reactionMutedNote, this.user?.id ?? null);
+		if (shouldSkip) return;
 
 		if (this.user) {
 			if (isRenotePacked(reactionMutedNote) && !isQuotePacked(reactionMutedNote)) {

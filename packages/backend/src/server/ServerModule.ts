@@ -22,7 +22,6 @@ import { SigninApiService } from './api/SigninApiService.js';
 import { SigninService } from './api/SigninService.js';
 import { SignupApiService } from './api/SignupApiService.js';
 import { StreamingApiServerService } from './api/StreamingApiServerService.js';
-import { NoteStreamingLockdownService } from './api/stream/NoteStreamingLockdownService.js';
 import { OpenApiServerService } from './api/openapi/OpenApiServerService.js';
 import { ClientServerService } from './web/ClientServerService.js';
 import { HtmlTemplateService } from './web/HtmlTemplateService.js';
@@ -51,6 +50,7 @@ import { ChatUserChannel } from './api/stream/channels/chat-user.js';
 import { ChatRoomChannel } from './api/stream/channels/chat-room.js';
 import { ReversiChannel } from './api/stream/channels/reversi.js';
 import { ReversiGameChannel } from './api/stream/channels/reversi-game.js';
+import { NoteStreamingHidingService } from './api/stream/NoteStreamingHidingService.js';
 import { SigninWithPasskeyApiService } from './api/SigninWithPasskeyApiService.js';
 
 @Module({
@@ -82,7 +82,6 @@ import { SigninWithPasskeyApiService } from './api/SigninWithPasskeyApiService.j
 		SigninService,
 		SignupApiService,
 		StreamingApiServerService,
-		NoteStreamingLockdownService,
 		MainChannel,
 		AdminChannel,
 		AntennaChannel,
@@ -102,6 +101,7 @@ import { SigninWithPasskeyApiService } from './api/SigninWithPasskeyApiService.j
 		QueueStatsChannel,
 		ServerStatsChannel,
 		UserListChannel,
+		NoteStreamingHidingService,
 		OpenApiServerService,
 		OAuth2ProviderService,
 	],
