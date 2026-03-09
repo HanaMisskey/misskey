@@ -128,6 +128,8 @@ const SUBSCRIPTION_ERROR_ID_MAP: Record<string, string> = {
 	schedule_already_exists: 'c7d2a5b9-4e6f-4c2b-8a3d-7f1e5b2c9d4a',
 };
 
+const SUBSCRIPTION_REQUEST_TIMEOUT = 15000; // ms
+
 @Injectable()
 export class SubscriptionManagementService {
 	constructor(
@@ -194,6 +196,7 @@ export class SubscriptionManagementService {
 	}[]> {
 		const res = await this.httpRequestService.send(this.getPaymentGatewayUrl('/internal/plans'), {
 			method: 'GET',
+			timeout: SUBSCRIPTION_REQUEST_TIMEOUT,
 			headers: {
 				Authorization: `Bearer ${this.getApiKey()}`,
 			},
@@ -226,6 +229,7 @@ export class SubscriptionManagementService {
 	public async getCustomerPortalUrl(userId: MiUser['id'], returnUrl: string): Promise<string> {
 		const res = await this.httpRequestService.send(this.getPaymentGatewayUrl('/internal/portal'), {
 			method: 'POST',
+			timeout: SUBSCRIPTION_REQUEST_TIMEOUT,
 			headers: {
 				Authorization: `Bearer ${this.getApiKey()}`,
 				'Content-Type': 'application/json',
@@ -265,6 +269,7 @@ export class SubscriptionManagementService {
 	}> {
 		const res = await this.httpRequestService.send(this.getPaymentGatewayUrl(`/internal/status?misskeyUserId=${encodeURIComponent(userId)}`), {
 			method: 'GET',
+			timeout: SUBSCRIPTION_REQUEST_TIMEOUT,
 			headers: {
 				Authorization: `Bearer ${this.getApiKey()}`,
 			},
@@ -304,6 +309,7 @@ export class SubscriptionManagementService {
 		const sessionId = this.idService.gen();
 		const res = await this.httpRequestService.send(this.getPaymentGatewayUrl('/internal/subscription/preview'), {
 			method: 'POST',
+			timeout: SUBSCRIPTION_REQUEST_TIMEOUT,
 			headers: {
 				Authorization: `Bearer ${this.getApiKey()}`,
 				'Content-Type': 'application/json',
@@ -347,6 +353,7 @@ export class SubscriptionManagementService {
 
 		const res = await this.httpRequestService.send(this.getPaymentGatewayUrl('/internal/subscription'), {
 			method: 'POST',
+			timeout: SUBSCRIPTION_REQUEST_TIMEOUT,
 			headers: {
 				Authorization: `Bearer ${this.getApiKey()}`,
 				'Content-Type': 'application/json',
@@ -381,6 +388,7 @@ export class SubscriptionManagementService {
 		const sessionId = this.idService.gen();
 		const res = await this.httpRequestService.send(this.getPaymentGatewayUrl('/internal/subscription/cancel/preview'), {
 			method: 'POST',
+			timeout: SUBSCRIPTION_REQUEST_TIMEOUT,
 			headers: {
 				Authorization: `Bearer ${this.getApiKey()}`,
 				'Content-Type': 'application/json',
@@ -437,6 +445,7 @@ export class SubscriptionManagementService {
 
 		const res = await this.httpRequestService.send(this.getPaymentGatewayUrl('/internal/subscription/cancel'), {
 			method: 'POST',
+			timeout: SUBSCRIPTION_REQUEST_TIMEOUT,
 			headers: {
 				Authorization: `Bearer ${this.getApiKey()}`,
 				'Content-Type': 'application/json',
