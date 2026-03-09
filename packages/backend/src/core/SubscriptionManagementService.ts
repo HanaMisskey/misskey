@@ -9,18 +9,24 @@ import { IdentifiableError } from '@/misc/identifiable-error.js';
 import type { Config } from '@/config.js';
 import { MiUser } from '@/models/User.js';
 
+interface SubscriptionPreviewPlan {
+  slug: string;
+  displayName: string;
+  description: string | null;
+  monthlyPrice: number;
+}
+
 interface SubscribePreview {
 	type: 'subscribe';
-	targetPlanSlug: string;
-	targetPlanDisplayName: string;
-	targetPlanMonthlyPrice: number;
+	currentPlan: null;
+	newPlan: SubscriptionPreviewPlan;
 	currency: string;
 }
 
 interface UpgradePreview {
 	type: 'upgrade';
-	currentPlanSlug: string;
-	newPlanSlug: string;
+	currentPlan: SubscriptionPreviewPlan;
+	newPlan: SubscriptionPreviewPlan;
 	amountDue: number;
 	credit: number;
 	newPlanCharge: number;
@@ -30,18 +36,17 @@ interface UpgradePreview {
 
 interface DowngradePreview {
 	type: 'downgrade';
-	currentPlanSlug: string;
-	newPlanSlug: string;
+	currentPlan: SubscriptionPreviewPlan;
+	newPlan: SubscriptionPreviewPlan;
 	effectiveAt: string;
-	currentPlanMonthlyPrice: number;
-	newPlanMonthlyPrice: number;
 	currency: string;
 }
 
 interface CancelDowngradePreview {
 	type: 'cancel_downgrade';
-	currentPlanSlug: string;
-	pendingDowngradeTargetSlug: string;
+	currentPlan: SubscriptionPreviewPlan;
+	newPlan: SubscriptionPreviewPlan;
+	pendingDowngradePlan: SubscriptionPreviewPlan;
 	pendingDowngradeEffectiveAt: string;
 }
 
@@ -367,7 +372,8 @@ export class SubscriptionManagementService {
 	public async startPlanCancelSession(userId: MiUser['id'], immediate: boolean): Promise<{
 		sessionId: string;
 		preview: {
-			currentPlanSlug: string;
+			currentPlan: SubscriptionPreviewPlan;
+			newPlan: null;
 			effectiveAt: string;
 			immediate: boolean;
 		}
@@ -390,9 +396,12 @@ export class SubscriptionManagementService {
 		}
 
 		const resJson = await res.json() as {
-			currentPlanSlug: string;
+			type: 'cancel';
+			currentPlan: SubscriptionPreviewPlan;
+			newPlan: null;
 			effectiveAt: string;
 			immediate: boolean;
+			requestId: string;
 		};
 
 		await this.redisClient.setex(`hanamiSubscriptionCancelPreview:${userId}`, SUBSCRIPTION_SESSION_TTL, JSON.stringify({
@@ -403,7 +412,8 @@ export class SubscriptionManagementService {
 		return {
 			sessionId,
 			preview: {
-				currentPlanSlug: resJson.currentPlanSlug,
+				currentPlan: resJson.currentPlan,
+				newPlan: null,
 				effectiveAt: resJson.effectiveAt,
 				immediate: resJson.immediate,
 			},
@@ -442,3 +452,14 @@ export class SubscriptionManagementService {
 		}
 	}
 }
+
+export const subscriptionPreviewPlanSchema = {
+	type: 'object',
+	properties: {
+		slug: { type: 'string' },
+		displayName: { type: 'string' },
+		description: { type: 'string', nullable: true },
+		monthlyPrice: { type: 'number' },
+	},
+	required: ['slug', 'displayName', 'description', 'monthlyPrice'],
+} as const;

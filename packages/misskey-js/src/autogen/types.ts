@@ -32986,7 +32986,18 @@ export interface operations {
                     'application/json': {
                         sessionId: string;
                         preview: {
-                            currentPlanSlug: string;
+                            currentPlan: {
+                                slug: string;
+                                displayName: string;
+                                description: string | null;
+                                monthlyPrice: number;
+                            };
+                            newPlan: {
+                                slug: string;
+                                displayName: string;
+                                description: string | null;
+                                monthlyPrice: number;
+                            } | null;
                             effectiveAt: string;
                             immediate: boolean;
                         };
@@ -33331,15 +33342,34 @@ export interface operations {
                         preview: {
                             /** @enum {string} */
                             type: 'subscribe';
-                            targetPlanSlug: string;
-                            targetPlanDisplayName: string;
-                            targetPlanMonthlyPrice: number;
+                            targetPlan: {
+                                slug: string;
+                                displayName: string;
+                                description: string | null;
+                                monthlyPrice: number;
+                            };
+                            currentPlan: {
+                                slug: string;
+                                displayName: string;
+                                description: string | null;
+                                monthlyPrice: number;
+                            } | null;
                             currency: string;
                         } | {
                             /** @enum {string} */
                             type: 'upgrade';
-                            currentPlanSlug: string;
-                            newPlanSlug: string;
+                            currentPlan: {
+                                slug: string;
+                                displayName: string;
+                                description: string | null;
+                                monthlyPrice: number;
+                            };
+                            newPlan: {
+                                slug: string;
+                                displayName: string;
+                                description: string | null;
+                                monthlyPrice: number;
+                            };
                             amountDue: number;
                             credit: number;
                             newPlanCharge: number;
@@ -33348,8 +33378,18 @@ export interface operations {
                         } | {
                             /** @enum {string} */
                             type: 'downgrade';
-                            currentPlanSlug: string;
-                            newPlanSlug: string;
+                            currentPlan: {
+                                slug: string;
+                                displayName: string;
+                                description: string | null;
+                                monthlyPrice: number;
+                            };
+                            newPlan: {
+                                slug: string;
+                                displayName: string;
+                                description: string | null;
+                                monthlyPrice: number;
+                            };
                             effectiveAt: string;
                             currentPlanMonthlyPrice: number;
                             newPlanMonthlyPrice: number;
@@ -33357,8 +33397,24 @@ export interface operations {
                         } | {
                             /** @enum {string} */
                             type: 'cancel_downgrade';
-                            currentPlanSlug: string;
-                            pendingDowngradeTargetSlug: string;
+                            currentPlan: {
+                                slug: string;
+                                displayName: string;
+                                description: string | null;
+                                monthlyPrice: number;
+                            };
+                            newPlan: {
+                                slug: string;
+                                displayName: string;
+                                description: string | null;
+                                monthlyPrice: number;
+                            };
+                            pendingDowngradePlan: {
+                                slug: string;
+                                displayName: string;
+                                description: string | null;
+                                monthlyPrice: number;
+                            };
                             pendingDowngradeEffectiveAt: string;
                         };
                     };

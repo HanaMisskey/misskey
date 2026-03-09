@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { ApiError } from '@/server/api/error.js';
-import { SubscriptionManagementService } from '@/core/SubscriptionManagementService.js';
+import { SubscriptionManagementService, subscriptionPreviewPlanSchema } from '@/core/SubscriptionManagementService.js';
 import { IdentifiableError } from '@/misc/identifiable-error.js';
 
 export const meta = {
@@ -15,11 +15,15 @@ export const meta = {
 			preview: {
 				type: 'object',
 				properties: {
-					currentPlanSlug: { type: 'string' },
+					currentPlan: subscriptionPreviewPlanSchema,
+					newPlan: {
+						...subscriptionPreviewPlanSchema,
+						nullable: true,
+					},
 					effectiveAt: { type: 'string' },
 					immediate: { type: 'boolean' },
 				},
-				required: ['currentPlanSlug', 'effectiveAt', 'immediate'],
+				required: ['currentPlan', 'newPlan', 'effectiveAt', 'immediate'],
 			},
 		},
 		required: ['sessionId', 'preview'],

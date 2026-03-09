@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { ApiError } from '@/server/api/error.js';
-import { SubscriptionManagementService } from '@/core/SubscriptionManagementService.js';
+import { SubscriptionManagementService, subscriptionPreviewPlanSchema } from '@/core/SubscriptionManagementService.js';
 import { IdentifiableError } from '@/misc/identifiable-error.js';
 
 export const meta = {
@@ -19,49 +19,52 @@ export const meta = {
 						type: 'object',
 						properties: {
 							type: { type: 'string', enum: ['subscribe'] },
-							targetPlanSlug: { type: 'string' },
-							targetPlanDisplayName: { type: 'string' },
-							targetPlanMonthlyPrice: { type: 'number' },
+							targetPlan: subscriptionPreviewPlanSchema,
+							currentPlan: {
+								...subscriptionPreviewPlanSchema,
+								nullable: true,
+							},
 							currency: { type: 'string' },
 						},
-						required: ['type', 'targetPlanSlug', 'targetPlanDisplayName', 'targetPlanMonthlyPrice', 'currency'],
+						required: ['type', 'targetPlan', 'currentPlan' ,'currency'],
 					},
 					{
 						type: 'object',
 						properties: {
 							type: { type: 'string', enum: ['upgrade'] },
-							currentPlanSlug: { type: 'string' },
-							newPlanSlug: { type: 'string' },
+							currentPlan: subscriptionPreviewPlanSchema,
+							newPlan: subscriptionPreviewPlanSchema,
 							amountDue: { type: 'number' },
 							credit: { type: 'number' },
 							newPlanCharge: { type: 'number' },
 							currency: { type: 'string' },
 							prorationDate: { type: 'number' },
 						},
-						required: ['type', 'currentPlanSlug', 'newPlanSlug', 'amountDue', 'credit', 'newPlanCharge', 'currency', 'prorationDate'],
+						required: ['type', 'currentPlan', 'newPlan', 'amountDue', 'credit', 'newPlanCharge', 'currency', 'prorationDate'],
 					},
 					{
 						type: 'object',
 						properties: {
 							type: { type: 'string', enum: ['downgrade'] },
-							currentPlanSlug: { type: 'string' },
-							newPlanSlug: { type: 'string' },
+							currentPlan: subscriptionPreviewPlanSchema,
+							newPlan: subscriptionPreviewPlanSchema,
 							effectiveAt: { type: 'string' },
 							currentPlanMonthlyPrice: { type: 'number' },
 							newPlanMonthlyPrice: { type: 'number' },
 							currency: { type: 'string' },
 						},
-						required: ['type', 'currentPlanSlug', 'newPlanSlug', 'effectiveAt', 'currentPlanMonthlyPrice', 'newPlanMonthlyPrice', 'currency'],
+						required: ['type', 'currentPlan', 'newPlan', 'effectiveAt', 'currentPlanMonthlyPrice', 'newPlanMonthlyPrice', 'currency'],
 					},
 					{
 						type: 'object',
 						properties: {
 							type: { type: 'string', enum: ['cancel_downgrade'] },
-							currentPlanSlug: { type: 'string' },
-							pendingDowngradeTargetSlug: { type: 'string' },
+							currentPlan: subscriptionPreviewPlanSchema,
+							newPlan: subscriptionPreviewPlanSchema,
+							pendingDowngradePlan: subscriptionPreviewPlanSchema,
 							pendingDowngradeEffectiveAt: { type: 'string' },
 						},
-						required: ['type', 'currentPlanSlug', 'pendingDowngradeTargetSlug', 'pendingDowngradeEffectiveAt'],
+						required: ['type', 'currentPlan', 'pendingDowngradePlan', 'pendingDowngradeEffectiveAt'],
 					},
 				],
 			},
