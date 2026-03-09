@@ -231,7 +231,6 @@ definePage(() => ({
 
 	.currentPlanImage {
 		padding-top: calc(var(--MI-margin) * 1.25);
-		margin-bottom: -20%;
 	}
 
 	.currentPlanImage img {
