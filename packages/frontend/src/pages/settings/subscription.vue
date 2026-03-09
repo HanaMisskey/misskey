@@ -91,6 +91,7 @@ async function cancelSubscription() {
 			currentPlan: currentPlan.value,
 			planChange: {
 				type: 'cancel',
+				sessionId: res.sessionId,
 				preview: res.preview,
 			},
 		});
@@ -98,7 +99,7 @@ async function cancelSubscription() {
 		if (planConfirmRes.canceled) return;
 		const hideCancel = waiting();
 		const cancelRes = await misskeyApi('premium/cancel/execute', {
-			sessionId: res.sessionId,
+			sessionId: planConfirmRes.newSessionId ?? res.sessionId,
 			immediate: planConfirmRes.cancelImmediately,
 		}).catch(() => 'ERROR');
 

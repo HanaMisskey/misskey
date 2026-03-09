@@ -1,5 +1,5 @@
 <template>
-<MkModal ref="modal" :preferType="'dialog'" :zPriority="'high'" @click="done(true)" @closed="emit('closed')">
+<MkModal ref="modal" :preferType="'dialog'" :zPriority="'high'" @click="onBackdropClick" @closed="emit('closed')">
 	<div :class="$style.root" class="_gaps">
 		<div class="_gaps_s">
 			<div :class="$style.header">
@@ -17,10 +17,11 @@
 					</div>
 					<XPlan :plan="planChange.type === 'cancel' ? null : getPlanObjFromPreviewPlan(planChange.preview)" />
 				</div>
+				<div :class="$style.planChangeLoadingRoot"><MkLoading /></div>
 			</div>
 			<div v-if="operationDescription != null" :class="$style.operationDescription">{{ operationDescription }}</div>
 			<div v-if="planChange.type === 'cancel'">
-				<MkSwitch v-model="cancelImmediately">
+				<MkSwitch v-model="cancelImmediately" :disabled="previewLoading">
 					{{ i18n.ts._hana._subscription.cancelImmediately }}
 					<template #caption>
 						{{ i18n.ts._hana._subscription.cancelImmediatelyDescription }}
@@ -30,8 +31,8 @@
 		</div>
 		<FormSlot>
 			<div :class="$style.buttons">
-				<MkButton inline rounded @click="cancel">{{ i18n.ts.cancel }}</MkButton>
-				<MkButton inline primary rounded @click="ok">{{ okText }}</MkButton>
+				<MkButton inline rounded :disabled="previewLoading" @click="cancel">{{ i18n.ts.cancel }}</MkButton>
+				<MkButton inline primary rounded :disabled="previewLoading" @click="ok">{{ okText }}</MkButton>
 			</div>
 			<template #caption>
 				<div :class="$style.buttonsSub">{{ i18n.ts._hana._subscription.termsAndConditionsApply }}</div>
@@ -42,7 +43,13 @@
 </template>
 
 <script lang="ts">
-export type HanaSubscriptionConfirmDialogDoneEvent = { canceled: true } | { canceled: false, cancelImmediately: boolean };
+export type HanaSubscriptionConfirmDialogDoneEvent = {
+	canceled: true;
+} | {
+	canceled: false;
+	newSessionId: string | null; // 変わった場合のみ
+	cancelImmediately: boolean;
+};
 export type HanaSubscriptionConfirmDialogProps = {
 	currentPlan: Misskey.entities.PremiumStatusResponse['subscription'];
 	planChange: {
@@ -50,13 +57,14 @@ export type HanaSubscriptionConfirmDialogProps = {
 		preview: Misskey.entities.PremiumSubscribePreviewResponse['preview'];
 	} | {
 		type: 'cancel';
+		sessionId: string;
 		preview: Misskey.entities.PremiumCancelPreviewResponse['preview'];
 	};
 };
 </script>
 
 <script lang="ts" setup>
-import { onBeforeUnmount, onMounted, shallowRef, computed, ref } from 'vue';
+import { onBeforeUnmount, onMounted, shallowRef, computed, ref, watch } from 'vue';
 import * as Misskey from 'misskey-js';
 import { dateString } from '@/filters/date.js';
 import MkModal from '@/components/MkModal.vue';
@@ -65,6 +73,7 @@ import MkSwitch from '@/components/MkSwitch.vue';
 import FormSlot from '@/components/form/slot.vue';
 import XPlan from './HanaSubscriptionConfirmDialog.plan.vue';
 import { i18n } from '@/i18n.js';
+import { misskeyApi } from '@/utility/misskey-api.js';
 
 const props = defineProps<HanaSubscriptionConfirmDialogProps>();
 
@@ -74,6 +83,13 @@ const emit = defineEmits<{
 }>();
 
 const modal = shallowRef<InstanceType<typeof MkModal>>();
+const previewLoading = ref(false);
+const cancelPreview = ref<Misskey.entities.PremiumCancelPreviewResponse['preview'] | null>(
+	props.planChange.type === 'cancel' ? props.planChange.preview : null,
+);
+const currentSessionId = ref<string | null>(props.planChange.type === 'cancel' ? props.planChange.sessionId : null);
+const newSessionId = ref<string | null>(null);
+const suppressPreviewRefresh = ref(false);
 
 const title = computed(() => {
 	if (props.planChange.type === 'cancel') {
@@ -126,7 +142,8 @@ const planChangeHeading = computed(() => {
 		if (cancelImmediately.value) {
 			return i18n.ts._hana._subscription.newPlanFromToday;
 		} else {
-			return i18n.tsx._hana._subscription.newPlanFromX({ x: dateString(props.planChange.preview.effectiveAt) });
+			const effectiveAt = cancelPreview.value?.effectiveAt ?? props.planChange.preview.effectiveAt;
+			return i18n.tsx._hana._subscription.newPlanFromX({ x: dateString(effectiveAt) });
 		}
 	} else {
 		switch (props.planChange.preview.type) {
@@ -175,24 +192,66 @@ function getPlanObjFromPreviewPlan(preview: Misskey.entities.PremiumSubscribePre
 
 const cancelImmediately = ref(false);
 
+watch(cancelImmediately, async (value, oldValue) => {
+	if (props.planChange.type !== 'cancel') return;
+	if (suppressPreviewRefresh.value) {
+		suppressPreviewRefresh.value = false;
+		return;
+	}
+	previewLoading.value = true;
+
+	const res = await misskeyApi('premium/cancel/preview', {
+		immediate: value,
+	}).catch(() => null);
+
+	previewLoading.value = false;
+	if (!res) {
+		suppressPreviewRefresh.value = true;
+		cancelImmediately.value = oldValue;
+		return;
+	}
+
+	cancelPreview.value = res.preview;
+	if (res.sessionId !== currentSessionId.value) {
+		currentSessionId.value = res.sessionId;
+		newSessionId.value = res.sessionId;
+	}
+});
+
 // overload function を使いたいので lint エラーを無視する
 function done(canceled: true): void;
 function done(canceled: false, cancelImmediately: boolean): void; // eslint-disable-line no-redeclare
 
 function done(canceled: boolean, cancelImmediately?: boolean): void { // eslint-disable-line no-redeclare
-	emit('done', { canceled, cancelImmediately } as HanaSubscriptionConfirmDialogDoneEvent);
+	if (canceled) {
+		emit('done', { canceled: true });
+	} else {
+		emit('done', {
+			canceled: false,
+			newSessionId: newSessionId.value,
+			cancelImmediately: cancelImmediately ?? false,
+		});
+	}
 	modal.value?.close();
 }
 
 async function ok() {
+	if (previewLoading.value) return;
 	done(false, cancelImmediately.value);
 }
 
 function cancel() {
+	if (previewLoading.value) return;
+	done(true);
+}
+
+function onBackdropClick() {
+	if (previewLoading.value) return;
 	done(true);
 }
 
 function onKeydown(evt: KeyboardEvent) {
+	if (previewLoading.value) return;
 	if (evt.key === 'Escape') cancel();
 }
 
@@ -235,6 +294,8 @@ onBeforeUnmount(() => {
 }
 
 .planChangeRoot {
+	position: relative;
+	overflow: clip;
 	padding: var(--MI-margin);
 }
 
@@ -250,6 +311,15 @@ onBeforeUnmount(() => {
 	align-items: center;
 	gap: 16px;
 	font-size: 0.75em;
+}
+
+.planChangeLoadingRoot {
+	position: absolute;
+	inset: 0;
+	background: rgba(255, 255, 255, 0.7);
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 @container (min-width: 350px) {
