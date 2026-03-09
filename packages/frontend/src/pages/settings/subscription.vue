@@ -100,9 +100,9 @@ async function cancelSubscription() {
 		const cancelRes = await misskeyApi('premium/cancel/execute', {
 			sessionId: res.sessionId,
 			immediate: planConfirmRes.cancelImmediately,
-		}).catch(() => null);
+		}).catch(() => 'ERROR');
 
-		if (cancelRes) {
+		if (cancelRes !== 'ERROR') {
 			hideCancel({ success: true });
 		} else {
 			hideCancel();
