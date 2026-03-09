@@ -2,23 +2,28 @@
 <SearchMarker path="/settings/subscription" :label="i18n.ts._hana._subscription.premium" :keywords="['subscription', 'premium']" icon="ti ti-device-desktop-star">
 	<div class="_gaps_m" :class="$style.root">
 		<SearchMarker :keywords="['subscription', 'current', 'plan']">
-			<div :class="$style.currentPlanRoot">
+			<div :class="$style.currentPlanRoot" :style="{ background: `var(--HNM_G-${planSlug}, #555)` }">
 				<div :class="$style.currentPlanText" class="_gaps">
 					<div>
 						<div :class="$style.currentPlanSub"><SearchLabel>{{ i18n.ts._hana._subscription.currentPlan }}</SearchLabel></div>
-						<div :class="$style.currentPlanTitle">{{ i18n.ts._hana._subscription.none }}</div>
+						<div :class="$style.currentPlanTitle">{{ currentPlanLoading ? i18n.ts.loading : currentPlan?.plan.displayName ?? i18n.ts._hana._subscription.none }}</div>
 					</div>
 					<div>
 						<div :class="$style.currentPlanSub">{{ i18n.ts._hana._subscription.nextBillingDate }}</div>
 						<div :class="$style.currentPlanNextBilling">-</div>
 					</div>
 					<div class="_buttons">
-						<MkButton rounded link to="/premium" style="background: #fff; font-weight: 700; color: var(--MI_THEME-accent) !important;">{{ i18n.ts._hana._subscription.changePlan }}</MkButton>
-						<MkButton rounded danger style="background: #fff;" @click="cancelSubscription">{{ i18n.ts._hana._subscription.cancelSubscription }}</MkButton>
+						<MkButton rounded link to="/premium" style="background: #fff; font-weight: 700; color: var(--MI_THEME-accent) !important;">{{ planSlug == null ? i18n.ts._hana._subscription.join : i18n.ts._hana._subscription.changePlan }}</MkButton>
+						<MkButton v-if="planSlug != null" rounded danger style="background: #fff;" @click="cancelSubscription">{{ i18n.ts._hana._subscription.cancelSubscription }}</MkButton>
 					</div>
 				</div>
 				<div :class="$style.currentPlanImage">
-					<img src="https://premium-lp.hanami-lp.pages.dev/premium/ch.png" />
+					<img
+						v-if="planSlug != null && !imageLoadFailed"
+						ref="imageEl"
+						:src="`https://static-assets.misskey.flowers/misc/premium/plan-kv/${planSlug}.png`"
+						:alt="planName ?? 'Free Plan'"
+					/>
 				</div>
 			</div>
 		</SearchMarker>
@@ -46,7 +51,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, computed, watch, onBeforeUnmount, useTemplateRef } from 'vue';
 import * as Misskey from 'misskey-js';
 
 import MkButton from '@/components/MkButton.vue';
@@ -59,7 +64,35 @@ import { waiting, alert as osAlert } from '@/os.js';
 import { misskeyApi } from '@/utility/misskey-api.js';
 import { planConfirm } from '@/hana/scripts/subscription.js';
 
+const currentPlanLoading = ref(true);
 const currentPlan = ref<Misskey.entities.PremiumStatusResponse['subscription']>(null);
+const planSlug = computed(() => currentPlan.value?.plan.slug ?? null);
+const planName = computed(() => currentPlan.value?.plan.displayName ?? null);
+const imageEl = useTemplateRef('imageEl');
+const imageLoadFailed = ref(false);
+
+function onImageLoad() {
+	if (imageEl.value == null) return;
+	if (imageEl.value.naturalWidth === 0) {
+		imageLoadFailed.value = true;
+	}
+}
+
+const imageElWatchStop = watch(imageEl, (el) => {
+	if (el == null) return;
+	if (el.complete) {
+		if (el.naturalWidth === 0) {
+			imageLoadFailed.value = true;
+		}
+	} else {
+		el.addEventListener('load', onImageLoad);
+	}
+	imageElWatchStop();
+}, { immediate: true });
+
+watch(planSlug, () => {
+	imageLoadFailed.value = false;
+});
 
 async function initiateCustomerPortal() {
 	const hide = waiting();
@@ -123,6 +156,18 @@ async function cancelSubscription() {
 	}
 }
 
+onMounted(async () => {
+	const res = await misskeyApi('premium/status').catch(() => null);
+	currentPlan.value = res?.subscription ?? null;
+	currentPlanLoading.value = false;
+});
+
+onBeforeUnmount(() => {
+	const el = imageEl.value;
+	if (el == null) return;
+	el.removeEventListener('load', onImageLoad);
+});
+
 definePage(() => ({
 	title: i18n.ts._hana._subscription.premium,
 	icon: 'ti ti-device-desktop-star',
@@ -140,7 +185,6 @@ definePage(() => ({
 	gap: 1rem;
 	overflow: clip;
 	border-radius: var(--MI-radius);
-	background: linear-gradient(135deg, #fdb272, #fd779e);
 	padding: 0 calc(var(--MI-margin) * 2);
 }
 

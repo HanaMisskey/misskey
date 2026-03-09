@@ -19,14 +19,14 @@ export const meta = {
 						type: 'object',
 						properties: {
 							type: { type: 'string', enum: ['subscribe'] },
-							targetPlan: subscriptionPreviewPlanSchema,
 							currentPlan: {
 								...subscriptionPreviewPlanSchema,
 								nullable: true,
 							},
+							newPlan: subscriptionPreviewPlanSchema,
 							currency: { type: 'string' },
 						},
-						required: ['type', 'targetPlan', 'currentPlan' ,'currency'],
+						required: ['type', 'currentPlan', 'newPlan', 'currency'],
 					},
 					{
 						type: 'object',

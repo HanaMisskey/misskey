@@ -17,7 +17,7 @@
 					</div>
 					<XPlan :plan="planChange.type === 'cancel' ? null : getPlanObjFromPreviewPlan(planChange.preview)" />
 				</div>
-				<div :class="$style.planChangeLoadingRoot"><MkLoading /></div>
+				<div v-if="previewLoading" :class="$style.planChangeLoadingRoot"><MkLoading /></div>
 			</div>
 			<div v-if="operationDescription != null" :class="$style.operationDescription">{{ operationDescription }}</div>
 			<div v-if="planChange.type === 'cancel'">
@@ -171,8 +171,8 @@ function getPlanObjFromPreviewPlan(preview: Misskey.entities.PremiumSubscribePre
 	switch (preview.type) {
 		case 'subscribe':
 			return {
-				slug: preview.targetPlan.slug,
-				planName: preview.targetPlan.displayName,
+				slug: preview.newPlan.slug,
+				planName: preview.newPlan.displayName,
 			};
 		case 'upgrade':
 		case 'downgrade':

@@ -33342,18 +33342,18 @@ export interface operations {
                         preview: {
                             /** @enum {string} */
                             type: 'subscribe';
-                            targetPlan: {
-                                slug: string;
-                                displayName: string;
-                                description: string | null;
-                                monthlyPrice: number;
-                            };
                             currentPlan: {
                                 slug: string;
                                 displayName: string;
                                 description: string | null;
                                 monthlyPrice: number;
                             } | null;
+                            newPlan: {
+                                slug: string;
+                                displayName: string;
+                                description: string | null;
+                                monthlyPrice: number;
+                            };
                             currency: string;
                         } | {
                             /** @enum {string} */
