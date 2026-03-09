@@ -10,7 +10,7 @@
 					</div>
 					<div>
 						<div :class="$style.currentPlanSub">{{ i18n.ts._hana._subscription.nextBillingDate }}</div>
-						<div :class="$style.currentPlanNextBilling">-</div>
+						<div :class="$style.currentPlanNextBilling">{{ currentPlanLoading ? i18n.ts.loading : currentPlan?.currentPeriodEnd != null ? dateString(currentPlan.currentPeriodEnd) : '-' }}</div>
 					</div>
 					<div class="_buttons">
 						<MkButton rounded link to="/premium" style="background: #fff; font-weight: 700; color: var(--MI_THEME-accent) !important;">{{ planSlug == null ? i18n.ts._hana._subscription.join : i18n.ts._hana._subscription.changePlan }}</MkButton>
@@ -61,6 +61,7 @@ import FormSection from '@/components/form/section.vue';
 import { i18n } from '@/i18n.js';
 import { definePage } from '@/page.js';
 import { waiting, alert as osAlert } from '@/os.js';
+import { dateString } from '@/filters/date.js';
 import { misskeyApi } from '@/utility/misskey-api.js';
 import { planConfirm } from '@/hana/scripts/subscription.js';
 
