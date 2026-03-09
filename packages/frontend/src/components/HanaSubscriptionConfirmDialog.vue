@@ -64,7 +64,7 @@ export type HanaSubscriptionConfirmDialogProps = {
 </script>
 
 <script lang="ts" setup>
-import { onBeforeUnmount, onMounted, shallowRef, computed, ref, watch } from 'vue';
+import { onBeforeUnmount, onMounted, useTemplateRef, computed, ref, watch } from 'vue';
 import * as Misskey from 'misskey-js';
 import { dateString } from '@/filters/date.js';
 import MkModal from '@/components/MkModal.vue';
@@ -82,7 +82,7 @@ const emit = defineEmits<{
 	(ev: 'closed'): void;
 }>();
 
-const modal = shallowRef<InstanceType<typeof MkModal>>();
+const modal = useTemplateRef('modal');
 const previewLoading = ref(false);
 const cancelPreview = ref<Misskey.entities.PremiumCancelPreviewResponse['preview'] | null>(
 	props.planChange.type === 'cancel' ? props.planChange.preview : null,
