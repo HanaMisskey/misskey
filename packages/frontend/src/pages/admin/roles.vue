@@ -345,6 +345,14 @@ SPDX-License-Identifier: AGPL-3.0-only
 							<template #label>{{ i18n.ts.enable }}</template>
 						</MkSwitch>
 					</MkFolder>
+
+					<MkFolder v-if="matchQuery([i18n.ts._hana._roles.canDeleteAccount, 'canDeleteAccount'])">
+						<template #label>{{ i18n.ts._hana._roles.canDeleteAccount }}</template>
+						<template #suffix>{{ policies.canDeleteAccount ? i18n.ts.yes : i18n.ts.no }}</template>
+						<MkSwitch v-model="policies.canDeleteAccount">
+							<template #label>{{ i18n.ts.enable }}</template>
+						</MkSwitch>
+					</MkFolder>
 				</div>
 			</MkFolder>
 			<MkButton primary rounded @click="create"><i class="ti ti-plus"></i> {{ i18n.ts._role.new }}</MkButton>

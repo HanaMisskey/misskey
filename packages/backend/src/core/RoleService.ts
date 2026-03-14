@@ -75,6 +75,7 @@ export type RolePolicies = {
 	scheduledNoteLimit: number;
 	watermarkAvailable: boolean;
 	durationBasedLockdownAvailable: boolean;
+	canDeleteAccount: boolean;
 };
 
 export const DEFAULT_POLICIES: RolePolicies = {
@@ -126,6 +127,7 @@ export const DEFAULT_POLICIES: RolePolicies = {
 	scheduledNoteLimit: 1,
 	watermarkAvailable: true,
 	durationBasedLockdownAvailable: true,
+	canDeleteAccount: true,
 };
 
 @Injectable()
@@ -463,6 +465,7 @@ export class RoleService implements OnApplicationShutdown, OnModuleInit {
 			scheduledNoteLimit: calc('scheduledNoteLimit', vs => Math.max(...vs)),
 			watermarkAvailable: calc('watermarkAvailable', vs => vs.some(v => v === true)),
 			durationBasedLockdownAvailable: calc('durationBasedLockdownAvailable', vs => vs.some(v => v === true)),
+			canDeleteAccount: calc('canDeleteAccount', vs => vs.some(v => v === true)),
 		};
 	}
 

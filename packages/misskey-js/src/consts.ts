@@ -234,6 +234,7 @@ export const rolePolicies = [
 	'scheduledNoteLimit',
 	'watermarkAvailable',
 	'durationBasedLockdownAvailable',
+	'canDeleteAccount',
 ] as const;
 
 export const queueTypes = [

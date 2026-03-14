@@ -13268,6 +13268,11 @@ export interface Locale extends ILocale {
          * 読み込みに時間がかかっています。
          */
         "takingTooLongToLoad": string;
+        /**
+         * このアカウントでは、現在アカウントの削除ができません。はなみすきープレミアムを契約している場合でアカウントの削除を行いたい場合は、「今すぐプレミアム機能を停止する」をオンにして解約してください。
+         * なお、こちらのオプションを有効にせず解約した場合、アカウントの削除ははなみすきープレミアムの契約が満了するまでお待ちいただく必要があります。
+         */
+        "cannotDeleteAccount": string;
         "_roles": {
             /**
              * 作成日時（タイムスタンプ）が～以前
@@ -13277,6 +13282,10 @@ export interface Locale extends ILocale {
              * 期間ベースのロックダウンの利用を許可
              */
             "durationBasedLockdownAvailable": string;
+            /**
+             * アカウントの削除を許可
+             */
+            "canDeleteAccount": string;
         };
         "_inDevelopment": {
             /**
