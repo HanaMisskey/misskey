@@ -56,30 +56,17 @@ const iframeHeight = ref(0);
 
 const currentPlan = ref<Misskey.entities.PremiumStatusResponse['subscription']>(null);
 
-type ButtonState = 'notAvailable' | 'canSubscribe' | 'manage';
+type ButtonState = 'fetching' | 'notAvailable' | 'canSubscribe' | 'manage';
 
 const buttonsState = ref<Record<typeof lpTier[number], ButtonState> | null>(null);
 
-async function onFrameLoad() {
-	if (!iframeLoaded.value) {
-		iframeLoaded.value = true;
-	} else if (frameEl.value) {
-		frameEl.value.src = frameUrl;
-		iframeLoaded.value = false;
-	}
-	frameEl.value?.contentWindow?.postMessage({
-		type: 'hanamisskey:meta',
-		payload: {
-			colorMode: store.s.darkMode ? 'dark' : 'light',
-			instance: JSON.parse(JSON.stringify(instance)),
-		},
-	}, origin);
+async function fetchButtonState() {
+	buttonsState.value = Object.fromEntries(lpTier.map((tier) => [tier, 'fetching'])) as Record<typeof lpTier[number], ButtonState>;
 
-	if (rootEl.value) {
-		const stickyTop = window.getComputedStyle(rootEl.value).getPropertyValue('--MI-stickyTop');
+	if (iframeLoaded.value) {
 		frameEl.value?.contentWindow?.postMessage({
-			type: 'hanamisskey:stickyTop',
-			payload: stickyTop,
+			type: 'hanamisskey:premium:buttonState',
+			payload: toRaw(buttonsState.value),
 		}, origin);
 	}
 
@@ -103,10 +90,37 @@ async function onFrameLoad() {
 
 	currentPlan.value = statusRes.subscription;
 
+	if (iframeLoaded.value) {
+		frameEl.value?.contentWindow?.postMessage({
+			type: 'hanamisskey:premium:buttonState',
+			payload: toRaw(buttonsState.value),
+		}, origin);
+	}
+}
+
+async function onFrameLoad() {
+	if (!iframeLoaded.value) {
+		iframeLoaded.value = true;
+	} else if (frameEl.value) {
+		frameEl.value.src = frameUrl;
+		iframeLoaded.value = false;
+	}
 	frameEl.value?.contentWindow?.postMessage({
-		type: 'hanamisskey:premium:buttonState',
-		payload: toRaw(buttonsState.value),
+		type: 'hanamisskey:meta',
+		payload: {
+			colorMode: store.s.darkMode ? 'dark' : 'light',
+			instance: JSON.parse(JSON.stringify(instance)),
+		},
 	}, origin);
+
+	if (rootEl.value) {
+		const stickyTop = window.getComputedStyle(rootEl.value).getPropertyValue('--MI-stickyTop');
+		frameEl.value?.contentWindow?.postMessage({
+			type: 'hanamisskey:stickyTop',
+			payload: stickyTop,
+		}, origin);
+	}
+	await fetchButtonState();
 }
 
 watch(store.r.darkMode, (to) => {
@@ -186,6 +200,7 @@ async function eventHandler(event: MessageEvent) {
 				location.href = executeRes.url;
 			} else {
 				hideExecute({ success: true });
+				await fetchButtonState();
 			}
 		} else if (buttonsState.value?.[planSlug] === 'manage') {
 			router.push('/settings/subscription');

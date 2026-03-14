@@ -110,6 +110,13 @@ watch(planSlug, () => {
 	imageLoadFailed.value = false;
 });
 
+async function fetchCurrentPlan() {
+	currentPlanLoading.value = true;
+	const res = await misskeyApi('premium/status').catch(() => null);
+	currentPlan.value = res?.subscription ?? null;
+	currentPlanLoading.value = false;
+}
+
 async function initiateCustomerPortal() {
 	const hide = waiting();
 	const res = await misskeyApi('premium/portal', {
@@ -154,6 +161,7 @@ async function cancelSubscription() {
 
 		if (cancelRes !== 'ERROR') {
 			hideCancel({ success: true });
+			await fetchCurrentPlan();
 		} else {
 			hideCancel();
 			osAlert({
@@ -199,6 +207,7 @@ async function cancelDowngrade() {
 
 		if (cancelRes !== 'ERROR') {
 			hideCancel({ success: true });
+			await fetchCurrentPlan();
 		} else {
 			hideCancel();
 			osAlert({
@@ -244,6 +253,7 @@ async function cancelCancelSubscription() {
 
 		if (cancelRes !== 'ERROR') {
 			hideCancel({ success: true });
+			await fetchCurrentPlan();
 		} else {
 			hideCancel();
 			osAlert({
@@ -263,9 +273,7 @@ async function cancelCancelSubscription() {
 }
 
 onMounted(async () => {
-	const res = await misskeyApi('premium/status').catch(() => null);
-	currentPlan.value = res?.subscription ?? null;
-	currentPlanLoading.value = false;
+	await fetchCurrentPlan();
 });
 
 onBeforeUnmount(() => {
