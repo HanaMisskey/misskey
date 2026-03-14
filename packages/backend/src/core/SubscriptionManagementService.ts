@@ -16,6 +16,23 @@ interface SubscriptionPreviewPlan {
   monthlyPrice: number;
 }
 
+interface SubscriptionStatus {
+	misskeyUserId: string;
+	subscription: {
+		plan: SubscriptionPreviewPlan | null;
+		status: 'incomplete' | 'incomplete_expired' | 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid' | 'paused';
+		currentPeriodEnd: string | null;
+		cancelAtPeriodEnd: boolean;
+		cancelAt: string | null;
+		pendingDowngrade: {
+			targetPlanSlug: string;
+			targetPlanDisplayName: string;
+			effectiveAt: string;
+		} | null;
+	} | null;
+	roleId: string | null;
+}
+
 interface SubscribePreview {
 	type: 'subscribe';
 	currentPlan: null;
@@ -253,20 +270,7 @@ export class SubscriptionManagementService {
 	}
 
 	@bindThis
-	public async getSubscriptionStatus(userId: MiUser['id']): Promise<{
-		subscription: {
-			plan: {
-				slug: string;
-				displayName: string;
-				description: string;
-				monthlyPrice: number;
-			};
-			status: 'incomplete' | 'incomplete_expired' | 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid' | 'paused';
-			currentPeriodEnd: string;
-			cancelAtPeriodEnd: boolean;
-		} | null;
-		roleId: string | null;
-	}> {
+	public async getSubscriptionStatus(userId: MiUser['id']): Promise<Omit<SubscriptionStatus, 'misskeyUserId'>> {
 		const res = await this.httpRequestService.send(this.getPaymentGatewayUrl(`/internal/status?misskeyUserId=${encodeURIComponent(userId)}`), {
 			method: 'GET',
 			timeout: SUBSCRIPTION_REQUEST_TIMEOUT,
@@ -279,21 +283,7 @@ export class SubscriptionManagementService {
 			throw new IdentifiableError('6a29c1d3-7b47-4f2c-8f35-9002a4f34683', `Failed to fetch subscription status from Hanami Billing: ${res.status} ${await res.text()}`);
 		}
 
-		const { subscription, roleId } = await res.json() as {
-			subscription: {
-				plan: {
-					slug: string;
-					displayName: string;
-					description: string;
-					monthlyPrice: number;
-				};
-				status: 'incomplete' | 'incomplete_expired' | 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid' | 'paused';
-				currentPeriodEnd: string;
-				cancelAtPeriodEnd: boolean;
-			} | null;
-			roleId: string | null;
-			requestId: string;
-		};
+		const { subscription, roleId } = await res.json() as SubscriptionStatus & { requestId: string };
 
 		return {
 			subscription,

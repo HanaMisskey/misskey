@@ -33194,13 +33194,19 @@ export interface operations {
                             plan: {
                                 slug: string;
                                 displayName: string;
-                                description: string;
+                                description: string | null;
                                 monthlyPrice: number;
-                            };
+                            } | null;
                             /** @enum {string} */
                             status: 'incomplete' | 'incomplete_expired' | 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid' | 'paused';
-                            currentPeriodEnd: string;
+                            currentPeriodEnd: string | null;
                             cancelAtPeriodEnd: boolean;
+                            cancelAt: string | null;
+                            pendingDowngrade: {
+                                targetPlanSlug: string;
+                                targetPlanDisplayName: string;
+                                effectiveAt: string;
+                            } | null;
                         } | null;
                         roleId: string | null;
                     };

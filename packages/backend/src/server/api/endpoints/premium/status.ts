@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { ApiError } from '@/server/api/error.js';
-import { SubscriptionManagementService } from '@/core/SubscriptionManagementService.js';
+import { SubscriptionManagementService, subscriptionPreviewPlanSchema } from '@/core/SubscriptionManagementService.js';
 import { IdentifiableError } from '@/misc/identifiable-error.js';
 
 export const meta = {
@@ -16,21 +16,25 @@ export const meta = {
 				optional: false, nullable: true,
 				properties: {
 					plan: {
-						type: 'object',
-						properties: {
-							slug: { type: 'string' },
-							displayName: { type: 'string' },
-							description: { type: 'string' },
-							monthlyPrice: { type: 'number' },
-						},
-						required: ['slug', 'displayName', 'description', 'monthlyPrice'],
+						...subscriptionPreviewPlanSchema,
+						nullable: true,
 					},
 					status: {
 						type: 'string',
 						enum: ['incomplete', 'incomplete_expired', 'trialing', 'active', 'past_due', 'canceled', 'unpaid', 'paused'],
 					},
-					currentPeriodEnd: { type: 'string' },
+					currentPeriodEnd: { type: 'string', nullable: true },
 					cancelAtPeriodEnd: { type: 'boolean' },
+					cancelAt: { type: 'string', nullable: true },
+					pendingDowngrade: {
+						type: 'object',
+						nullable: true,
+						properties: {
+							targetPlanSlug: { type: 'string' },
+							targetPlanDisplayName: { type: 'string' },
+							effectiveAt: { type: 'string' },
+						},
+					},
 				},
 			},
 			roleId: { type: 'string', nullable: true },
