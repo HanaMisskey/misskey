@@ -13556,6 +13556,14 @@ export interface Locale extends ILocale {
              */
             "cancelSubscription": string;
             /**
+             * ダウングレードを取り消す
+             */
+            "cancelDowngrade": string;
+            /**
+             * 解約を取り消す
+             */
+            "cancelCancelSubscription": string;
+            /**
              * プランの紹介はこちら
              */
             "goToIntroductionPage": string;
@@ -13571,6 +13579,10 @@ export interface Locale extends ILocale {
              * 次回請求日
              */
             "nextBillingDate": string;
+            /**
+             * 解約予定日
+             */
+            "expectedCancelDate": string;
             /**
              * 管理
              */
@@ -13592,7 +13604,7 @@ export interface Locale extends ILocale {
              */
             "failedToProcess": string;
             /**
-             * 時間をおいてから再度お試しください。問題が解決しない場合はお問い合わせください。
+             * リロードしたり、時間をおいたりしてから再度お試しください。問題が解決しない場合はお問い合わせください。
              */
             "failedDescription": string;
             /**
@@ -13608,6 +13620,14 @@ export interface Locale extends ILocale {
              */
             "cancelConfirm": string;
             /**
+             * プランのダウングレードを取り消しますか？
+             */
+            "cancelDowngradeConfirm": string;
+            /**
+             * 解約を取り消しますか？
+             */
+            "cancelCancelConfirm": string;
+            /**
              * 加入する
              */
             "planNewOk": string;
@@ -13619,6 +13639,14 @@ export interface Locale extends ILocale {
              * 解約する
              */
             "cancelOk": string;
+            /**
+             * ダウングレードを取り消す
+             */
+            "cancelDowngradeOk": string;
+            /**
+             * 解約を取り消す
+             */
+            "cancelCancelOk": string;
             /**
              * はなみすきープレミアムにかかる決済情報はStripeによって保管され、はなみすきーではお支払い情報を保持しません。システムの都合上、購入処理を完了してからプランが適用されるまで最大で2分程度かかりますのであらかじめご了承ください。
              */
@@ -13643,6 +13671,14 @@ export interface Locale extends ILocale {
              * このオプションをオンにして解約処理を行うと、残りの期間を破棄して即座にプレミアム機能の提供を停止します。この操作は取り消すことができません。
              */
             "cancelImmediatelyDescription": string;
+            /**
+             * プランのダウングレードを取り消すと、今後予定されているプランの変更がすべてキャンセルされ、現在のプランの料金が次回請求予定日に請求されます。
+             */
+            "cancelDowngradeDescription": string;
+            /**
+             * 解約の取り消しを行うと、解約予定日がキャンセルされ、次回請求予定日に現在のプランの料金が請求されます。
+             */
+            "cancelCancelDescription": string;
             /**
              * 処理を実行することで、各種規約および本画面上の注意事項を確認し、同意したものとみなされます。
              */

@@ -90,7 +90,10 @@ async function onFrameLoad() {
 
 	buttonsState.value = Object.fromEntries(lpTier.map((tier) => {
 		let state: ButtonState = 'notAvailable';
-		if (statusRes.subscription?.plan.slug === tier && statusRes.subscription?.status === 'active') {
+		if (
+			(statusRes.subscription?.plan?.slug === tier || statusRes.subscription?.pendingDowngrade?.targetPlanSlug === tier) &&
+			statusRes.subscription?.status === 'active'
+		) {
 			state = 'manage';
 		} else if (planRes.some((p) => p.slug === tier)) {
 			state = 'canSubscribe';

@@ -160,7 +160,7 @@ const planChangeHeading = computed(() => {
 });
 
 function getPlanObjFromCurrentPlan(plan: Misskey.entities.PremiumStatusResponse['subscription']): { slug: string; planName: string } | null {
-	if (!plan) return null;
+	if (plan == null || plan.plan == null) return null;
 	return {
 		slug: plan.plan.slug,
 		planName: plan.plan.displayName,
