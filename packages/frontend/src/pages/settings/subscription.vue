@@ -263,26 +263,7 @@ async function cancelCancelSubscription() {
 }
 
 onMounted(async () => {
-	// const res = await misskeyApi('premium/status').catch(() => null);
-	currentPlan.value = {
-        "plan": {
-            "slug": "dango",
-            "displayName": "だんごプラン",
-            "description": "「花より団子」なあなたに。検索精度の向上・ドライブ容量の緩和が使えるおいしいプラン！",
-            "monthlyPrice": 790,
-            "priceStale": false,
-            "active": true
-        },
-        "status": "active",
-        "currentPeriodEnd": "2026-04-09 19:16:40",
-        "cancelAtPeriodEnd": false,
-        "cancelAt": null,
-        "pendingDowngrade": {
-            "targetPlanSlug": "hana",
-            "targetPlanDisplayName": "はなプラン",
-            "effectiveAt": "2026-04-09T19:16:40.000Z"
-        }
-}
+	const res = await misskeyApi('premium/status').catch(() => null);
 	currentPlanLoading.value = false;
 });
 
