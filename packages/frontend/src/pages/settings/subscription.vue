@@ -264,6 +264,7 @@ async function cancelCancelSubscription() {
 
 onMounted(async () => {
 	const res = await misskeyApi('premium/status').catch(() => null);
+	currentPlan.value = res?.subscription ?? null;
 	currentPlanLoading.value = false;
 });
 
