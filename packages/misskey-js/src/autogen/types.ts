@@ -33422,6 +33422,22 @@ export interface operations {
                                 monthlyPrice: number;
                             };
                             pendingDowngradeEffectiveAt: string;
+                        } | {
+                            /** @enum {string} */
+                            type: 'cancel_cancel';
+                            currentPlan: {
+                                slug: string;
+                                displayName: string;
+                                description: string | null;
+                                monthlyPrice: number;
+                            };
+                            newPlan: {
+                                slug: string;
+                                displayName: string;
+                                description: string | null;
+                                monthlyPrice: number;
+                            };
+                            pendingDowngradeEffectiveAt: string;
                         };
                     };
                 };

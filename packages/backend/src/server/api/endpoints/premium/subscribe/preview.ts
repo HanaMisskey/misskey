@@ -66,6 +66,16 @@ export const meta = {
 						},
 						required: ['type', 'currentPlan', 'pendingDowngradePlan', 'pendingDowngradeEffectiveAt'],
 					},
+					{
+						type: 'object',
+						properties: {
+							type: { type: 'string', enum: ['cancel_cancel'] },
+							currentPlan: subscriptionPreviewPlanSchema,
+							newPlan: subscriptionPreviewPlanSchema,
+							pendingDowngradeEffectiveAt: { type: 'string' },
+						},
+						required: ['type', 'currentPlan', 'pendingDowngradePlan', 'pendingDowngradeEffectiveAt'],
+					},
 				],
 			},
 		},

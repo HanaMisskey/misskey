@@ -67,11 +67,19 @@ interface CancelDowngradePreview {
 	pendingDowngradeEffectiveAt: string;
 }
 
+interface CancelCancelPreview {
+	type: 'cancel_cancel';
+	currentPlan: SubscriptionPreviewPlan;
+	newPlan: SubscriptionPreviewPlan;
+	pendingDowngradeEffectiveAt: string;
+}
+
 type SubscriptionPreviewResult =
 	| SubscribePreview
 	| UpgradePreview
 	| DowngradePreview
-	| CancelDowngradePreview;
+	| CancelDowngradePreview
+	| CancelCancelPreview;
 
 type SubscriptionPreviewResponse = SubscriptionPreviewResult & { requestId: string };
 
