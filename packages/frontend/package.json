@@ -128,7 +128,7 @@
 		"eslint-plugin-import": "2.32.0",
 		"eslint-plugin-vue": "10.6.2",
 		"fast-glob": "3.3.3",
-		"happy-dom": "20.3.0",
+		"happy-dom": "20.8.8",
 		"intersection-observer": "0.12.2",
 		"micromatch": "4.0.8",
 		"minimatch": "10.1.1",
