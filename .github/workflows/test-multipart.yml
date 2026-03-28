@@ -1,0 +1,80 @@
+name: Test (multipart upload)
+
+on:
+  push:
+    branches:
+      - hanami
+    paths:
+      - packages/backend/**
+      - packages/misskey-js/**
+      - .github/workflows/test-multipart.yml
+  pull_request:
+    paths:
+      - packages/backend/**
+      - packages/misskey-js/**
+      - .github/workflows/test-multipart.yml
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Multipart upload cluster tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version-file:
+          - .node-version
+
+    steps:
+      - uses: actions/checkout@v4.3.0
+        with:
+          submodules: true
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4.2.0
+      - name: Use Node.js
+        uses: actions/setup-node@v4.4.0
+        with:
+          node-version-file: ${{ matrix.node-version-file }}
+          cache: 'pnpm'
+      - run: pnpm i --frozen-lockfile
+      - name: Build
+        run: pnpm build
+      - name: Setup certificates and config
+        run: |
+          cd packages/backend/test-multipart
+          bash setup.sh
+          sudo chmod 644 ./certificates/*.key
+      - name: Start cluster
+        run: |
+          cd packages/backend/test-multipart
+          docker compose up -d --scale tester=0
+      - name: Wait for cluster health
+        run: |
+          cd packages/backend/test-multipart
+          timeout 180 bash -c 'until docker compose ps nginx | grep -q healthy; do sleep 5; echo "Waiting..."; done'
+          echo "Cluster is healthy"
+      - name: Run tests
+        run: |
+          cd packages/backend/test-multipart
+          docker compose run --no-deps tester
+        env:
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_ACCESS_KEY: ${{ secrets.R2_ACCESS_KEY }}
+          R2_SECRET_KEY: ${{ secrets.R2_SECRET_KEY }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          R2_STAGING_BUCKET: ${{ secrets.R2_STAGING_BUCKET }}
+      - name: Collect logs
+        if: failure()
+        run: |
+          cd packages/backend/test-multipart
+          docker compose logs misskey-1 misskey-2 nginx > /tmp/cluster-logs.txt 2>&1
+      - name: Upload logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cluster-logs
+          path: /tmp/cluster-logs.txt
+      - name: Stop cluster
+        if: always()
+        run: |
+          cd packages/backend/test-multipart
+          docker compose down

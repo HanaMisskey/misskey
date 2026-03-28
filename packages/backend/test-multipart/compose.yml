@@ -1,0 +1,250 @@
+services:
+  # Shared infrastructure
+  db:
+    image: postgres:18-alpine
+    env_file:
+      - ./.config/docker.env
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB
+      interval: 5s
+      retries: 20
+    networks:
+      - cluster_network
+
+  redis:
+    image: redis:7
+    healthcheck:
+      test: redis-cli ping
+      interval: 5s
+      retries: 20
+    networks:
+      - cluster_network
+
+  # Setup: install dependencies
+  setup:
+    image: node:${NODE_VERSION:-22}
+    volumes:
+      - ../../../pnpm-lock.yaml:/misskey/pnpm-lock.yaml:ro
+      - ../../../pnpm-workspace.yaml:/misskey/pnpm-workspace.yaml:ro
+      - ../../../package.json:/misskey/package.json:ro
+      - ../../../patches:/misskey/patches:ro
+      - ../../package.json:/misskey/packages/backend/package.json:ro
+      - ../../../packages/misskey-js/package.json:/misskey/packages/misskey-js/package.json:ro
+      - ../../../packages/misskey-reversi/package.json:/misskey/packages/misskey-reversi/package.json:ro
+      - node_modules:/misskey/node_modules
+      - backend_node_modules:/misskey/packages/backend/node_modules
+      - misskey_js_node_modules:/misskey/packages/misskey-js/node_modules
+      - misskey_reversi_node_modules:/misskey/packages/misskey-reversi/node_modules
+    working_dir: /misskey
+    command: >
+      bash -c "
+        npm install -g pnpm &&
+        pnpm i --frozen-lockfile
+      "
+    networks:
+      - cluster_network
+
+  # Misskey instance 1
+  misskey-1:
+    image: node:${NODE_VERSION:-22}
+    env_file:
+      - ./.config/docker.env
+    environment:
+      - NODE_ENV=production
+      - MISSKEY_CONFIG_YML=cluster.default.yml
+    volumes:
+      - ../../../built:/misskey/built:ro
+      - ../assets:/misskey/packages/backend/assets:ro
+      - ../built:/misskey/packages/backend/built:ro
+      - ../migration:/misskey/packages/backend/migration:ro
+      - ../ormconfig.js:/misskey/packages/backend/ormconfig.js:ro
+      - ../package.json:/misskey/packages/backend/package.json:ro
+      - ../../misskey-js/built:/misskey/packages/misskey-js/built:ro
+      - ../../misskey-js/package.json:/misskey/packages/misskey-js/package.json:ro
+      - ../../misskey-reversi/built:/misskey/packages/misskey-reversi/built:ro
+      - ../../misskey-reversi/package.json:/misskey/packages/misskey-reversi/package.json:ro
+      - ../../../healthcheck.sh:/misskey/healthcheck.sh:ro
+      - ../../../package.json:/misskey/package.json:ro
+      - ../../../pnpm-lock.yaml:/misskey/pnpm-lock.yaml:ro
+      - ../../../pnpm-workspace.yaml:/misskey/pnpm-workspace.yaml:ro
+      - ../../../patches:/misskey/patches:ro
+      - ./.config/cluster.default.yml:/misskey/.config/cluster.default.yml:ro
+      - ./certificates/rootCA.crt:/usr/local/share/ca-certificates/rootCA.crt:ro
+      - node_modules:/misskey/node_modules
+      - backend_node_modules:/misskey/packages/backend/node_modules
+      - misskey_js_node_modules:/misskey/packages/misskey-js/node_modules
+      - misskey_reversi_node_modules:/misskey/packages/misskey-reversi/node_modules
+      - files:/misskey/files
+    working_dir: /misskey
+    command: >
+      bash -c "
+        npm install -g pnpm &&
+        pnpm -F backend migrate &&
+        pnpm -F backend start
+      "
+    healthcheck:
+      test: bash /misskey/healthcheck.sh
+      interval: 5s
+      retries: 40
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      setup:
+        condition: service_completed_successfully
+    networks:
+      - cluster_network
+
+  # Misskey instance 2
+  misskey-2:
+    image: node:${NODE_VERSION:-22}
+    env_file:
+      - ./.config/docker.env
+    environment:
+      - NODE_ENV=production
+      - MISSKEY_CONFIG_YML=cluster.default.yml
+    volumes:
+      - ../../../built:/misskey/built:ro
+      - ../assets:/misskey/packages/backend/assets:ro
+      - ../built:/misskey/packages/backend/built:ro
+      - ../migration:/misskey/packages/backend/migration:ro
+      - ../ormconfig.js:/misskey/packages/backend/ormconfig.js:ro
+      - ../package.json:/misskey/packages/backend/package.json:ro
+      - ../../misskey-js/built:/misskey/packages/misskey-js/built:ro
+      - ../../misskey-js/package.json:/misskey/packages/misskey-js/package.json:ro
+      - ../../misskey-reversi/built:/misskey/packages/misskey-reversi/built:ro
+      - ../../misskey-reversi/package.json:/misskey/packages/misskey-reversi/package.json:ro
+      - ../../../healthcheck.sh:/misskey/healthcheck.sh:ro
+      - ../../../package.json:/misskey/package.json:ro
+      - ../../../pnpm-lock.yaml:/misskey/pnpm-lock.yaml:ro
+      - ../../../pnpm-workspace.yaml:/misskey/pnpm-workspace.yaml:ro
+      - ../../../patches:/misskey/patches:ro
+      - ./.config/cluster.default.yml:/misskey/.config/cluster.default.yml:ro
+      - ./certificates/rootCA.crt:/usr/local/share/ca-certificates/rootCA.crt:ro
+      - node_modules:/misskey/node_modules
+      - backend_node_modules:/misskey/packages/backend/node_modules
+      - misskey_js_node_modules:/misskey/packages/misskey-js/node_modules
+      - misskey_reversi_node_modules:/misskey/packages/misskey-reversi/node_modules
+      - files:/misskey/files
+    working_dir: /misskey
+    command: >
+      bash -c "
+        npm install -g pnpm &&
+        pnpm -F backend start
+      "
+    healthcheck:
+      test: bash /misskey/healthcheck.sh
+      interval: 5s
+      retries: 40
+    depends_on:
+      misskey-1:
+        condition: service_healthy
+    networks:
+      - cluster_network
+
+  # Nginx load balancer
+  nginx:
+    image: nginx:1.27
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./certificates/cluster.test.crt:/etc/nginx/certificates/cluster.test.crt:ro
+      - ./certificates/cluster.test.key:/etc/nginx/certificates/cluster.test.key:ro
+      - ./certificates/rootCA.crt:/etc/nginx/certificates/rootCA.crt:ro
+    healthcheck:
+      test: service nginx status
+      interval: 5s
+      retries: 20
+    depends_on:
+      misskey-1:
+        condition: service_healthy
+      misskey-2:
+        condition: service_healthy
+    networks:
+      cluster_network:
+
+  # Rate limit purge daemon
+  daemon:
+    image: node:${NODE_VERSION:-22}
+    volumes:
+      - ../../../built:/misskey/built:ro
+      - ../built:/misskey/packages/backend/built:ro
+      - ../package.json:/misskey/packages/backend/package.json:ro
+      - ../../../package.json:/misskey/package.json:ro
+      - ../../../pnpm-lock.yaml:/misskey/pnpm-lock.yaml:ro
+      - ../../../pnpm-workspace.yaml:/misskey/pnpm-workspace.yaml:ro
+      - ../../../patches:/misskey/patches:ro
+      - node_modules:/misskey/node_modules
+      - backend_node_modules:/misskey/packages/backend/node_modules
+      - ./daemon.ts:/misskey/packages/backend/test-multipart/daemon.ts:ro
+    working_dir: /misskey
+    command: >
+      bash -c "
+        npm install -g pnpm &&
+        node --loader ts-node/esm packages/backend/test-multipart/daemon.ts
+      "
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - cluster_network
+
+  # Test runner
+  tester:
+    image: node:${NODE_VERSION:-22}
+    environment:
+      - NODE_ENV=test
+      - NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/rootCA.crt
+      - CLUSTER_HOST=https://nginx
+      - R2_ENDPOINT=${R2_ENDPOINT:-}
+      - R2_ACCESS_KEY=${R2_ACCESS_KEY:-}
+      - R2_SECRET_KEY=${R2_SECRET_KEY:-}
+      - R2_BUCKET=${R2_BUCKET:-}
+      - R2_STAGING_BUCKET=${R2_STAGING_BUCKET:-}
+    volumes:
+      - ../../../built:/misskey/built:ro
+      - ../built:/misskey/packages/backend/built:ro
+      - ../built-test:/misskey/packages/backend/built-test:ro
+      - ../package.json:/misskey/packages/backend/package.json:ro
+      - ../../misskey-js/built:/misskey/packages/misskey-js/built:ro
+      - ../../misskey-js/package.json:/misskey/packages/misskey-js/package.json:ro
+      - ../../../package.json:/misskey/package.json:ro
+      - ../../../pnpm-lock.yaml:/misskey/pnpm-lock.yaml:ro
+      - ../../../pnpm-workspace.yaml:/misskey/pnpm-workspace.yaml:ro
+      - ../../../patches:/misskey/patches:ro
+      - ./test:/misskey/packages/backend/test-multipart/test:ro
+      - ./certificates/rootCA.crt:/usr/local/share/ca-certificates/rootCA.crt:ro
+      - node_modules:/misskey/node_modules
+      - backend_node_modules:/misskey/packages/backend/node_modules
+      - misskey_js_node_modules:/misskey/packages/misskey-js/node_modules
+    working_dir: /misskey
+    command: >
+      bash -c "
+        npm install -g pnpm &&
+        pnpm -F backend jest --config jest.config.cjs -- test-multipart/test
+      "
+    depends_on:
+      nginx:
+        condition: service_healthy
+      daemon:
+        condition: service_started
+    networks:
+      cluster_network:
+        ipv4_address: 172.24.1.1
+
+networks:
+  cluster_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.24.0.0/16
+
+volumes:
+  db-data:
+  node_modules:
+  backend_node_modules:
+  misskey_js_node_modules:
+  misskey_reversi_node_modules:
+  files:
