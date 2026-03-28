@@ -130,9 +130,11 @@ describe('Multipart Upload (Cluster)', () => {
 	});
 
 	// --- S3 Tests (R2) ---
-	const describeR2 = hasR2 ? describe : describe.skip;
+	// S3 direct: only when R2 is available AND staging is NOT configured
+	// (when staging is configured, uploads go through staging, not direct)
+	const describeR2Direct = (hasR2 && !hasR2Staging) ? describe : describe.skip;
 
-	describeR2('S3 + クラスタ: R2', () => {
+	describeR2Direct('S3直接 + クラスタ: R2（ステージングなし）', () => {
 		const createdFileIds: string[] = [];
 
 		beforeAll(async () => {
