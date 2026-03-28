@@ -5570,6 +5570,7 @@ export type components = {
                 turnstile: boolean;
                 recaptcha: boolean;
                 objectStorage: boolean;
+                multipartUpload: boolean;
                 serviceWorker: boolean;
                 /** @default true */
                 miauth: boolean;
@@ -9537,6 +9538,16 @@ export interface operations {
                         name: string | null;
                         shortName: string | null;
                         objectStorageS3ForcePathStyle: boolean;
+                        useMultipartUpload: boolean;
+                        objectStorageStagingBucket: string | null;
+                        objectStorageStagingEndpoint: string | null;
+                        objectStorageStagingRegion: string | null;
+                        objectStorageStagingAccessKey: string | null;
+                        objectStorageStagingSecretKey: string | null;
+                        objectStorageStagingPort: number | null;
+                        objectStorageStagingUseSSL: boolean;
+                        objectStorageStagingUseProxy: boolean;
+                        objectStorageStagingS3ForcePathStyle: boolean;
                         privacyPolicyUrl: string | null;
                         inquiryUrl: string | null;
                         repositoryUrl: string | null;
@@ -12844,6 +12855,16 @@ export interface operations {
                     objectStorageUseProxy?: boolean;
                     objectStorageSetPublicRead?: boolean;
                     objectStorageS3ForcePathStyle?: boolean;
+                    useMultipartUpload?: boolean;
+                    objectStorageStagingBucket?: string | null;
+                    objectStorageStagingEndpoint?: string | null;
+                    objectStorageStagingRegion?: string | null;
+                    objectStorageStagingAccessKey?: string | null;
+                    objectStorageStagingSecretKey?: string | null;
+                    objectStorageStagingPort?: number | null;
+                    objectStorageStagingUseSSL?: boolean;
+                    objectStorageStagingUseProxy?: boolean;
+                    objectStorageStagingS3ForcePathStyle?: boolean;
                     enableIpLogging?: boolean;
                     enableActiveEmailValidation?: boolean;
                     enableVerifymailApi?: boolean;
