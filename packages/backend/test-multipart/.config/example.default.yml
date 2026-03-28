@@ -1,5 +1,6 @@
 url: https://cluster.test/
 port: 3000
+setupPassword: test_setup_password
 db:
   host: db
   port: 5432
@@ -11,6 +12,8 @@ redis:
   host: redis
   port: 6379
 id: 'aidx'
+fulltextSearch:
+  provider: sqlLike
 proxyBypassHosts:
   - api.deepl.com
   - api-free.deepl.com

@@ -1,0 +1,4 @@
+volumes/
+certificates/
+.config/default.yml
+.config/cluster.default.yml

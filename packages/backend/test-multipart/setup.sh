@@ -22,6 +22,6 @@ openssl x509 -req -in certificates/cluster.test.csr \
 rm -f certificates/cluster.test.csr certificates/rootCA.srl
 
 echo "=== Generating Misskey config ==="
-cp .config/example.default.yml .config/cluster.default.yml
+cp .config/example.default.yml .config/default.yml
 
 echo "=== Done ==="

@@ -1,12 +1,11 @@
 import * as crypto from 'crypto';
-import fetch, { type RequestInit, type Response } from 'node-fetch';
 import type * as misskey from 'misskey-js';
 
 export interface UserToken {
 	token: string;
 }
 
-const CLUSTER_URL = 'https://nginx';
+const CLUSTER_URL = 'https://cluster.test';
 
 function instanceUrl(instance: 'instance-1' | 'instance-2'): string {
 	return `${CLUSTER_URL}/${instance}`;
@@ -92,14 +91,31 @@ export async function uploadPartViaLB(
 	return { status: res.status, body };
 }
 
-/** Create a test user */
-export async function signup(params: { username: string }): Promise<misskey.entities.SignupResponse> {
-	const res = await apiViaLB('admin/accounts/create', {
-		username: params.username,
-		password: 'test_password_' + crypto.randomBytes(8).toString('hex'),
-	});
-	if (res.status !== 200) throw new Error(`Signup failed: ${JSON.stringify(res.body)}`);
-	return res.body;
+let adminUser: (misskey.entities.SignupResponse & { token: string }) | null = null;
+
+/** Create admin (first user) or regular user */
+export async function signup(params: { username: string }): Promise<misskey.entities.SignupResponse & { token: string }> {
+	const password = 'test_password_' + crypto.randomBytes(8).toString('hex');
+
+	if (!adminUser) {
+		// First user: use setupPassword
+		const res = await apiViaLB('admin/accounts/create', {
+			username: params.username,
+			password,
+			setupPassword: 'test_setup_password',
+		});
+		if (res.status !== 200) throw new Error(`Signup failed (admin): ${JSON.stringify(res.body)}`);
+		adminUser = res.body;
+		return res.body;
+	} else {
+		// Subsequent users: use admin token
+		const res = await fetchApi(CLUSTER_URL, 'admin/accounts/create', {
+			username: params.username,
+			password,
+		}, adminUser);
+		if (res.status !== 200) throw new Error(`Signup failed: ${JSON.stringify(res.body)}`);
+		return res.body;
+	}
 }
 
 /** Generate random blob of given size */
