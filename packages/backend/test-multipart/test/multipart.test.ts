@@ -203,6 +203,9 @@ describe('Multipart Upload (Cluster)', () => {
 		const createdFileIds: string[] = [];
 
 		beforeAll(async () => {
+			// Wait for previous test's meta changes to propagate
+			await new Promise(resolve => setTimeout(resolve, 2000));
+
 			const endpoint = new URL(R2_ENDPOINT!);
 			await apiTo('instance-1', 'admin/update-meta', {
 				useObjectStorage: true,
@@ -219,12 +222,16 @@ describe('Multipart Upload (Cluster)', () => {
 				// Staging S3 settings (same R2 account, different bucket)
 				objectStorageStagingBucket: R2_STAGING_BUCKET!,
 				objectStorageStagingEndpoint: endpoint.host,
+				objectStorageStagingRegion: 'auto',
 				objectStorageStagingAccessKey: R2_ACCESS_KEY!,
 				objectStorageStagingSecretKey: R2_SECRET_KEY!,
 				objectStorageStagingUseSSL: endpoint.protocol === 'https:',
 				objectStorageStagingS3ForcePathStyle: false,
 				objectStorageStagingUseProxy: false,
 			}, admin);
+
+			// Wait for meta to propagate to both instances
+			await new Promise(resolve => setTimeout(resolve, 2000));
 		}, 1000 * 30);
 
 		afterAll(async () => {
