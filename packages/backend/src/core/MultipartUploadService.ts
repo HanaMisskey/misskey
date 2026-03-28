@@ -6,7 +6,6 @@ import { Inject, Injectable } from '@nestjs/common';
 import * as Redis from 'ioredis';
 import type { S3Client } from '@aws-sdk/client-s3';
 import { DI } from '@/di-symbols.js';
-import type { Config } from '@/config.js';
 import type { MiMeta } from '@/models/Meta.js';
 import type { MiDriveFile } from '@/models/DriveFile.js';
 import type { MiUser } from '@/models/User.js';
@@ -70,9 +69,6 @@ export class MultipartUploadService {
 	private logger: Logger;
 
 	constructor(
-		@Inject(DI.config)
-		private config: Config,
-
 		@Inject(DI.meta)
 		private meta: MiMeta,
 
@@ -87,14 +83,13 @@ export class MultipartUploadService {
 		this.logger = new Logger('multipart-upload', 'cyan');
 	}
 
-	/** Get S3 client for initial session creation (uses live config) */
+	/** Get S3 client for initial session creation (uses live meta) */
 	@bindThis
 	private getS3ClientForNewSession(): { client: S3Client; bucket: string; useStaging: boolean } {
-		const staging = this.config.objectStorageStaging;
-		if (staging) {
-			const client = this.s3Service.getStagingS3Client();
+		if (this.meta.objectStorageStagingBucket) {
+			const client = this.s3Service.getStagingS3Client(this.meta);
 			if (client) {
-				return { client, bucket: staging.bucket, useStaging: true };
+				return { client, bucket: this.meta.objectStorageStagingBucket, useStaging: true };
 			}
 		}
 
@@ -106,7 +101,7 @@ export class MultipartUploadService {
 	@bindThis
 	private getS3ClientFromSession(session: SessionData): { client: S3Client; bucket: string } {
 		if (session.useStaging) {
-			const client = this.s3Service.getStagingS3Client();
+			const client = this.s3Service.getStagingS3Client(this.meta);
 			if (client) {
 				return { client, bucket: session.s3Bucket! };
 			}

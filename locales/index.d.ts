@@ -13272,6 +13272,14 @@ export interface Locale extends ILocale {
          * 大きなファイル（10MB超）の分割アップロードを有効にする
          */
         "enableMultipartUpload": string;
+        /**
+         * ステージング用オブジェクトストレージ
+         */
+        "stagingObjectStorage": string;
+        /**
+         * マルチパートアップロード時のチャンクを一時保存する別のS3互換ストレージです。設定しない場合は本番のオブジェクトストレージに直接アップロードされます。
+         */
+        "stagingObjectStorageDesc": string;
         "_roles": {
             /**
              * 作成日時（タイムスタンプ）が～以前

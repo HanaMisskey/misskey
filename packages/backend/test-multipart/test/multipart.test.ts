@@ -17,6 +17,8 @@ describe('Multipart Upload (Cluster)', () => {
 	beforeAll(async () => {
 		admin = await signup({ username: 'admin' });
 		bob = await signup({ username: 'bob' });
+		// Enable multipart upload server-wide
+		await apiViaLB('admin/update-meta', { useMultipartUpload: true }, admin);
 	}, 1000 * 60 * 2);
 
 	describe('ローカルストレージ: パート分散', () => {
@@ -130,9 +132,9 @@ describe('Multipart Upload (Cluster)', () => {
 	});
 
 	// --- S3 Tests (R2) ---
-	// S3 direct: only when R2 is available AND staging is NOT configured
-	// (when staging is configured, uploads go through staging, not direct)
-	const describeR2Direct = (hasR2 && !hasR2Staging) ? describe : describe.skip;
+	// S3 direct: staging settings are controlled via admin/update-meta per test,
+	// so we only need R2 credentials to be available
+	const describeR2Direct = hasR2 ? describe : describe.skip;
 
 	describeR2Direct('S3直接 + クラスタ: R2（ステージングなし）', () => {
 		const createdFileIds: string[] = [];
@@ -141,6 +143,7 @@ describe('Multipart Upload (Cluster)', () => {
 			const endpoint = new URL(R2_ENDPOINT!);
 			await apiTo('instance-1', 'admin/update-meta', {
 				useObjectStorage: true,
+				useMultipartUpload: true,
 				objectStorageBucket: R2_BUCKET!,
 				objectStorageEndpoint: endpoint.host,
 				objectStorageAccessKey: R2_ACCESS_KEY!,
@@ -154,12 +157,12 @@ describe('Multipart Upload (Cluster)', () => {
 		}, 1000 * 30);
 
 		afterAll(async () => {
-			// Clean up created files (also deletes S3 objects)
 			for (const fileId of createdFileIds) {
 				await apiViaLB('drive/files/delete', { fileId }, admin);
 			}
 			await apiTo('instance-1', 'admin/update-meta', {
 				useObjectStorage: false,
+				useMultipartUpload: false,
 			}, admin);
 		});
 
@@ -200,10 +203,10 @@ describe('Multipart Upload (Cluster)', () => {
 		const createdFileIds: string[] = [];
 
 		beforeAll(async () => {
-			// Enable object storage (staging config is already in default.yml via setup.sh)
 			const endpoint = new URL(R2_ENDPOINT!);
 			await apiTo('instance-1', 'admin/update-meta', {
 				useObjectStorage: true,
+				useMultipartUpload: true,
 				objectStorageBucket: R2_BUCKET!,
 				objectStorageEndpoint: endpoint.host,
 				objectStorageAccessKey: R2_ACCESS_KEY!,
@@ -213,6 +216,14 @@ describe('Multipart Upload (Cluster)', () => {
 				objectStorageSetPublicRead: false,
 				objectStorageRegion: 'auto',
 				objectStorageBaseUrl: `${R2_ENDPOINT}/${R2_BUCKET}`,
+				// Staging S3 settings (same R2 account, different bucket)
+				objectStorageStagingBucket: R2_STAGING_BUCKET!,
+				objectStorageStagingEndpoint: endpoint.host,
+				objectStorageStagingAccessKey: R2_ACCESS_KEY!,
+				objectStorageStagingSecretKey: R2_SECRET_KEY!,
+				objectStorageStagingUseSSL: endpoint.protocol === 'https:',
+				objectStorageStagingS3ForcePathStyle: false,
+				objectStorageStagingUseProxy: false,
 			}, admin);
 		}, 1000 * 30);
 
@@ -222,6 +233,8 @@ describe('Multipart Upload (Cluster)', () => {
 			}
 			await apiTo('instance-1', 'admin/update-meta', {
 				useObjectStorage: false,
+				useMultipartUpload: false,
+				objectStorageStagingBucket: null,
 			}, admin);
 		});
 

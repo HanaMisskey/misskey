@@ -6,7 +6,7 @@
 import { URL } from 'node:url';
 import * as http from 'node:http';
 import * as https from 'node:https';
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import {
 	AbortMultipartUploadCommand,
 	CompleteMultipartUploadCommand,
@@ -21,8 +21,6 @@ import {
 import { Upload } from '@aws-sdk/lib-storage';
 import { NodeHttpHandler, NodeHttpHandlerOptions } from '@smithy/node-http-handler';
 import type { MiMeta } from '@/models/Meta.js';
-import { DI } from '@/di-symbols.js';
-import type { Config } from '@/config.js';
 import { HttpRequestService } from '@/core/HttpRequestService.js';
 import { bindThis } from '@/decorators.js';
 import type {
@@ -41,9 +39,6 @@ import type { Readable } from 'node:stream';
 @Injectable()
 export class S3Service {
 	constructor(
-		@Inject(DI.config)
-		private config: Config,
-
 		private httpRequestService: HttpRequestService,
 	) {
 	}
@@ -101,31 +96,34 @@ export class S3Service {
 	}
 
 	@bindThis
-	public getStagingS3Client(): S3Client | null {
-		const staging = this.config.objectStorageStaging;
-		if (!staging) return null;
+	public getStagingS3Client(meta: MiMeta): S3Client | null {
+		if (!meta.objectStorageStagingBucket) return null;
 
-		const u = staging.endpoint
-			? `${staging.useSSL ? 'https' : 'http'}://${staging.endpoint}`
-			: `${staging.useSSL ? 'https' : 'http'}://example.net`;
+		const endpoint = meta.objectStorageStagingEndpoint;
+		const useSSL = meta.objectStorageStagingUseSSL;
+		const port = meta.objectStorageStagingPort;
 
-		const agent = this.httpRequestService.getAgentByUrl(new URL(u), !(staging.useProxy ?? false), true);
+		const u = endpoint
+			? `${useSSL ? 'https' : 'http'}://${endpoint}${port ? `:${port}` : ''}`
+			: `${useSSL ? 'https' : 'http'}://example.net`;
+
+		const agent = this.httpRequestService.getAgentByUrl(new URL(u), !meta.objectStorageStagingUseProxy, true);
 		const handlerOption: NodeHttpHandlerOptions = {};
-		if (staging.useSSL) {
+		if (useSSL) {
 			handlerOption.httpsAgent = agent as https.Agent;
 		} else {
 			handlerOption.httpAgent = agent as http.Agent;
 		}
 
 		return new S3Client({
-			endpoint: staging.endpoint ? u : undefined,
-			credentials: (staging.accessKey && staging.secretKey) ? {
-				accessKeyId: staging.accessKey,
-				secretAccessKey: staging.secretKey,
+			endpoint: endpoint ? u : undefined,
+			credentials: (meta.objectStorageStagingAccessKey && meta.objectStorageStagingSecretKey) ? {
+				accessKeyId: meta.objectStorageStagingAccessKey,
+				secretAccessKey: meta.objectStorageStagingSecretKey,
 			} : undefined,
-			region: staging.region || undefined,
-			tls: staging.useSSL ?? false,
-			forcePathStyle: staging.endpoint ? (staging.s3ForcePathStyle ?? false) : false,
+			region: meta.objectStorageStagingRegion || undefined,
+			tls: useSSL,
+			forcePathStyle: endpoint ? meta.objectStorageStagingS3ForcePathStyle : false,
 			requestHandler: new NodeHttpHandler(handlerOption),
 			requestChecksumCalculation: 'WHEN_REQUIRED',
 			responseChecksumValidation: 'WHEN_REQUIRED',

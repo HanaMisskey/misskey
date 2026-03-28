@@ -3,7 +3,6 @@ import * as Path from 'node:path';
 import { Inject, Injectable } from '@nestjs/common';
 import type { S3Client } from '@aws-sdk/client-s3';
 import { DI } from '@/di-symbols.js';
-import type { Config } from '@/config.js';
 import type { MiMeta } from '@/models/Meta.js';
 import { S3Service } from '@/core/S3Service.js';
 import { InternalStorageService } from '@/core/InternalStorageService.js';
@@ -18,9 +17,6 @@ export class CleanExpiredMultipartUploadsProcessorService {
 	private logger: Logger;
 
 	constructor(
-		@Inject(DI.config)
-		private config: Config,
-
 		@Inject(DI.meta)
 		private meta: MiMeta,
 
@@ -86,12 +82,12 @@ export class CleanExpiredMultipartUploadsProcessorService {
 		});
 
 		// Staging S3 (if configured)
-		if (this.config.objectStorageStaging) {
-			const stagingClient = this.s3Service.getStagingS3Client();
+		if (this.meta.objectStorageStagingBucket) {
+			const stagingClient = this.s3Service.getStagingS3Client(this.meta);
 			if (stagingClient) {
 				targets.push({
 					client: stagingClient,
-					bucket: this.config.objectStorageStaging.bucket,
+					bucket: this.meta.objectStorageStagingBucket,
 					label: 'staging',
 				});
 			}

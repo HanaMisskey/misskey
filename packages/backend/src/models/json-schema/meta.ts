@@ -361,6 +361,10 @@ export const packedMetaDetailedOnlySchema = {
 					type: 'boolean',
 					optional: false, nullable: false,
 				},
+				multipartUpload: {
+					type: 'boolean',
+					optional: false, nullable: false,
+				},
 				serviceWorker: {
 					type: 'boolean',
 					optional: false, nullable: false,

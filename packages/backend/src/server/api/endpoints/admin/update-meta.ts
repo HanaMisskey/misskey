@@ -129,6 +129,16 @@ export const paramDef = {
 		objectStorageUseProxy: { type: 'boolean' },
 		objectStorageSetPublicRead: { type: 'boolean' },
 		objectStorageS3ForcePathStyle: { type: 'boolean' },
+		useMultipartUpload: { type: 'boolean' },
+		objectStorageStagingBucket: { type: 'string', nullable: true },
+		objectStorageStagingEndpoint: { type: 'string', nullable: true },
+		objectStorageStagingRegion: { type: 'string', nullable: true },
+		objectStorageStagingAccessKey: { type: 'string', nullable: true },
+		objectStorageStagingSecretKey: { type: 'string', nullable: true },
+		objectStorageStagingPort: { type: 'integer', nullable: true },
+		objectStorageStagingUseSSL: { type: 'boolean' },
+		objectStorageStagingUseProxy: { type: 'boolean' },
+		objectStorageStagingS3ForcePathStyle: { type: 'boolean' },
 		enableIpLogging: { type: 'boolean' },
 		enableActiveEmailValidation: { type: 'boolean' },
 		enableVerifymailApi: { type: 'boolean' },
@@ -553,6 +563,46 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 
 			if (ps.objectStorageS3ForcePathStyle !== undefined) {
 				set.objectStorageS3ForcePathStyle = ps.objectStorageS3ForcePathStyle;
+			}
+
+			if (ps.useMultipartUpload !== undefined) {
+				set.useMultipartUpload = ps.useMultipartUpload;
+			}
+
+			if (ps.objectStorageStagingBucket !== undefined) {
+				set.objectStorageStagingBucket = ps.objectStorageStagingBucket;
+			}
+
+			if (ps.objectStorageStagingEndpoint !== undefined) {
+				set.objectStorageStagingEndpoint = ps.objectStorageStagingEndpoint;
+			}
+
+			if (ps.objectStorageStagingRegion !== undefined) {
+				set.objectStorageStagingRegion = ps.objectStorageStagingRegion;
+			}
+
+			if (ps.objectStorageStagingAccessKey !== undefined) {
+				set.objectStorageStagingAccessKey = ps.objectStorageStagingAccessKey;
+			}
+
+			if (ps.objectStorageStagingSecretKey !== undefined) {
+				set.objectStorageStagingSecretKey = ps.objectStorageStagingSecretKey;
+			}
+
+			if (ps.objectStorageStagingPort !== undefined) {
+				set.objectStorageStagingPort = ps.objectStorageStagingPort;
+			}
+
+			if (ps.objectStorageStagingUseSSL !== undefined) {
+				set.objectStorageStagingUseSSL = ps.objectStorageStagingUseSSL;
+			}
+
+			if (ps.objectStorageStagingUseProxy !== undefined) {
+				set.objectStorageStagingUseProxy = ps.objectStorageStagingUseProxy;
+			}
+
+			if (ps.objectStorageStagingS3ForcePathStyle !== undefined) {
+				set.objectStorageStagingS3ForcePathStyle = ps.objectStorageStagingS3ForcePathStyle;
 			}
 
 			if (ps.deeplAuthKey !== undefined) {

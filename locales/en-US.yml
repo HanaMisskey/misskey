@@ -3418,6 +3418,8 @@ _hana:
   showOnX: "View on {x}"
   takingTooLongToLoad: "It seems to be taking a long time to load. Are you looking for these?"
   enableMultipartUpload: "Enable multipart upload for large files (>10MB)"
+  stagingObjectStorage: "Staging Object Storage"
+  stagingObjectStorageDesc: "A separate S3-compatible storage used to temporarily store chunks during multipart uploads. If not configured, chunks are uploaded directly to the production storage."
   _inDevelopment:
     title: "This feature is under development"
     description: "HanaMisskey is packed with new features currently in development! Stay tuned to see what exciting features will be implemented."

@@ -489,6 +489,61 @@ export class MiMeta {
 	@Column('boolean', {
 		default: false,
 	})
+	public useMultipartUpload: boolean;
+
+	@Column('varchar', {
+		length: 1024,
+		nullable: true,
+	})
+	public objectStorageStagingBucket: string | null;
+
+	@Column('varchar', {
+		length: 1024,
+		nullable: true,
+	})
+	public objectStorageStagingEndpoint: string | null;
+
+	@Column('varchar', {
+		length: 1024,
+		nullable: true,
+	})
+	public objectStorageStagingRegion: string | null;
+
+	@Column('varchar', {
+		length: 1024,
+		nullable: true,
+	})
+	public objectStorageStagingAccessKey: string | null;
+
+	@Column('varchar', {
+		length: 1024,
+		nullable: true,
+	})
+	public objectStorageStagingSecretKey: string | null;
+
+	@Column('integer', {
+		nullable: true,
+	})
+	public objectStorageStagingPort: number | null;
+
+	@Column('boolean', {
+		default: true,
+	})
+	public objectStorageStagingUseSSL: boolean;
+
+	@Column('boolean', {
+		default: true,
+	})
+	public objectStorageStagingUseProxy: boolean;
+
+	@Column('boolean', {
+		default: true,
+	})
+	public objectStorageStagingS3ForcePathStyle: boolean;
+
+	@Column('boolean', {
+		default: false,
+	})
 	public enableIpLogging: boolean;
 
 	@Column('boolean', {

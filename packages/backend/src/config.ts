@@ -53,16 +53,6 @@ type Source = {
 	redisForJobQueue?: RedisOptionsSource;
 	redisForTimelines?: RedisOptionsSource;
 	redisForReactions?: RedisOptionsSource;
-	objectStorageStaging?: {
-		bucket: string;
-		endpoint?: string;
-		region?: string;
-		accessKey?: string;
-		secretKey?: string;
-		useSSL?: boolean;
-		useProxy?: boolean;
-		s3ForcePathStyle?: boolean;
-	};
 	fulltextSearch?: {
 		provider?: FulltextSearchProvider;
 	};
@@ -231,16 +221,6 @@ export type Config = {
 	redisForJobQueue: RedisOptions & RedisOptionsSource;
 	redisForTimelines: RedisOptions & RedisOptionsSource;
 	redisForReactions: RedisOptions & RedisOptionsSource;
-	objectStorageStaging: {
-		bucket: string;
-		endpoint?: string;
-		region?: string;
-		accessKey?: string;
-		secretKey?: string;
-		useSSL?: boolean;
-		useProxy?: boolean;
-		s3ForcePathStyle?: boolean;
-	} | undefined;
 	sentryForBackend: { options: Partial<Sentry.NodeOptions>; enableNodeProfiling: boolean; } | undefined;
 	sentryForFrontend: {
 		options: Partial<SentryVue.BrowserOptions> & { dsn: string };
@@ -342,7 +322,6 @@ export function loadConfig(): Config {
 		redisForJobQueue: config.redisForJobQueue ? convertRedisOptions(config.redisForJobQueue, host) : redis,
 		redisForTimelines: config.redisForTimelines ? convertRedisOptions(config.redisForTimelines, host) : redis,
 		redisForReactions: config.redisForReactions ? convertRedisOptions(config.redisForReactions, host) : redis,
-		objectStorageStaging: config.objectStorageStaging,
 		sentryForBackend: config.sentryForBackend,
 		sentryForFrontend: config.sentryForFrontend,
 		id: config.id,

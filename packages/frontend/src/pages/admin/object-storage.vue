@@ -91,6 +91,59 @@ SPDX-License-Identifier: AGPL-3.0-only
 							<template #caption><SearchText>{{ i18n.ts.s3ForcePathStyleDesc }}</SearchText></template>
 						</MkSwitch>
 					</SearchMarker>
+
+					<SearchMarker>
+						<MkSwitch v-model="useMultipartUpload">
+							<template #label><SearchLabel>{{ i18n.ts._hana.enableMultipartUpload }}</SearchLabel></template>
+						</MkSwitch>
+					</SearchMarker>
+
+					<template v-if="useMultipartUpload">
+						<MkFolder>
+							<template #icon><i class="ti ti-cloud-upload"></i></template>
+							<template #label>{{ i18n.ts._hana.stagingObjectStorage }}</template>
+							<template #caption>{{ i18n.ts._hana.stagingObjectStorageDesc }}</template>
+
+							<div class="_gaps_m">
+								<MkInput v-model="objectStorageStagingBucket">
+									<template #label>{{ i18n.ts.objectStorageBucket }}</template>
+								</MkInput>
+
+								<MkInput v-model="objectStorageStagingEndpoint" :placeholder="'example.com'">
+									<template #label>{{ i18n.ts.objectStorageEndpoint }}</template>
+									<template #prefix>https://</template>
+								</MkInput>
+
+								<MkInput v-model="objectStorageStagingRegion">
+									<template #label>{{ i18n.ts.objectStorageRegion }}</template>
+								</MkInput>
+
+								<FormSplit :minWidth="280">
+									<MkInput v-model="objectStorageStagingAccessKey">
+										<template #prefix><i class="ti ti-key"></i></template>
+										<template #label>Access key</template>
+									</MkInput>
+
+									<MkInput v-model="objectStorageStagingSecretKey" type="password">
+										<template #prefix><i class="ti ti-key"></i></template>
+										<template #label>Secret key</template>
+									</MkInput>
+								</FormSplit>
+
+								<MkSwitch v-model="objectStorageStagingUseSSL">
+									<template #label>{{ i18n.ts.objectStorageUseSSL }}</template>
+								</MkSwitch>
+
+								<MkSwitch v-model="objectStorageStagingUseProxy">
+									<template #label>{{ i18n.ts.objectStorageUseProxy }}</template>
+								</MkSwitch>
+
+								<MkSwitch v-model="objectStorageStagingS3ForcePathStyle">
+									<template #label>s3ForcePathStyle</template>
+								</MkSwitch>
+							</div>
+						</MkFolder>
+					</template>
 				</template>
 			</div>
 		</SearchMarker>
@@ -109,6 +162,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 import { ref, computed } from 'vue';
 import MkSwitch from '@/components/MkSwitch.vue';
 import MkInput from '@/components/MkInput.vue';
+import MkFolder from '@/components/MkFolder.vue';
 import FormSplit from '@/components/form/split.vue';
 import * as os from '@/os.js';
 import { misskeyApi } from '@/utility/misskey-api.js';
@@ -132,6 +186,15 @@ const objectStorageUseSSL = ref(meta.objectStorageUseSSL);
 const objectStorageUseProxy = ref(meta.objectStorageUseProxy);
 const objectStorageSetPublicRead = ref(meta.objectStorageSetPublicRead);
 const objectStorageS3ForcePathStyle = ref(meta.objectStorageS3ForcePathStyle);
+const useMultipartUpload = ref(meta.useMultipartUpload);
+const objectStorageStagingBucket = ref(meta.objectStorageStagingBucket);
+const objectStorageStagingEndpoint = ref(meta.objectStorageStagingEndpoint);
+const objectStorageStagingRegion = ref(meta.objectStorageStagingRegion);
+const objectStorageStagingAccessKey = ref(meta.objectStorageStagingAccessKey);
+const objectStorageStagingSecretKey = ref(meta.objectStorageStagingSecretKey);
+const objectStorageStagingUseSSL = ref(meta.objectStorageStagingUseSSL);
+const objectStorageStagingUseProxy = ref(meta.objectStorageStagingUseProxy);
+const objectStorageStagingS3ForcePathStyle = ref(meta.objectStorageStagingS3ForcePathStyle);
 
 function save() {
 	os.apiWithDialog('admin/update-meta', {
@@ -148,6 +211,16 @@ function save() {
 		objectStorageUseProxy: objectStorageUseProxy.value,
 		objectStorageSetPublicRead: objectStorageSetPublicRead.value,
 		objectStorageS3ForcePathStyle: objectStorageS3ForcePathStyle.value,
+		useMultipartUpload: useMultipartUpload.value,
+		objectStorageStagingBucket: objectStorageStagingBucket.value,
+		objectStorageStagingEndpoint: objectStorageStagingEndpoint.value,
+		objectStorageStagingRegion: objectStorageStagingRegion.value,
+		objectStorageStagingAccessKey: objectStorageStagingAccessKey.value,
+		objectStorageStagingSecretKey: objectStorageStagingSecretKey.value,
+		objectStorageStagingPort: null,
+		objectStorageStagingUseSSL: objectStorageStagingUseSSL.value,
+		objectStorageStagingUseProxy: objectStorageStagingUseProxy.value,
+		objectStorageStagingS3ForcePathStyle: objectStorageStagingS3ForcePathStyle.value,
 	}).then(() => {
 		fetchInstance(true);
 	});

@@ -41,7 +41,7 @@ export function uploadFile(file: File | Blob, options: {
 	caption?: string | null;
 	onProgress?: (ctx: { total: number; loaded: number; }) => void;
 } = {}): UploadReturnType {
-	if (file.size > MULTIPART_THRESHOLD && prefer.s['experimental.enableMultipartUpload']) {
+	if (file.size > MULTIPART_THRESHOLD && prefer.s['experimental.enableMultipartUpload'] && (instance.features as any)?.multipartUpload) {
 		return uploadFileMultipart(file, options);
 	}
 

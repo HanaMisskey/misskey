@@ -3552,6 +3552,8 @@ _hana:
   showOnX: "{x}で見る"
   takingTooLongToLoad: "読み込みに時間がかかっています。"
   enableMultipartUpload: "大きなファイル（10MB超）の分割アップロードを有効にする"
+  stagingObjectStorage: "ステージング用オブジェクトストレージ"
+  stagingObjectStorageDesc: "マルチパートアップロード時のチャンクを一時保存する別のS3互換ストレージです。設定しない場合は本番のオブジェクトストレージに直接アップロードされます。"
   _roles:
     createdBefore: "作成日時（タイムスタンプ）が～以前"
     durationBasedLockdownAvailable: "期間ベースのロックダウンの利用を許可"

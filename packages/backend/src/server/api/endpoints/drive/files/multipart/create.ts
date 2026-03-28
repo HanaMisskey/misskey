@@ -5,6 +5,8 @@ import { MultipartUploadService } from '@/core/MultipartUploadService.js';
 import { RoleService } from '@/core/RoleService.js';
 import { DriveFileEntityService } from '@/core/entities/DriveFileEntityService.js';
 import { DB_MAX_IMAGE_COMMENT_LENGTH } from '@/const.js';
+import { DI } from '@/di-symbols.js';
+import { MiMeta } from '@/models/_.js';
 import { ApiError } from '../../../../error.js';
 
 export const meta = {
@@ -46,6 +48,11 @@ export const meta = {
 			id: '6e7bdb48-efaf-4dc9-a6dd-e0e5cd1e63cf',
 			httpStatusCode: 413,
 		},
+		multipartUploadDisabled: {
+			message: 'Multipart upload is disabled on this server.',
+			code: 'MULTIPART_UPLOAD_DISABLED',
+			id: 'a3c9b8f1-7e2d-4a5c-b6d0-8f1e2a3b4c5d',
+		},
 	},
 } as const;
 
@@ -66,11 +73,18 @@ export const paramDef = {
 @Injectable()
 export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-disable-line import/no-default-export
 	constructor(
+		@Inject(DI.meta)
+		private serverSettings: MiMeta,
+
 		private multipartUploadService: MultipartUploadService,
 		private roleService: RoleService,
 		private driveFileEntityService: DriveFileEntityService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
+			if (!this.serverSettings.useMultipartUpload) {
+				throw new ApiError(meta.errors.multipartUploadDisabled);
+			}
+
 			// Normalize file name (consistent with drive/files/create)
 			let name = ps.name ?? null;
 			if (name != null) {
