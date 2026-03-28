@@ -4,6 +4,8 @@ cd "$(dirname "$0")"
 
 echo "=== Generating certificates for cluster.test ==="
 
+mkdir -p certificates
+
 # Root CA
 openssl genrsa -out certificates/rootCA.key 4096 2>/dev/null
 openssl req -x509 -new -nodes -key certificates/rootCA.key -sha256 -days 3650 \
