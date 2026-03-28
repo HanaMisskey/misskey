@@ -1,18 +1,6 @@
-/**
- * @typedef {import('typeorm').MigrationInterface} MigrationInterface
- * @typedef {import('typeorm').QueryRunner} QueryRunner
- */
-
-/**
- * @class
- * @implements {MigrationInterface}
- */
-module.exports = class AddMultipartUploadSettings1774732586238 {
+export class AddMultipartUploadSettings1774732586238 {
     name = 'AddMultipartUploadSettings1774732586238'
 
-    /**
-     * @param {QueryRunner} queryRunner
-     */
     async up(queryRunner) {
         await queryRunner.query(`ALTER TABLE "meta" ADD "useMultipartUpload" boolean NOT NULL DEFAULT false`);
         await queryRunner.query(`ALTER TABLE "meta" ADD "objectStorageStagingBucket" character varying(1024)`);
@@ -26,9 +14,6 @@ module.exports = class AddMultipartUploadSettings1774732586238 {
         await queryRunner.query(`ALTER TABLE "meta" ADD "objectStorageStagingS3ForcePathStyle" boolean NOT NULL DEFAULT true`);
     }
 
-    /**
-     * @param {QueryRunner} queryRunner
-     */
     async down(queryRunner) {
         await queryRunner.query(`ALTER TABLE "meta" DROP COLUMN "objectStorageStagingS3ForcePathStyle"`);
         await queryRunner.query(`ALTER TABLE "meta" DROP COLUMN "objectStorageStagingUseProxy"`);
