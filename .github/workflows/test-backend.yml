@@ -171,10 +171,33 @@ jobs:
         run: git diff --exit-code pnpm-lock.yaml
       - name: Copy Configure
         run: cp .github/misskey/test.yml .config
+      - name: Generate staging config
+        if: env.R2_ENDPOINT != ''
+        run: |
+          cp .config/test.yml .config/test-with-staging.yml
+          cat >> .config/test-with-staging.yml << EOF
+
+          objectStorageStaging:
+            bucket: ${{ secrets.R2_STAGING_BUCKET }}
+            endpoint: $(echo $R2_ENDPOINT | sed 's|https://||')
+            region: auto
+            accessKey: ${{ secrets.R2_ACCESS_KEY }}
+            secretKey: ${{ secrets.R2_SECRET_KEY }}
+            useSSL: true
+            s3ForcePathStyle: false
+          EOF
+        env:
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
       - name: Build
         run: pnpm build
       - name: Test
         run: pnpm --filter backend test-and-coverage:e2e
+        env:
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_ACCESS_KEY: ${{ secrets.R2_ACCESS_KEY }}
+          R2_SECRET_KEY: ${{ secrets.R2_SECRET_KEY }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          R2_STAGING_BUCKET: ${{ secrets.R2_STAGING_BUCKET }}
       - name: Upload to Codecov
         uses: codecov/codecov-action@v5
         with:

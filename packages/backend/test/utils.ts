@@ -694,3 +694,53 @@ export async function captureWebhook<T = SystemWebhookPayload>(postAction: () =>
 
 	return JSON.parse(result) as T;
 }
+
+// --- Multipart Upload Helpers ---
+
+export const createMultipartSession = async (user: UserToken, params: {
+	totalParts: number;
+	name?: string | null;
+	totalSize?: number | null;
+	comment?: string | null;
+	folderId?: string | null;
+	isSensitive?: boolean;
+	force?: boolean;
+}) => {
+	return api('drive/files/multipart/create', params as any, user);
+};
+
+export const uploadPart = async (
+	user: UserToken,
+	sessionId: string,
+	partNumber: number,
+	blob: Blob,
+): Promise<{ status: number; body: any }> => {
+	const formData = new FormData();
+	const headers: Record<string, string> = {};
+
+	if (user.bearer) {
+		headers.Authorization = `Bearer ${user.token}`;
+	} else {
+		formData.append('i', user.token);
+	}
+	formData.append('sessionId', sessionId);
+	formData.append('partNumber', String(partNumber));
+	formData.append('file', blob, `part-${partNumber}`);
+
+	const res = await relativeFetch('api/drive/files/multipart/upload-part', {
+		method: 'POST',
+		body: formData,
+		headers,
+	});
+
+	const body = res.status !== 204 ? await res.json() : null;
+	return { status: res.status, body };
+};
+
+export const completeMultipart = async (user: UserToken, sessionId: string) => {
+	return api('drive/files/multipart/complete', { sessionId } as any, user);
+};
+
+export const abortMultipart = async (user: UserToken, sessionId: string) => {
+	return api('drive/files/multipart/abort', { sessionId } as any, user);
+};
