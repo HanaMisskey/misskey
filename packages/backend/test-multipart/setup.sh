@@ -24,4 +24,21 @@ rm -f certificates/cluster.test.csr certificates/rootCA.srl
 echo "=== Generating Misskey config ==="
 cp .config/example.default.yml .config/default.yml
 
+# Append staging S3 config if R2 staging env vars are set
+if [ -n "${R2_ENDPOINT:-}" ] && [ -n "${R2_STAGING_BUCKET:-}" ]; then
+  R2_HOST=$(echo "$R2_ENDPOINT" | sed 's|https://||' | sed 's|http://||')
+  cat >> .config/default.yml << EOF
+
+objectStorageStaging:
+  bucket: ${R2_STAGING_BUCKET}
+  endpoint: ${R2_HOST}
+  region: auto
+  accessKey: ${R2_ACCESS_KEY}
+  secretKey: ${R2_SECRET_KEY}
+  useSSL: true
+  s3ForcePathStyle: false
+EOF
+  echo "=== Staging S3 config appended ==="
+fi
+
 echo "=== Done ==="

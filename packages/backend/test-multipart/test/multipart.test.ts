@@ -6,7 +6,9 @@ const R2_ENDPOINT = process.env.R2_ENDPOINT;
 const R2_ACCESS_KEY = process.env.R2_ACCESS_KEY;
 const R2_SECRET_KEY = process.env.R2_SECRET_KEY;
 const R2_BUCKET = process.env.R2_BUCKET;
+const R2_STAGING_BUCKET = process.env.R2_STAGING_BUCKET;
 const hasR2 = !!(R2_ENDPOINT && R2_ACCESS_KEY && R2_SECRET_KEY && R2_BUCKET);
+const hasR2Staging = !!(hasR2 && R2_STAGING_BUCKET);
 
 describe('Multipart Upload (Cluster)', () => {
 	let admin: misskey.entities.SignupResponse;
@@ -183,6 +185,67 @@ describe('Multipart Upload (Cluster)', () => {
 			assert.strictEqual(file.status, 200);
 			assert.ok(file.body.id);
 			assert.strictEqual(file.body.size, part1.size + part2.size + part3.size);
+			assert.ok(file.body.url);
+
+			createdFileIds.push(file.body.id);
+		}, 1000 * 60 * 3);
+	});
+
+	// --- Staging S3 Tests (R2 → R2) ---
+	const describeStaging = hasR2Staging ? describe : describe.skip;
+
+	describeStaging('ステージングS3 + クラスタ: R2 → R2', () => {
+		const createdFileIds: string[] = [];
+
+		beforeAll(async () => {
+			// Enable object storage (staging config is already in default.yml via setup.sh)
+			const endpoint = new URL(R2_ENDPOINT!);
+			await apiTo('instance-1', 'admin/update-meta', {
+				useObjectStorage: true,
+				objectStorageBucket: R2_BUCKET!,
+				objectStorageEndpoint: endpoint.host,
+				objectStorageAccessKey: R2_ACCESS_KEY!,
+				objectStorageSecretKey: R2_SECRET_KEY!,
+				objectStorageUseSSL: endpoint.protocol === 'https:',
+				objectStorageS3ForcePathStyle: false,
+				objectStorageSetPublicRead: false,
+				objectStorageRegion: 'auto',
+				objectStorageBaseUrl: `${R2_ENDPOINT}/${R2_BUCKET}`,
+			}, admin);
+		}, 1000 * 30);
+
+		afterAll(async () => {
+			for (const fileId of createdFileIds) {
+				await apiViaLB('drive/files/delete', { fileId }, admin);
+			}
+			await apiTo('instance-1', 'admin/update-meta', {
+				useObjectStorage: false,
+			}, admin);
+		});
+
+		test('ステージングS3経由でパートが分散してもcompleteが成功する', async () => {
+			const part1 = generateRandomBlob(5 * 1024 * 1024 + 100 * 1024);
+			const part2 = generateRandomBlob(1024 * 1024);
+
+			// create on instance-1
+			const session = await apiTo('instance-1', 'drive/files/multipart/create', {
+				totalParts: 2, name: 'staging-cluster-test.bin',
+			}, admin);
+			assert.strictEqual(session.status, 200);
+			const sessionId = session.body.sessionId;
+
+			// Upload parts across instances (chunks go to staging S3)
+			await uploadPartTo('instance-2', admin, sessionId, 1, part1);
+			await uploadPartTo('instance-1', admin, sessionId, 2, part2);
+
+			// Complete from instance-2 (assembles on staging, then transfers to production)
+			const file = await apiTo('instance-2', 'drive/files/multipart/complete', {
+				sessionId,
+			}, admin);
+			assert.strictEqual(file.status, 200);
+			assert.ok(file.body.id);
+			assert.strictEqual(file.body.size, part1.size + part2.size);
+			// URL should point to production bucket, not staging
 			assert.ok(file.body.url);
 
 			createdFileIds.push(file.body.id);
