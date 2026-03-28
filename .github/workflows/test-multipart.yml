@@ -45,10 +45,22 @@ jobs:
           cd packages/backend/test-multipart
           bash setup.sh
           sudo chmod 644 ./certificates/*.key
+        env:
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_ACCESS_KEY: ${{ secrets.R2_ACCESS_KEY }}
+          R2_SECRET_KEY: ${{ secrets.R2_SECRET_KEY }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          R2_STAGING_BUCKET: ${{ secrets.R2_STAGING_BUCKET }}
       - name: Start cluster
         run: |
           cd packages/backend/test-multipart
           docker compose up -d --scale tester=0
+        env:
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_ACCESS_KEY: ${{ secrets.R2_ACCESS_KEY }}
+          R2_SECRET_KEY: ${{ secrets.R2_SECRET_KEY }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          R2_STAGING_BUCKET: ${{ secrets.R2_STAGING_BUCKET }}
       - name: Wait for cluster health
         run: |
           cd packages/backend/test-multipart
