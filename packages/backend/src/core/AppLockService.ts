@@ -41,4 +41,9 @@ export class AppLockService {
 	public getChartInsertLock(lockKey: string, timeout = 30 * 1000): Promise<() => void> {
 		return this.lock(`chart-insert:${lockKey}`, timeout);
 	}
+
+	@bindThis
+	public getLock(key: string, timeout = 30 * 1000): Promise<() => void> {
+		return this.lock(key, timeout);
+	}
 }

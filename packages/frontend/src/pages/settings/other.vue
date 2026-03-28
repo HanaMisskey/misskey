@@ -110,6 +110,9 @@ SPDX-License-Identifier: AGPL-3.0-only
 						<MkSwitch v-model="enableWebTranslatorApi">
 							<template #label>Enable in-browser translator API</template>
 						</MkSwitch>
+						<MkSwitch v-model="enableMultipartUpload">
+							<template #label>{{ i18n.ts._hana.enableMultipartUpload }}</template>
+						</MkSwitch>
 					</div>
 				</MkFolder>
 			</SearchMarker>
@@ -191,6 +194,7 @@ const enableWasmEmojiSearch = computed(hanaStore.makeGetterSetter('enableWasmEmo
 const enableFolderPageView = prefer.model('experimental.enableFolderPageView');
 const enableHapticFeedback = prefer.model('experimental.enableHapticFeedback');
 const enableWebTranslatorApi = prefer.model('experimental.enableWebTranslatorApi');
+const enableMultipartUpload = prefer.model('experimental.enableMultipartUpload');
 
 watch([
 	skipNoteRender,

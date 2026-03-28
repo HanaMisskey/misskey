@@ -41,6 +41,7 @@ import { SystemAccountService } from './SystemAccountService.js';
 import { InternalStorageService } from './InternalStorageService.js';
 import { MetaService } from './MetaService.js';
 import { MfmService } from './MfmService.js';
+import { MultipartUploadService } from './MultipartUploadService.js';
 import { ModerationLogService } from './ModerationLogService.js';
 import { NoteCreateService } from './NoteCreateService.js';
 import { NoteDeleteService } from './NoteDeleteService.js';
@@ -187,6 +188,7 @@ const $InternalStorageService: Provider = { provide: 'InternalStorageService', u
 const $MetaService: Provider = { provide: 'MetaService', useExisting: MetaService };
 const $MfmService: Provider = { provide: 'MfmService', useExisting: MfmService };
 const $ModerationLogService: Provider = { provide: 'ModerationLogService', useExisting: ModerationLogService };
+const $MultipartUploadService: Provider = { provide: 'MultipartUploadService', useExisting: MultipartUploadService };
 const $NoteCreateService: Provider = { provide: 'NoteCreateService', useExisting: NoteCreateService };
 const $NoteDeleteService: Provider = { provide: 'NoteDeleteService', useExisting: NoteDeleteService };
 const $NotePiningService: Provider = { provide: 'NotePiningService', useExisting: NotePiningService };
@@ -342,6 +344,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		MetaService,
 		MfmService,
 		ModerationLogService,
+		MultipartUploadService,
 		NoteCreateService,
 		NoteDeleteService,
 		NotePiningService,
@@ -493,6 +496,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$MetaService,
 		$MfmService,
 		$ModerationLogService,
+		$MultipartUploadService,
 		$NoteCreateService,
 		$NoteDeleteService,
 		$NotePiningService,
@@ -645,6 +649,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		MetaService,
 		MfmService,
 		ModerationLogService,
+		MultipartUploadService,
 		NoteCreateService,
 		NoteDeleteService,
 		NotePiningService,
@@ -795,6 +800,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$MetaService,
 		$MfmService,
 		$ModerationLogService,
+		$MultipartUploadService,
 		$NoteCreateService,
 		$NoteDeleteService,
 		$NotePiningService,

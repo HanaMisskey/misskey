@@ -29,6 +29,11 @@ export class UploadAbortedError extends Error {
 	}
 }
 
+const MULTIPART_THRESHOLD = 10 * 1024 * 1024; // 10MB
+const MULTIPART_PART_SIZE = 8 * 1024 * 1024; // 8MB
+const MULTIPART_CONCURRENCY = 3;
+const MULTIPART_MAX_RETRIES = 3;
+
 export function uploadFile(file: File | Blob, options: {
 	name?: string;
 	folderId?: string | null;
@@ -36,6 +41,10 @@ export function uploadFile(file: File | Blob, options: {
 	caption?: string | null;
 	onProgress?: (ctx: { total: number; loaded: number; }) => void;
 } = {}): UploadReturnType {
+	if (file.size > MULTIPART_THRESHOLD && prefer.s['experimental.enableMultipartUpload']) {
+		return uploadFileMultipart(file, options);
+	}
+
 	const xhr = new XMLHttpRequest();
 	const abortController = new AbortController();
 	const { signal } = abortController;
@@ -311,4 +320,180 @@ export async function selectDriveFolder(initialFolder: Misskey.entities.DriveFol
 			closed: () => dispose(),
 		});
 	});
+}
+
+function uploadFileMultipart(file: File | Blob, options: {
+	name?: string;
+	folderId?: string | null;
+	isSensitive?: boolean;
+	caption?: string | null;
+	onProgress?: (ctx: { total: number; loaded: number; }) => void;
+} = {}): UploadReturnType {
+	const abortController = new AbortController();
+	const { signal } = abortController;
+	let sessionId: string | null = null;
+
+	const filePromise = (async () => {
+		if ($i == null) throw new Error('Not signed in');
+
+		if ((file.size > instance.maxFileSize) || (file.size > ($i.policies.maxFileSizeMb * 1024 * 1024))) {
+			os.alert({
+				type: 'error',
+				title: i18n.ts.failedToUpload,
+				text: i18n.ts.cannotUploadBecauseExceedsFileSizeLimit,
+			});
+			throw new UploadAbortedError();
+		}
+
+		signal.throwIfAborted();
+
+		// 1. Create session
+		const totalParts = Math.ceil(file.size / MULTIPART_PART_SIZE);
+		const fileName = options.name ?? (file instanceof File ? file.name : 'untitled');
+
+		const session = await misskeyApi('drive/files/multipart/create', {
+			totalParts,
+			name: fileName,
+			totalSize: file.size,
+			comment: options.caption ?? null,
+			folderId: options.folderId ?? null,
+			isSensitive: options.isSensitive ?? false,
+			force: true,
+		});
+		sessionId = session.sessionId;
+
+		signal.throwIfAborted();
+
+		// 2. Slice file into parts
+		const parts: { partNumber: number; blob: Blob }[] = [];
+		for (let i = 0; i < totalParts; i++) {
+			const start = i * MULTIPART_PART_SIZE;
+			const end = Math.min(start + MULTIPART_PART_SIZE, file.size);
+			parts.push({ partNumber: i + 1, blob: file.slice(start, end) });
+		}
+
+		// 3. Upload parts in parallel with concurrency limit
+		const completedPartSizes: number[] = new Array(totalParts).fill(0);
+
+		const reportProgress = () => {
+			if (options.onProgress) {
+				const loaded = completedPartSizes.reduce((a, b) => a + b, 0);
+				options.onProgress({ total: file.size, loaded });
+			}
+		};
+
+		const uploadPart = async (part: { partNumber: number; blob: Blob }): Promise<void> => {
+			for (let attempt = 0; attempt < MULTIPART_MAX_RETRIES; attempt++) {
+				signal.throwIfAborted();
+				try {
+					const formData = new FormData();
+					formData.append('i', $i!.token);
+					formData.append('sessionId', sessionId!);
+					formData.append('partNumber', String(part.partNumber));
+					formData.append('file', part.blob, `part-${part.partNumber}`);
+
+					const res = await fetch(apiUrl + '/drive/files/multipart/upload-part', {
+						method: 'POST',
+						body: formData,
+						signal,
+					});
+
+					if (!res.ok) {
+						const body = await res.json().catch(() => null);
+						const code = body?.error?.code;
+						if (code === 'MAX_FILE_SIZE_EXCEEDED') {
+							os.alert({
+								type: 'error',
+								title: i18n.ts.failedToUpload,
+								text: i18n.ts.cannotUploadBecauseExceedsFileSizeLimit,
+							});
+							throw new UploadAbortedError();
+						}
+						if (code === 'SESSION_NOT_FOUND' || code === 'SESSION_OWNER_MISMATCH') {
+							// Non-retryable fatal errors
+							throw new UploadAbortedError();
+						}
+						throw new Error(`Part ${part.partNumber} upload failed: ${code ?? res.status}`);
+					}
+
+					completedPartSizes[part.partNumber - 1] = part.blob.size;
+					reportProgress();
+					return;
+				} catch (err) {
+					if (err instanceof UploadAbortedError) throw err;
+					if (signal.aborted) throw new UploadAbortedError();
+					if (attempt === MULTIPART_MAX_RETRIES - 1) throw err;
+				}
+			}
+		};
+
+		// Worker pool with concurrency limit
+		const queue = [...parts];
+		const workers: Promise<void>[] = [];
+		let error: Error | null = null;
+
+		const runWorker = async () => {
+			while (queue.length > 0 && !error && !signal.aborted) {
+				const part = queue.shift()!;
+				try {
+					await uploadPart(part);
+				} catch (err) {
+					error = err as Error;
+					throw err;
+				}
+			}
+		};
+
+		for (let i = 0; i < Math.min(MULTIPART_CONCURRENCY, parts.length); i++) {
+			workers.push(runWorker());
+		}
+
+		await Promise.all(workers);
+
+		signal.throwIfAborted();
+
+		// 4. Complete
+		const driveFile = await misskeyApi('drive/files/multipart/complete', {
+			sessionId: sessionId!,
+		}) as Misskey.entities.DriveFile;
+
+		globalEvents.emit('driveFileCreated', driveFile);
+		return driveFile;
+	})().catch(async (err) => {
+		// Abort the S3 session on failure (unless it was a user abort)
+		if (sessionId && !(err instanceof UploadAbortedError)) {
+			try {
+				await misskeyApi('drive/files/multipart/abort', { sessionId });
+			} catch { /* best effort */ }
+		}
+		if (err instanceof UploadAbortedError) throw err;
+
+		// Match error handling from single upload path, using error code strings
+		const errorCode = err?.code;
+		if (errorCode === 'INAPPROPRIATE') {
+			os.alert({ type: 'error', title: i18n.ts.failedToUpload, text: i18n.ts.cannotUploadBecauseInappropriate });
+		} else if (errorCode === 'NO_FREE_SPACE') {
+			os.alert({ type: 'error', title: i18n.ts.failedToUpload, text: i18n.ts.cannotUploadBecauseNoFreeSpace });
+		} else if (errorCode === 'MAX_FILE_SIZE_EXCEEDED') {
+			os.alert({ type: 'error', title: i18n.ts.failedToUpload, text: i18n.ts.cannotUploadBecauseExceedsFileSizeLimit });
+		} else if (errorCode === 'UNALLOWED_FILE_TYPE') {
+			os.alert({ type: 'error', title: i18n.ts.failedToUpload, text: i18n.ts.cannotUploadBecauseUnallowedFileType });
+		} else {
+			os.alert({
+				type: 'error',
+				title: i18n.ts.failedToUpload,
+				text: err?.message ?? 'Unknown error',
+			});
+		}
+		throw err;
+	});
+
+	const abort = () => {
+		abortController.abort();
+		if (sessionId) {
+			misskeyApi('drive/files/multipart/abort', { sessionId }).catch(() => {});
+		}
+	};
+
+	return { filePromise, abort };
 }

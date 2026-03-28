@@ -542,4 +542,7 @@ export const PREF_DEF = definePreferences({
 	'experimental.enableWebTranslatorApi': {
 		default: false,
 	},
+	'experimental.enableMultipartUpload': {
+		default: false,
+	},
 });

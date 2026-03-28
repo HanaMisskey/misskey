@@ -3417,6 +3417,7 @@ _hana:
   searchIsInBeta: "Our own search engine is currently under development. Currently you are using the same search engine (Meilisearch) as regular Misskey. Stay tuned to see how the search is optimized in the future!"
   showOnX: "View on {x}"
   takingTooLongToLoad: "It seems to be taking a long time to load. Are you looking for these?"
+  enableMultipartUpload: "Enable multipart upload for large files (>10MB)"
   _inDevelopment:
     title: "This feature is under development"
     description: "HanaMisskey is packed with new features currently in development! Stay tuned to see what exciting features will be implemented."

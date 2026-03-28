@@ -13268,6 +13268,10 @@ export interface Locale extends ILocale {
          * 読み込みに時間がかかっています。
          */
         "takingTooLongToLoad": string;
+        /**
+         * 大きなファイル（10MB超）の分割アップロードを有効にする
+         */
+        "enableMultipartUpload": string;
         "_roles": {
             /**
              * 作成日時（タイムスタンプ）が～以前
