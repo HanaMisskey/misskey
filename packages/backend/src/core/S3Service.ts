@@ -102,7 +102,7 @@ export class S3Service {
 
 	@bindThis
 	public getStagingS3Client(): S3Client | null {
-		const staging = this.config.multipartUploadS3;
+		const staging = this.config.objectStorageStaging;
 		if (!staging) return null;
 
 		const u = staging.endpoint

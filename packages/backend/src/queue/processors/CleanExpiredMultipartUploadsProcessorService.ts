@@ -86,12 +86,12 @@ export class CleanExpiredMultipartUploadsProcessorService {
 		});
 
 		// Staging S3 (if configured)
-		if (this.config.multipartUploadS3) {
+		if (this.config.objectStorageStaging) {
 			const stagingClient = this.s3Service.getStagingS3Client();
 			if (stagingClient) {
 				targets.push({
 					client: stagingClient,
-					bucket: this.config.multipartUploadS3.bucket,
+					bucket: this.config.objectStorageStaging.bucket,
 					label: 'staging',
 				});
 			}

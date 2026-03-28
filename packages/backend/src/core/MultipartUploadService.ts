@@ -90,7 +90,7 @@ export class MultipartUploadService {
 	/** Get S3 client for initial session creation (uses live config) */
 	@bindThis
 	private getS3ClientForNewSession(): { client: S3Client; bucket: string; useStaging: boolean } {
-		const staging = this.config.multipartUploadS3;
+		const staging = this.config.objectStorageStaging;
 		if (staging) {
 			const client = this.s3Service.getStagingS3Client();
 			if (client) {
