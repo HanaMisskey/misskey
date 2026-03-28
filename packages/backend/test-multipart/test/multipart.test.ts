@@ -131,6 +131,8 @@ describe('Multipart Upload (Cluster)', () => {
 	const describeR2 = hasR2 ? describe : describe.skip;
 
 	describeR2('S3 + クラスタ: R2', () => {
+		const createdFileIds: string[] = [];
+
 		beforeAll(async () => {
 			const endpoint = new URL(R2_ENDPOINT!);
 			await apiTo('instance-1', 'admin/update-meta', {
@@ -148,6 +150,10 @@ describe('Multipart Upload (Cluster)', () => {
 		}, 1000 * 30);
 
 		afterAll(async () => {
+			// Clean up created files (also deletes S3 objects)
+			for (const fileId of createdFileIds) {
+				await apiViaLB('drive/files/delete', { fileId }, admin);
+			}
 			await apiTo('instance-1', 'admin/update-meta', {
 				useObjectStorage: false,
 			}, admin);
@@ -178,6 +184,8 @@ describe('Multipart Upload (Cluster)', () => {
 			assert.ok(file.body.id);
 			assert.strictEqual(file.body.size, part1.size + part2.size + part3.size);
 			assert.ok(file.body.url);
+
+			createdFileIds.push(file.body.id);
 		}, 1000 * 60 * 3);
 	});
 });
