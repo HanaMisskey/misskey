@@ -18,6 +18,8 @@ on:
 jobs:
   test:
     name: Multipart upload cluster tests
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     strategy:
       matrix:
