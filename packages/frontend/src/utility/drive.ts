@@ -392,7 +392,7 @@ function uploadFileMultipart(file: File | Blob, options: {
 					formData.append('partNumber', String(part.partNumber));
 					formData.append('file', part.blob, `part-${part.partNumber}`);
 
-					const res = await fetch(apiUrl + '/drive/files/multipart/upload-part', {
+					const res = await window.fetch(apiUrl + '/drive/files/multipart/upload-part', {
 						method: 'POST',
 						body: formData,
 						signal,
