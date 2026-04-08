@@ -5652,6 +5652,10 @@ export interface Locale extends ILocale {
      */
     "nothingToConfigure": string;
     /**
+     * リノート先のチャンネルを見る
+     */
+    "viewRenotedChannel": string;
+    /**
      * 常に絶対時刻で表示する
      */
     "alwaysUseAbsoluteTime": string;
