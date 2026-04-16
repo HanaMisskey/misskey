@@ -35,6 +35,16 @@ SPDX-License-Identifier: AGPL-3.0-only
 			</template>
 		</XFolder>
 
+		<XFolder v-if="matchQuery([i18n.ts._role._options.hanamiTlAvailable, 'hanamiTlAvailable'])" v-model:policyMeta="policyMetaModel.hanamiTlAvailable" :isBaseRole="isBaseRole" :readonly="readonly">
+			<template #label>{{ i18n.ts._role._options.hanamiTlAvailable }}</template>
+			<template #valueText>{{ valuesModel.hanamiTlAvailable ? i18n.ts.yes : i18n.ts.no }}</template>
+			<template #default="{ disabled }">
+				<MkSwitch v-model="valuesModel.hanamiTlAvailable" :disabled="disabled">
+					<template #label>{{ i18n.ts.enable }}</template>
+				</MkSwitch>
+			</template>
+		</XFolder>
+
 		<XFolder v-if="matchQuery([i18n.ts._role._options.canPublicNote, 'canPublicNote'])" v-model:policyMeta="policyMetaModel.canPublicNote" :isBaseRole="isBaseRole" :readonly="readonly">
 			<template #label>{{ i18n.ts._role._options.canPublicNote }}</template>
 			<template #valueText>{{ valuesModel.canPublicNote ? i18n.ts.yes : i18n.ts.no }}</template>
@@ -136,6 +146,16 @@ SPDX-License-Identifier: AGPL-3.0-only
 			<template #valueText>{{ valuesModel.canSearchNotes ? i18n.ts.yes : i18n.ts.no }}</template>
 			<template #default="{ disabled }">
 				<MkSwitch v-model="valuesModel.canSearchNotes" :disabled="disabled">
+					<template #label>{{ i18n.ts.enable }}</template>
+				</MkSwitch>
+			</template>
+		</XFolder>
+
+		<XFolder v-if="matchQuery([i18n.ts._role._options.canSearchWithHanamiSearchV1, 'canSearchWithHanamiSearchV1'])" v-model:policyMeta="policyMetaModel.canSearchWithHanamiSearchV1" :isBaseRole="isBaseRole" :readonly="readonly">
+			<template #label>{{ i18n.ts._role._options.canSearchWithHanamiSearchV1 }}</template>
+			<template #valueText>{{ valuesModel.canSearchWithHanamiSearchV1 ? i18n.ts.yes : i18n.ts.no }}</template>
+			<template #default="{ disabled }">
+				<MkSwitch v-model="valuesModel.canSearchWithHanamiSearchV1" :disabled="disabled">
 					<template #label>{{ i18n.ts.enable }}</template>
 				</MkSwitch>
 			</template>
@@ -349,6 +369,16 @@ SPDX-License-Identifier: AGPL-3.0-only
 			</template>
 		</XFolder>
 
+		<XFolder v-if="matchQuery([i18n.ts._role._options.canImportNotes, 'canImportNotes'])" v-model:policyMeta="policyMetaModel.canImportNotes" :isBaseRole="isBaseRole" :readonly="readonly">
+			<template #label>{{ i18n.ts._role._options.canImportNotes }}</template>
+			<template #valueText>{{ valuesModel.canImportNotes ? i18n.ts.yes : i18n.ts.no }}</template>
+			<template #default="{ disabled }">
+				<MkSwitch v-model="valuesModel.canImportNotes" :disabled="disabled">
+					<template #label>{{ i18n.ts.enable }}</template>
+				</MkSwitch>
+			</template>
+		</XFolder>
+
 		<XFolder v-if="matchQuery([i18n.ts._role._options.canImportUserLists, 'canImportUserList'])" v-model:policyMeta="policyMetaModel.canImportUserLists" :isBaseRole="isBaseRole" :readonly="readonly">
 			<template #label>{{ i18n.ts._role._options.canImportUserLists }}</template>
 			<template #valueText>{{ valuesModel.canImportUserLists ? i18n.ts.yes : i18n.ts.no }}</template>
@@ -382,6 +412,16 @@ SPDX-License-Identifier: AGPL-3.0-only
 			<template #valueText>{{ valuesModel.watermarkAvailable ? i18n.ts.yes : i18n.ts.no }}</template>
 			<template #default="{ disabled }">
 				<MkSwitch v-model="valuesModel.watermarkAvailable" :disabled="disabled">
+					<template #label>{{ i18n.ts.enable }}</template>
+				</MkSwitch>
+			</template>
+		</XFolder>
+
+		<XFolder v-if="matchQuery([i18n.ts._hana._roles.durationBasedLockdownAvailable, 'durationBasedLockdownAvailable'])" v-model:policyMeta="policyMetaModel.durationBasedLockdownAvailable" :isBaseRole="isBaseRole" :readonly="readonly">
+			<template #label>{{ i18n.ts._hana._roles.durationBasedLockdownAvailable }}</template>
+			<template #valueText>{{ valuesModel.durationBasedLockdownAvailable ? i18n.ts.yes : i18n.ts.no }}</template>
+			<template #default="{ disabled }">
+				<MkSwitch v-model="valuesModel.durationBasedLockdownAvailable" :disabled="disabled">
 					<template #label>{{ i18n.ts.enable }}</template>
 				</MkSwitch>
 			</template>
