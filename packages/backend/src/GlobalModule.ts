@@ -58,7 +58,7 @@ const $hanamisearch: Provider = {
 	provide: DI.hanamisearch,
 	useFactory: (config: Config) => {
 		if (config.hanamisearch) {
-			return new MeiliSearch({
+			return new Meilisearch({
 				host: `${config.hanamisearch.ssl ? 'https' : 'http'}://${config.hanamisearch.host}:${config.hanamisearch.port}`,
 				apiKey: config.hanamisearch.apiKey,
 			});

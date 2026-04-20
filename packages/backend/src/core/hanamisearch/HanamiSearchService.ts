@@ -18,7 +18,7 @@ import { IdService } from '@/core/IdService.js';
 import { isMustRemove } from '@/misc/is-hidden-or-visibility-modified.js';
 import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
 import { removeMutedUsersReactions } from '@/misc/reactions-mute.js';
-import type { Index, MeiliSearch } from 'meilisearch';
+import type { Index, Meilisearch } from 'meilisearch';
 
 type K = string;
 type V = string | number | boolean;
@@ -73,7 +73,7 @@ export class HanamiSearchService {
 		private config: Config,
 
 		@Inject(DI.hanamisearch)
-		private hanamisearch: MeiliSearch | null,
+		private hanamisearch: Meilisearch | null,
 
 		@Inject(DI.notesRepository)
 		private notesRepository: NotesRepository,
@@ -92,7 +92,7 @@ export class HanamiSearchService {
 		}
 	}
 
-	private initializeIndex(searchClient: MeiliSearch, indexName: string): Index {
+	private initializeIndex(searchClient: Meilisearch, indexName: string): Index {
 		const index = searchClient.index(indexName);
 		index.updateSettings({
 			searchableAttributes: ['text', 'cw'],
