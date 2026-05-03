@@ -2156,6 +2156,7 @@ _role:
     canSearchWithHanamiSearchV1: "HanamiSearchV1の利用"
     canSearchUsers: "ユーザー検索の利用"
     canUseTranslator: "翻訳機能の利用"
+    canCreateChannel: "チャンネルの作成"
     avatarDecorationLimit: "アイコンデコレーションの最大取付個数"
     canImportAntennas: "アンテナのインポートを許可"
     canImportBlocking: "ブロックのインポートを許可"
