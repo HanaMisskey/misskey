@@ -10,6 +10,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import * as Sentry from '@sentry/node';
 import { DI } from '@/di-symbols.js';
 import { getIpHash } from '@/misc/get-ip-hash.js';
+import { genAidx } from '@/misc/id/aidx.js';
 import type { MiLocalUser, MiUser } from '@/models/User.js';
 import type { MiAccessToken } from '@/models/AccessToken.js';
 import type Logger from '@/logger.js';
@@ -104,7 +105,7 @@ export class ApiCallService implements OnApplicationShutdown {
 		}
 	}
 
-	#onExecError(ep: IEndpoint, data: any, err: Error, userId?: MiUser['id']): void {
+	#onExecError(ep: IEndpoint, data: any, err: Error, userId?: MiUser['id'], reqId?: string): void {
 		if (err instanceof ApiError || err instanceof AuthenticationError) {
 			throw err;
 		} else {
@@ -112,6 +113,7 @@ export class ApiCallService implements OnApplicationShutdown {
 			this.logger.error(`Internal error occurred in ${ep.name}: ${err.message}`, {
 				ep: ep.name,
 				ps: data,
+				reqId,
 				e: {
 					message: err.message,
 					code: err.name,
@@ -123,12 +125,20 @@ export class ApiCallService implements OnApplicationShutdown {
 			if (this.config.sentryForBackend) {
 				Sentry.captureMessage(`Internal error occurred in ${ep.name}: ${err.message}`, {
 					level: 'error',
+					// `tags` are top-level filterable in Sentry/Glitchtip UI; we
+					// surface the per-request id and the endpoint here so the
+					// fan-out across many endpoints stays grouped.
+					tags: {
+						reqId: reqId ?? 'unknown',
+						endpoint: ep.name,
+					},
 					user: {
 						id: userId,
 					},
 					extra: {
 						ep: ep.name,
 						ps: data,
+						reqId,
 						e: {
 							message: err.message,
 							code: err.name,
@@ -155,6 +165,18 @@ export class ApiCallService implements OnApplicationShutdown {
 		request: FastifyRequest<{ Body: Record<string, unknown> | undefined, Querystring: Record<string, unknown> }>,
 		reply: FastifyReply,
 	): void {
+		// Per-request correlation id. Used to:
+		// (1) tag every Sentry event raised below this call site
+		// (2) emit `X-Request-Id` so frontends / proxies / Loki promtail can
+		//     correlate user-facing failures with backend traces
+		// (3) thread through structured logger so `{namespace="misskey"} | json
+		//     | reqId="<id>"` returns the full request lifecycle in Loki.
+		// AIDX (16 chars, time-sortable) is preferable to UUID for this:
+		// shorter in headers / Sentry tags, and `sort_by reqId` gives temporal
+		// order in Loki without needing the timestamp column.
+		const reqId = genAidx(Date.now());
+		reply.header('X-Request-Id', reqId);
+
 		const body = request.method === 'GET'
 			? request.query
 			: request.body;
@@ -168,7 +190,7 @@ export class ApiCallService implements OnApplicationShutdown {
 			return;
 		}
 		this.authenticateService.authenticate(token).then(([user, app]) => {
-			this.call(endpoint, user, app, body, null, request).then((res) => {
+			this.call(endpoint, user, app, body, null, request, reqId).then((res) => {
 				if (request.method === 'GET' && endpoint.meta.cacheSec && !token && !user) {
 					reply.header('Cache-Control', `public, max-age=${endpoint.meta.cacheSec}`);
 				}
@@ -191,6 +213,10 @@ export class ApiCallService implements OnApplicationShutdown {
 		request: FastifyRequest<{ Body: Record<string, unknown>, Querystring: Record<string, unknown> }>,
 		reply: FastifyReply,
 	): Promise<void> {
+		// Same correlation-id discipline as `handleRequest` — see comment there.
+		const reqId = genAidx(Date.now());
+		reply.header('X-Request-Id', reqId);
+
 		const multipartData = await request.file().catch(() => {
 			/* Fastify throws if the remote didn't send multipart data. Return 400 below. */
 		});
@@ -229,7 +255,7 @@ export class ApiCallService implements OnApplicationShutdown {
 			this.call(endpoint, user, app, fields, {
 				name: multipartData.filename,
 				path: path,
-			}, request).then((res) => {
+			}, request, reqId).then((res) => {
 				this.send(reply, res);
 			}).catch((err: ApiError) => {
 				this.#sendApiError(reply, err);
@@ -299,6 +325,7 @@ export class ApiCallService implements OnApplicationShutdown {
 			path: string;
 		} | null,
 		request: FastifyRequest<{ Body: Record<string, unknown> | undefined, Querystring: Record<string, unknown> }>,
+		reqId?: string,
 	) {
 		const isSecure = user != null && token == null;
 
@@ -435,11 +462,25 @@ export class ApiCallService implements OnApplicationShutdown {
 		if (this.config.sentryForBackend) {
 			return await Sentry.startSpan({
 				name: 'API: ' + ep.name,
-			}, () => ep.exec(data, user, token, file, request.ip, request.headers)
-				.catch((err: Error) => this.#onExecError(ep, data, err, user?.id)));
+				// Span attributes carry into Sentry/Glitchtip "Performance" tab
+				// and let us join with backend-side logs by reqId without
+				// having to re-run the request.
+				attributes: {
+					'misskey.reqId': reqId ?? 'unknown',
+					'misskey.endpoint': ep.name,
+					'misskey.user.id': user?.id ?? 'anonymous',
+				},
+			}, () => {
+				// Tag scope-level for any captureException raised inside the
+				// span (request-scoped, no leakage thanks to startSpan's hub).
+				Sentry.getCurrentScope().setTag('reqId', reqId ?? 'unknown');
+				Sentry.getCurrentScope().setTag('endpoint', ep.name);
+				return ep.exec(data, user, token, file, request.ip, request.headers)
+					.catch((err: Error) => this.#onExecError(ep, data, err, user?.id, reqId));
+			});
 		} else {
 			return await ep.exec(data, user, token, file, request.ip, request.headers)
-				.catch((err: Error) => this.#onExecError(ep, data, err, user?.id));
+				.catch((err: Error) => this.#onExecError(ep, data, err, user?.id, reqId));
 		}
 	}
 
