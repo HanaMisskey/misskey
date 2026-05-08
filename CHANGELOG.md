@@ -1,3 +1,18 @@
+## Unreleased
+
+### General
+-
+
+### Client
+- Enhance: テーマのプレビュー時、リロードせずにもとのテーマに戻せるように
+- Fix: テーマエディター使用時に、最初の変更のみ適用される問題を修正
+- Fix: テーマのプレビュー時、既存のテーマとIDが被っている場合にプレビューできない問題を修正
+- Fix: テーマのインストールエラーの表示を改善
+
+### Server
+-
+
+
 ## 2026.5.1
 
 ### General
@@ -5,6 +20,8 @@
 - Fix: `.devcontainer/compose.yml`のvolumeのマウントパスを修正
 
 ### Client
+- Enhance: ノートの詳細表示での公開範囲の表示を改善  
+  (Cherry-picked from https://github.com/kokonect-link/cherrypick/commit/ecc75563f4e428b66adccc379bf317b5b21ed8e6)
 - Fix: ロール設定画面でロールをアサイン/アサイン解除した際、リロードしなくても画面に反映されるよう修正
 
 ### Server

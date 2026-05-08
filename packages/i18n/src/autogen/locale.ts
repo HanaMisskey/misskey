@@ -5656,6 +5656,14 @@ export interface Locale extends ILocale {
      */
     "viewRenotedChannel": string;
     /**
+     * テーマのプレビュー中
+     */
+    "previewingTheme": string;
+    /**
+     * 元に戻す
+     */
+    "previewingThemeRestore": string;
+    /**
      * 常に絶対時刻で表示する
      */
     "alwaysUseAbsoluteTime": string;
