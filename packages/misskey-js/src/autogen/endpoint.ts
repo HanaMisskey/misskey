@@ -645,6 +645,8 @@ import type {
 	UsersListsUpdateMembershipRequest,
 	UsersNotesRequest,
 	UsersNotesResponse,
+	UsersNotifyListRequest,
+	UsersNotifyListResponse,
 	UsersPagesRequest,
 	UsersPagesResponse,
 	UsersReactionsRequest,
@@ -1092,6 +1094,7 @@ export type Endpoints = {
 	'users/lists/update': { req: UsersListsUpdateRequest; res: UsersListsUpdateResponse };
 	'users/lists/update-membership': { req: UsersListsUpdateMembershipRequest; res: EmptyResponse };
 	'users/notes': { req: UsersNotesRequest; res: UsersNotesResponse };
+	'users/notify/list': { req: UsersNotifyListRequest; res: UsersNotifyListResponse };
 	'users/pages': { req: UsersPagesRequest; res: UsersPagesResponse };
 	'users/reactions': { req: UsersReactionsRequest; res: UsersReactionsResponse };
 	'users/recommendation': { req: UsersRecommendationRequest; res: UsersRecommendationResponse };

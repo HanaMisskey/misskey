@@ -2178,6 +2178,8 @@ declare namespace entities {
         UsersListsUpdateMembershipRequest,
         UsersNotesRequest,
         UsersNotesResponse,
+        UsersNotifyListRequest,
+        UsersNotifyListResponse,
         UsersPagesRequest,
         UsersPagesResponse,
         UsersReactionsRequest,
@@ -3861,6 +3863,12 @@ type UsersNotesRequest = operations['users___notes']['requestBody']['content']['
 
 // @public (undocumented)
 type UsersNotesResponse = operations['users___notes']['responses']['200']['content']['application/json'];
+
+// @public (undocumented)
+type UsersNotifyListRequest = operations['users___notify___list']['requestBody']['content']['application/json'];
+
+// @public (undocumented)
+type UsersNotifyListResponse = operations['users___notify___list']['responses']['200']['content']['application/json'];
 
 // @public (undocumented)
 type UsersPagesRequest = operations['users___pages']['requestBody']['content']['application/json'];
