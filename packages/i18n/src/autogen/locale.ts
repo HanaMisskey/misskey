@@ -3037,6 +3037,14 @@ export interface Locale extends ILocale {
      */
     "confirmToUnclipAlreadyClippedNote": ParameterizedString<"name">;
     /**
+     * このアンテナから削除
+     */
+    "removeFromAntenna": string;
+    /**
+     * 「{name}」からこのノートを削除しますか？
+     */
+    "removeNoteFromAntennaConfirm": ParameterizedString<"name">;
+    /**
      * パブリック
      */
     "public": string;
@@ -5667,6 +5675,10 @@ export interface Locale extends ILocale {
      * 元に戻す
      */
     "previewingThemeRestore": string;
+    /**
+     * アクセストークン
+     */
+    "accessToken": string;
     /**
      * 常に絶対時刻で表示する
      */
