@@ -34,6 +34,7 @@ allowBuilds:
 minimumReleaseAge: 10080 # delay 7days to mitigate supply-chain attack
 minimumReleaseAgeExclude:
   - '@misskey-dev/*'
+  - '@hanamisskey/*'
   - '@syuilo/aiscript'
   - buraha
   - mfm-js
@@ -53,7 +54,7 @@ minimumReleaseAgeExclude:
   - slacc-win32-x64-msvc
   - '@typescript/native-preview*'
   - pnpm
-  - typeorm # そのうち消す
+  - '@types/archiver' # そのうち消す
 overrides:
   '@aiscript-dev/aiscript-languageserver': '-'
   chokidar: 5.0.0
