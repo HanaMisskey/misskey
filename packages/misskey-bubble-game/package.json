@@ -29,7 +29,7 @@
 		"@types/seedrandom": "3.0.8",
 		"@typescript-eslint/eslint-plugin": "8.53.0",
 		"@typescript-eslint/parser": "8.53.0",
-		"esbuild": "0.27.2",
+		"esbuild": "0.28.1",
 		"execa": "9.6.1",
 		"glob": "11.1.0",
 		"nodemon": "3.1.11",
