@@ -16,7 +16,7 @@ allowBuilds:
   '@parcel/watcher': true
   '@sentry/profiling-node': true
   '@sentry-internal/node-cpu-profiler': true
-  '@tensorflow/tfjs-node': true
+  '@sentry/node-cpu-profiler': true
   bufferutil: true
   canvas: true
   core-js: true
@@ -53,13 +53,7 @@ minimumReleaseAgeExclude:
   - slacc-win32-arm64-msvc
   - slacc-win32-x64-msvc
   - '@typescript/native-preview*'
-  - pnpm
-  - esbuild # 脆弱性対応。そのうち消す
-  - '@esbuild/*' # 脆弱性対応。そのうち消す
-  - js-yaml # 脆弱性対応。そのうち消す
-  - vite # 脆弱性対応。そのうち消す
-  - form-data # 脆弱性対応。そのうち消す
-  - tar
+  - vite # そのうち消す
 overrides:
   '@aiscript-dev/aiscript-languageserver': '-'
   chokidar: 5.0.0
