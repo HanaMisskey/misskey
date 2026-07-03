@@ -19,6 +19,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 import { ref, watch } from 'vue';
 import { i18n } from '@/i18n.js';
 import { store } from '@/store.js';
+import { prefer } from '@/preferences.js';
 import { deepMerge } from '@/utility/merge.js';
 import MkSwitch from '@/components/MkSwitch.vue';
 import MkInfo from '@/components/MkInfo.vue';
@@ -27,7 +28,7 @@ import type { TutorialPageCommonExpose } from '@/components/MkTutorial.vue';
 // センシティブをミュートするほうがONなので、storeとは逆にする
 const tlMuteSensitive = ref(!store.s.tl.filter.withSensitive);
 
-const confirmWhenRevealingSensitiveMedia = store.model('confirmWhenRevealingSensitiveMedia');
+const confirmWhenRevealingSensitiveMedia = prefer.model('confirmWhenRevealingSensitiveMedia');
 
 watch(tlMuteSensitive, (to) => {
 	const out = deepMerge({ filter: { withSensitive: !to } }, store.s.tl);
