@@ -5696,6 +5696,14 @@ export interface Locale extends ILocale {
      */
     "prepend": string;
     /**
+     * サムネイルの表示を制限するURL
+     */
+    "urlPreviewSensitiveList": string;
+    /**
+     * スペースで区切るとAND指定になり、改行で区切るとOR指定になります。スラッシュで囲むと正規表現になります。一致した場合、サムネイルが表示されなくなります。
+     */
+    "urlPreviewSensitiveListDescription": string;
+    /**
      * 常に絶対時刻で表示する
      */
     "alwaysUseAbsoluteTime": string;
