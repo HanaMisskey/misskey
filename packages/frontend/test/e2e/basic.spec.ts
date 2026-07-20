@@ -10,7 +10,7 @@ import {
 	// locator helper
 	locateMkInput, locateMkSwitch, locateMkTextarea,
 	// utils
-	registerUser, resetState, visitHome,
+	registerUser, resetState, visitHome, postNote,
 	// page utils
 	waitApiResponse, signIn,
 } from './utils.js';
@@ -209,12 +209,7 @@ test.describe('After user setup', () => {
 	});
 
 	test('note', async ({ page }) => {
-		await page.getByTestId('open-post-form').waitFor({ state: 'visible' });
-		await page.getByTestId('open-post-form').click();
-		await page.getByTestId('post-form-text').fill('Hello, Misskey!');
-		await page.getByTestId('post-form-submit').click();
-
-		await page.getByText('Hello, Misskey!').waitFor({ timeout: 15000 });
+		await postNote(page, 'Hello, Misskey!');
 	});
 
 	test('open note form with hotkey', async ({ page }) => {
