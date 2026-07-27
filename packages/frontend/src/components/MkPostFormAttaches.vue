@@ -103,7 +103,6 @@ const emit = defineEmits<{
 	(ev: 'showUploaderMenu', uploaderItem: UploaderItem, event: MouseEvent | KeyboardEvent): void;
 }>();
 
-
 //#region objectUrlMap
 const objectUrlMap = new Map<string, string>();
 
