@@ -72,13 +72,14 @@ export type Attach = {
 </script>
 
 <script lang="ts" setup>
-import { inject } from 'vue';
+import { inject, watch, onUnmounted } from 'vue';
 import * as Misskey from 'misskey-js';
 import type { MenuItem } from '@/types/menu';
 import { copyToClipboard } from '@/utility/copy-to-clipboard.js';
 import { getFileType, getFileTypeIcon } from '@/utility/file-type.js';
 import MkDriveFileThumbnail from '@/components/MkDriveFileThumbnail.vue';
 import MkDraggable from '@/components/MkDraggable.vue';
+import type { Content } from '@/components/MkLightbox.item.vue';
 import * as os from '@/os.js';
 import { misskeyApi } from '@/utility/misskey-api.js';
 import { i18n } from '@/i18n.js';
@@ -101,6 +102,33 @@ const emit = defineEmits<{
 	(ev: 'changeDriveFileName', file: Misskey.entities.DriveFile, newName: string): void;
 	(ev: 'showUploaderMenu', uploaderItem: UploaderItem, event: MouseEvent | KeyboardEvent): void;
 }>();
+
+
+//#region objectUrlMap
+const objectUrlMap = new Map<string, string>();
+
+watch(() => props.modelValue, () => {
+	for (const item of props.modelValue) {
+		if (!objectUrlMap.has(item.id) && item.type === 'uploaderItem') {
+			objectUrlMap.set(item.id, URL.createObjectURL(item.file.file));
+		}
+	}
+
+	for (const [item, url] of objectUrlMap.entries()) {
+		if (!props.modelValue.find(x => x.id === item)) {
+			URL.revokeObjectURL(url);
+			objectUrlMap.delete(item);
+		}
+	}
+}, { immediate: true, deep: true });
+
+onUnmounted(() => {
+	for (const url of objectUrlMap.values()) {
+		URL.revokeObjectURL(url);
+	}
+	objectUrlMap.clear();
+});
+//#endregion
 
 function progressDashArray(item: UploaderItem): string {
 	const progress = item.progress ? item.progress.value / item.progress.max : 0;
@@ -202,6 +230,7 @@ function showFileMenu(attach: Attach, ev: MouseEvent | KeyboardEvent): void {
 	if (attach.type === 'driveFile') {
 		const file = attach.file;
 		const isImage = file.type.startsWith('image/');
+		const isVideo = file.type.startsWith('video/');
 
 		const menuItems: MenuItem[] = [];
 		menuItems.push({
@@ -218,13 +247,28 @@ function showFileMenu(attach: Attach, ev: MouseEvent | KeyboardEvent): void {
 			action: () => { describeDriveFile(file); },
 		});
 
-		if (isImage) {
+		if (isImage || isVideo) {
 			menuItems.push({
 				text: i18n.ts.preview,
 				icon: 'ti ti-photo-search',
 				action: async () => {
-					const { dispose } = await os.popupAsyncWithDialog(import('@/components/MkImgPreviewDialog.vue').then(x => x.default), {
-						file: file,
+					const constents = props.modelValue.filter(item => (
+						(item.type.startsWith('image') || item.type.startsWith('video')) &&
+						(item.type === 'driveFile' || objectUrlMap.has(item.id))
+					)).map<Content>(item => ({
+						id: item.id,
+						type: item.type.startsWith('video') ? 'video' as const : 'image' as const,
+						url: item.type === 'driveFile' ? item.file.url : objectUrlMap.get(item.id)!,
+						thumbnailUrl: item.type === 'driveFile' ? item.file.thumbnailUrl : item.file.thumbnail,
+						width: item.type === 'driveFile' ? item.file.properties.width : null,
+						height: item.type === 'driveFile' ? item.file.properties.height : null,
+						filename: item.type === 'driveFile' ? item.file.name : item.file.name,
+						file: item.type === 'driveFile' ? item.file : undefined,
+						//sourceElement: TODO
+					}));
+					const { dispose } = await os.popupAsyncWithDialog(import('@/components/MkLightbox.vue').then(x => x.default), {
+						defaultIndex: constents.findIndex(content => content.id === file.id),
+						contents: constents,
 					}, {
 						closed: () => dispose(),
 					});

@@ -16,7 +16,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 		@pointerup.passive="onPointerup"
 		@pointercancel.passive="cancelPointerGesture"
 		@touchstart.passive="onTouchstart"
-		@touchmove.passive="onTouchmove"
+		@touchmove="onTouchmove"
 		@touchcancel.passive="cancelPointerGesture"
 		@contextmenu="cancelPointerGesture"
 		@wheel="onWheel"
@@ -284,7 +284,7 @@ function shouldHideInGallery(content: Content): boolean {
 	if (!hiddenByDefault) return false;
 
 	// ギャラリー起動時に最初に開いたセンシティブ画像だけは初期表示で隠さない
-	if (content.file.isSensitive && prefer.s.nsfw !== 'force' && props.initiallyOpened) {
+	if (content.file.isSensitive && props.initiallyOpened) {
 		return false;
 	}
 
@@ -721,6 +721,13 @@ function onTouchstart(ev: TouchEvent) {
 
 function onTouchmove(ev: TouchEvent) {
 	doubleTapDetector.onTouchmove(ev);
+
+	// スワイプ操作中は、ブラウザがタッチを慣性スクロールとして認識するのを防ぐためにpreventDefaultする必要がある
+	// touch-action: noneが指定されているが、それだけではブラウザによっては慣性スクロールが発生した扱いになり、
+	// その後のタップが慣性スクロールを止めるためのタップという扱いで握りつぶされてしまうことがあるので必要
+	if (isVerticalSwiping || isHorizontalSwiping || isZooming.value || pointerEventCache.size > 1) {
+		ev.preventDefault();
+	}
 }
 
 //#region inertia
