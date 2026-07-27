@@ -262,6 +262,7 @@ function showFileMenu(attach: Attach, ev: MouseEvent | KeyboardEvent): void {
 						width: item.type === 'driveFile' ? item.file.properties.width : null,
 						height: item.type === 'driveFile' ? item.file.properties.height : null,
 						filename: item.type === 'driveFile' ? item.file.name : item.file.name,
+						caption: item.type === 'driveFile' ? item.file.comment : item.file.caption,
 						file: item.type === 'driveFile' ? item.file : undefined,
 						//sourceElement: TODO
 					}));
