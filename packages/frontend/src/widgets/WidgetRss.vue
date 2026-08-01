@@ -30,7 +30,6 @@ import type { WidgetComponentEmits, WidgetComponentExpose, WidgetComponentProps 
 import type { FormWithDefault, GetFormResultType } from '@/utility/form.js';
 import { i18n } from '@/i18n.js';
 import MkContainer from '@/components/MkContainer.vue';
-import { i18n } from '@/i18n.js';
 
 const name = 'rss';
 
