@@ -1,8 +1,3 @@
-/*
- * SPDX-FileCopyrightText: syuilo and misskey-project
- * SPDX-License-Identifier: AGPL-3.0-only
- */
-
 import { describe, expect, test } from '@jest/globals';
 import { buildHanamiSearchDocument } from '@/core/hanamisearch/HanamiSearchService.js';
 import { MiNote } from '@/models/Note.js';
