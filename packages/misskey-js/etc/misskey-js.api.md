@@ -1310,6 +1310,27 @@ type DriveFilesFindResponse = operations['drive___files___find']['responses']['2
 type DriveFilesMoveBulkRequest = operations['drive___files___move-bulk']['requestBody']['content']['application/json'];
 
 // @public (undocumented)
+type DriveFilesMultipartAbortRequest = operations['drive___files___multipart___abort']['requestBody']['content']['application/json'];
+
+// @public (undocumented)
+type DriveFilesMultipartCompleteRequest = operations['drive___files___multipart___complete']['requestBody']['content']['application/json'];
+
+// @public (undocumented)
+type DriveFilesMultipartCompleteResponse = operations['drive___files___multipart___complete']['responses']['200']['content']['application/json'];
+
+// @public (undocumented)
+type DriveFilesMultipartCreateRequest = operations['drive___files___multipart___create']['requestBody']['content']['application/json'];
+
+// @public (undocumented)
+type DriveFilesMultipartCreateResponse = operations['drive___files___multipart___create']['responses']['200']['content']['application/json'];
+
+// @public (undocumented)
+type DriveFilesMultipartUploadPartRequest = operations['drive___files___multipart___upload-part']['requestBody']['content']['multipart/form-data'];
+
+// @public (undocumented)
+type DriveFilesMultipartUploadPartResponse = operations['drive___files___multipart___upload-part']['responses']['200']['content']['application/json'];
+
+// @public (undocumented)
 type DriveFilesRequest = operations['drive___files']['requestBody']['content']['application/json'];
 
 // @public (undocumented)
@@ -1811,6 +1832,13 @@ declare namespace entities {
         DriveFilesFindByHashRequest,
         DriveFilesFindByHashResponse,
         DriveFilesMoveBulkRequest,
+        DriveFilesMultipartAbortRequest,
+        DriveFilesMultipartCompleteRequest,
+        DriveFilesMultipartCompleteResponse,
+        DriveFilesMultipartCreateRequest,
+        DriveFilesMultipartCreateResponse,
+        DriveFilesMultipartUploadPartRequest,
+        DriveFilesMultipartUploadPartResponse,
         DriveFilesShowRequest,
         DriveFilesShowResponse,
         DriveFilesUpdateRequest,

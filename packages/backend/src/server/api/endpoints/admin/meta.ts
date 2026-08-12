@@ -467,6 +467,46 @@ export const meta = {
 				type: 'boolean',
 				optional: false, nullable: false,
 			},
+			useMultipartUpload: {
+				type: 'boolean',
+				optional: false, nullable: false,
+			},
+			objectStorageStagingBucket: {
+				type: 'string',
+				optional: false, nullable: true,
+			},
+			objectStorageStagingEndpoint: {
+				type: 'string',
+				optional: false, nullable: true,
+			},
+			objectStorageStagingRegion: {
+				type: 'string',
+				optional: false, nullable: true,
+			},
+			objectStorageStagingAccessKey: {
+				type: 'string',
+				optional: false, nullable: true,
+			},
+			objectStorageStagingSecretKey: {
+				type: 'string',
+				optional: false, nullable: true,
+			},
+			objectStorageStagingPort: {
+				type: 'number',
+				optional: false, nullable: true,
+			},
+			objectStorageStagingUseSSL: {
+				type: 'boolean',
+				optional: false, nullable: false,
+			},
+			objectStorageStagingUseProxy: {
+				type: 'boolean',
+				optional: false, nullable: false,
+			},
+			objectStorageStagingS3ForcePathStyle: {
+				type: 'boolean',
+				optional: false, nullable: false,
+			},
 			privacyPolicyUrl: {
 				type: 'string',
 				optional: false, nullable: true,
@@ -713,6 +753,16 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				objectStorageUseProxy: instance.objectStorageUseProxy,
 				objectStorageSetPublicRead: instance.objectStorageSetPublicRead,
 				objectStorageS3ForcePathStyle: instance.objectStorageS3ForcePathStyle,
+				useMultipartUpload: instance.useMultipartUpload,
+				objectStorageStagingBucket: instance.objectStorageStagingBucket,
+				objectStorageStagingEndpoint: instance.objectStorageStagingEndpoint,
+				objectStorageStagingRegion: instance.objectStorageStagingRegion,
+				objectStorageStagingAccessKey: instance.objectStorageStagingAccessKey,
+				objectStorageStagingSecretKey: instance.objectStorageStagingSecretKey,
+				objectStorageStagingPort: instance.objectStorageStagingPort,
+				objectStorageStagingUseSSL: instance.objectStorageStagingUseSSL,
+				objectStorageStagingUseProxy: instance.objectStorageStagingUseProxy,
+				objectStorageStagingS3ForcePathStyle: instance.objectStorageStagingS3ForcePathStyle,
 				deeplAuthKey: instance.deeplAuthKey,
 				deeplIsPro: instance.deeplIsPro,
 				enableIpLogging: instance.enableIpLogging,

@@ -175,6 +175,10 @@ export * as 'drive/files/attached-notes' from './endpoints/drive/files/attached-
 export * as 'drive/files/attached-chat-messages' from './endpoints/drive/files/attached-chat-messages.js';
 export * as 'drive/files/check-existence' from './endpoints/drive/files/check-existence.js';
 export * as 'drive/files/create' from './endpoints/drive/files/create.js';
+export * as 'drive/files/multipart/create' from './endpoints/drive/files/multipart/create.js';
+export * as 'drive/files/multipart/upload-part' from './endpoints/drive/files/multipart/upload-part.js';
+export * as 'drive/files/multipart/complete' from './endpoints/drive/files/multipart/complete.js';
+export * as 'drive/files/multipart/abort' from './endpoints/drive/files/multipart/abort.js';
 export * as 'drive/files/delete' from './endpoints/drive/files/delete.js';
 export * as 'drive/files/find' from './endpoints/drive/files/find.js';
 export * as 'drive/files/find-by-hash' from './endpoints/drive/files/find-by-hash.js';

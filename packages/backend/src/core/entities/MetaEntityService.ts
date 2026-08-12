@@ -169,6 +169,7 @@ export class MetaEntityService {
 				recaptcha: instance.enableRecaptcha,
 				turnstile: instance.enableTurnstile,
 				objectStorage: instance.useObjectStorage,
+				multipartUpload: instance.useMultipartUpload,
 				serviceWorker: instance.enableServiceWorker,
 				miauth: true,
 			},

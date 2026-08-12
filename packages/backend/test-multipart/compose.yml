@@ -1,0 +1,388 @@
+services:
+  # Shared infrastructure
+  db:
+    image: postgres:18-alpine
+    env_file:
+      - ./.config/docker.env
+    volumes:
+      - type: bind
+        source: ./volumes/db
+        target: /var/lib/postgresql
+        bind:
+          create_host_path: true
+    healthcheck:
+      test: pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB
+      interval: 5s
+      retries: 20
+    networks:
+      - cluster_network
+
+  redis:
+    image: redis:7
+    healthcheck:
+      test: redis-cli ping
+      interval: 5s
+      retries: 20
+    networks:
+      - cluster_network
+
+  # Misskey instance 1 (runs migration + start)
+  misskey-1:
+    image: node:${NODE_VERSION:-22}
+    env_file:
+      - ./.config/docker.env
+    environment:
+      - NODE_ENV=production
+      - MISSKEY_CONFIG_YML=default.yml
+    volumes:
+      - type: bind
+        source: ../../../built
+        target: /misskey/built
+        read_only: true
+      - type: bind
+        source: ../assets
+        target: /misskey/packages/backend/assets
+        read_only: true
+      - type: bind
+        source: ../built
+        target: /misskey/packages/backend/built
+        read_only: true
+      - type: bind
+        source: ../migration
+        target: /misskey/packages/backend/migration
+        read_only: true
+      - type: bind
+        source: ../ormconfig.js
+        target: /misskey/packages/backend/ormconfig.js
+        read_only: true
+      - type: bind
+        source: ../package.json
+        target: /misskey/packages/backend/package.json
+        read_only: true
+      - type: bind
+        source: ../../misskey-js/built
+        target: /misskey/packages/misskey-js/built
+        read_only: true
+      - type: bind
+        source: ../../misskey-js/package.json
+        target: /misskey/packages/misskey-js/package.json
+        read_only: true
+      - type: bind
+        source: ../../misskey-reversi/built
+        target: /misskey/packages/misskey-reversi/built
+        read_only: true
+      - type: bind
+        source: ../../misskey-reversi/package.json
+        target: /misskey/packages/misskey-reversi/package.json
+        read_only: true
+      - type: bind
+        source: ../../../healthcheck.sh
+        target: /misskey/healthcheck.sh
+        read_only: true
+      - type: bind
+        source: ../../../package.json
+        target: /misskey/package.json
+        read_only: true
+      - type: bind
+        source: ../../../pnpm-lock.yaml
+        target: /misskey/pnpm-lock.yaml
+        read_only: true
+      - type: bind
+        source: ../../../pnpm-workspace.yaml
+        target: /misskey/pnpm-workspace.yaml
+        read_only: true
+      - type: bind
+        source: ../../../patches
+        target: /misskey/patches
+        read_only: true
+      - type: bind
+        source: ./.config/default.yml
+        target: /misskey/.config/default.yml
+        read_only: true
+      - type: bind
+        source: ./certificates/rootCA.crt
+        target: /usr/local/share/ca-certificates/rootCA.crt
+        read_only: true
+      - type: bind
+        source: ./volumes/files
+        target: /misskey/files
+        bind:
+          create_host_path: true
+    working_dir: /misskey
+    command: >
+      bash -c "
+        npm install -g pnpm
+        pnpm -F backend i --frozen-lockfile
+        pnpm -F misskey-js i --frozen-lockfile
+        pnpm -F misskey-reversi i --frozen-lockfile
+        pnpm -F backend migrate
+        pnpm -F backend start
+      "
+    healthcheck:
+      test: bash /misskey/healthcheck.sh
+      interval: 5s
+      retries: 40
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - cluster_network
+
+  # Misskey instance 2 (start only, no migration)
+  misskey-2:
+    image: node:${NODE_VERSION:-22}
+    env_file:
+      - ./.config/docker.env
+    environment:
+      - NODE_ENV=production
+      - MISSKEY_CONFIG_YML=default.yml
+    volumes:
+      - type: bind
+        source: ../../../built
+        target: /misskey/built
+        read_only: true
+      - type: bind
+        source: ../assets
+        target: /misskey/packages/backend/assets
+        read_only: true
+      - type: bind
+        source: ../built
+        target: /misskey/packages/backend/built
+        read_only: true
+      - type: bind
+        source: ../migration
+        target: /misskey/packages/backend/migration
+        read_only: true
+      - type: bind
+        source: ../ormconfig.js
+        target: /misskey/packages/backend/ormconfig.js
+        read_only: true
+      - type: bind
+        source: ../package.json
+        target: /misskey/packages/backend/package.json
+        read_only: true
+      - type: bind
+        source: ../../misskey-js/built
+        target: /misskey/packages/misskey-js/built
+        read_only: true
+      - type: bind
+        source: ../../misskey-js/package.json
+        target: /misskey/packages/misskey-js/package.json
+        read_only: true
+      - type: bind
+        source: ../../misskey-reversi/built
+        target: /misskey/packages/misskey-reversi/built
+        read_only: true
+      - type: bind
+        source: ../../misskey-reversi/package.json
+        target: /misskey/packages/misskey-reversi/package.json
+        read_only: true
+      - type: bind
+        source: ../../../healthcheck.sh
+        target: /misskey/healthcheck.sh
+        read_only: true
+      - type: bind
+        source: ../../../package.json
+        target: /misskey/package.json
+        read_only: true
+      - type: bind
+        source: ../../../pnpm-lock.yaml
+        target: /misskey/pnpm-lock.yaml
+        read_only: true
+      - type: bind
+        source: ../../../pnpm-workspace.yaml
+        target: /misskey/pnpm-workspace.yaml
+        read_only: true
+      - type: bind
+        source: ../../../patches
+        target: /misskey/patches
+        read_only: true
+      - type: bind
+        source: ./.config/default.yml
+        target: /misskey/.config/default.yml
+        read_only: true
+      - type: bind
+        source: ./certificates/rootCA.crt
+        target: /usr/local/share/ca-certificates/rootCA.crt
+        read_only: true
+      - type: bind
+        source: ./volumes/files
+        target: /misskey/files
+        bind:
+          create_host_path: true
+    working_dir: /misskey
+    command: >
+      bash -c "
+        npm install -g pnpm
+        pnpm -F backend i --frozen-lockfile
+        pnpm -F misskey-js i --frozen-lockfile
+        pnpm -F misskey-reversi i --frozen-lockfile
+        pnpm -F backend start
+      "
+    healthcheck:
+      test: bash /misskey/healthcheck.sh
+      interval: 5s
+      retries: 40
+    depends_on:
+      misskey-1:
+        condition: service_healthy
+    networks:
+      - cluster_network
+
+  # Nginx load balancer
+  nginx:
+    image: nginx:1.27
+    volumes:
+      - type: bind
+        source: ./nginx.conf
+        target: /etc/nginx/conf.d/default.conf
+        read_only: true
+      - type: bind
+        source: ./certificates/cluster.test.crt
+        target: /etc/nginx/certificates/cluster.test.crt
+        read_only: true
+      - type: bind
+        source: ./certificates/cluster.test.key
+        target: /etc/nginx/certificates/cluster.test.key
+        read_only: true
+      - type: bind
+        source: ./certificates/rootCA.crt
+        target: /etc/nginx/certificates/rootCA.crt
+        read_only: true
+    healthcheck:
+      test: service nginx status
+      interval: 5s
+      retries: 20
+    depends_on:
+      misskey-1:
+        condition: service_healthy
+      misskey-2:
+        condition: service_healthy
+    networks:
+      cluster_network:
+        aliases:
+          - cluster.test
+
+  # Rate limit purge daemon
+  daemon:
+    image: node:${NODE_VERSION:-22}
+    volumes:
+      - type: bind
+        source: ../package.json
+        target: /misskey/packages/backend/package.json
+        read_only: true
+      - type: bind
+        source: ./daemon.ts
+        target: /misskey/packages/backend/test-multipart/daemon.ts
+        read_only: true
+      - type: bind
+        source: ../../../package.json
+        target: /misskey/package.json
+        read_only: true
+      - type: bind
+        source: ../../../pnpm-lock.yaml
+        target: /misskey/pnpm-lock.yaml
+        read_only: true
+      - type: bind
+        source: ../../../pnpm-workspace.yaml
+        target: /misskey/pnpm-workspace.yaml
+        read_only: true
+      - type: bind
+        source: ../../../patches
+        target: /misskey/patches
+        read_only: true
+    working_dir: /misskey
+    command: >
+      bash -c "
+        npm install -g pnpm
+        pnpm -F backend i --frozen-lockfile
+        npx tsx packages/backend/test-multipart/daemon.ts
+      "
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - cluster_network
+
+  # Test runner
+  tester:
+    image: node:${NODE_VERSION:-22}
+    environment:
+      - NODE_ENV=test
+      - NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/rootCA.crt
+      - R2_ENDPOINT=${R2_ENDPOINT:-}
+      - R2_ACCESS_KEY=${R2_ACCESS_KEY:-}
+      - R2_SECRET_KEY=${R2_SECRET_KEY:-}
+      - R2_BUCKET=${R2_BUCKET:-}
+      - R2_STAGING_BUCKET=${R2_STAGING_BUCKET:-}
+    volumes:
+      - type: bind
+        source: ../package.json
+        target: /misskey/packages/backend/package.json
+        read_only: true
+      - type: bind
+        source: ../jest.js
+        target: /misskey/packages/backend/jest.js
+        read_only: true
+      - type: bind
+        source: ./jest.config.cjs
+        target: /misskey/packages/backend/test-multipart/jest.config.cjs
+        read_only: true
+      - type: bind
+        source: ./test
+        target: /misskey/packages/backend/test-multipart/test
+        read_only: true
+      - type: bind
+        source: ../../misskey-js/built
+        target: /misskey/packages/misskey-js/built
+        read_only: true
+      - type: bind
+        source: ../../misskey-js/package.json
+        target: /misskey/packages/misskey-js/package.json
+        read_only: true
+      - type: bind
+        source: ../../../package.json
+        target: /misskey/package.json
+        read_only: true
+      - type: bind
+        source: ../../../pnpm-lock.yaml
+        target: /misskey/pnpm-lock.yaml
+        read_only: true
+      - type: bind
+        source: ../../../pnpm-workspace.yaml
+        target: /misskey/pnpm-workspace.yaml
+        read_only: true
+      - type: bind
+        source: ../../../patches
+        target: /misskey/patches
+        read_only: true
+      - type: bind
+        source: ./certificates/rootCA.crt
+        target: /usr/local/share/ca-certificates/rootCA.crt
+        read_only: true
+    working_dir: /misskey
+    entrypoint: >
+      bash -c '
+        npm install -g pnpm
+        pnpm -F misskey-js i --frozen-lockfile
+        pnpm -F backend i --frozen-lockfile
+        exec "$0" "$@"
+      '
+    command: node packages/backend/jest.js --forceExit --config packages/backend/test-multipart/jest.config.cjs
+    depends_on:
+      nginx:
+        condition: service_healthy
+      daemon:
+        condition: service_started
+    networks:
+      cluster_network:
+        ipv4_address: 172.24.1.1
+
+networks:
+  cluster_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.24.0.0/16

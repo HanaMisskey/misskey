@@ -2151,6 +2151,50 @@ declare module '../api.js' {
     ): Promise<SwitchCaseResponseType<E, P>>;
 
     /**
+     * Abort a multipart upload session.
+     * 
+     * **Credential required**: *Yes* / **Permission**: *write:drive*
+     */
+    request<E extends 'drive/files/multipart/abort', P extends Endpoints[E]['req']>(
+      endpoint: E,
+      params: P,
+      credential?: string | null,
+    ): Promise<SwitchCaseResponseType<E, P>>;
+
+    /**
+     * Complete a multipart upload session and create the drive file.
+     * 
+     * **Credential required**: *Yes* / **Permission**: *write:drive*
+     */
+    request<E extends 'drive/files/multipart/complete', P extends Endpoints[E]['req']>(
+      endpoint: E,
+      params: P,
+      credential?: string | null,
+    ): Promise<SwitchCaseResponseType<E, P>>;
+
+    /**
+     * Initiate a multipart upload session.
+     * 
+     * **Credential required**: *Yes* / **Permission**: *write:drive*
+     */
+    request<E extends 'drive/files/multipart/create', P extends Endpoints[E]['req']>(
+      endpoint: E,
+      params: P,
+      credential?: string | null,
+    ): Promise<SwitchCaseResponseType<E, P>>;
+
+    /**
+     * Upload a part of a multipart upload session.
+     * 
+     * **Credential required**: *Yes* / **Permission**: *write:drive*
+     */
+    request<E extends 'drive/files/multipart/upload-part', P extends Endpoints[E]['req']>(
+      endpoint: E,
+      params: P,
+      credential?: string | null,
+    ): Promise<SwitchCaseResponseType<E, P>>;
+
+    /**
      * Show the properties of a drive file.
      * 
      * **Credential required**: *Yes* / **Permission**: *read:drive*

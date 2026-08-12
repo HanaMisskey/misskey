@@ -70,6 +70,13 @@ type AddFileArgs = {
 
 	requestIp?: string | null;
 	requestHeaders?: Record<string, string> | null;
+
+	/** Options for multipart upload optimization (skip re-uploading original to S3) */
+	s3Multipart?: {
+		skipOriginalUpload: boolean;
+		s3Key: string;
+		s3Url: string;
+	};
 };
 
 type UploadFromUrlArgs = {
@@ -146,7 +153,14 @@ export class DriveService {
 	 * @param size Size for original
 	 */
 	@bindThis
-	private async save(file: MiDriveFile, path: string, name: string, type: string, hash: string, size: number): Promise<MiDriveFile> {
+	private async save(file: MiDriveFile, path: string, name: string, type: string, hash: string, size: number, opts?: {
+		/** Skip uploading the original file to S3 (used when it's already on S3 via multipart upload) */
+		skipOriginalUpload?: boolean;
+		/** Pre-assigned S3 key for the original file */
+		s3Key?: string;
+		/** Pre-assigned S3 URL for the original file */
+		s3Url?: string;
+	}): Promise<MiDriveFile> {
 	// thunbnail, webpublic を必要なら生成
 		const alts = await this.generateAlts(path, type, !file.uri);
 
@@ -174,8 +188,8 @@ export class DriveService {
 
 			// for original
 			const prefix = this.meta.objectStoragePrefix ? `${this.meta.objectStoragePrefix}/` : '';
-			const key = `${prefix}${randomUUID()}${ext}`;
-			const url = `${ baseUrl }/${ key }`;
+			const key = opts?.s3Key ?? `${prefix}${randomUUID()}${ext}`;
+			const url = opts?.s3Url ?? `${ baseUrl }/${ key }`;
 
 			// for alts
 			let webpublicKey: string | null = null;
@@ -185,10 +199,14 @@ export class DriveService {
 			//#endregion
 
 			//#region Uploads
-			this.registerLogger.info(`uploading original: ${key}`);
-			const uploads = [
-				this.upload(key, fs.createReadStream(path), type, null, name),
-			];
+			const uploads: Promise<void>[] = [];
+
+			if (opts?.skipOriginalUpload) {
+				this.registerLogger.info(`skipping original upload (already on S3): ${key}`);
+			} else {
+				this.registerLogger.info(`uploading original: ${key}`);
+				uploads.push(this.upload(key, fs.createReadStream(path), type, null, name));
+			}
 
 			if (alts.webpublic) {
 				webpublicKey = `${prefix}webpublic-${randomUUID()}.${alts.webpublic.ext}`;
@@ -456,6 +474,7 @@ export class DriveService {
 		requestIp = null,
 		requestHeaders = null,
 		ext = null,
+		s3Multipart,
 	}: AddFileArgs): Promise<MiDriveFile> {
 		let skipNsfwCheck = false;
 		const userRoleNSFW = user && (await this.roleService.getUserPolicies(user.id)).alwaysMarkNsfw;
@@ -654,7 +673,11 @@ export class DriveService {
 				}
 			}
 		} else {
-			file = await (this.save(file, path, detectedName, info.type.mime, info.md5, info.size));
+			file = await (this.save(file, path, detectedName, info.type.mime, info.md5, info.size, s3Multipart ? {
+				skipOriginalUpload: s3Multipart.skipOriginalUpload,
+				s3Key: s3Multipart.s3Key,
+				s3Url: s3Multipart.s3Url,
+			} : undefined));
 		}
 
 		this.registerLogger.succ(`drive file has been created ${file.id}`);

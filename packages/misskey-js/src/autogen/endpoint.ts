@@ -295,6 +295,13 @@ import type {
 	DriveFilesFindByHashRequest,
 	DriveFilesFindByHashResponse,
 	DriveFilesMoveBulkRequest,
+	DriveFilesMultipartAbortRequest,
+	DriveFilesMultipartCompleteRequest,
+	DriveFilesMultipartCompleteResponse,
+	DriveFilesMultipartCreateRequest,
+	DriveFilesMultipartCreateResponse,
+	DriveFilesMultipartUploadPartRequest,
+	DriveFilesMultipartUploadPartResponse,
 	DriveFilesShowRequest,
 	DriveFilesShowResponse,
 	DriveFilesUpdateRequest,
@@ -859,6 +866,10 @@ export type Endpoints = {
 	'drive/files/find': { req: DriveFilesFindRequest; res: DriveFilesFindResponse };
 	'drive/files/find-by-hash': { req: DriveFilesFindByHashRequest; res: DriveFilesFindByHashResponse };
 	'drive/files/move-bulk': { req: DriveFilesMoveBulkRequest; res: EmptyResponse };
+	'drive/files/multipart/abort': { req: DriveFilesMultipartAbortRequest; res: EmptyResponse };
+	'drive/files/multipart/complete': { req: DriveFilesMultipartCompleteRequest; res: DriveFilesMultipartCompleteResponse };
+	'drive/files/multipart/create': { req: DriveFilesMultipartCreateRequest; res: DriveFilesMultipartCreateResponse };
+	'drive/files/multipart/upload-part': { req: DriveFilesMultipartUploadPartRequest; res: DriveFilesMultipartUploadPartResponse };
 	'drive/files/show': { req: DriveFilesShowRequest; res: DriveFilesShowResponse };
 	'drive/files/update': { req: DriveFilesUpdateRequest; res: DriveFilesUpdateResponse };
 	'drive/files/upload-from-url': { req: DriveFilesUploadFromUrlRequest; res: EmptyResponse };
@@ -1107,4 +1118,5 @@ export type Endpoints = {
  */
 export const endpointReqTypes = {
 	'drive/files/create': 'multipart/form-data',
+	'drive/files/multipart/upload-part': 'multipart/form-data',
 } as const satisfies { [K in keyof Endpoints]?: 'multipart/form-data'; };
