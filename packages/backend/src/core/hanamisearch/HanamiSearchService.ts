@@ -71,6 +71,47 @@ function compileQuery(q: Q): string {
 	}
 }
 
+/**
+ * 索引へ送る 1 件ぶんを組み立てる。
+ *
+ * **クラスの外に出しているのは、ここが試験できる形でないと抜けに気づけないため。**
+ * 送る項目が足りないことは、送った側からは何も起きない。索引が受け取った分だけで
+ * 文書を作り、200 を返す。**気づくのは、PG から作り直した文書と突き合わせたとき**で、
+ * それは何日も後になる。
+ *
+ * 空の配列を `null` に畳むのは、索引側が「空の列」と「その項目が無い」を同じに
+ * 扱うため。畳まずに送ると、同じ投稿でも経路によって `_source` が変わり、
+ * **全件が「中身が違う」になる。**
+ */
+export function buildHanamiSearchDocument(note: MiNote, createdAt: number) {
+	return {
+		id: note.id,
+		createdAt,
+		userId: note.userId,
+		userHost: note.userHost,
+		channelId: note.channelId,
+		cw: note.cw,
+		text: note.text,
+		// 配列が空の場合は null にする（検索時のパフォーマンスのためにインデックスしない）
+		tags: (note.tags.length > 0) ? note.tags : null,
+		fileIds: (note.fileIds.length > 0) ? note.fileIds : null,
+		// **カスタム絵文字の「印」は、この列からしか導けない。**
+		//
+		// HanamiSearch はカスタム絵文字を `:name:` という印として索引に入れ、
+		// ファンマーク検索がそれを引く。本文からは導けない — 本文に書かれた
+		// `:name:` が実在する絵文字とは限らないので、索引側は本文を信じない。
+		//
+		// **送っていなかった。** そのため live で入った投稿だけ印を持たず、
+		// PG から作り直した分には付くので、突き合わせが毎周これを
+		// contentMismatch として出し、**昇格が止まっていた**。
+		//
+		// 2026-08-12 実測: 直近 20 分の索引対象 2,035 件のうち 451 件が食い違い、
+		// 欠けていた印 652 個は**全部カスタム絵文字**、Unicode 絵文字は 0 個。
+		// 10 日前から 3,000 件（作り直しで入った分）の食い違いは 0 件。
+		emojis: (note.emojis.length > 0) ? note.emojis : null,
+	};
+}
+
 @Injectable()
 export class HanamiSearchService {
 	private readonly hanamisearchIndexScope: 'local' | 'global' | string[] = 'global';
@@ -132,22 +173,7 @@ export class HanamiSearchService {
 		if (note.text == null && note.cw == null) return;
 		if (!['home', 'public'].includes(note.visibility)) return;
 
-		// 配列が空の場合は null にする（検索時のパフォーマンスのためにインデックスしない）
-		const fileIds = (note.fileIds.length > 0) ? note.fileIds : null;
-		const tags = (note.tags.length > 0) ? note.tags : null;
-
-		const createdAt = this.idService.parse(note.id).date.getTime();
-		const noteData = {
-			id: note.id,
-			createdAt,
-			userId: note.userId,
-			userHost: note.userHost,
-			channelId: note.channelId,
-			cw: note.cw,
-			text: note.text,
-			tags: tags,
-			fileIds: fileIds,
-		};
+		const noteData = buildHanamiSearchDocument(note, this.idService.parse(note.id).date.getTime());
 
 		const shouldIndex = (scope: string | string[], userHost: string | null): boolean => {
 			if (scope === 'global') return true;
