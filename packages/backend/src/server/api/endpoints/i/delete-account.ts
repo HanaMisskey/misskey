@@ -13,6 +13,7 @@ import { UserAuthService } from '@/core/UserAuthService.js';
 
 export const meta = {
 	requireCredential: true,
+	requiredRolePolicy: 'canDeleteAccount',
 
 	secure: true,
 } as const;

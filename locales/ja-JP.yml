@@ -3551,9 +3551,11 @@ _hana:
   searchIsInBeta: "独自検索エンジンは現在開発中です。今ご利用いただけるのは通常のMisskeyと同じ検索エンジン（Meilisearch）です。今後の進化にご期待ください！"
   showOnX: "{x}で見る"
   takingTooLongToLoad: "読み込みに時間がかかっています。"
+  cannotDeleteAccount: "このアカウントでは、現在アカウントの削除ができません。はなみすきープレミアムを契約している場合でアカウントの削除を行いたい場合は、「今すぐプレミアム機能を停止する」をオンにして解約してください。\nなお、こちらのオプションを有効にせず解約した場合、アカウントの削除ははなみすきープレミアムの契約が満了するまでお待ちいただく必要があります。"
   _roles:
     createdBefore: "作成日時（タイムスタンプ）が～以前"
     durationBasedLockdownAvailable: "期間ベースのロックダウンの利用を許可"
+    canDeleteAccount: "アカウントの削除を許可"
   _inDevelopment:
     title: "この機能は開発中です"
     description: "はなみすきーは新規機能盛りだくさんで鋭意開発中です！\nどんな機能が実装されるかはお楽しみ。"

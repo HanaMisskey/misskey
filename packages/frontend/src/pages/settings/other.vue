@@ -74,7 +74,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 					<template #icon><SearchIcon><i class="ti ti-alert-triangle"></i></SearchIcon></template>
 					<template #label><SearchLabel>{{ i18n.ts.closeAccount }}</SearchLabel></template>
 
-					<div class="_gaps_m">
+					<FormInfo v-if="$i.policies.canDeleteAccount !== true" warn>{{ i18n.ts._hana.cannotDeleteAccount }}</FormInfo>
+					<div v-else class="_gaps_m">
 						<FormInfo warn>{{ i18n.ts._accountDelete.mayTakeTime }}</FormInfo>
 						<FormInfo>{{ i18n.ts._accountDelete.sendEmail }}</FormInfo>
 						<MkButton v-if="!$i.isDeleted" danger @click="deleteAccount"><SearchText>{{ i18n.ts._accountDelete.requestAccountDelete }}</SearchText></MkButton>
