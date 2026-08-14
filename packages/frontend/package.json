@@ -131,7 +131,7 @@
 		"happy-dom": "20.3.0",
 		"intersection-observer": "0.12.2",
 		"micromatch": "4.0.8",
-		"minimatch": "10.1.1",
+		"minimatch": "10.2.3",
 		"msw": "2.12.7",
 		"msw-storybook-addon": "2.0.6",
 		"nodemon": "3.1.11",
