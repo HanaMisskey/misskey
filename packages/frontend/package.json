@@ -49,7 +49,7 @@
 		"estree-walker": "3.0.3",
 		"eventemitter3": "5.0.1",
 		"execa": "9.6.1",
-		"exifreader": "4.36.0",
+		"exifreader": "4.39.0",
 		"frontend-shared": "workspace:*",
 		"icons-subsetter": "workspace:*",
 		"idb-keyval": "6.2.2",
