@@ -86,6 +86,7 @@ import { i18n } from '@/i18n.js';
 import { prefer } from '@/preferences.js';
 import { DI } from '@/di.js';
 import { globalEvents } from '@/events.js';
+import { isPreviewable, getType } from '@/utility/lightbox.js';
 
 const props = defineProps<{
 	draggable?: boolean;
@@ -228,8 +229,6 @@ function handleClick(attach: Attach, ev: PointerEvent | KeyboardEvent): void {
 function showFileMenu(attach: Attach, ev: MouseEvent | KeyboardEvent): void {
 	if (attach.type === 'driveFile') {
 		const file = attach.file;
-		const isImage = file.type.startsWith('image/');
-		const isVideo = file.type.startsWith('video/');
 
 		const menuItems: MenuItem[] = [];
 		menuItems.push({
@@ -246,17 +245,17 @@ function showFileMenu(attach: Attach, ev: MouseEvent | KeyboardEvent): void {
 			action: () => { describeDriveFile(file); },
 		});
 
-		if (isImage || isVideo) {
+		if (isPreviewable(file.type)) {
 			menuItems.push({
 				text: i18n.ts.preview,
 				icon: 'ti ti-photo-search',
 				action: async () => {
 					const constents = props.modelValue.filter(item => (
-						(item.type.startsWith('image') || item.type.startsWith('video')) &&
+						isPreviewable(file.type) &&
 						(item.type === 'driveFile' || objectUrlMap.has(item.id))
 					)).map<Content>(item => ({
 						id: item.id,
-						type: item.type.startsWith('video') ? 'video' as const : 'image' as const,
+						type: getType(item.type === 'driveFile' ? item.file.type : item.file.file.type),
 						url: item.type === 'driveFile' ? item.file.url : objectUrlMap.get(item.id)!,
 						thumbnailUrl: item.type === 'driveFile' ? item.file.thumbnailUrl : item.file.thumbnail,
 						width: item.type === 'driveFile' ? item.file.properties.width : null,

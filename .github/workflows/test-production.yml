@@ -5,6 +5,8 @@ on:
     branches:
       - hanami
   pull_request:
+    branches-ignore:
+      - master
 
 env:
   NODE_ENV: production
