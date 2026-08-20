@@ -34,13 +34,11 @@ SPDX-License-Identifier: AGPL-3.0-only
 <script setup lang="ts">
 import { useTemplateRef, shallowRef, ref, computed, watch, onBeforeUnmount } from 'vue';
 import * as Misskey from 'misskey-js';
+import tinycolor from 'tinycolor2';
+import type { Content } from '@/components/MkLightbox.item.vue';
 import { i18n } from '@/i18n.js';
 import { themeManager } from '@/theme.js';
 import { prefer } from '@/preferences.js';
-import { store } from '@/store.js';
-import tinycolor from 'tinycolor2';
-import { extractAvgColorFromBlurhash } from '@@/js/extract-avg-color-from-blurhash.js';
-import type { Content } from '@/components/MkLightbox.item.vue';
 
 // クリック等のフォールスルーはキャンバスに渡す (ルートは全面を覆うので、その外側は背景として扱わせる)
 defineOptions({
@@ -65,25 +63,35 @@ const canvasCtx = computed(() => canvasEl.value?.getContext('2d') ?? null);
 const fileUser = computed(() => props.content.file?.user ?? props.user);
 
 //#region 描画パラメータ
-// 低域しか見ないので、その範囲を十分な bin 数で刻めるよう大きめの FFT を使う (48kHz で bin 幅 ≒ 5.9Hz)
+const BAND_COUNT = 96;
+const BASE_HALF_HEIGHT_RATIO = 0.003;
+
+// 低域も十分な bin 数で刻めるよう大きめの FFT を使う (48kHz で bin 幅 ≒ 5.9Hz)
 const FFT_SIZE = 8192;
 const BIN_COUNT = FFT_SIZE / 2;
 
-/** 波形の制御点数 (片側)。実際の輪郭はこれを左右にミラーした 2 倍の点で構成される */
-const BAND_COUNT = 36;
-/** スペクトルとして取り出す周波数レンジ。波形もビート判定もこの低域だけを見る */
-const MIN_FREQ = 30;
-const MAX_FREQ = 300;
+/** スペクトルとして取り出す周波数レンジ */
+const MIN_FREQ = 20;
+const MAX_FREQ = 16000;
+
+/**
+ * 低域の傾き補正の倍率。1オクターブ上がるごとにこの値を掛ける。1より大きいと高域が持ち上がる
+ */
+const SPECTRUM_TILT_COEFFICIENT = 1.06;
+
+const BEAT_BAND_COUNT = 36;
+const BEAT_MIN_FREQ = 30;
+const BEAT_MAX_FREQ = 300;
 
 /** 波形の立ち上がり / 立ち下がりの時定数 (s) */
 const WAVE_ATTACK_TAU = 0.01;
 const WAVE_RELEASE_TAU = 0.015;
 /** 正規化後にかけるコントラスト強調の指数 大きいほど小さい山が引っ込み、大きい山との差が開く */
 const CONTRAST_EXPONENT = 1.9;
-/** 基準半径に対する波形の振れ幅 */
-const WAVE_GAIN = 1.05;
-/** Catmull-Rom スプラインの張り具合 大きいほど丸く、0 に近いほど折れ線に近づく */
-const SPLINE_TENSION = 0.9;
+/** キャンバス高に対する無音時の半幅と、振幅によって加わる最大半幅 */
+const WAVE_GAIN_HALF_HEIGHT_RATIO = 0.3;
+/** 各バーに割り当てられた横幅のうち、実際の線の幅として使う割合 (0-1) */
+const BAR_THICKNESS_FACTOR = 0.5;
 
 /** 全体の音圧に追従する緩やかな拡大縮小の時定数 (s) と最大量 */
 const LEVEL_TAU = 0.3;
@@ -98,8 +106,8 @@ const BEAT_RELEASE_TAU = 0.18;
 /** ビートに合わせて瞬間的に拡大する量 */
 const BEAT_SCALE = 0.16;
 
-/** キャンバス短辺の半分に対する、無音時の波形半径の比 (アバターの直径もこれに一致する) */
-const BASE_RADIUS_RATIO = 0.36;
+/** キャンバス高に対するアバター直径の比 */
+const AVATAR_SIZE_RATIO = 0.36;
 //#endregion
 
 // アニメーション量を控えるべきかどうか（拡大縮小のみ抑制）
@@ -110,39 +118,160 @@ const freqArray = new Uint8Array(BIN_COUNT);
 /** 帯域ごとに参照する bin の範囲 */
 const bandStart = new Uint16Array(BAND_COUNT);
 const bandEnd = new Uint16Array(BAND_COUNT);
+/** ビート検出用の低域だけを参照する bin の範囲 */
+const beatBandStart = new Uint16Array(BEAT_BAND_COUNT);
+const beatBandEnd = new Uint16Array(BEAT_BAND_COUNT);
+/** 帯域ごとに掛ける傾き補正の倍率 */
+const bandTilt = new Float32Array(BAND_COUNT);
 /** 帯域ごとの生の振幅 (フレーム内の作業用) */
 const rawLevels = new Float32Array(BAND_COUNT);
 /** 帯域ごとの平滑化済み振幅 (0-1) */
 const levels = new Float32Array(BAND_COUNT);
-/** 輪郭の頂点座標 */
-const pointsX = new Float64Array(BAND_COUNT * 2);
-const pointsY = new Float64Array(BAND_COUNT * 2);
+/** ビート検出用の低域の生の振幅 */
+const beatRawLevels = new Float32Array(BEAT_BAND_COUNT);
+/** 上下の輪郭の頂点座標 */
+const pointsX = new Float64Array(BAND_COUNT);
+const topPointsY = new Float64Array(BAND_COUNT);
+const bottomPointsY = new Float64Array(BAND_COUNT);
 
-/** 自動レンジ調整が追跡している下限 / 上限。低域だけを見るので全帯域で 1 つのレンジを共有する */
-let rangeFloor = 0;
-let rangeCeil = 0;
+/** 表示波形と低域ビート検出がそれぞれ追跡する自動レンジ */
+type AnalysisRange = { floor: number; ceil: number };
+const waveRange: AnalysisRange = { floor: 0, ceil: 0 };
+const beatRange: AnalysisRange = { floor: 0, ceil: 0 };
 let levelEnv = 0;
 let energyEnv = 0;
 let energyBaseline = 0;
 let beatEnv = 0;
 
-function setupBands(sampleRate: number) {
-	const ratio = MAX_FREQ / MIN_FREQ;
-	for (let i = 0; i < BAND_COUNT; i++) {
-		const lowFreq = MIN_FREQ * Math.pow(ratio, i / BAND_COUNT);
-		const highFreq = MIN_FREQ * Math.pow(ratio, (i + 1) / BAND_COUNT);
-		const toBin = (freq: number) => freq * FFT_SIZE / sampleRate;
-		const start = Math.min(Math.max(Math.floor(toBin(lowFreq)), 0), BIN_COUNT - 1);
-		const end = Math.min(Math.max(Math.ceil(toBin(highFreq)), start + 1), BIN_COUNT);
-		bandStart[i] = start;
-		bandEnd[i] = end;
+function getAudioVisualizerBarWidth(canvasWidth: number, barCount: number, thicknessFactor: number) {
+	return (canvasWidth / barCount) * thicknessFactor;
+}
+
+/**
+ * FFT の bin を帯域ごとにまとめる。低域は十分な分解能で刻めるよう、対数的に帯域を広げる
+ */
+function writeLogarithmicFrequencyBands(options: {
+	fftSize: number;
+	sampleRate: number;
+	minFrequency: number;
+	maxFrequency: number;
+	starts: Uint16Array;
+	ends: Uint16Array;
+}) {
+	const bandCount = options.starts.length;
+	const binCount = options.fftSize / 2;
+	const maxFrequency = Math.min(options.maxFrequency, options.sampleRate / 2);
+	const frequencyRatio = maxFrequency / options.minFrequency;
+	const toBin = (frequency: number) => frequency * options.fftSize / options.sampleRate;
+
+	for (let i = 0; i < bandCount; i++) {
+		const lowFrequency = options.minFrequency * Math.pow(frequencyRatio, i / bandCount);
+		const highFrequency = options.minFrequency * Math.pow(frequencyRatio, (i + 1) / bandCount);
+		const start = Math.min(Math.max(Math.floor(toBin(lowFrequency)), 0), binCount - 1);
+		const end = Math.min(Math.max(Math.ceil(toBin(highFrequency)), start + 1), binCount);
+		options.starts[i] = start;
+		options.ends[i] = end;
 	}
+}
+
+/**
+ * 帯域ごとの傾き補正の倍率をかける
+ */
+function writeSpectrumTilt(options: {
+	sampleRate: number;
+	minFrequency: number;
+	maxFrequency: number;
+	tilt: Float32Array;
+}) {
+	const bandCount = options.tilt.length;
+	const maxFrequency = Math.min(options.maxFrequency, options.sampleRate / 2);
+	const frequencyRatio = maxFrequency / options.minFrequency;
+	const pivotFrequency = Math.sqrt(options.minFrequency * maxFrequency);
+
+	for (let i = 0; i < bandCount; i++) {
+		const centerFrequency = options.minFrequency * Math.pow(frequencyRatio, (i + 0.5) / bandCount);
+		options.tilt[i] = Math.pow(SPECTRUM_TILT_COEFFICIENT, Math.log2(centerFrequency / pivotFrequency));
+	}
+}
+
+function writeFrequencyBandLevels(options: {
+	frequencyData: Uint8Array;
+	starts: Uint16Array;
+	ends: Uint16Array;
+	levels: Float32Array;
+	/** 帯域ごとに掛ける倍率 (傾き補正が要らない用途では省略する) */
+	tilt?: Float32Array;
+}) {
+	const bandCount = options.levels.length;
+
+	for (let i = 0; i < bandCount; i++) {
+		let max = 0;
+		let total = 0;
+		for (let bin = options.starts[i]; bin < options.ends[i]; bin++) {
+			const value = options.frequencyData[bin];
+			total += value;
+			if (value > max) max = value;
+		}
+		const binCount = options.ends[i] - options.starts[i];
+		const level = (max * 0.7 + (total / binCount) * 0.3) / 255;
+		options.levels[i] = options.tilt == null ? level : Math.min(level * options.tilt[i], 1);
+	}
+
+	let previous = options.levels[0];
+	let sum = 0;
+	let min = 1;
+	let peak = 0;
+	for (let i = 0; i < bandCount; i++) {
+		const current = options.levels[i];
+		const next = i + 1 < bandCount ? options.levels[i + 1] : current;
+		const smoothed = (previous + current * 3 + next) / 5;
+		options.levels[i] = smoothed;
+		previous = current;
+
+		sum += smoothed;
+		if (smoothed < min) min = smoothed;
+		if (smoothed > peak) peak = smoothed;
+	}
+
+	return { min, peak, mean: sum / bandCount };
+}
+
+function remap(value: number, inMin: number, inMax: number, outMin: number, outMax: number) {
+	return ((value - inMin) / (inMax - inMin)) * (outMax - outMin) + outMin;
+}
+
+function setupBands(sampleRate: number) {
+	writeLogarithmicFrequencyBands({
+		fftSize: FFT_SIZE,
+		sampleRate,
+		minFrequency: MIN_FREQ,
+		maxFrequency: MAX_FREQ,
+		starts: bandStart,
+		ends: bandEnd,
+	});
+	writeSpectrumTilt({
+		sampleRate,
+		minFrequency: MIN_FREQ,
+		maxFrequency: MAX_FREQ,
+		tilt: bandTilt,
+	});
+	// ビート検出は低域を見るのが目的なので、こちらには傾き補正を掛けない
+	writeLogarithmicFrequencyBands({
+		fftSize: FFT_SIZE,
+		sampleRate,
+		minFrequency: BEAT_MIN_FREQ,
+		maxFrequency: BEAT_MAX_FREQ,
+		starts: beatBandStart,
+		ends: beatBandEnd,
+	});
 }
 
 function resetAnalysis() {
 	levels.fill(0);
-	rangeFloor = 0;
-	rangeCeil = 0;
+	waveRange.floor = 0;
+	waveRange.ceil = 0;
+	beatRange.floor = 0;
+	beatRange.ceil = 0;
 	levelEnv = 0;
 	energyEnv = 0;
 	energyBaseline = 0;
@@ -169,49 +298,15 @@ const MIN_RANGE_SPAN = 0.14;
  * フレーム内の最小 / 最大値から、正規化に使うレンジを更新して幅を返す (自動レンジ調整)。
  * 音源ごとの音量差を吸収しつつ、下限をゆっくり、上限を即時に追従させて短時間のダイナミクスは残す
  */
-function updateRange(frameMin: number, framePeak: number, dt: number) {
-	rangeFloor = approach(rangeFloor, frameMin, frameMin < rangeFloor ? RANGE_FLOOR_FALL_TAU : RANGE_FLOOR_RISE_TAU, dt);
+function updateRange(range: AnalysisRange, frameMin: number, framePeak: number, dt: number) {
+	range.floor = approach(range.floor, frameMin, frameMin < range.floor ? RANGE_FLOOR_FALL_TAU : RANGE_FLOOR_RISE_TAU, dt);
 	// 上限は即座に持ち上げ、ゆっくり戻す。戻り先に下限 + 最小幅を混ぜて、レンジが潰れないようにする
-	rangeCeil = framePeak > rangeCeil ? framePeak : approach(rangeCeil, Math.max(framePeak, rangeFloor + MIN_RANGE_SPAN), RANGE_CEIL_FALL_TAU, dt);
-	return Math.max(rangeCeil - rangeFloor, MIN_RANGE_SPAN);
+	range.ceil = framePeak > range.ceil ? framePeak : approach(range.ceil, Math.max(framePeak, range.floor + MIN_RANGE_SPAN), RANGE_CEIL_FALL_TAU, dt);
+	return Math.max(range.ceil - range.floor, MIN_RANGE_SPAN);
 }
 //#endregion
 
-const defaultBgColor = themeManager.currentCompiledTheme?.accent ?? '#aaa';
-const accentColorHue = computed(() => tinycolor(fileUser.value?.avatarBlurhash ? extractAvgColorFromBlurhash(fileUser.value.avatarBlurhash) ?? defaultBgColor : defaultBgColor).toHsl().h);
-const bgColor = computed(() => {
-	let targetLightness, targetSaturation;
-	if (store.r.darkMode.value) {
-		targetLightness = 0.1;
-		targetSaturation = 0.8;
-	} else {
-		targetLightness = 0.9;
-		targetSaturation = 0.9;
-	}
-	return `hsl(${accentColorHue.value}, ${targetSaturation * 100}%, ${targetLightness * 100}%)`;
-});
-const fgColor = computed(() => {
-	let targetLightness, targetSaturation;
-	if (store.r.darkMode.value) {
-		targetLightness = 0.25;
-		targetSaturation = 0.8;
-	} else {
-		targetLightness = 0.7;
-		targetSaturation = 0.7;
-	}
-	return `hsl(${accentColorHue.value}, ${targetSaturation * 100}%, ${targetLightness * 100}%)`;
-});
-const messageColor = computed(() => {
-	let targetLightness, targetSaturation;
-	if (store.r.darkMode.value) {
-		targetLightness = 0.75;
-		targetSaturation = 0.4;
-	} else {
-		targetLightness = 0.25;
-		targetSaturation = 0.4;
-	}
-	return `hsl(${accentColorHue.value}, ${targetSaturation * 100}%, ${targetLightness * 100}%)`;
-});
+const accentColorHue = tinycolor(themeManager.currentCompiledTheme!.accent).toHsl().h;
 
 // 読み込みが終わるまでは描画しない (読み込み完了時の描き直しは下のwatchで行う)
 const avatarImage = shallowRef<HTMLImageElement | null>(null);
@@ -443,53 +538,38 @@ function analyse(dt: number) {
 	if (analyserNode == null) return;
 	analyserNode.getByteFrequencyData(freqArray);
 
-	// 帯域ごとの生の振幅を求める
-	for (let i = 0; i < BAND_COUNT; i++) {
-		let max = 0;
-		let total = 0;
-		for (let bin = bandStart[i]; bin < bandEnd[i]; bin++) {
-			const v = freqArray[bin];
-			total += v;
-			if (v > max) max = v;
-		}
-		const binCount = bandEnd[i] - bandStart[i];
-		// 最大値寄りにブレンドすると、幅の広い帯域でも細いピークが平均に埋もれず輪郭が動く
-		rawLevels[i] = (max * 0.7 + (total / binCount) * 0.3) / 255;
-	}
-
-	// 隣接帯域どうしをならして山をなだらかにする
-	let prev = rawLevels[0];
-	let sum = 0;
-	let frameMin = 1;
-	let framePeak = 0;
-	for (let i = 0; i < BAND_COUNT; i++) {
-		const current = rawLevels[i];
-		const next = i + 1 < BAND_COUNT ? rawLevels[i + 1] : current;
-		const smoothed = (prev + current * 3 + next) / 5;
-		rawLevels[i] = smoothed;
-		prev = current;
-
-		sum += smoothed;
-		if (smoothed < frameMin) frameMin = smoothed;
-		if (smoothed > framePeak) framePeak = smoothed;
-	}
+	// 最大値寄りの帯域値を作り、低域寄りの傾きを補正してから、隣接帯域どうしをならして山をなだらかにする
+	const waveFrame = writeFrequencyBandLevels({
+		frequencyData: freqArray,
+		starts: bandStart,
+		ends: bandEnd,
+		levels: rawLevels,
+		tilt: bandTilt,
+	});
 
 	// 無音ゲート: 自動レンジ調整は微小なノイズも最大まで引き伸ばしてしまうので、
 	// フレーム全体のエネルギーが無いときは強制的に閉じる
-	const frameMean = sum / BAND_COUNT;
-	const gate = Math.min(Math.max((frameMean - GATE_FLOOR) / GATE_RANGE, 0), 1);
+	const gate = Math.min(Math.max((waveFrame.mean - GATE_FLOOR) / GATE_RANGE, 0), 1);
 
-	const span = updateRange(frameMin, framePeak, dt);
+	const span = updateRange(waveRange, waveFrame.min, waveFrame.peak, dt);
 
 	for (let i = 0; i < BAND_COUNT; i++) {
-		const normalized = Math.min(Math.max((rawLevels[i] - rangeFloor) / span, 0), 1);
+		const normalized = Math.min(Math.max((rawLevels[i] - waveRange.floor) / span, 0), 1);
 		const target = Math.pow(normalized, CONTRAST_EXPONENT) * gate;
 
 		levels[i] = approach(levels[i], target, target > levels[i] ? WAVE_ATTACK_TAU : WAVE_RELEASE_TAU, dt);
 	}
 
+	const beatFrame = writeFrequencyBandLevels({
+		frequencyData: freqArray,
+		starts: beatBandStart,
+		ends: beatBandEnd,
+		levels: beatRawLevels,
+	});
+	const beatGate = Math.min(Math.max((beatFrame.mean - GATE_FLOOR) / GATE_RANGE, 0), 1);
+	const beatSpan = updateRange(beatRange, beatFrame.min, beatFrame.peak, dt);
 	// 低域全体のエネルギー。音圧による拡大縮小とビート検出の両方がこれを共有する
-	const energy = Math.min(Math.max((frameMean - rangeFloor) / span, 0), 1) * gate;
+	const energy = Math.min(Math.max((beatFrame.mean - beatRange.floor) / beatSpan, 0), 1) * beatGate;
 
 	// 全体の音圧: 緩やかに追従させ、曲の盛り上がりに合わせてじわっと拡大縮小させる
 	levelEnv = approach(levelEnv, energy, LEVEL_TAU, dt);
@@ -504,39 +584,31 @@ function analyse(dt: number) {
 
 //#region 描画
 /**
- * 帯域の振幅を左右対称の閉じた輪郭として塗る
+ * 低域から高域までを左から右へ並べ、中央線を挟んで上下対称の縦のバーとして描く
  */
-function fillWave(ctx: CanvasRenderingContext2D, centerX: number, centerY: number, baseRadius: number) {
-	const total = BAND_COUNT * 2;
+function drawBars(ctx: CanvasRenderingContext2D, width: number, height: number, centerY: number) {
+	const baseHalfHeight = height * BASE_HALF_HEIGHT_RATIO;
+	const gainHalfHeight = height * WAVE_GAIN_HALF_HEIGHT_RATIO;
+	const cellWidth = width / levels.length;
 
-	for (let k = 0; k < total; k++) {
-		// 前半は上→下、後半はその鏡像で下→上をたどる
-		const bandIndex = k < BAND_COUNT ? k : total - 1 - k;
-		const radius = baseRadius * (1 + levels[bandIndex] * WAVE_GAIN);
-		// 真上を起点に、半周を BAND_COUNT 等分する (両端を半ステップずらして点の重複を避ける)
-		const angle = -Math.PI / 2 + Math.PI * (k + 0.5) / BAND_COUNT;
-		pointsX[k] = centerX + radius * Math.cos(angle);
-		pointsY[k] = centerY + radius * Math.sin(angle);
-	}
+	//ctx.beginPath();
+	for (let i = 0; i < BAND_COUNT; i++) {
+		const halfHeight = baseHalfHeight + levels[i] * gainHalfHeight;
+		pointsX[i] = cellWidth * (i + 0.5);
+		topPointsY[i] = centerY - halfHeight;
+		bottomPointsY[i] = centerY + halfHeight;
 
-	// Catmull-Rom スプラインを 3 次ベジェに変換して描く (曲線が頂点そのものを通るので、単独の山が潰れない)
-	ctx.beginPath();
-	ctx.moveTo(pointsX[0], pointsY[0]);
-	for (let k = 0; k < total; k++) {
-		const prev = (k - 1 + total) % total;
-		const next = (k + 1) % total;
-		const nextNext = (k + 2) % total;
-		ctx.bezierCurveTo(
-			pointsX[k] + (pointsX[next] - pointsX[prev]) * SPLINE_TENSION / 6,
-			pointsY[k] + (pointsY[next] - pointsY[prev]) * SPLINE_TENSION / 6,
-			pointsX[next] - (pointsX[nextNext] - pointsX[k]) * SPLINE_TENSION / 6,
-			pointsY[next] - (pointsY[nextNext] - pointsY[k]) * SPLINE_TENSION / 6,
-			pointsX[next],
-			pointsY[next],
-		);
+		const opacity = remap(levels[i], 0, 1, 0.125, 1);
+		const hue = remap(i, 0, BAND_COUNT - 1, accentColorHue - 10, accentColorHue + 10);
+		ctx.globalAlpha = opacity;
+		ctx.strokeStyle = `hsl(${hue}, 100%, 50%)`;
+		ctx.beginPath();
+		ctx.moveTo(pointsX[i], topPointsY[i]);
+		ctx.lineTo(pointsX[i], bottomPointsY[i]);
+		ctx.stroke();
 	}
-	ctx.closePath();
-	ctx.fill();
+	//ctx.stroke();
+	ctx.globalAlpha = 1;
 }
 
 /**
@@ -549,26 +621,23 @@ function draw(dt: number) {
 
 	if (dt > 0) analyse(dt);
 
-	ctx.fillStyle = bgColor.value;
+	ctx.fillStyle = `hsl(${accentColorHue}, ${0.8 * 100}%, ${0.05 * 100}%)`;
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 	const centerX = canvas.width / 2;
 	const centerY = canvas.height / 2;
 
-	// 全体が拡大縮小する
-	// (ビジュアライザを描画できない場合は解析が走らずエンベロープが 0 のままなので、自然に等倍になる)
-	const scale = 1 + (levelEnv * LEVEL_SCALE + beatEnv * BEAT_SCALE) * motionDamp;
-	const baseRadius = Math.min(centerX, centerY) * BASE_RADIUS_RATIO * scale;
-
 	if (isVisualizerAvailable) {
-		ctx.fillStyle = fgColor.value;
-		fillWave(ctx, centerX, centerY, baseRadius);
+		ctx.lineWidth = getAudioVisualizerBarWidth(canvas.width, BAND_COUNT, BAR_THICKNESS_FACTOR);
+		ctx.lineCap = 'round';
+		drawBars(ctx, canvas.width, canvas.height, centerY);
 	}
 
-	// 波形の中心にアバターを円形にくりぬいて描画 (波形が出せない場合もアバターは出す)
+	// アバターを円形にくりぬいて描画 (波形が出せない場合もアバターは出す)
+	const avatarScaleFactor = 1 + (levelEnv * LEVEL_SCALE + beatEnv * BEAT_SCALE) * motionDamp;
 	const avatar = avatarImage.value;
+	const avatarSize = canvas.height * AVATAR_SIZE_RATIO * avatarScaleFactor;
 	if (avatar != null) {
-		const avatarSize = baseRadius * 2;
 		const avatarHeight = Math.max(avatar.height * (avatarSize / avatar.width), avatarSize);
 		const avatarWidth = Math.max(avatar.width * (avatarSize / avatar.height), avatarSize);
 		ctx.save();
@@ -581,11 +650,11 @@ function draw(dt: number) {
 
 	if (!isVisualizerAvailable) {
 		// 再生自体はできるので、アバターの下に文言を添えるだけに留める
-		ctx.fillStyle = messageColor.value;
+		ctx.fillStyle = `hsl(${accentColorHue}, ${0.4 * 100}%, ${0.75 * 100}%)`;
 		ctx.textAlign = 'center';
 		ctx.textBaseline = 'middle';
 		ctx.font = `${Math.round(canvas.height * 0.055)}px ${window.getComputedStyle(canvas).fontFamily}`;
-		ctx.fillText(i18n.ts.cannotPreview, centerX, centerY + baseRadius + canvas.height * 0.09);
+		ctx.fillText(i18n.ts.cannotPreview, centerX, centerY + avatarSize / 2 + canvas.height * 0.09);
 	}
 }
 
@@ -604,10 +673,8 @@ watch(() => props.volume, (to) => {
 	}
 });
 
-watch([bgColor, fgColor], redrawIfStopped);
-
 watch(() => fileUser.value?.avatarUrl, (avatarUrl) => {
-		const img = new Image();
+	const img = new Image();
 	img.addEventListener('load', () => {
 		avatarImage.value = img;
 		redrawIfStopped();
