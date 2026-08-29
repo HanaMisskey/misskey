@@ -168,7 +168,7 @@
 		"rename": "1.0.4",
 		"rss-parser": "3.13.0",
 		"rxjs": "7.8.2",
-		"sanitize-html": "2.17.0",
+		"sanitize-html": "2.17.5",
 		"secure-json-parse": "3.0.2",
 		"semver": "7.7.3",
 		"sharp": "0.33.5",
