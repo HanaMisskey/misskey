@@ -7,8 +7,6 @@ SPDX-License-Identifier: AGPL-3.0-only
 <div class="_gaps">
 	<div class="_spacer" :class="$style.pageMain" style="--MI_SPACER-w: 800px;">
 		<div class="_gaps">
-			<MkInfo v-if="!$i || !$i.policies.canSearchWithHanamiSearchV1">{{ i18n.ts._hana.searchIsInBeta }}</MkInfo>
-
 			<HanaSearchInput
 				v-model="searchQuery"
 				v-model:mode="searchMode"
@@ -98,7 +96,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 					<div :class="$style.searchOptionGroupRoot">
 						<div :class="$style.searchOptionGroupLabel">{{ i18n.ts.filter }}</div>
-						<MkSwitch v-model="onlyWithFiles" :disabled="!($i != null && $i.policies.canSearchWithHanamiSearchV1 === true && searchMode === 'v1')">{{ i18n.ts.withFiles }}<span class="_beta">{{ i18n.ts._hana._search.v1Only }}</span></MkSwitch>
+						<MkSwitch v-model="onlyWithFiles">{{ i18n.ts.withFiles }}</MkSwitch>
 					</div>
 				</div>
 			</MkFoldableSection>
@@ -123,7 +121,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 			<div ref="searchResultStickyContainer" :class="$style.searchResultStickyRoot">
 				<div :class="$style.searchResultStickyContainer">
 					<div :class="$style.searchResultStickyTitle"><i class="ti ti-list-search"></i> {{ i18n.ts.searchResult }}</div>
-					<div v-if="searchMode === 'v1' && onlyWithFiles" :class="$style.searchResultStickyViewRoot">
+					<div v-if="onlyWithFiles" :class="$style.searchResultStickyViewRoot">
 						<MkSwitch v-model="showAsGrid"><i class="ti ti-layout-grid"></i><span :class="$style.searchResultStickyViewLabelText">&nbsp;{{ i18n.ts._hana._search.showAsGrid }}</span></MkSwitch>
 					</div>
 				</div>
@@ -133,7 +131,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 			'--MI_SPACER-w': (showAsGrid ? undefined : '800px'),
 		}">
 			<MkPagination
-				v-if="searchMode === 'v1' && onlyWithFiles && showAsGrid"
+				v-if="onlyWithFiles && showAsGrid"
 				v-slot="{ items }"
 				:key="`searchNotes:${key}:grid`"
 				:paginator="paginator"
@@ -142,7 +140,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 					<MkNoteMediaGrid v-for="note in (items as Misskey.entities.Note[])" :key="note.id" :note="note" square/>
 				</div>
 			</MkPagination>
-			<MkNotesTimeline v-else :key="`searchNotes:${key}:note`" :paginator="paginator" :withControl="false"/>
+			<MkNotesTimeline v-else :key="`searchNotes:${key}:note`" :paginator="paginator" :withControl="searchMode === 'v1'"/>
 		</div>
 	</MkStickyContainer>
 </div>
@@ -151,8 +149,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 <script lang="ts" setup>
 import { computed, ref, shallowRef, useTemplateRef, toRef, markRaw } from 'vue';
 import type * as Misskey from 'misskey-js';
-import { Paginator } from '@/utility/paginator.js';
-import type { IPaginator } from '@/utility/paginator.js';
+import type { IPaginator, Paginator as PaginatorClassType } from '@/utility/paginator.js';
+import type { TokenPaginator as TokenPaginatorClassType } from '@/hana/scripts/token-paginator.js';
 import { $i } from '@/i.js';
 import { host as localHost } from '@@/js/config.js';
 import { i18n } from '@/i18n.js';
@@ -168,7 +166,6 @@ import MkRadios from '@/components/MkRadios.vue';
 import MkUserCardMini from '@/components/MkUserCardMini.vue';
 
 import HanaSearchInput from '@/components/HanaSearchInput.vue';
-import MkInfo from '@/components/MkInfo.vue';
 import MkSwitch from '@/components/MkSwitch.vue';
 import MkPagination from '@/components/MkPagination.vue';
 import MkNoteMediaGrid from '@/components/MkNoteMediaGrid.vue';
@@ -195,7 +192,7 @@ const paginator = shallowRef<IPaginator<Misskey.entities.Note> | null>(null);
 const searchQuery = ref(toRef(props, 'query').value);
 const hostInput = ref(toRef(props, 'host').value);
 
-const searchMode = ref<SearchMode>('v1');
+const searchMode = ref<SearchMode>($i?.policies.canSearchWithHanamiSearchV2 ? 'v2' : 'v1' );
 const showAsGrid = ref(false);
 const onlyWithFiles = ref(false);
 
@@ -305,6 +302,9 @@ const searchResultStickyContainer = useTemplateRef('searchResultStickyContainer'
 
 const parentBg = ref<string | null>(null);
 
+let NormalPaginator: typeof PaginatorClassType | null = null;
+let TokenPaginator: typeof TokenPaginatorClassType | null = null;
+
 async function search() {
 	if (searchParams.value == null) return;
 
@@ -371,8 +371,24 @@ async function search() {
 		}
 	}
 
-	if ($i?.policies.canSearchWithHanamiSearchV1 === true && searchMode.value === 'v1') {
-		paginator.value = markRaw(new Paginator('notes/hanamisearch-v1', {
+	if ($i?.policies.canSearchWithHanamiSearchV2 === true && searchMode.value === 'v2') {
+		if (TokenPaginator == null) {
+			const mod = await import('@/hana/scripts/token-paginator.js');
+			TokenPaginator = mod.TokenPaginator;
+		}
+		paginator.value = markRaw(new TokenPaginator('notes/hanamisearch-v2', {
+			limit: 20,
+			params: {
+				...searchParams.value,
+				onlyWithFiles: onlyWithFiles.value,
+			},
+		}));
+	} else if ($i?.policies.canSearchWithHanamiSearchV1 === true && searchMode.value === 'v1') {
+		if (NormalPaginator == null) {
+			const mod = await import('@/utility/paginator.js');
+			NormalPaginator = mod.Paginator;
+		}
+		paginator.value = markRaw(new NormalPaginator('notes/hanamisearch-v1', {
 			limit: 10,
 			params: {
 				...searchParams.value,
@@ -380,7 +396,12 @@ async function search() {
 			},
 		}));
 	} else {
-		paginator.value = markRaw(new Paginator('notes/search', {
+		// たぶんここにはたどり着かないと思うけど
+		if (NormalPaginator == null) {
+			const mod = await import('@/utility/paginator.js');
+			NormalPaginator = mod.Paginator;
+		}
+		paginator.value = markRaw(new NormalPaginator('notes/search', {
 			limit: 10,
 			params: {
 				...searchParams.value,

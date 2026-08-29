@@ -1,1 +1,1 @@
-export type SearchMode = 'v0' | 'v1';
+export type SearchMode = 'v1' | 'v2';

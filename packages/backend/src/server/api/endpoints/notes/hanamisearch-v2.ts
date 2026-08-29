@@ -1,30 +1,31 @@
-/*
- * SPDX-FileCopyrightText: syuilo and misskey-project
- * SPDX-License-Identifier: AGPL-3.0-only
- */
-
 import { Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
-import { SearchService } from '@/core/SearchService.js';
-import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
-import { RoleService } from '@/core/RoleService.js';
 import { HanamiSearchService } from '@/core/hanamisearch/HanamiSearchService.js';
-import { IdService } from '@/core/IdService.js';
-import { ApiError } from '../../error.js';
 
 export const meta = {
 	tags: ['notes'],
 
 	requireCredential: false,
+	requiredRolePolicy: 'canSearchWithHanamiSearchV2',
 
 	res: {
-		type: 'array',
+		type: 'object',
 		optional: false, nullable: false,
-		items: {
-			type: 'object',
-			optional: false, nullable: false,
-			ref: 'Note',
-		},
+		properties: {
+			items: {
+				type: 'array',
+				optional: false, nullable: false,
+				items: {
+					type: 'object',
+					optional: false, nullable: false,
+					ref: 'Note',
+				},
+			},
+			nextToken: {
+				type: 'string',
+				optional: true, nullable: true,
+			},
+		}
 	},
 
 	errors: {
@@ -40,18 +41,15 @@ export const paramDef = {
 	type: 'object',
 	properties: {
 		query: { type: 'string' },
-		sinceId: { type: 'string', format: 'misskey:id' },
-		untilId: { type: 'string', format: 'misskey:id' },
-		sinceDate: { type: 'integer' },
-		untilDate: { type: 'integer' },
 		limit: { type: 'integer', minimum: 1, maximum: 100, default: 10 },
-		offset: { type: 'integer', default: 0 },
+		nextToken: { type: 'string', nullable: true },
 		host: {
 			type: 'string',
 			description: 'The local host is represented with `.`.',
 		},
 		userId: { type: 'string', format: 'misskey:id', nullable: true, default: null },
 		channelId: { type: 'string', format: 'misskey:id', nullable: true, default: null },
+		onlyWithFiles: { type: 'boolean', default: false },
 	},
 	required: ['query'],
 } as const;
@@ -62,23 +60,23 @@ export const paramDef = {
 export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-disable-line import/no-default-export
 	constructor(
 		private hanamiSearchService: HanamiSearchService,
-		private idService: IdService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
-			const untilId = ps.untilId ?? (ps.untilDate ? this.idService.gen(ps.untilDate!) : undefined);
-			const sinceId = ps.sinceId ?? (ps.sinceDate ? this.idService.gen(ps.sinceDate!) : undefined);
-
-			return await this.hanamiSearchService.searchNote(ps.query, me, {
+			const sres = await this.hanamiSearchService.searchNote(ps.query, me, {
 				userId: ps.userId,
 				channelId: ps.channelId,
 				host: ps.host,
-				preferredMethod: 'hanamisearchv1',
+				preferredMethod: 'hanamisearchv2',
+				onlyWithFiles: ps.onlyWithFiles,
 			}, {
-				untilId: untilId,
-				sinceId: sinceId,
+				// TODO: nextToken対応
 				limit: ps.limit,
 			});
+
+			return {
+				items: sres,
+				nextToken: 'foo', // ← 返せるものがなくなった（終わりに到達した）らnullにすること
+			};
 		});
 	}
 }
-
