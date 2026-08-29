@@ -147,12 +147,12 @@ export class FileServerService {
 						url.searchParams.set('static', '1');
 
 						file.cleanup();
-						return await reply.redirect(url.toString(), 301);
+						return await reply.redirect(url.toString(), 307);
 					} else if (file.mime.startsWith('video/')) {
 						const externalThumbnail = this.videoProcessingService.getExternalVideoThumbnailUrl(file.url);
 						if (externalThumbnail) {
 							file.cleanup();
-							return await reply.redirect(externalThumbnail, 301);
+							return await reply.redirect(externalThumbnail, 307);
 						}
 
 						image = await this.videoProcessingService.generateVideoThumbnail(file.path);
@@ -167,7 +167,7 @@ export class FileServerService {
 						url.searchParams.set('url', file.url);
 
 						file.cleanup();
-						return await reply.redirect(url.toString(), 301);
+						return await reply.redirect(url.toString(), 307);
 					}
 				}
 
@@ -315,7 +315,7 @@ export class FileServerService {
 
 			return await reply.redirect(
 				url.toString(),
-				301,
+				307,
 			);
 		}
 
