@@ -320,12 +320,15 @@ export default function (props: MfmProps, { emit }: { emit: SetupContext<MfmEven
 						]);
 					}
 					case 'clickable': {
-						return h('span', { onClick(ev: PointerEvent): void {
-							ev.stopPropagation();
-							ev.preventDefault();
-							const clickEv = typeof token.props.args.ev === 'string' ? token.props.args.ev : '';
-							emit('clickEv', clickEv);
-						} }, genEl(token.children, scale));
+						return h('span', {
+							style: 'user-select: none;',
+							onClick(ev: PointerEvent): void {
+								ev.stopPropagation();
+								ev.preventDefault();
+								const clickEv = typeof token.props.args.ev === 'string' ? token.props.args.ev : '';
+								emit('clickEv', clickEv);
+							},
+						}, genEl(token.children, scale));
 					}
 					case 'saize': {
 						if (token.children.length === 1 && token.children[0].type === 'text') {

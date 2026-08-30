@@ -66,8 +66,7 @@ const fileUser = computed(() => props.content.file?.user ?? props.user);
 const BAND_COUNT = 96;
 const BASE_HALF_HEIGHT_RATIO = 0.003;
 
-// 低域も十分な bin 数で刻めるよう大きめの FFT を使う (48kHz で bin 幅 ≒ 5.9Hz)
-const FFT_SIZE = 8192;
+const FFT_SIZE = 4096;
 const BIN_COUNT = FFT_SIZE / 2;
 
 /** スペクトルとして取り出す周波数レンジ */
@@ -77,7 +76,7 @@ const MAX_FREQ = 16000;
 /**
  * 低域の傾き補正の倍率。1オクターブ上がるごとにこの値を掛ける。1より大きいと高域が持ち上がる
  */
-const SPECTRUM_TILT_COEFFICIENT = 1.06;
+const SPECTRUM_TILT_COEFFICIENT = 1.085;
 
 const BEAT_BAND_COUNT = 36;
 const BEAT_MIN_FREQ = 30;
@@ -422,8 +421,8 @@ function setupAudioGraph(el: HTMLAudioElement) {
 		audioCtx = new AudioContext();
 		analyserNode = audioCtx.createAnalyser();
 		analyserNode.fftSize = FFT_SIZE;
-		// FFT の窓自体が長く (≒ 170ms) 平滑がかかるうえ、時間ベースの平滑は analyse() 側で行うので弱めにする
-		analyserNode.smoothingTimeConstant = 0.3;
+		// 時間ベースの平滑は analyse() 側で行うので弱めでよい
+		analyserNode.smoothingTimeConstant = 0.2;
 		// 既定の -100〜-30dB は音楽素材に対して下が広すぎるので、実用レンジに寄せて 0-255 を使い切る
 		analyserNode.minDecibels = -90;
 		analyserNode.maxDecibels = -25;
