@@ -34,3 +34,5 @@ minimumReleaseAge: 10080 # delay 7days to mitigate supply-chain attack
 minimumReleaseAgeExclude:
   - '@syuilo/aiscript'
   - '@fastify/express'
+  # Renovate security update: js-yaml@4.3.1
+  - js-yaml@4.3.1
