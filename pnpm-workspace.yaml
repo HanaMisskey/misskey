@@ -34,3 +34,5 @@ minimumReleaseAge: 10080 # delay 7days to mitigate supply-chain attack
 minimumReleaseAgeExclude:
   - '@syuilo/aiscript'
   - '@fastify/express'
+  # Renovate security update: vitest@3.2.6 || 4.1.0
+  - vitest@3.2.6 || 4.1.0

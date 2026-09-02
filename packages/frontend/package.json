@@ -145,7 +145,7 @@
 		"tsx": "4.21.0",
 		"vite-plugin-glsl": "1.5.5",
 		"vite-plugin-turbosnap": "1.0.3",
-		"vitest": "3.2.4",
+		"vitest": "3.2.6",
 		"vitest-fetch-mock": "0.4.5",
 		"vue-component-type-helpers": "3.1.4",
 		"vue-eslint-parser": "10.2.0",
