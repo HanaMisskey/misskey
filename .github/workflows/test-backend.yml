@@ -44,7 +44,7 @@ jobs:
           POSTGRES_DB: test-misskey
           POSTGRES_HOST_AUTH_METHOD: trust
       redis:
-        image: redis:7
+        image: redis:8
         ports:
           - 56312:6379
       meilisearch:
@@ -63,17 +63,17 @@ jobs:
           MEILI_ENV: 'development'
 
     steps:
-    - uses: actions/checkout@v4.3.0
+    - uses: actions/checkout@v7.0.1
       with:
         submodules: true
     - name: Setup pnpm
-      uses: pnpm/action-setup@v4.2.0
+      uses: pnpm/action-setup@v6.0.10
     - name: Get current date
       id: current-date
       run: echo "today=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
     - name: Setup and Restore ffmpeg/ffprobe Cache
       id: cache-ffmpeg
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: |
           /usr/local/bin/ffmpeg
@@ -99,7 +99,7 @@ jobs:
           fi
         done
     - name: Use Node.js
-      uses: actions/setup-node@v4.4.0
+      uses: actions/setup-node@v7.0.0
       with:
         node-version-file: ${{ matrix.node-version-file }}
         cache: 'pnpm'
@@ -113,7 +113,7 @@ jobs:
     - name: Test
       run: pnpm --filter backend test-and-coverage
     - name: Upload to Codecov
-      uses: codecov/codecov-action@v5
+      uses: codecov/codecov-action@v7
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         files: ./packages/backend/coverage/coverage-final.json
@@ -137,7 +137,7 @@ jobs:
           POSTGRES_DB: test-misskey
           POSTGRES_HOST_AUTH_METHOD: trust
       redis:
-        image: redis:7
+        image: redis:8
         ports:
           - 56312:6379
       meilisearch:
@@ -156,13 +156,13 @@ jobs:
           MEILI_ENV: 'development'
 
     steps:
-      - uses: actions/checkout@v4.3.0
+      - uses: actions/checkout@v7.0.1
         with:
           submodules: true
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4.2.0
+        uses: pnpm/action-setup@v6.0.10
       - name: Use Node.js
-        uses: actions/setup-node@v4.4.0
+        uses: actions/setup-node@v7.0.0
         with:
           node-version-file: ${{ matrix.node-version-file }}
           cache: 'pnpm'
@@ -176,7 +176,7 @@ jobs:
       - name: Test
         run: pnpm --filter backend test-and-coverage:e2e
       - name: Upload to Codecov
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./packages/backend/coverage/coverage-final.json
@@ -200,16 +200,16 @@ jobs:
           POSTGRES_HOST_AUTH_METHOD: trust
 
     steps:
-      - uses: actions/checkout@v4.3.0
+      - uses: actions/checkout@v7.0.1
         with:
           submodules: true
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4.2.0
+        uses: pnpm/action-setup@v6.0.10
       - name: Get current date
         id: current-date
         run: echo "today=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
       - name: Use Node.js
-        uses: actions/setup-node@v4.4.0
+        uses: actions/setup-node@v7.0.0
         with:
           node-version-file: ${{ matrix.node-version-file }}
           cache: 'pnpm'

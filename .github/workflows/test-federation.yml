@@ -31,17 +31,17 @@ jobs:
           - .node-version
           - .github/min.node-version
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: true
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4.2.0
+        uses: pnpm/action-setup@v6.0.10
       - name: Get current date
         id: current-date
         run: echo "today=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
       - name: Setup and Restore ffmpeg/ffprobe Cache
         id: cache-ffmpeg
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             /usr/local/bin/ffmpeg
@@ -67,7 +67,7 @@ jobs:
             fi
           done
       - name: Use Node.js
-        uses: actions/setup-node@v4.4.0
+        uses: actions/setup-node@v7.0.0
         with:
           node-version-file: ${{ matrix.node-version-file }}
           cache: 'pnpm'
