@@ -27,13 +27,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4.3.0
+    - uses: actions/checkout@v7.0.1
       with:
         submodules: true
     - name: Setup pnpm
-      uses: pnpm/action-setup@v4.2.0
+      uses: pnpm/action-setup@v6.0.10
     - name: Use Node.js
-      uses: actions/setup-node@v4.4.0
+      uses: actions/setup-node@v7.0.0
       with:
         node-version-file: '.node-version'
         cache: 'pnpm'
@@ -47,7 +47,7 @@ jobs:
     - name: Test
       run: pnpm --filter frontend test-and-coverage
     - name: Upload Coverage
-      uses: codecov/codecov-action@v5
+      uses: codecov/codecov-action@v7
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         files: ./packages/frontend/coverage/coverage-final.json
@@ -70,7 +70,7 @@ jobs:
           POSTGRES_DB: test-misskey
           POSTGRES_HOST_AUTH_METHOD: trust
       redis:
-        image: redis:7
+        image: redis:8
         ports:
           - 56312:6379
       meilisearch:
@@ -89,7 +89,7 @@ jobs:
           MEILI_ENV: 'development'
 
     steps:
-    - uses: actions/checkout@v4.3.0
+    - uses: actions/checkout@v7.0.1
       with:
         submodules: true
     # https://github.com/cypress-io/cypress-docker-images/issues/150
@@ -99,9 +99,9 @@ jobs:
     #- uses: browser-actions/setup-firefox@latest
     #  if: ${{ matrix.browser == 'firefox' }}
     - name: Setup pnpm
-      uses: pnpm/action-setup@v4.2.0
+      uses: pnpm/action-setup@v6.0.10
     - name: Use Node.js
-      uses: actions/setup-node@v4.4.0
+      uses: actions/setup-node@v7.0.0
       with:
         node-version-file: '.node-version'
         cache: 'pnpm'
@@ -118,7 +118,7 @@ jobs:
     - name: Cypress install
       run: pnpm exec cypress install
     - name: Cypress run
-      uses: cypress-io/github-action@v6
+      uses: cypress-io/github-action@v7.4.3
       timeout-minutes: 15
       with:
         install: false
@@ -126,12 +126,12 @@ jobs:
         wait-on: 'http://localhost:61812'
         headed: true
         browser: ${{ matrix.browser }}
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       if: failure()
       with:
         name: ${{ matrix.browser }}-cypress-screenshots
         path: cypress/screenshots
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       if: always()
       with:
         name: ${{ matrix.browser }}-cypress-videos
