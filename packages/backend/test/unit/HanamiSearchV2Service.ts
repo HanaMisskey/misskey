@@ -5,7 +5,6 @@
 
 import { createServer } from 'node:http';
 import { once } from 'node:events';
-import { createCipheriv, createHash } from 'node:crypto';
 import { describe, expect, jest, test } from '@jest/globals';
 import { HanamiSearchV2Service } from '@/core/hanamisearch/HanamiSearchV2Service.js';
 import { HttpRequestService } from '@/core/HttpRequestService.js';
@@ -172,19 +171,19 @@ describe('HanamiSearch v2', () => {
 		expect(second.send).not.toHaveBeenCalled();
 	});
 
-	/** Oracle: migration must not accept API-key-derived continuations. The legacy wire fixture follows commit 56075ed1bc5df0d2975006f45cb91245ee017a0c; matching request conditions and a fixed clock keep its fingerprint and expiry valid, so rejection cannot be attributed to either constraint. */
+	/**
+	 * Oracle: migration must not accept API-key-derived continuations. This fixed synthetic fixture follows
+	 * commit 56075ed1bc5df0d2975006f45cb91245ee017a0c with API key test-hanamisearch-v2-key and twelve IV bytes of 1.
+	 * Its payload has cursor legacy-position, expiresAt 1783000300000, and the fingerprint of
+	 * ['花', 'viewer', [], 1, 'search.example.test', 443, 'notes']. The matching request and fixed clock
+	 * keep both conditions valid, so rejection cannot be attributed to an expired or mismatched cursor.
+	 */
 	test('rejects an unexpired legacy continuation with matching search conditions', async () => {
 		const now = 1_783_000_000_000;
 		const clock = jest.spyOn(Date, 'now').mockReturnValue(now);
 		try {
-			const apiKey = 'test-hanamisearch-v2-key';
-			const fingerprint = createHash('sha256').update(JSON.stringify(['花', 'viewer', [], 1, 'search.example.test', 443, 'notes'])).digest('hex');
-			const iv = Buffer.alloc(12, 1);
-			const cipher = createCipheriv('aes-256-gcm', createHash('sha256').update(apiKey).digest(), iv);
-			const payload = JSON.stringify({ cursor: 'legacy-position', fingerprint, expiresAt: now + 300_000 });
-			const encrypted = Buffer.concat([cipher.update(payload), cipher.final()]);
-			const cursor = Buffer.concat([iv, cipher.getAuthTag(), encrypted]).toString('base64url');
-			const f = fixture([{ hits: [], nextCursor: null }], [], apiKey);
+			const cursor = 'AQEBAQEBAQEBAQEBg4UoWW5O7az2xdrtvtraJ81dORNwrM9M5Ie48WFpFOylNn8QxZeJpUpUN4MCZlPiR25bdKyOwd2vVKGohd8IAm0T-l4OrAua9_YAc-diDgIBvI1MZCIjJ58jpl3zeQwJIw39kO634xcrngKdj8Hx6fqRKXV8DjSvFxyLiDDw3ojZQaK1efwTH4PzAI9hPAL5qlbfv845bw';
+			const f = fixture([{ hits: [], nextCursor: null }], []);
 			await expect(f.service.searchNote('花', viewer, {}, { limit: 1, cursor })).rejects.toMatchObject({ code: 'INVALID_CURSOR' });
 			expect(f.send).not.toHaveBeenCalled();
 		} finally {
