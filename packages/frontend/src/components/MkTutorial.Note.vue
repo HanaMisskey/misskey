@@ -85,7 +85,7 @@ const canContinue = computed(() => {
 	return true;
 });
 
-function addReaction(emoji) {
+function addReaction(emoji: string) {
 	onceReacted.value = true;
 	exampleNote.reactions[emoji] = 1;
 	exampleNote.myReaction = emoji;
@@ -112,7 +112,7 @@ function doNotification(emoji: string): void {
 	globalEvents.emit('clientNotification', notification);
 }
 
-function removeReaction(emoji) {
+function removeReaction(emoji: string) {
 	delete exampleNote.reactions[emoji];
 	exampleNote.myReaction = undefined;
 }

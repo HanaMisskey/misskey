@@ -6,6 +6,7 @@
 process.env.NODE_ENV = 'test';
 
 import * as assert from 'assert';
+import { afterAll, beforeAll, beforeEach, describe, test } from 'vitest';
 import { api, port, post, signup, startJobQueue } from '../utils.js';
 import type { INestApplicationContext } from '@nestjs/common';
 import type * as misskey from 'misskey-js';
@@ -16,7 +17,7 @@ describe('export-clips', () => {
 	let bob: misskey.entities.SignupResponse;
 
 	// XXX: Any better way to get the result?
-	async function pollFirstDriveFile() {
+	async function pollFirstDriveFile(): Promise<any> {
 		while (true) {
 			const files = (await api('drive/files', {}, alice)).body;
 			if (!files.length) {

@@ -1,6 +1,6 @@
-# syntax = docker/dockerfile:1.4
+# syntax = docker/dockerfile:1.23
 
-ARG NODE_VERSION=22.22.0-bookworm
+ARG NODE_VERSION=26.4.0-trixie
 
 # build assets & compile TypeScript
 
@@ -24,6 +24,7 @@ COPY --link ["packages/frontend-shared/package.json", "./packages/frontend-share
 COPY --link ["packages/frontend/package.json", "./packages/frontend/"]
 COPY --link ["packages/frontend-embed/package.json", "./packages/frontend-embed/"]
 COPY --link ["packages/frontend-builder/package.json", "./packages/frontend-builder/"]
+COPY --link ["packages/i18n/package.json", "./packages/i18n/"]
 COPY --link ["packages/icons-subsetter/package.json", "./packages/icons-subsetter/"]
 COPY --link ["packages/sw/package.json", "./packages/sw/"]
 COPY --link ["packages/misskey-js/package.json", "./packages/misskey-js/"]
@@ -39,7 +40,6 @@ RUN --mount=type=cache,target=/root/.local/share/pnpm/store,sharing=locked \
 
 COPY --link . ./
 
-RUN git submodule update --init
 RUN pnpm build
 RUN rm -rf .git/
 
@@ -73,6 +73,8 @@ FROM --platform=$TARGETPLATFORM node:${NODE_VERSION}-slim AS runner
 ARG UID="991"
 ARG GID="991"
 
+ENV PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false
+
 RUN apt-get update \
 	&& apt-get install -y --no-install-recommends \
 	ffmpeg tini curl libjemalloc-dev libjemalloc2 \
@@ -101,7 +103,7 @@ COPY --chown=misskey:misskey --from=native-builder /misskey/packages/misskey-js/
 COPY --chown=misskey:misskey --from=native-builder /misskey/packages/misskey-reversi/built ./packages/misskey-reversi/built
 COPY --chown=misskey:misskey --from=native-builder /misskey/packages/misskey-bubble-game/built ./packages/misskey-bubble-game/built
 COPY --chown=misskey:misskey --from=native-builder /misskey/packages/backend/built ./packages/backend/built
-COPY --chown=misskey:misskey --from=native-builder /misskey/fluent-emojis /misskey/fluent-emojis
+COPY --chown=misskey:misskey --from=native-builder /misskey/packages/i18n/built ./packages/i18n/built
 COPY --chown=misskey:misskey . ./
 
 ENV LD_PRELOAD=/usr/local/lib/libjemalloc.so

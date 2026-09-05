@@ -270,6 +270,10 @@ export function createPostgresDataSource(config: Config) {
 		extra: {
 			...config.db.extra,
 		},
+		invalidWhereValuesBehavior: {
+			null: 'ignore',
+			undefined: 'ignore',
+		},
 		...(config.dbReplications ? {
 			replication: {
 				master: {

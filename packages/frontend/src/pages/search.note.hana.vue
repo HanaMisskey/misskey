@@ -26,11 +26,10 @@ SPDX-License-Identifier: AGPL-3.0-only
 						<div :class="$style.searchOptionGroupLabel">{{ i18n.ts._hana._search.searchSource }}</div>
 
 						<div class="_gaps_s">
-							<MkRadios v-model="searchScope">
-								<option v-if="noteSearchableScope === 'global'" value="all">{{ i18n.ts._hana._search.searchScopeAll }}</option>
-								<option value="local">{{ i18n.ts._hana._search.searchScopeLocal }}</option>
-								<option v-if="noteSearchableScope === 'global'" value="server">{{ i18n.ts._hana._search.searchScopeServer }}</option>
-								<option value="user">{{ i18n.ts._hana._search.searchScopeUser }}</option>
+							<MkRadios
+								v-model="searchScope"
+								:options="searchScopeDef"
+							>
 							</MkRadios>
 
 							<div v-if="searchScope === 'server'" :class="$style.subOptionRoot">
@@ -174,6 +173,7 @@ import MkPagination from '@/components/MkPagination.vue';
 import MkNoteMediaGrid from '@/components/MkNoteMediaGrid.vue';
 import { getBgColor } from '@/utility/get-bg-color.js';
 import type { SearchMode } from '@/hana/types/search.js';
+import type { MkRadiosOption } from '@/components/MkRadios.vue';
 
 const props = withDefaults(defineProps<{
 	query?: string;
@@ -233,6 +233,24 @@ const searchScope = ref<'all' | 'local' | 'server' | 'user'>((() => {
 	if (hostInput.value) return 'server';
 	return 'all';
 })());
+
+const searchScopeDef = computed<MkRadiosOption[]>(() => {
+	const options: MkRadiosOption[] = [];
+
+	if (instance.federation !== 'none' && noteSearchableScope === 'global') {
+		options.push({ value: 'all', label: i18n.ts._search.searchScopeAll });
+	}
+
+	options.push({ value: 'local', label: instance.federation === 'none' ? i18n.ts._search.searchScopeAll : i18n.ts._search.searchScopeLocal });
+
+	if (instance.federation !== 'none' && noteSearchableScope === 'global') {
+		options.push({ value: 'server', label: i18n.ts._search.searchScopeServer });
+	}
+
+	options.push({ value: 'user', label: i18n.ts._search.searchScopeUser });
+
+	return options;
+});
 
 type SearchParams = {
 	readonly query: string;

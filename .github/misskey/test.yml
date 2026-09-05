@@ -16,11 +16,11 @@ redis:
   port: 56312
 meilisearch:
   host: 127.0.0.1
-  port: 17700
+  port: 57712
   index: 'test'
 hanamisearch:
   host: 127.0.0.1
-  port: 17701
+  port: 57713
   index: 'test-hanami'
 id: aidx
 
