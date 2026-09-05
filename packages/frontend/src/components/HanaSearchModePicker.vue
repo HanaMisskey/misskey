@@ -13,20 +13,16 @@
 		<div :class="[$style.label, $style.item]">
 			{{ i18n.ts._hana._searchMode.title }}
 		</div>
-		<button key="public" class="_button" :class="[$style.item, { [$style.active]: v === 'v0' }]" data-index="1" @click="choose('v0')">
-			<div :class="$style.icon">
-				<i class="ti ti-search"></i>
-			</div>
-			<div :class="$style.body">
-				<span :class="$style.itemTitle">Meilisearch (v0)</span>
-				<MkCondensedLine :minScale="0.8">{{ i18n.ts._hana._searchMode.v0Description }}</MkCondensedLine>
-			</div>
-		</button>
-		<button key="v1" class="_button" :class="[$style.item, { [$style.active]: v === 'v1' }]" data-index="2" @click="choose('v1')">
+		<button v-if="$i.policies.canSearchWithHanamiSearchV1" key="v1" class="_button" :class="[$style.item, { [$style.active]: v === 'v1' }]" data-index="2" @click="choose('v1')">
 			<div :class="$style.icon"><i class="ti ti-filter-search"></i></div>
 			<div :class="$style.body">
 				<span :class="$style.itemTitle">HanamiSearch v1</span>
-				<MkCondensedLine :minScale="0.8">{{ i18n.ts._hana._searchMode.v1Description }}</MkCondensedLine>
+			</div>
+		</button>
+		<button v-if="$i.policies.canSearchWithHanamiSearchV2" key="v2" class="_button" :class="[$style.item, { [$style.active]: v === 'v2' }]" data-index="3" @click="choose('v2')">
+			<div :class="$style.icon"><i class="ti ti-search"></i></div>
+			<div :class="$style.body">
+				<span :class="$style.itemTitle">HanamiSearch v2 β</span>
 			</div>
 		</button>
 	</div>

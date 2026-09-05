@@ -3111,6 +3111,15 @@ export type paths = {
          */
         post: operations['notes___hanamisearch-v1'];
     };
+    '/notes/hanamisearch-v2': {
+        /**
+         * notes/hanamisearch-v2
+         * @description No description provided.
+         *
+         *     **Credential required**: *Yes* / **Permission**: *read:account*
+         */
+        post: operations['notes___hanamisearch-v2'];
+    };
     '/notes/hybrid-timeline': {
         /**
          * notes/hybrid-timeline
@@ -5323,6 +5332,7 @@ export type components = {
             canManageAvatarDecorations: boolean;
             canSearchNotes: boolean;
             canSearchWithHanamiSearchV1: boolean;
+            canSearchWithHanamiSearchV2: boolean;
             canSearchUsers: boolean;
             canUseTranslator: boolean;
             canHideAds: boolean;
@@ -30284,6 +30294,91 @@ export interface operations {
                 };
                 content: {
                     'application/json': components['schemas']['Note'][];
+                };
+            };
+            /** @description Client error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Authentication error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Forbidden error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description I'm Ai */
+            418: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+        };
+    };
+    'notes___hanamisearch-v2': {
+        requestBody: {
+            content: {
+                'application/json': {
+                    query: string;
+                    /** @default 10 */
+                    limit?: number;
+                    cursor?: string | null;
+                    /** @description The local host is represented with `.`. */
+                    host?: string;
+                    /**
+                     * Format: misskey:id
+                     * @default null
+                     */
+                    userId?: string | null;
+                    /**
+                     * Format: misskey:id
+                     * @default null
+                     */
+                    channelId?: string | null;
+                    /** @default false */
+                    onlyWithFiles?: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description OK (with results) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': {
+                        notes: components['schemas']['Note'][];
+                        nextCursor: string | null;
+                    };
                 };
             };
             /** @description Client error */

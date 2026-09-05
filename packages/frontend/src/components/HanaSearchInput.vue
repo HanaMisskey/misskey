@@ -51,17 +51,17 @@
 					<i class="ti ti-x"></i>
 				</button>
 				<button
-					v-if="$i != null && $i.policies.canSearchWithHanamiSearchV1 === true"
+					v-if="$i != null && ($i.policies.canSearchWithHanamiSearchV1 === true || $i.policies.canSearchWithHanamiSearchV2 === true)"
 					class="_button"
 					:class="[
 						$style.modeSwitchButton,
-						{ [$style.v1]: searchMode === 'v1' },
+						{ [$style.v1]: searchMode === 'v1' || searchMode === 'v2' },
 					]"
 					:disabled="disabled"
 					@click.stop="setSearchMode"
 				>
 					<div><i class="ti ti-sparkles"></i></div>
-					<div :class="$style.modeSwitchValue">{{ searchMode }}</div>
+					<div :class="$style.modeSwitchValue">{{ searchMode === 'v2' ? 'v2 β' : searchMode }}</div>
 					<div><i class="ti ti-chevron-down"></i></div>
 				</button>
 			</slot>
@@ -112,7 +112,7 @@ type Token = {
 };
 const rawV = ref<string>(v.value);
 const parsedRawV = computed<Token[]>(() => {
-	if (searchMode.value === 'v0') {
+	if (searchMode.value !== 'v1') {
 		return [{ value: rawV.value, type: 'text' }];
 	} else {
 		const _rawV = rawV.value.split(/(\s)/);
