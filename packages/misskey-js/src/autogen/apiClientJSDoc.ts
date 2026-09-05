@@ -3794,7 +3794,7 @@ declare module '../api.js' {
 
     /**
      * No description provided.
-     *
+     * 
      * **Credential required**: *Yes* / **Permission**: *read:account*
      */
     request<E extends 'notes/hanamisearch-v2', P extends Endpoints[E]['req']>(
