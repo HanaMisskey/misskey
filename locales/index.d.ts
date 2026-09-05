@@ -8283,6 +8283,10 @@ export interface Locale extends ILocale {
              */
             "canSearchWithHanamiSearchV1": string;
             /**
+             * HanamiSearch v2 βの利用
+             */
+            "canSearchWithHanamiSearchV2": string;
+            /**
              * ユーザー検索の利用
              */
             "canSearchUsers": string;

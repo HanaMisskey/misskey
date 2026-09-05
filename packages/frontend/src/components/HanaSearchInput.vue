@@ -51,17 +51,17 @@
 					<i class="ti ti-x"></i>
 				</button>
 				<button
-					v-if="$i != null && $i.policies.canSearchWithHanamiSearchV1 === true"
+					v-if="$i != null && ($i.policies.canSearchWithHanamiSearchV1 === true || $i.policies.canSearchWithHanamiSearchV2 === true)"
 					class="_button"
 					:class="[
 						$style.modeSwitchButton,
-						{ [$style.v1]: searchMode === 'v1' },
+						{ [$style.v1]: searchMode === 'v1' || searchMode === 'v2' },
 					]"
 					:disabled="disabled"
 					@click.stop="setSearchMode"
 				>
-					<div><i class="ti ti-sparkles"></i></div>
-					<div :class="$style.modeSwitchValue">{{ searchMode }}</div>
+					<div v-if="searchMode === 'v2'" aria-hidden="true"><i class="ti ti-sparkles"></i></div>
+					<div>{{ searchMode }}</div>
 					<div><i class="ti ti-chevron-down"></i></div>
 				</button>
 			</slot>
@@ -112,7 +112,7 @@ type Token = {
 };
 const rawV = ref<string>(v.value);
 const parsedRawV = computed<Token[]>(() => {
-	if (searchMode.value === 'v0') {
+	if (searchMode.value !== 'v1') {
 		return [{ value: rawV.value, type: 'text' }];
 	} else {
 		const _rawV = rawV.value.split(/(\s)/);
@@ -424,7 +424,8 @@ html[data-color-scheme=dark] .hl {
 	display: flex;
 	align-items: center;
 	height: 100%;
-	padding: 0 4px;
+	gap: 4px;
+	padding: 0 6px;
 	font-size: .9em;
 
 	&:hover {
@@ -448,11 +449,6 @@ html[data-color-scheme=dark] .hl {
 			z-index: -1;
 		}
 	}
-}
-
-.modeSwitchValue {
-	margin-left: -4px;
-	min-width: 24px;
 }
 
 .clearButton {

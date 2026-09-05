@@ -44,14 +44,15 @@ SPDX-License-Identifier: AGPL-3.0-only
 			<MkNotesTimeline :paginator="featuredPaginator"/>
 		</div>
 		<div v-else-if="tab === 'search'">
-			<div v-if="notesSearchAvailable" class="_gaps">
+			<div v-if="hanamiSearchAvailable" class="_gaps">
 				<div>
-					<HanaSearchInput v-model="searchQuery" @enter="search()">
+					<HanaSearchInput v-model="searchQuery" v-model:mode="searchMode" @enter="search()">
 						<template #prefix><i class="ti ti-search"></i></template>
 					</HanaSearchInput>
 					<MkButton primary rounded style="margin-top: 8px;" @click="search()">{{ i18n.ts.search }}</MkButton>
 				</div>
-				<MkNotesTimeline v-if="searchPaginator" :key="searchKey" :paginator="searchPaginator"/>
+				<HanamiSearchV2Results v-if="v2Params" :key="searchKey" :params="v2Params"/>
+				<MkNotesTimeline v-else-if="searchPaginator" :key="searchKey" :paginator="searchPaginator"/>
 			</div>
 			<div v-else>
 				<MkInfo warn>{{ i18n.ts.notesSearchNotAvailable }}</MkInfo>
@@ -76,6 +77,7 @@ import * as Misskey from 'misskey-js';
 import { url } from '@@/js/config.js';
 import { useInterval } from '@@/js/use-interval.js';
 import type { PageHeaderItem } from '@/types/page-header.js';
+import type { HanamiSearchV2Params } from '@/utility/hanamisearch-v2.js';
 import MkPostForm from '@/components/MkPostForm.vue';
 import MkStreamingNotesTimeline from '@/components/MkStreamingNotesTimeline.vue';
 import XChannelFollowButton from '@/components/MkChannelFollowButton.vue';
@@ -90,13 +92,14 @@ import { favoritedChannelsCache } from '@/cache.js';
 import MkButton from '@/components/MkButton.vue';
 //import MkInput from '@/components/MkInput.vue';
 import HanaSearchInput from '@/components/HanaSearchInput.vue';
+import HanamiSearchV2Results from '@/components/HanamiSearchV2Results.vue';
 import { prefer } from '@/preferences.js';
 import MkNote from '@/components/MkNote.vue';
 import MkInfo from '@/components/MkInfo.vue';
 import MkFoldableSection from '@/components/MkFoldableSection.vue';
 import { isSupportShare } from '@/utility/navigator.js';
 import { copyToClipboard } from '@/utility/copy-to-clipboard.js';
-import { notesSearchAvailable } from '@/utility/check-permissions.js';
+import { hanamiSearchAvailable } from '@/utility/check-permissions.js';
 import { miLocalStorage } from '@/local-storage.js';
 import { useRouter } from '@/router.js';
 import type { SearchMode } from '@/hana/types/search.js';
@@ -113,9 +116,14 @@ const tab = ref('overview');
 const channel = ref<Misskey.entities.Channel | null>(null);
 const favorited = ref(false);
 const searchQuery = ref('');
-const searchMode = ref<SearchMode>($i?.policies.canSearchWithHanamiSearchV1 ? 'v1' : 'v0');
+const searchMode = ref<SearchMode>($i?.policies.canSearchWithHanamiSearchV2 ? 'v2' : $i?.policies.canSearchWithHanamiSearchV1 ? 'v1' : 'v0');
 const searchPaginator = shallowRef();
-const searchKey = ref('');
+const v2Params = shallowRef<HanamiSearchV2Params | null>(null);
+const searchKey = ref(0);
+watch([searchQuery, searchMode, () => props.channelId], () => {
+	v2Params.value = null;
+	searchPaginator.value = null;
+});
 const featuredPaginator = markRaw(new Paginator('notes/featured', {
 	limit: 10,
 	computedParams: computed(() => ({
@@ -246,9 +254,13 @@ async function search() {
 
 	const query = searchQuery.value.toString().trim();
 
-	if (query == null) return;
+	if (!query) return;
 
-	if ($i?.policies.canSearchWithHanamiSearchV1 === true && searchMode.value === 'v1') {
+	v2Params.value = null;
+	searchPaginator.value = null;
+	if ($i?.policies.canSearchWithHanamiSearchV2 === true && searchMode.value === 'v2') {
+		v2Params.value = { query, channelId: channel.value.id, limit: 10 };
+	} else if ($i?.policies.canSearchWithHanamiSearchV1 === true && searchMode.value === 'v1') {
 		searchPaginator.value = markRaw(new Paginator('notes/hanamisearch-v1', {
 			limit: 10,
 			params: {
@@ -266,7 +278,7 @@ async function search() {
 		}));
 	}
 
-	searchKey.value = query;
+	searchKey.value++;
 }
 
 const headerActions = computed(() => {

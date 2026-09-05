@@ -2033,6 +2033,8 @@ declare namespace entities {
         NotesHanamiTimelineResponse,
         NotesHanamisearchV1Request,
         NotesHanamisearchV1Response,
+        NotesHanamisearchV2Request,
+        NotesHanamisearchV2Response,
         NotesHybridTimelineRequest,
         NotesHybridTimelineResponse,
         NotesLocalTimelineRequest,
@@ -3139,6 +3141,12 @@ type NotesHanamisearchV1Request = operations['notes___hanamisearch-v1']['request
 
 // @public (undocumented)
 type NotesHanamisearchV1Response = operations['notes___hanamisearch-v1']['responses']['200']['content']['application/json'];
+
+// @public (undocumented)
+type NotesHanamisearchV2Request = operations['notes___hanamisearch-v2']['requestBody']['content']['application/json'];
+
+// @public (undocumented)
+type NotesHanamisearchV2Response = operations['notes___hanamisearch-v2']['responses']['200']['content']['application/json'];
 
 // @public (undocumented)
 type NotesHanamiTimelineRequest = operations['notes___hanami-timeline']['requestBody']['content']['application/json'];

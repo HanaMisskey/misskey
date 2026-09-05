@@ -2149,6 +2149,7 @@ _role:
     canHideAds: "広告の非表示"
     canSearchNotes: "ノート検索の利用"
     canSearchWithHanamiSearchV1: "HanamiSearchV1の利用"
+    canSearchWithHanamiSearchV2: "HanamiSearch v2 βの利用"
     canSearchUsers: "ユーザー検索の利用"
     canUseTranslator: "翻訳機能の利用"
     avatarDecorationLimit: "アイコンデコレーションの最大取付個数"

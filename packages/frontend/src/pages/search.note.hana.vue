@@ -7,7 +7,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 <div class="_gaps">
 	<div class="_spacer" :class="$style.pageMain" style="--MI_SPACER-w: 800px;">
 		<div class="_gaps">
-			<MkInfo v-if="!$i || !$i.policies.canSearchWithHanamiSearchV1">{{ i18n.ts._hana.searchIsInBeta }}</MkInfo>
+			<MkInfo v-if="!$i || (!$i.policies.canSearchWithHanamiSearchV1 && !$i.policies.canSearchWithHanamiSearchV2)">{{ i18n.ts._hana.searchIsInBeta }}</MkInfo>
 
 			<HanaSearchInput
 				v-model="searchQuery"
@@ -98,7 +98,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 					<div :class="$style.searchOptionGroupRoot">
 						<div :class="$style.searchOptionGroupLabel">{{ i18n.ts.filter }}</div>
-						<MkSwitch v-model="onlyWithFiles" :disabled="!($i != null && $i.policies.canSearchWithHanamiSearchV1 === true && searchMode === 'v1')">{{ i18n.ts.withFiles }}<span class="_beta">{{ i18n.ts._hana._search.v1Only }}</span></MkSwitch>
+						<MkSwitch v-model="onlyWithFiles" :disabled="!canFilterFiles">{{ i18n.ts.withFiles }}</MkSwitch>
 					</div>
 				</div>
 			</MkFoldableSection>
@@ -118,22 +118,23 @@ SPDX-License-Identifier: AGPL-3.0-only
 		</div>
 	</div>
 
-	<MkStickyContainer v-if="paginator">
+	<MkStickyContainer v-if="paginator || v2Params">
 		<template #header>
 			<div ref="searchResultStickyContainer" :class="$style.searchResultStickyRoot">
 				<div :class="$style.searchResultStickyContainer">
 					<div :class="$style.searchResultStickyTitle"><i class="ti ti-list-search"></i> {{ i18n.ts.searchResult }}</div>
-					<div v-if="searchMode === 'v1' && onlyWithFiles" :class="$style.searchResultStickyViewRoot">
+					<div v-if="resultWithFiles" :class="$style.searchResultStickyViewRoot">
 						<MkSwitch v-model="showAsGrid"><i class="ti ti-layout-grid"></i><span :class="$style.searchResultStickyViewLabelText">&nbsp;{{ i18n.ts._hana._search.showAsGrid }}</span></MkSwitch>
 					</div>
 				</div>
 			</div>
 		</template>
 		<div class="_spacer" :style="{
-			'--MI_SPACER-w': (showAsGrid ? undefined : '800px'),
+			'--MI_SPACER-w': (resultWithFiles && showAsGrid ? undefined : '800px'),
 		}">
+			<HanamiSearchV2Results v-if="v2Params" :key="`searchNotes:${key}:v2`" :params="v2Params" :showAsGrid="resultWithFiles && showAsGrid"/>
 			<MkPagination
-				v-if="searchMode === 'v1' && onlyWithFiles && showAsGrid"
+				v-else-if="paginator && resultWithFiles && showAsGrid"
 				v-slot="{ items }"
 				:key="`searchNotes:${key}:grid`"
 				:paginator="paginator"
@@ -142,15 +143,16 @@ SPDX-License-Identifier: AGPL-3.0-only
 					<MkNoteMediaGrid v-for="note in (items as Misskey.entities.Note[])" :key="note.id" :note="note" square/>
 				</div>
 			</MkPagination>
-			<MkNotesTimeline v-else :key="`searchNotes:${key}:note`" :paginator="paginator" :withControl="false"/>
+			<MkNotesTimeline v-else-if="paginator" :key="`searchNotes:${key}:note`" :paginator="paginator" :withControl="false"/>
 		</div>
 	</MkStickyContainer>
 </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, shallowRef, useTemplateRef, toRef, markRaw } from 'vue';
+import { computed, ref, shallowRef, useTemplateRef, toRef, markRaw, watch, nextTick } from 'vue';
 import type * as Misskey from 'misskey-js';
+import type { HanamiSearchV2Params } from '@/utility/hanamisearch-v2.js';
 import { Paginator } from '@/utility/paginator.js';
 import type { IPaginator } from '@/utility/paginator.js';
 import { $i } from '@/i.js';
@@ -168,6 +170,7 @@ import MkRadios from '@/components/MkRadios.vue';
 import MkUserCardMini from '@/components/MkUserCardMini.vue';
 
 import HanaSearchInput from '@/components/HanaSearchInput.vue';
+import HanamiSearchV2Results from '@/components/HanamiSearchV2Results.vue';
 import MkInfo from '@/components/MkInfo.vue';
 import MkSwitch from '@/components/MkSwitch.vue';
 import MkPagination from '@/components/MkPagination.vue';
@@ -191,13 +194,16 @@ const router = useRouter();
 
 const key = ref(0);
 const paginator = shallowRef<IPaginator<Misskey.entities.Note> | null>(null);
+const v2Params = shallowRef<HanamiSearchV2Params | null>(null);
+const resultWithFiles = ref(false);
 
 const searchQuery = ref(toRef(props, 'query').value);
 const hostInput = ref(toRef(props, 'host').value);
 
-const searchMode = ref<SearchMode>('v1');
+const searchMode = ref<SearchMode>($i?.policies.canSearchWithHanamiSearchV2 ? 'v2' : $i?.policies.canSearchWithHanamiSearchV1 ? 'v1' : 'v0');
 const showAsGrid = ref(false);
 const onlyWithFiles = ref(false);
+const canFilterFiles = computed(() => searchMode.value === 'v2' ? $i?.policies.canSearchWithHanamiSearchV2 === true : searchMode.value === 'v1' && $i?.policies.canSearchWithHanamiSearchV1 === true);
 
 const user = shallowRef<Misskey.entities.UserDetailed | null>(null);
 
@@ -233,6 +239,12 @@ const searchScope = ref<'all' | 'local' | 'server' | 'user'>((() => {
 	if (hostInput.value) return 'server';
 	return 'all';
 })());
+
+watch([searchQuery, searchScope, hostInput, user, onlyWithFiles, searchMode], () => {
+	v2Params.value = null;
+	paginator.value = null;
+	resultWithFiles.value = false;
+});
 
 type SearchParams = {
 	readonly query: string;
@@ -371,7 +383,12 @@ async function search() {
 		}
 	}
 
-	if ($i?.policies.canSearchWithHanamiSearchV1 === true && searchMode.value === 'v1') {
+	v2Params.value = null;
+	paginator.value = null;
+	resultWithFiles.value = canFilterFiles.value && onlyWithFiles.value;
+	if ($i?.policies.canSearchWithHanamiSearchV2 === true && searchMode.value === 'v2') {
+		v2Params.value = { ...searchParams.value, onlyWithFiles: onlyWithFiles.value, limit: 10 };
+	} else if ($i?.policies.canSearchWithHanamiSearchV1 === true && searchMode.value === 'v1') {
 		paginator.value = markRaw(new Paginator('notes/hanamisearch-v1', {
 			limit: 10,
 			params: {
@@ -390,6 +407,7 @@ async function search() {
 
 	key.value++;
 
+	await nextTick();
 	parentBg.value = getBgColor(searchResultStickyContainer.value?.parentElement);
 }
 </script>

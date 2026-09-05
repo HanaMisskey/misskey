@@ -4,10 +4,12 @@
 -
 
 ### Client
--
+- Enhance: HanamiSearch v2 βに対応
 
 ### Server
--
+- Enhance: HanamiSearch v2に対応
+  - ロールの「HanamiSearch v2 βの利用」は初期状態では無効です。
+  - HanamiSearch v2の利用には、HanamiSearchのAPIキーの設定が必要です。
 
 
 ## 2025.11.1
