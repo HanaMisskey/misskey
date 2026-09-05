@@ -44,7 +44,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 			<MkNotesTimeline :paginator="featuredPaginator"/>
 		</div>
 		<div v-else-if="tab === 'search'">
-			<div v-if="notesSearchAvailable" class="_gaps">
+			<div v-if="hanamiSearchAvailable" class="_gaps">
 				<div>
 					<HanaSearchInput v-model="searchQuery" v-model:mode="searchMode" @enter="search()">
 						<template #prefix><i class="ti ti-search"></i></template>
@@ -99,7 +99,7 @@ import MkInfo from '@/components/MkInfo.vue';
 import MkFoldableSection from '@/components/MkFoldableSection.vue';
 import { isSupportShare } from '@/utility/navigator.js';
 import { copyToClipboard } from '@/utility/copy-to-clipboard.js';
-import { notesSearchAvailable } from '@/utility/check-permissions.js';
+import { hanamiSearchAvailable } from '@/utility/check-permissions.js';
 import { miLocalStorage } from '@/local-storage.js';
 import { useRouter } from '@/router.js';
 import type { SearchMode } from '@/hana/types/search.js';
