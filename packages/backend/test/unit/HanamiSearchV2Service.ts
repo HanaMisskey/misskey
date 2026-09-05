@@ -15,7 +15,7 @@ const viewer = { id: 'viewer' } as MiUser;
 const cursorEncryptionKey = '0123456789abcdef'.repeat(4);
 const note = (id: string, extra = {}) => ({ id, userId: 'author', userHost: null, user: { isSuspended: false }, visibility: 'public', fileIds: [], reactions: {}, ...extra });
 
-function fixture(pages: unknown[], rows: ReturnType<typeof note>[][], apiKey: string | undefined = 'test-hanamisearch-v2-key') {
+function fixture(pages: unknown[], rows: ReturnType<typeof note>[][], settingsOverrides: Partial<NonNullable<Config['hanamisearch']>> = {}) {
 	const send = jest.fn<(...args: unknown[]) => Promise<unknown>>();
 	for (const page of pages) send.mockResolvedValueOnce({ ok: true, status: 200, json: async () => page });
 	const getMany = jest.fn<() => Promise<unknown[]>>();
@@ -26,7 +26,7 @@ function fixture(pages: unknown[], rows: ReturnType<typeof note>[][], apiKey: st
 	const blocked = new Set<string>();
 	const mutedInstances: string[] = [];
 	const dependencies = [
-		{ hanamisearch: { host: 'search.example.test', port: 443, ssl: true, apiKey, cursorEncryptionKey, index: 'notes' } },
+		{ hanamisearch: { host: 'search.example.test', port: 443, ssl: true, apiKey: 'test-hanamisearch-v2-key', cursorEncryptionKey, index: 'notes', ...settingsOverrides } },
 		{ createQueryBuilder: () => query },
 		{ blockedHosts: [] },
 		{ packMany: async (notes: MiNote[]) => notes.map(n => ({ ...n })) },
@@ -155,7 +155,7 @@ describe('HanamiSearch v2', () => {
 	test('accepts a continuation after changing the API key', async () => {
 		const first = fixture([{ hits: [{ id: 'a' }], nextCursor: 'shared-position' }], [[note('a')]]);
 		const page = await first.service.searchNote('花', viewer, {}, { limit: 1 });
-		const second = fixture([{ hits: [], nextCursor: null }], [], 'rotated-api-key');
+		const second = fixture([{ hits: [], nextCursor: null }], [], { apiKey: 'rotated-api-key' });
 		await expect(second.service.searchNote('花', viewer, {}, { limit: 1, cursor: page.nextCursor! })).resolves.toEqual({ notes: [], nextCursor: null });
 		expect(second.send).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ headers: expect.objectContaining({ Authorization: 'Bearer rotated-api-key' }), body: expect.stringContaining('"cursor":"shared-position"') }), expect.anything());
 	});
