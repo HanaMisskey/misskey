@@ -5,6 +5,7 @@
 
 import { createServer } from 'node:http';
 import { once } from 'node:events';
+import { createCipheriv, createHash } from 'node:crypto';
 import { describe, expect, jest, test } from '@jest/globals';
 import { HanamiSearchV2Service } from '@/core/hanamisearch/HanamiSearchV2Service.js';
 import { HttpRequestService } from '@/core/HttpRequestService.js';
@@ -12,6 +13,7 @@ import type { Config } from '@/config.js';
 import type { MiNote, MiUser } from '@/models/_.js';
 
 const viewer = { id: 'viewer' } as MiUser;
+const cursorEncryptionKey = '0123456789abcdef'.repeat(4);
 const note = (id: string, extra = {}) => ({ id, userId: 'author', userHost: null, user: { isSuspended: false }, visibility: 'public', fileIds: [], reactions: {}, ...extra });
 
 function fixture(pages: unknown[], rows: ReturnType<typeof note>[][], apiKey: string | undefined = 'test-hanamisearch-v2-key') {
@@ -25,7 +27,7 @@ function fixture(pages: unknown[], rows: ReturnType<typeof note>[][], apiKey: st
 	const blocked = new Set<string>();
 	const mutedInstances: string[] = [];
 	const dependencies = [
-		{ hanamisearch: { host: 'search.example.test', port: 443, ssl: true, apiKey, index: 'notes' } },
+		{ hanamisearch: { host: 'search.example.test', port: 443, ssl: true, apiKey, cursorEncryptionKey, index: 'notes' } },
 		{ createQueryBuilder: () => query },
 		{ blockedHosts: [] },
 		{ packMany: async (notes: MiNote[]) => notes.map(n => ({ ...n })) },
@@ -130,6 +132,66 @@ describe('HanamiSearch v2', () => {
 		expect(f.send).not.toHaveBeenCalled();
 	});
 
+	/** Oracle: the dedicated key must represent exactly 32 bytes in hex; invalid configuration disables only v2 requests, without preventing service construction or contacting HanamiSearch. */
+	test.each([undefined, null, '', 'ab'.repeat(31), 'ab'.repeat(33), 'g'.repeat(64), `${cursorEncryptionKey}\n`, 42, [cursorEncryptionKey]])('is unavailable with an invalid cursor encryption key (%p)', async (key) => {
+		const f = fixture([{ hits: [], nextCursor: null }], []);
+		Object.assign(f.dependencies[0].hanamisearch!, { cursorEncryptionKey: key });
+		const service = new HanamiSearchV2Service(...f.dependencies);
+		await expect(service.searchNote('花', viewer, {}, { limit: 1 })).rejects.toMatchObject({ code: 'UNAVAILABLE' });
+		expect(f.send).not.toHaveBeenCalled();
+	});
+
+	/** Oracle: instances configured with the same 32 key bytes share continuations; hex letter case does not change those bytes. Separate instances exercise key persistence without requiring external services. */
+	test.each([cursorEncryptionKey, cursorEncryptionKey.toUpperCase()])('shares a continuation across independently constructed services (%p)', async (key) => {
+		const first = fixture([{ hits: [{ id: 'a' }], nextCursor: 'shared-position' }], [[note('a')]]);
+		const page = await first.service.searchNote('花', viewer, {}, { limit: 1 });
+		const second = fixture([{ hits: [], nextCursor: null }], []);
+		Object.assign(second.dependencies[0].hanamisearch!, { cursorEncryptionKey: key });
+		const service = new HanamiSearchV2Service(...second.dependencies);
+		await expect(service.searchNote('花', viewer, {}, { limit: 1, cursor: page.nextCursor! })).resolves.toEqual({ notes: [], nextCursor: null });
+		expect(second.send).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ body: expect.stringContaining('"cursor":"shared-position"') }), expect.anything());
+	});
+
+	/** Oracle: rotating HTTP credentials must preserve existing continuations when the independent cursor encryption key stays the same. */
+	test('accepts a continuation after changing the API key', async () => {
+		const first = fixture([{ hits: [{ id: 'a' }], nextCursor: 'shared-position' }], [[note('a')]]);
+		const page = await first.service.searchNote('花', viewer, {}, { limit: 1 });
+		const second = fixture([{ hits: [], nextCursor: null }], [], 'rotated-api-key');
+		await expect(second.service.searchNote('花', viewer, {}, { limit: 1, cursor: page.nextCursor! })).resolves.toEqual({ notes: [], nextCursor: null });
+		expect(second.send).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ headers: expect.objectContaining({ Authorization: 'Bearer rotated-api-key' }), body: expect.stringContaining('"cursor":"shared-position"') }), expect.anything());
+	});
+
+	/** Oracle: changing only the cursor encryption key invalidates old continuations before a search request is sent. */
+	test('rejects a continuation after changing the cursor encryption key', async () => {
+		const first = fixture([{ hits: [{ id: 'a' }], nextCursor: 'shared-position' }], [[note('a')]]);
+		const page = await first.service.searchNote('花', viewer, {}, { limit: 1 });
+		const second = fixture([{ hits: [], nextCursor: null }], []);
+		Object.assign(second.dependencies[0].hanamisearch!, { cursorEncryptionKey: 'fedcba9876543210'.repeat(4) });
+		const service = new HanamiSearchV2Service(...second.dependencies);
+		await expect(service.searchNote('花', viewer, {}, { limit: 1, cursor: page.nextCursor! })).rejects.toMatchObject({ code: 'INVALID_CURSOR' });
+		expect(second.send).not.toHaveBeenCalled();
+	});
+
+	/** Oracle: migration must not accept API-key-derived continuations. The legacy wire fixture follows commit 56075ed1bc5df0d2975006f45cb91245ee017a0c; matching request conditions and a fixed clock keep its fingerprint and expiry valid, so rejection cannot be attributed to either constraint. */
+	test('rejects an unexpired legacy continuation with matching search conditions', async () => {
+		const now = 1_783_000_000_000;
+		const clock = jest.spyOn(Date, 'now').mockReturnValue(now);
+		try {
+			const apiKey = 'test-hanamisearch-v2-key';
+			const fingerprint = createHash('sha256').update(JSON.stringify(['花', 'viewer', [], 1, 'search.example.test', 443, 'notes'])).digest('hex');
+			const iv = Buffer.alloc(12, 1);
+			const cipher = createCipheriv('aes-256-gcm', createHash('sha256').update(apiKey).digest(), iv);
+			const payload = JSON.stringify({ cursor: 'legacy-position', fingerprint, expiresAt: now + 300_000 });
+			const encrypted = Buffer.concat([cipher.update(payload), cipher.final()]);
+			const cursor = Buffer.concat([iv, cipher.getAuthTag(), encrypted]).toString('base64url');
+			const f = fixture([{ hits: [], nextCursor: null }], [], apiKey);
+			await expect(f.service.searchNote('花', viewer, {}, { limit: 1, cursor })).rejects.toMatchObject({ code: 'INVALID_CURSOR' });
+			expect(f.send).not.toHaveBeenCalled();
+		} finally {
+			clock.mockRestore();
+		}
+	});
+
 	test.each([{ hits: 'invalid' }, { hits: [{ id: 3 }] }, { hits: [], nextCursor: 4 }])('rejects an invalid response %p', async (response) => {
 		const f = fixture([response], []);
 		await expect(f.service.searchNote('花', viewer, {}, { limit: 1 })).rejects.toMatchObject({ code: 'UNAVAILABLE' });
@@ -180,7 +242,7 @@ describe('HanamiSearch v2', () => {
 			const address = server.address();
 			if (!address || typeof address === 'string') throw new Error('Expected local test address');
 			const f = fixture([], [[note('a', { fileIds: ['file1'] })]]);
-			const config = { userAgent: 'Misskey test', hanamisearch: { host: '127.0.0.1', port: String(address.port), ssl: false, apiKey: 'test-key', index: 'test' } } as Config;
+			const config = { userAgent: 'Misskey test', hanamisearch: { host: '127.0.0.1', port: String(address.port), ssl: false, apiKey: 'test-key', cursorEncryptionKey, index: 'test' } } as Config;
 			f.dependencies[0] = config;
 			f.dependencies[6] = new HttpRequestService(config);
 			const service = new HanamiSearchV2Service(...f.dependencies);

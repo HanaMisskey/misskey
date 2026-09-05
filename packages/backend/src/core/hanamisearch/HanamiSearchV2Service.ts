@@ -59,6 +59,9 @@ export class HanamiSearchV2Service {
 	private async search(q: string, me: MiUser | null, opts: SearchOptions, pagination: SearchPagination): Promise<SearchPage> {
 		const settings = this.config.hanamisearch;
 		if (!settings?.apiKey) throw new HanamiSearchV2Error('UNAVAILABLE');
+		if (typeof settings.cursorEncryptionKey !== 'string' || settings.cursorEncryptionKey.length !== 64 || !/^[0-9a-fA-F]{64}$/.test(settings.cursorEncryptionKey)) {
+			throw new HanamiSearchV2Error('UNAVAILABLE');
+		}
 		const limit = pagination.limit ?? 10;
 		const filter: string[] = [];
 		if (opts.userId) filter.push(`userId = ${JSON.stringify(opts.userId)}`);
@@ -68,7 +71,7 @@ export class HanamiSearchV2Service {
 		const fingerprint = createHash('sha256').update(JSON.stringify([
 			q, me?.id ?? null, filter, limit, settings.host, settings.port, settings.index,
 		])).digest('hex');
-		const key = createHash('sha256').update(settings.apiKey).digest();
+		const key = Buffer.from(settings.cursorEncryptionKey, 'hex');
 		let cursor = pagination.cursor == null ? null : this.readCursor(pagination.cursor, key, fingerprint);
 		const seenCursors = new Set<string>();
 		if (cursor) seenCursors.add(cursor);

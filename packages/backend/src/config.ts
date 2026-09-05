@@ -68,6 +68,7 @@ type Source = {
 		host: string;
 		port: string;
 		apiKey: string;
+		cursorEncryptionKey?: string;
 		ssl?: boolean;
 		index: string;
 		scope?: 'local' | 'global' | string[];
@@ -169,6 +170,7 @@ export type Config = {
 		host: string;
 		port: string;
 		apiKey: string;
+		cursorEncryptionKey?: string;
 		ssl?: boolean;
 		index: string;
 		scope?: 'local' | 'global' | string[];
