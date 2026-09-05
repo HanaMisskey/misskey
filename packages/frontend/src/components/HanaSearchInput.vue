@@ -60,8 +60,8 @@
 					:disabled="disabled"
 					@click.stop="setSearchMode"
 				>
-					<div><i class="ti ti-sparkles"></i></div>
-					<div :class="$style.modeSwitchValue">{{ searchMode === 'v2' ? 'v2 β' : searchMode }}</div>
+					<div v-if="searchMode === 'v2'" aria-hidden="true"><i class="ti ti-sparkles"></i></div>
+					<div>{{ searchMode }}</div>
 					<div><i class="ti ti-chevron-down"></i></div>
 				</button>
 			</slot>
@@ -424,7 +424,8 @@ html[data-color-scheme=dark] .hl {
 	display: flex;
 	align-items: center;
 	height: 100%;
-	padding: 0 4px;
+	gap: 4px;
+	padding: 0 6px;
 	font-size: .9em;
 
 	&:hover {
@@ -448,11 +449,6 @@ html[data-color-scheme=dark] .hl {
 			z-index: -1;
 		}
 	}
-}
-
-.modeSwitchValue {
-	margin-left: -4px;
-	min-width: 24px;
 }
 
 .clearButton {

@@ -14,13 +14,13 @@
 			{{ i18n.ts._hana._searchMode.title }}
 		</div>
 		<button v-if="$i.policies.canSearchWithHanamiSearchV1" key="v1" class="_button" :class="[$style.item, { [$style.active]: v === 'v1' }]" data-index="2" @click="choose('v1')">
-			<div :class="$style.icon"><i class="ti ti-filter-search"></i></div>
+			<div :class="$style.icon" aria-hidden="true"></div>
 			<div :class="$style.body">
 				<span :class="$style.itemTitle">HanamiSearch v1</span>
 			</div>
 		</button>
 		<button v-if="$i.policies.canSearchWithHanamiSearchV2" key="v2" class="_button" :class="[$style.item, { [$style.active]: v === 'v2' }]" data-index="3" @click="choose('v2')">
-			<div :class="$style.icon"><i class="ti ti-search"></i></div>
+			<div :class="$style.icon" aria-hidden="true"><i class="ti ti-sparkles"></i></div>
 			<div :class="$style.body">
 				<span :class="$style.itemTitle">HanamiSearch v2 β</span>
 			</div>
