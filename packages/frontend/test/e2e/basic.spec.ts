@@ -115,7 +115,16 @@ test.describe('After setup instance', () => {
 		await page.getByTestId('user-setup-next').click();
 		await page.waitForTimeout(1000);
 
-		// 【設定】プッシュ通知
+		// 【チュートリアル】ノートの投稿設定
+		await page.getByTestId('user-setup-next').click();
+		await page.waitForTimeout(1000);
+
+		// 【チュートリアル】添付ファイルをセンシティブにするには？
+		// インタラクティブ要素があるが、テスト時は無視できるようになっている
+		await page.getByTestId('user-setup-next').click();
+		await page.waitForTimeout(1000);
+
+		// 【設定】プライバシー設定
 		await page.getByTestId('user-setup-next').click();
 		await page.waitForTimeout(1000);
 
