@@ -175,6 +175,9 @@ importers:
       '@types/redis-info':
         specifier: 3.0.3
         version: 3.0.3
+      '@zip.js/zip.js':
+        specifier: 2.8.60
+        version: 2.8.60
       accepts:
         specifier: 1.3.8
         version: 1.3.8
@@ -5311,6 +5314,10 @@ packages:
     resolution: {integrity: sha512-p96FSY54r+WJ50FIOsCOjyj/wavs8921hG5+kVMmZgKcvIKxMXHTrjNJvRgWa/zuX3B6t2lijLNFaOyuxUH+2A==}
     engines: {node: '>=14.6'}
     deprecated: this version has critical issues, please update to the latest version
+
+  '@zip.js/zip.js@2.8.60':
+    resolution: {integrity: sha512-pULv0waMlnKAUUxrsuAOa0ADONGRuhdHORtuXVgClNlScDB5YjImCV8DZrE1SicaROyE6MwGkH8CLJ+o4Nx07g==}
+    engines: {bun: '>=0.7.0', deno: '>=1.0.0', node: '>=18.0.0'}
 
   abbrev@1.1.1:
     resolution: {integrity: sha512-nne9/IiQ/hzIhY6pdDnbBtz7DjPTKrY00P/zvPSm5pOFkl6xuGrGnXn/VtTNNfNtAfZ9/1RtehkszU9qcTii0Q==}
@@ -16259,6 +16266,8 @@ snapshots:
 
   '@xmldom/xmldom@0.9.8':
     optional: true
+
+  '@zip.js/zip.js@2.8.60': {}
 
   abbrev@1.1.1: {}
 
