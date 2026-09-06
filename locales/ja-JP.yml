@@ -2149,6 +2149,7 @@ _role:
     canHideAds: "広告の非表示"
     canSearchNotes: "ノート検索の利用"
     canSearchWithHanamiSearchV1: "HanamiSearchV1の利用"
+    canSearchWithHanamiSearchV2: "HanamiSearchV2の利用"
     canSearchUsers: "ユーザー検索の利用"
     canUseTranslator: "翻訳機能の利用"
     avatarDecorationLimit: "アイコンデコレーションの最大取付個数"
@@ -3548,7 +3549,6 @@ _hana:
   hanaModeShort: "はな"
   hanaModeTutorialDescription: "はなみすきーの主要な独自機能として「はなモード」があります。はなモードを有効にするかどうかで、はなみすきーでのSNS体験は大きく変わってきます。以下に主な違いとおすすめのユースケースを挙げますので、どちらか選択して進んでください。"
   flowerEffect: "いつでも花びらを降らせる"
-  searchIsInBeta: "独自検索エンジンは現在開発中です。今ご利用いただけるのは通常のMisskeyと同じ検索エンジン（Meilisearch）です。今後の進化にご期待ください！"
   showOnX: "{x}で見る"
   takingTooLongToLoad: "読み込みに時間がかかっています。"
   _roles:
@@ -3619,6 +3619,7 @@ _hana:
     new: "新登場"
     v0Description: "通常のMisskeyと同じ検索システム"
     v1Description: "精度が大幅改善 / 演算子などで高度な検索が可能"
+    v2Description: "v1の機能＋類義語考慮でもっと見つけやすく"
   _willBeMergedToUpstream:
     settingFutureDateToChangeNotesVisibilityIsProhibited: "未来の日付が選択されています。"
     settingFutureDateToChangeNotesVisibilityIsProhibitedDescription: "ロックダウン設定にて未来の日付を設定することはできません。"

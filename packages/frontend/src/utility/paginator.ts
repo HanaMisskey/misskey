@@ -13,6 +13,13 @@ const MAX_QUEUE_ITEMS = 100;
 const FIRST_FETCH_LIMIT = 15;
 const SECOND_FETCH_LIMIT = 30;
 
+export const paginatorConsts = {
+	MAX_ITEMS,
+	MAX_QUEUE_ITEMS,
+	FIRST_FETCH_LIMIT,
+	SECOND_FETCH_LIMIT,
+};
+
 export type MisskeyEntity = {
 	id: string;
 	createdAt: string;

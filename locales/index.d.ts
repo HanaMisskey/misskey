@@ -8283,6 +8283,10 @@ export interface Locale extends ILocale {
              */
             "canSearchWithHanamiSearchV1": string;
             /**
+             * HanamiSearchV2の利用
+             */
+            "canSearchWithHanamiSearchV2": string;
+            /**
              * ユーザー検索の利用
              */
             "canSearchUsers": string;
@@ -13257,10 +13261,6 @@ export interface Locale extends ILocale {
          */
         "flowerEffect": string;
         /**
-         * 独自検索エンジンは現在開発中です。今ご利用いただけるのは通常のMisskeyと同じ検索エンジン（Meilisearch）です。今後の進化にご期待ください！
-         */
-        "searchIsInBeta": string;
-        /**
          * {x}で見る
          */
         "showOnX": ParameterizedString<"x">;
@@ -13523,6 +13523,10 @@ export interface Locale extends ILocale {
              * 精度が大幅改善 / 演算子などで高度な検索が可能
              */
             "v1Description": string;
+            /**
+             * v1の機能＋類義語考慮でもっと見つけやすく
+             */
+            "v2Description": string;
         };
         "_willBeMergedToUpstream": {
             /**

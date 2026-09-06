@@ -13,20 +13,18 @@
 		<div :class="[$style.label, $style.item]">
 			{{ i18n.ts._hana._searchMode.title }}
 		</div>
-		<button key="public" class="_button" :class="[$style.item, { [$style.active]: v === 'v0' }]" data-index="1" @click="choose('v0')">
-			<div :class="$style.icon">
-				<i class="ti ti-search"></i>
-			</div>
-			<div :class="$style.body">
-				<span :class="$style.itemTitle">Meilisearch (v0)</span>
-				<MkCondensedLine :minScale="0.8">{{ i18n.ts._hana._searchMode.v0Description }}</MkCondensedLine>
-			</div>
-		</button>
 		<button key="v1" class="_button" :class="[$style.item, { [$style.active]: v === 'v1' }]" data-index="2" @click="choose('v1')">
 			<div :class="$style.icon"><i class="ti ti-filter-search"></i></div>
 			<div :class="$style.body">
 				<span :class="$style.itemTitle">HanamiSearch v1</span>
 				<MkCondensedLine :minScale="0.8">{{ i18n.ts._hana._searchMode.v1Description }}</MkCondensedLine>
+			</div>
+		</button>
+		<button key="v2" :disabled="$i == null || !$i.policies.canSearchWithHanamiSearchV2" class="_button" :class="[$style.item, { [$style.active]: v === 'v2' }]" data-index="3" @click="choose('v2')">
+			<div :class="$style.icon"><i class="ti ti-message-2-search"></i></div>
+			<div :class="$style.body">
+				<span :class="$style.itemTitle">HanamiSearch v2</span>
+				<MkCondensedLine :minScale="0.8">{{ i18n.ts._hana._searchMode.v2Description }}</MkCondensedLine>
 			</div>
 		</button>
 	</div>
@@ -37,10 +35,8 @@
 import { nextTick, shallowRef, ref } from 'vue';
 import MkModal from '@/components/MkModal.vue';
 import { i18n } from '@/i18n.js';
-import { ensureSignin } from '@/i.js';
+import { $i } from '@/i.js';
 import type { SearchMode } from '@/hana/types/search.js';
-
-const $i = ensureSignin();
 
 const modal = shallowRef<InstanceType<typeof MkModal>>();
 
@@ -109,11 +105,15 @@ function choose(mode: SearchMode): void {
 	width: 100%;
 	box-sizing: border-box;
 
-	&:hover {
+	&:disabled {
+		opacity: 0.7;
+	}
+
+	&:not(:disabled):hover {
 		background: rgba(0, 0, 0, 0.05);
 	}
 
-	&:active {
+	&:not(:disabled):active {
 		background: rgba(0, 0, 0, 0.1);
 	}
 
