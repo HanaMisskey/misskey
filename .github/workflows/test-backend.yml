@@ -11,6 +11,8 @@ on:
       - .github/workflows/test-backend.yml
       - .github/misskey/test.yml
   pull_request:
+    branches-ignore:
+      - master
     paths:
       - packages/backend/**
       # for permissions
@@ -38,36 +40,36 @@ jobs:
           POSTGRES_DB: test-misskey
           POSTGRES_HOST_AUTH_METHOD: trust
       redis:
-        image: redis:7
+        image: redis:8
         ports:
           - 56312:6379
       meilisearch:
-        image: getmeili/meilisearch:latest
+        image: getmeili/meilisearch:v1.49.0
         ports:
-          - 17700:7700
+          - 57712:7700
         env:
           MEILI_NO_ANALYTICS: 'true'
           MEILI_ENV: 'development'
       hanamisearch:
         image: getmeili/meilisearch:latest
         ports:
-          - 17701:7700
+          - 57713:7700
         env:
           MEILI_NO_ANALYTICS: 'true'
           MEILI_ENV: 'development'
 
     steps:
-    - uses: actions/checkout@v4.3.0
+    - uses: actions/checkout@v7.0.0
       with:
         submodules: true
     - name: Setup pnpm
-      uses: pnpm/action-setup@v4.2.0
+      uses: pnpm/action-setup@v6.0.9
     - name: Install FFmpeg
       run: |
         sudo apt update
         sudo apt install -y ffmpeg
     - name: Use Node.js
-      uses: actions/setup-node@v4.4.0
+      uses: actions/setup-node@v7.0.0
       with:
         node-version-file: ${{ matrix.node-version-file }}
         cache: 'pnpm'
@@ -81,7 +83,7 @@ jobs:
     - name: Test
       run: pnpm --filter backend test-and-coverage
     - name: Upload to Codecov
-      uses: codecov/codecov-action@v5
+      uses: codecov/codecov-action@v7
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         files: ./packages/backend/coverage/coverage-final.json
@@ -105,32 +107,32 @@ jobs:
           POSTGRES_DB: test-misskey
           POSTGRES_HOST_AUTH_METHOD: trust
       redis:
-        image: redis:7
+        image: redis:8
         ports:
           - 56312:6379
       meilisearch:
         image: getmeili/meilisearch:latest
         ports:
-          - 17700:7700
+          - 57712:7700
         env:
           MEILI_NO_ANALYTICS: 'true'
           MEILI_ENV: 'development'
       hanamisearch:
         image: getmeili/meilisearch:latest
         ports:
-          - 17701:7700
+          - 57713:7700
         env:
           MEILI_NO_ANALYTICS: 'true'
           MEILI_ENV: 'development'
 
     steps:
-      - uses: actions/checkout@v4.3.0
+      - uses: actions/checkout@v7.0.0
         with:
           submodules: true
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4.2.0
+        uses: pnpm/action-setup@v6.0.9
       - name: Use Node.js
-        uses: actions/setup-node@v4.4.0
+        uses: actions/setup-node@v7.0.0
         with:
           node-version-file: ${{ matrix.node-version-file }}
           cache: 'pnpm'
@@ -144,7 +146,7 @@ jobs:
       - name: Test
         run: pnpm --filter backend test-and-coverage:e2e
       - name: Upload to Codecov
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./packages/backend/coverage/coverage-final.json
@@ -168,16 +170,16 @@ jobs:
           POSTGRES_HOST_AUTH_METHOD: trust
 
     steps:
-      - uses: actions/checkout@v4.3.0
+      - uses: actions/checkout@v7.0.0
         with:
           submodules: true
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4.2.0
+        uses: pnpm/action-setup@v6.0.9
       - name: Get current date
         id: current-date
         run: echo "today=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
       - name: Use Node.js
-        uses: actions/setup-node@v4.4.0
+        uses: actions/setup-node@v7.0.0
         with:
           node-version-file: ${{ matrix.node-version-file }}
           cache: 'pnpm'

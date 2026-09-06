@@ -6,9 +6,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import bcrypt from 'bcryptjs';
 import { Endpoint } from '@/server/api/endpoint-base.js';
+import { ApiError } from '@/server/api/error.js';
 import type { UsersRepository, UserProfilesRepository, MiMeta } from '@/models/_.js';
 import { DI } from '@/di-symbols.js';
-import { ApiError } from '@/server/api/error.js';
 import { secureRndstr } from '@/misc/secure-rndstr.js';
 import { RoleService } from '@/core/RoleService.js';
 import { ModerationLogService } from '@/core/ModerationLogService.js';
@@ -74,7 +74,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			const user = await this.usersRepository.findOneBy({ id: ps.userId });
 
 			if (user == null) {
-				throw new Error('user not found');
+				throw new ApiError(meta.errors.noSuchUser);
 			}
 
 			if (await this.roleService.isAdministrator(user) && me.id !== user.id) {

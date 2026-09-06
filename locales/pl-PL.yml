@@ -1044,6 +1044,7 @@ inMinutes: "minuta"
 inDays: "dzień"
 widgets: "Widżety"
 presets: "Konfiguracja"
+previewingThemeRestore: "Przywróć"
 _imageEditing:
   _vars:
     filename: "Nazwa pliku"
@@ -1361,6 +1362,14 @@ _widgets:
   _userList:
     chooseList: "Wybierz listę"
   clicker: "Clicker"
+_widgetOptions:
+  height: "Wysokość"
+  _button:
+    colored: "Kolorowe"
+  _clock:
+    size: "Rozmiar"
+  _birthdayFollowings:
+    period: "Czas trwania"
 _cw:
   hide: "Ukryj"
   show: "Załaduj więcej"

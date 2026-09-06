@@ -65,6 +65,7 @@ import {
 	packedMetaDetailedOnlySchema,
 	packedMetaDetailedSchema,
 	packedMetaLiteSchema,
+	packedMetaClientOptionsSchema,
 } from '@/models/json-schema/meta.js';
 import { packedUserWebhookSchema } from '@/models/json-schema/user-webhook.js';
 import { packedSystemWebhookSchema } from '@/models/json-schema/system-webhook.js';
@@ -137,6 +138,7 @@ export const refs = {
 	MetaLite: packedMetaLiteSchema,
 	MetaDetailedOnly: packedMetaDetailedOnlySchema,
 	MetaDetailed: packedMetaDetailedSchema,
+	MetaClientOptions: packedMetaClientOptionsSchema,
 	UserWebhook: packedUserWebhookSchema,
 	SystemWebhook: packedSystemWebhookSchema,
 	AbuseReportNotificationRecipient: packedAbuseReportNotificationRecipientSchema,
@@ -263,8 +265,6 @@ type ObjectSchemaTypeDef<p extends Schema> =
 					never :
 				never :
 			any;
-
-type ObjectSchemaType<p extends Schema> = NullOrUndefined<p, ObjectSchemaTypeDef<p>>;
 
 export type SchemaTypeDef<p extends Schema> =
 	p['type'] extends 'null' ? null :

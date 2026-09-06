@@ -130,7 +130,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			const _userMap = await this.userEntityService.packMany(topRepliedUserIds, me, { schema: 'UserDetailed' })
 				.then(users => new Map(users.map(u => [u.id, u])));
 			const repliesObj = await Promise.all(topRepliedUserIds.map(async (userId) => ({
-				user: _userMap.get(userId) ?? await this.userEntityService.pack(userId, me, { schema: 'UserDetailed' }),
+				user: _userMap.get(userId) ?? (await this.userEntityService.pack(userId, me, { schema: 'UserDetailed' })),
 				weight: repliedUsers[userId] / peak,
 			})));
 

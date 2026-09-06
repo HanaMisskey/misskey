@@ -4,7 +4,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 -->
 
 <template>
-<MkContainer :showHeader="widgetProps.showHeader" data-cy-mkw-aiscript class="mkw-aiscript">
+<MkContainer :showHeader="widgetProps.showHeader" data-testid="mkw-aiscript" class="mkw-aiscript">
 	<template #icon><i class="ti ti-terminal-2"></i></template>
 	<template #header>{{ i18n.ts._widgets.aiscript }}</template>
 
@@ -37,10 +37,12 @@ const name = 'aiscript';
 const widgetPropsDef = {
 	showHeader: {
 		type: 'boolean',
+		label: i18n.ts._widgetOptions.showHeader,
 		default: true,
 	},
 	script: {
 		type: 'string',
+		label: i18n.ts.script,
 		multiline: true,
 		default: '(1 + 1)',
 		hidden: true,

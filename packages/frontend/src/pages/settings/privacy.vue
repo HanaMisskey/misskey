@@ -6,7 +6,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 <template>
 <SearchMarker path="/settings/privacy" :label="i18n.ts.privacy" :keywords="['privacy']" icon="ti ti-lock-open">
 	<div class="_gaps_m">
-		<MkFeatureBanner icon="/client-assets/unlocked_3d.png" color="#aeff00">
+		<MkFeatureBanner icon="/fluent-emoji/1f513.png" color="#aeff00">
 			<SearchText>{{ i18n.ts._settings.privacyBanner }}</SearchText>
 		</MkFeatureBanner>
 
@@ -90,7 +90,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 		<SearchMarker :keywords="['lockdown']">
 			<FormSection>
-				<template #label><SearchLabel>{{ i18n.ts.lockdown }}</SearchLabel><span class="_beta">{{ i18n.ts.beta }}</span></template>
+				<template #label><SearchLabel>{{ i18n.ts.lockdown }}</SearchLabel></template>
 
 				<div class="_gaps_m">
 					<SearchMarker :keywords="['login', 'signin']">
@@ -215,9 +215,9 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 <script lang="ts" setup>
 import { ref, computed, watch } from 'vue';
+import type { MkSelectItem } from '@/components/MkSelect.vue';
 import MkSwitch from '@/components/MkSwitch.vue';
 import MkSelect from '@/components/MkSelect.vue';
-import type { MkSelectItem } from '@/components/MkSelect.vue';
 import FormSection from '@/components/form/section.vue';
 import { misskeyApi } from '@/utility/misskey-api.js';
 import { i18n } from '@/i18n.js';
