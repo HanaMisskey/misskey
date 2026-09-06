@@ -114,17 +114,13 @@ export class UrlPreviewService {
 	}
 
 	private fetchSummary(url: string, meta: MiMeta, lang?: string): Promise<SummalyResult> {
-		const agent = this.config.proxy
-			? {
-				http: this.httpRequestService.httpAgent,
-				https: this.httpRequestService.httpsAgent,
-			}
-			: undefined;
-
 		return summaly(url, {
 			followRedirects: this.meta.urlPreviewAllowRedirect,
 			lang: lang ?? 'ja-JP',
-			agent: agent,
+			agent: {
+				http: this.httpRequestService.httpAgent,
+				https: this.httpRequestService.httpsAgent,
+			},
 			userAgent: meta.urlPreviewUserAgent ?? undefined,
 			operationTimeout: meta.urlPreviewTimeout,
 			contentLengthLimit: meta.urlPreviewMaximumContentLength,

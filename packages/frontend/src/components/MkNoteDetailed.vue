@@ -257,7 +257,7 @@ import { userPage } from '@/filters/user.js';
 import { notePage } from '@/filters/note.js';
 import number from '@/filters/number.js';
 import * as os from '@/os.js';
-import { misskeyApi, misskeyApiGet } from '@/utility/misskey-api.js';
+import { misskeyApi } from '@/utility/misskey-api.js';
 import * as sound from '@/utility/sound.js';
 import { reactionPicker } from '@/utility/reaction-picker.js';
 import { extractUrlFromMfm } from '@/utility/extract-url-from-mfm.js';
@@ -427,10 +427,9 @@ useTooltip(renoteButton, async (showing) => {
 
 if (appearNote.reactionAcceptance === 'likeOnly') {
 	useTooltip(reactButton, async (showing) => {
-		const reactions = await misskeyApiGet('notes/reactions', {
+		const reactions = await misskeyApi('notes/reactions', {
 			noteId: appearNote.id,
 			limit: 10,
-			_cacheKey_: $appearNote.reactionCount,
 		});
 
 		const users = reactions.map(x => x.user);
