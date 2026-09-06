@@ -171,7 +171,7 @@
 		"sanitize-html": "2.17.0",
 		"secure-json-parse": "3.0.2",
 		"semver": "7.7.3",
-		"sharp": "0.33.5",
+		"sharp": "0.35.4",
 		"slacc": "0.0.10",
 		"strict-event-emitter-types": "2.0.0",
 		"stringz": "2.1.0",
