@@ -51,8 +51,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 					</HanaSearchInput>
 					<MkButton primary rounded style="margin-top: 8px;" @click="search()">{{ i18n.ts.search }}</MkButton>
 				</div>
-				<HanamiSearchV2Results v-if="v2Params" :key="searchKey" :params="v2Params"/>
-				<MkNotesTimeline v-else-if="searchPaginator" :key="searchKey" :paginator="searchPaginator"/>
+				<MkNotesTimeline v-if="searchPaginator" :key="searchKey" :paginator="searchPaginator" :autoLoad="false" :withControl="resultMode === 'v1'"/>
 			</div>
 			<div v-else>
 				<MkInfo warn>{{ i18n.ts.notesSearchNotAvailable }}</MkInfo>
@@ -72,12 +71,11 @@ SPDX-License-Identifier: AGPL-3.0-only
 </template>
 
 <script lang="ts" setup>
-import { computed, watch, ref, markRaw, shallowRef } from 'vue';
+import { computed, watch, ref, markRaw, shallowRef, onBeforeUnmount } from 'vue';
 import * as Misskey from 'misskey-js';
 import { url } from '@@/js/config.js';
 import { useInterval } from '@@/js/use-interval.js';
 import type { PageHeaderItem } from '@/types/page-header.js';
-import type { HanamiSearchV2Params } from '@/utility/hanamisearch-v2.js';
 import MkPostForm from '@/components/MkPostForm.vue';
 import MkStreamingNotesTimeline from '@/components/MkStreamingNotesTimeline.vue';
 import XChannelFollowButton from '@/components/MkChannelFollowButton.vue';
@@ -92,7 +90,6 @@ import { favoritedChannelsCache } from '@/cache.js';
 import MkButton from '@/components/MkButton.vue';
 //import MkInput from '@/components/MkInput.vue';
 import HanaSearchInput from '@/components/HanaSearchInput.vue';
-import HanamiSearchV2Results from '@/components/HanamiSearchV2Results.vue';
 import { prefer } from '@/preferences.js';
 import MkNote from '@/components/MkNote.vue';
 import MkInfo from '@/components/MkInfo.vue';
@@ -103,6 +100,8 @@ import { hanamiSearchAvailable } from '@/utility/check-permissions.js';
 import { miLocalStorage } from '@/local-storage.js';
 import { useRouter } from '@/router.js';
 import type { SearchMode } from '@/hana/types/search.js';
+import { TokenPaginator } from '@/hana/scripts/token-paginator.js';
+import type { IPaginator } from '@/utility/paginator.js';
 import { Paginator } from '@/utility/paginator.js';
 
 const router = useRouter();
@@ -117,11 +116,12 @@ const channel = ref<Misskey.entities.Channel | null>(null);
 const favorited = ref(false);
 const searchQuery = ref('');
 const searchMode = ref<SearchMode>($i?.policies.canSearchWithHanamiSearchV2 ? 'v2' : $i?.policies.canSearchWithHanamiSearchV1 ? 'v1' : 'v0');
-const searchPaginator = shallowRef();
-const v2Params = shallowRef<HanamiSearchV2Params | null>(null);
+const searchPaginator = shallowRef<IPaginator<Misskey.entities.Note> | null>(null);
+const resultMode = ref<SearchMode>('v1');
+onBeforeUnmount(() => searchPaginator.value?.dispose?.());
 const searchKey = ref(0);
 watch(() => props.channelId, () => {
-	v2Params.value = null;
+	searchPaginator.value?.dispose?.();
 	searchPaginator.value = null;
 });
 const featuredPaginator = markRaw(new Paginator('notes/featured', {
@@ -256,10 +256,13 @@ async function search() {
 
 	if (!query) return;
 
-	v2Params.value = null;
+	searchPaginator.value?.dispose?.();
 	searchPaginator.value = null;
 	if ($i?.policies.canSearchWithHanamiSearchV2 === true && searchMode.value === 'v2') {
-		v2Params.value = { query, channelId: channel.value.id, limit: 10 };
+		searchPaginator.value = markRaw(new TokenPaginator('notes/hanamisearch-v2', {
+			limit: 10,
+			params: { query, channelId: channel.value.id },
+		}));
 	} else if ($i?.policies.canSearchWithHanamiSearchV1 === true && searchMode.value === 'v1') {
 		searchPaginator.value = markRaw(new Paginator('notes/hanamisearch-v1', {
 			limit: 10,
@@ -278,6 +281,8 @@ async function search() {
 		}));
 	}
 
+	resultMode.value = searchMode.value;
+	void searchPaginator.value.init();
 	searchKey.value++;
 }
 

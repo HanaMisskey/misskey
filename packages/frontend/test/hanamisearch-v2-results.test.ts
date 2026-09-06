@@ -5,7 +5,29 @@
 
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/vue';
-import Results from '@/components/HanamiSearchV2Results.vue';
+import type { Component } from 'vue';
+import { defineComponent, markRaw, onBeforeUnmount, shallowRef, watch } from 'vue';
+import { prefer } from '@/preferences.js';
+import { TokenPaginator } from '@/hana/scripts/token-paginator.js';
+import MkNotesTimeline from '@/components/MkNotesTimeline.vue';
+import MkPagination from '@/components/MkPagination.vue';
+
+// Exercise the shared renderers with the same explicit ownership used by the search pages.
+const Results = defineComponent({
+	components: { MkNotesTimeline: MkNotesTimeline as Component, MkPagination: MkPagination as unknown as Component },
+	props: { params: { type: Object, required: true }, showAsGrid: Boolean },
+	setup(props) {
+		const paginator = shallowRef<TokenPaginator<'notes/hanamisearch-v2'>>();
+		watch(() => props.params, params => {
+			paginator.value?.dispose();
+			paginator.value = markRaw(new TokenPaginator('notes/hanamisearch-v2', { params: { query: params.query } }));
+			void paginator.value.init();
+		}, { immediate: true });
+		onBeforeUnmount(() => paginator.value?.dispose());
+		return { paginator };
+	},
+	template: '<MkPagination v-if="showAsGrid" :paginator="paginator" :autoLoad="false" v-slot="{items}"><p v-for="note in items" :key="note.id">{{note.id}}</p></MkPagination><MkNotesTimeline v-else :paginator="paginator" :autoLoad="false" :withControl="false"/>',
+});
 
 const { request, appeared } = vi.hoisted(() => ({ request: vi.fn(), appeared: vi.fn() }));
 vi.mock('@/utility/misskey-api.js', () => ({ misskeyApi: request }));
@@ -35,7 +57,7 @@ function mount() {
 	});
 }
 
-afterEach(() => { cleanup(); request.mockReset(); appeared.mockReset(); });
+afterEach(() => { cleanup(); request.mockReset(); appeared.mockReset(); prefer.r.enableInfiniteScroll.value = true; });
 
 /** Oracle: the search screen must expose continuation even for an empty page, and offer retry without hiding earlier notes. */
 describe('HanamiSearch v2 result controls', () => {
@@ -71,7 +93,7 @@ describe('HanamiSearch v2 result controls', () => {
 		expect(request).toHaveBeenCalledTimes(1);
 		await fireEvent.click(view.getByText('Refresh'));
 		await waitFor(() => expect(request).toHaveBeenCalledTimes(2));
-		expect(request.mock.calls[1][1]).toEqual({ query: '花' });
+		expect(request.mock.calls[1][1]).toEqual({ query: '花', limit: 10 });
 	});
 
 	test('keeps visible notes during failure and retries from the button', async () => {
@@ -96,4 +118,20 @@ describe('HanamiSearch v2 result controls', () => {
 		expect(view.queryByText('old-note')).toBeNull();
 		await waitFor(() => expect(request.mock.calls[1][1].cursor).toBeUndefined());
 	});
+});
+
+/** With infinite scrolling disabled, only the explicit continuation action may load more. */
+test('keeps manual pagination when infinite scrolling is disabled', async () => {
+	prefer.r.enableInfiniteScroll.value = false;
+	request.mockResolvedValueOnce({ notes: [{ id: 'first-note' }], nextCursor: 'next' })
+		.mockResolvedValueOnce({ notes: [{ id: 'last-note' }], nextCursor: null });
+	const view = mount();
+	await view.findByText('first-note');
+	expect(appeared.mock.calls.every(call => call[0] == null)).toBe(true);
+	expect(request).toHaveBeenCalledTimes(1);
+	await view.rerender({ showAsGrid: true });
+	expect(request).toHaveBeenCalledTimes(1);
+	await fireEvent.click(view.getByText('More'));
+	await view.findByText('last-note');
+	expect(request.mock.calls[1][1].cursor).toBe('next');
 });

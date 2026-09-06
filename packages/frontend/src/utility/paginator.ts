@@ -56,6 +56,7 @@ export interface IPaginator<T = unknown, _T = T & MisskeyEntity> {
 	searchQuery: Ref<null | string>;
 	order: Ref<'newest' | 'oldest'>;
 
+	dispose?(): void;
 	init(): Promise<void>;
 	reload(): Promise<void>;
 	fetchOlder(): Promise<void>;

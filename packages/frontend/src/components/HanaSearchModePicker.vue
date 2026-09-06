@@ -13,16 +13,18 @@
 		<div :class="[$style.label, $style.item]">
 			{{ i18n.ts._hana._searchMode.title }}
 		</div>
-		<button v-if="$i.policies.canSearchWithHanamiSearchV1" key="v1" class="_button" :class="[$style.item, { [$style.active]: v === 'v1' }]" data-index="2" @click="choose('v1')">
-			<div :class="$style.icon" aria-hidden="true"></div>
+		<button key="v1" :disabled="$i == null || !$i.policies.canSearchWithHanamiSearchV1" class="_button" :class="[$style.item, { [$style.active]: v === 'v1' }]" data-index="2" @click="choose('v1')">
+			<div :class="$style.icon"><i class="ti ti-filter-search"></i></div>
 			<div :class="$style.body">
 				<span :class="$style.itemTitle">HanamiSearch v1</span>
+				<MkCondensedLine :minScale="0.8">{{ i18n.ts._hana._searchMode.v1Description }}</MkCondensedLine>
 			</div>
 		</button>
-		<button v-if="$i.policies.canSearchWithHanamiSearchV2" key="v2" class="_button" :class="[$style.item, { [$style.active]: v === 'v2' }]" data-index="3" @click="choose('v2')">
-			<div :class="$style.icon" aria-hidden="true"><i class="ti ti-sparkles"></i></div>
+		<button key="v2" :disabled="$i == null || !$i.policies.canSearchWithHanamiSearchV2" class="_button" :class="[$style.item, { [$style.active]: v === 'v2' }]" data-index="3" @click="choose('v2')">
+			<div :class="$style.icon"><i class="ti ti-message-2-search"></i></div>
 			<div :class="$style.body">
-				<span :class="$style.itemTitle">HanamiSearch v2 β</span>
+				<span :class="$style.itemTitle">HanamiSearch v2</span>
+				<MkCondensedLine :minScale="0.8">{{ i18n.ts._hana._searchMode.v2Description }}</MkCondensedLine>
 			</div>
 		</button>
 	</div>
@@ -33,10 +35,8 @@
 import { nextTick, shallowRef, ref } from 'vue';
 import MkModal from '@/components/MkModal.vue';
 import { i18n } from '@/i18n.js';
-import { ensureSignin } from '@/i.js';
+import { $i } from '@/i.js';
 import type { SearchMode } from '@/hana/types/search.js';
-
-const $i = ensureSignin();
 
 const modal = shallowRef<InstanceType<typeof MkModal>>();
 
@@ -54,6 +54,8 @@ const emit = defineEmits<{
 const v = ref(props.currentMode);
 
 function choose(mode: SearchMode): void {
+	if (mode === 'v1' && !$i?.policies.canSearchWithHanamiSearchV1) return;
+	if (mode === 'v2' && !$i?.policies.canSearchWithHanamiSearchV2) return;
 	v.value = mode;
 	emit('changeMode', mode);
 	nextTick(() => {
@@ -105,11 +107,15 @@ function choose(mode: SearchMode): void {
 	width: 100%;
 	box-sizing: border-box;
 
-	&:hover {
+	&:disabled {
+		opacity: 0.7;
+	}
+
+	&:not(:disabled):hover {
 		background: rgba(0, 0, 0, 0.05);
 	}
 
-	&:active {
+	&:not(:disabled):active {
 		background: rgba(0, 0, 0, 0.1);
 	}
 

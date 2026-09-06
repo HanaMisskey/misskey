@@ -118,7 +118,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 		</div>
 	</div>
 
-	<MkStickyContainer v-if="paginator || v2Params">
+	<MkStickyContainer v-if="paginator">
 		<template #header>
 			<div ref="searchResultStickyContainer" :class="$style.searchResultStickyRoot">
 				<div :class="$style.searchResultStickyContainer">
@@ -132,27 +132,28 @@ SPDX-License-Identifier: AGPL-3.0-only
 		<div class="_spacer" :style="{
 			'--MI_SPACER-w': (resultWithFiles && showAsGrid ? undefined : '800px'),
 		}">
-			<HanamiSearchV2Results v-if="v2Params" :key="`searchNotes:${key}:v2`" :params="v2Params" :showAsGrid="resultWithFiles && showAsGrid"/>
 			<MkPagination
-				v-else-if="paginator && resultWithFiles && showAsGrid"
+				v-if="resultWithFiles && showAsGrid"
 				v-slot="{ items }"
 				:key="`searchNotes:${key}:grid`"
 				:paginator="paginator"
+				:autoLoad="false"
 			>
 				<div :class="$style.stream">
 					<MkNoteMediaGrid v-for="note in (items as Misskey.entities.Note[])" :key="note.id" :note="note" square/>
 				</div>
 			</MkPagination>
-			<MkNotesTimeline v-else-if="paginator" :key="`searchNotes:${key}:note`" :paginator="paginator" :withControl="resultMode === 'v1'"/>
+			<MkNotesTimeline v-else-if="paginator" :key="`searchNotes:${key}:note`" :paginator="paginator" :autoLoad="false" :withControl="resultMode === 'v1'"/>
 		</div>
 	</MkStickyContainer>
 </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, shallowRef, useTemplateRef, toRef, markRaw, nextTick } from 'vue';
+import { computed, ref, shallowRef, useTemplateRef, toRef, markRaw, nextTick, onBeforeUnmount } from 'vue';
 import type * as Misskey from 'misskey-js';
-import type { HanamiSearchV2Params } from '@/utility/hanamisearch-v2.js';
+import { TokenPaginator } from '@/hana/scripts/token-paginator.js';
+import { useGlobalEvent } from '@/events.js';
 import { Paginator } from '@/utility/paginator.js';
 import type { IPaginator } from '@/utility/paginator.js';
 import { $i } from '@/i.js';
@@ -170,7 +171,6 @@ import MkRadios from '@/components/MkRadios.vue';
 import MkUserCardMini from '@/components/MkUserCardMini.vue';
 
 import HanaSearchInput from '@/components/HanaSearchInput.vue';
-import HanamiSearchV2Results from '@/components/HanamiSearchV2Results.vue';
 import MkInfo from '@/components/MkInfo.vue';
 import MkSwitch from '@/components/MkSwitch.vue';
 import MkPagination from '@/components/MkPagination.vue';
@@ -194,7 +194,8 @@ const router = useRouter();
 
 const key = ref(0);
 const paginator = shallowRef<IPaginator<Misskey.entities.Note> | null>(null);
-const v2Params = shallowRef<HanamiSearchV2Params | null>(null);
+onBeforeUnmount(() => paginator.value?.dispose?.());
+useGlobalEvent('noteDeleted', id => paginator.value?.removeItem(id));
 const resultWithFiles = ref(false);
 const resultMode = ref<SearchMode>('v1');
 
@@ -313,17 +314,20 @@ const searchResultStickyContainer = useTemplateRef('searchResultStickyContainer'
 const parentBg = ref<string | null>(null);
 
 async function search() {
-	if (searchParams.value == null) return;
+	const submittedParams = searchParams.value;
+	if (submittedParams == null) return;
+	const submittedMode = searchMode.value;
+	const submittedWithFiles = canFilterFiles.value && onlyWithFiles.value;
 
 	//#region AP lookup
-	if (searchParams.value.query.startsWith('https://') && !searchParams.value.query.includes(' ')) {
+	if (submittedParams.query.startsWith('https://') && !submittedParams.query.includes(' ')) {
 		const confirm = await os.confirm({
 			type: 'info',
 			text: i18n.ts.lookupConfirm,
 		});
 		if (!confirm.canceled) {
 			const promise = misskeyApi('ap/show', {
-				uri: searchParams.value.query,
+				uri: submittedParams.query,
 			});
 
 			os.promiseDialog(promise, null, null, i18n.ts.fetchingAsApObject);
@@ -350,19 +354,19 @@ async function search() {
 	}
 	//#endregion
 
-	if (searchParams.value.query.length > 1 && !searchParams.value.query.includes(' ')) {
-		if (searchParams.value.query.startsWith('@')) {
+	if (submittedParams.query.length > 1 && !submittedParams.query.includes(' ')) {
+		if (submittedParams.query.startsWith('@')) {
 			const confirm = await os.confirm({
 				type: 'info',
 				text: i18n.ts.lookupConfirm,
 			});
 			if (!confirm.canceled) {
-				router.pushByPath(`/${searchParams.value.query}`);
+				router.pushByPath(`/${submittedParams.query}`);
 				return;
 			}
 		}
 
-		if (searchParams.value.query.startsWith('#')) {
+		if (submittedParams.query.startsWith('#')) {
 			const confirm = await os.confirm({
 				type: 'info',
 				text: i18n.ts.openTagPageConfirm,
@@ -370,7 +374,7 @@ async function search() {
 			if (!confirm.canceled) {
 				router.push('/tags/:tag', {
 					params: {
-						tag: searchParams.value.query.substring(1),
+						tag: submittedParams.query.substring(1),
 					},
 				});
 				return;
@@ -378,29 +382,33 @@ async function search() {
 		}
 	}
 
-	v2Params.value = null;
+	paginator.value?.dispose?.();
 	paginator.value = null;
-	resultWithFiles.value = canFilterFiles.value && onlyWithFiles.value;
-	resultMode.value = searchMode.value;
-	if ($i?.policies.canSearchWithHanamiSearchV2 === true && searchMode.value === 'v2') {
-		v2Params.value = { ...searchParams.value, onlyWithFiles: onlyWithFiles.value, limit: 10 };
-	} else if ($i?.policies.canSearchWithHanamiSearchV1 === true && searchMode.value === 'v1') {
+	resultWithFiles.value = submittedWithFiles;
+	resultMode.value = submittedMode;
+	if ($i?.policies.canSearchWithHanamiSearchV2 === true && submittedMode === 'v2') {
+		paginator.value = markRaw(new TokenPaginator('notes/hanamisearch-v2', {
+			limit: 20,
+			params: { ...submittedParams, onlyWithFiles: submittedWithFiles },
+		}));
+	} else if ($i?.policies.canSearchWithHanamiSearchV1 === true && submittedMode === 'v1') {
 		paginator.value = markRaw(new Paginator('notes/hanamisearch-v1', {
 			limit: 10,
 			params: {
-				...searchParams.value,
-				onlyWithFiles: onlyWithFiles.value,
+				...submittedParams,
+				onlyWithFiles: submittedWithFiles,
 			},
 		}));
 	} else {
 		paginator.value = markRaw(new Paginator('notes/search', {
 			limit: 10,
 			params: {
-				...searchParams.value,
+				...submittedParams,
 			},
 		}));
 	}
 
+	void paginator.value.init();
 	key.value++;
 
 	await nextTick();
