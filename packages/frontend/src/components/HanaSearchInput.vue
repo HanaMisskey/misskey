@@ -55,7 +55,7 @@
 					class="_button"
 					:class="[
 						$style.modeSwitchButton,
-						{ [$style.v1]: searchMode === 'v1' || searchMode === 'v2' },
+						{ [$style.accented]: searchMode === 'v2' },
 					]"
 					:disabled="disabled"
 					@click.stop="setSearchMode"
@@ -432,7 +432,7 @@ html[data-color-scheme=dark] .hl {
 		opacity: 0.8;
 	}
 
-	&.v1 {
+	&.accented {
 		color: var(--MI_THEME-fgOnAccent);
 		font-weight: 700;
 

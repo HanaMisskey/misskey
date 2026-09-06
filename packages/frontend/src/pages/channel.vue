@@ -120,7 +120,7 @@ const searchMode = ref<SearchMode>($i?.policies.canSearchWithHanamiSearchV2 ? 'v
 const searchPaginator = shallowRef();
 const v2Params = shallowRef<HanamiSearchV2Params | null>(null);
 const searchKey = ref(0);
-watch([searchQuery, searchMode, () => props.channelId], () => {
+watch(() => props.channelId, () => {
 	v2Params.value = null;
 	searchPaginator.value = null;
 });

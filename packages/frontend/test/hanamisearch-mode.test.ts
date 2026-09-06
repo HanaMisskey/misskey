@@ -69,5 +69,6 @@ describe('HanamiSearch input mode display', () => {
 		expect(button.querySelectorAll('.ti-sparkles')).toHaveLength(mode === 'v2' ? 1 : 0);
 		expect(button.querySelectorAll('.ti')).toHaveLength(mode === 'v2' ? 2 : 1);
 		expect(button.querySelector('.ti-chevron-down')).not.toBeNull();
+		expect(button.className.includes('accented')).toBe(mode === 'v2');
 	});
 });

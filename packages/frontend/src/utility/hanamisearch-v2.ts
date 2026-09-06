@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { ref, shallowRef } from 'vue';
+import { computed, ref, shallowRef } from 'vue';
+import type { IPaginator, MisskeyEntity } from '@/utility/paginator.js';
 
 export type HanamiSearchV2Params = {
 	query: string;
@@ -22,10 +23,10 @@ export function createHanamiSearchV2<T extends { id: string }>(request: (params:
 	let params: HanamiSearchV2Params | null = null;
 	let generation = 0;
 	let disposed = false;
-	let hasPage = false;
+	const hasPage = ref(false);
 
 	async function loadMore(): Promise<void> {
-		if (disposed || params == null || loading.value || (hasPage && nextCursor.value == null)) return;
+		if (disposed || params == null || loading.value || (hasPage.value && nextCursor.value == null)) return;
 		const currentGeneration = generation;
 		loading.value = true;
 		error.value = false;
@@ -39,7 +40,7 @@ export function createHanamiSearchV2<T extends { id: string }>(request: (params:
 				return true;
 			})];
 			nextCursor.value = page.nextCursor;
-			hasPage = true;
+			hasPage.value = true;
 		} catch {
 			if (generation === currentGeneration) error.value = true;
 		} finally {
@@ -53,7 +54,7 @@ export function createHanamiSearchV2<T extends { id: string }>(request: (params:
 		params = { ...newParams };
 		notes.value = [];
 		nextCursor.value = null;
-		hasPage = false;
+		hasPage.value = false;
 		loading.value = false;
 		error.value = false;
 		await loadMore();
@@ -65,5 +66,44 @@ export function createHanamiSearchV2<T extends { id: string }>(request: (params:
 		loading.value = false;
 	}
 
-	return { notes, nextCursor, loading, error, search, loadMore, dispose };
+	return { notes, nextCursor, loading, error, hasPage, search, loadMore, dispose };
+}
+
+export function createHanamiSearchV2Paginator<T extends MisskeyEntity>(params: () => HanamiSearchV2Params, request: (params: HanamiSearchV2Params & { cursor?: string }) => Promise<{ notes: T[]; nextCursor: string | null }>) {
+	const state = createHanamiSearchV2<T & MisskeyEntity>(request);
+	const queued: (T & MisskeyEntity)[] = [];
+	const paginator = {
+		items: state.notes,
+		queuedAheadItemsCount: ref(0),
+		fetching: computed(() => state.loading.value && !state.hasPage.value),
+		fetchingOlder: computed(() => state.loading.value && state.hasPage.value),
+		fetchingNewer: ref(false),
+		canFetchOlder: computed(() => state.nextCursor.value != null),
+		canFetchNewer: ref(false),
+		canSearch: false,
+		error: computed(() => state.error.value && !state.hasPage.value),
+		fetchOlderError: computed(() => state.error.value && state.hasPage.value),
+		computedParams: null,
+		initialId: null,
+		initialDate: null,
+		initialDirection: 'older' as const,
+		noPaging: false,
+		searchQuery: ref<string | null>(null),
+		order: ref<'newest' | 'oldest'>('newest'),
+		init: () => state.search(params()),
+		reload: () => state.search(params()),
+		fetchOlder: state.loadMore,
+		async fetchNewer() {},
+		// 取得済み末尾を切り捨てると、次のcursorでは捨てた検索結果へ戻れない。
+		trim() {},
+		unshiftItems(items: (T & MisskeyEntity)[]) { state.notes.value = [...items, ...state.notes.value]; },
+		pushItems(items: (T & MisskeyEntity)[]) { state.notes.value = [...state.notes.value, ...items]; },
+		prepend(item: T & MisskeyEntity) { state.notes.value = [item, ...state.notes.value]; },
+		enqueue(item: T & MisskeyEntity) { queued.unshift(item); paginator.queuedAheadItemsCount.value = queued.length; },
+		releaseQueue() { paginator.unshiftItems(queued.splice(0)); paginator.queuedAheadItemsCount.value = 0; },
+		removeItem(id: string) { state.notes.value = state.notes.value.filter(note => note.id !== id); },
+		updateItem(id: string, updater: (item: T & MisskeyEntity) => T & MisskeyEntity) { state.notes.value = state.notes.value.map(note => note.id === id ? updater(note) : note); },
+		dispose: state.dispose,
+	} satisfies IPaginator<T> & { dispose: () => void };
+	return paginator;
 }

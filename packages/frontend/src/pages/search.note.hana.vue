@@ -143,14 +143,14 @@ SPDX-License-Identifier: AGPL-3.0-only
 					<MkNoteMediaGrid v-for="note in (items as Misskey.entities.Note[])" :key="note.id" :note="note" square/>
 				</div>
 			</MkPagination>
-			<MkNotesTimeline v-else-if="paginator" :key="`searchNotes:${key}:note`" :paginator="paginator" :withControl="false"/>
+			<MkNotesTimeline v-else-if="paginator" :key="`searchNotes:${key}:note`" :paginator="paginator" :withControl="resultMode === 'v1'"/>
 		</div>
 	</MkStickyContainer>
 </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, shallowRef, useTemplateRef, toRef, markRaw, watch, nextTick } from 'vue';
+import { computed, ref, shallowRef, useTemplateRef, toRef, markRaw, nextTick } from 'vue';
 import type * as Misskey from 'misskey-js';
 import type { HanamiSearchV2Params } from '@/utility/hanamisearch-v2.js';
 import { Paginator } from '@/utility/paginator.js';
@@ -196,6 +196,7 @@ const key = ref(0);
 const paginator = shallowRef<IPaginator<Misskey.entities.Note> | null>(null);
 const v2Params = shallowRef<HanamiSearchV2Params | null>(null);
 const resultWithFiles = ref(false);
+const resultMode = ref<SearchMode>('v1');
 
 const searchQuery = ref(toRef(props, 'query').value);
 const hostInput = ref(toRef(props, 'host').value);
@@ -239,12 +240,6 @@ const searchScope = ref<'all' | 'local' | 'server' | 'user'>((() => {
 	if (hostInput.value) return 'server';
 	return 'all';
 })());
-
-watch([searchQuery, searchScope, hostInput, user, onlyWithFiles, searchMode], () => {
-	v2Params.value = null;
-	paginator.value = null;
-	resultWithFiles.value = false;
-});
 
 type SearchParams = {
 	readonly query: string;
@@ -386,6 +381,7 @@ async function search() {
 	v2Params.value = null;
 	paginator.value = null;
 	resultWithFiles.value = canFilterFiles.value && onlyWithFiles.value;
+	resultMode.value = searchMode.value;
 	if ($i?.policies.canSearchWithHanamiSearchV2 === true && searchMode.value === 'v2') {
 		v2Params.value = { ...searchParams.value, onlyWithFiles: onlyWithFiles.value, limit: 10 };
 	} else if ($i?.policies.canSearchWithHanamiSearchV1 === true && searchMode.value === 'v1') {
