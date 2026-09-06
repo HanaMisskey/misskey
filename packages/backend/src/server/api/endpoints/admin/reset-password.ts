@@ -9,6 +9,7 @@ import { Endpoint } from '@/server/api/endpoint-base.js';
 import { ApiError } from '@/server/api/error.js';
 import type { UsersRepository, UserProfilesRepository, MiMeta } from '@/models/_.js';
 import { DI } from '@/di-symbols.js';
+import { ApiError } from '@/server/api/error.js';
 import { secureRndstr } from '@/misc/secure-rndstr.js';
 import { RoleService } from '@/core/RoleService.js';
 import { ModerationLogService } from '@/core/ModerationLogService.js';
