@@ -245,6 +245,7 @@ fulltextSearch:
 #  host: hanamisearch
 #  port: 7700
 #  apiKey: ''
+#  cursorEncryptionKey: ''
 #  ssl: true
 #  index: ''
 

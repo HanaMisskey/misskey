@@ -8283,6 +8283,10 @@ export interface Locale extends ILocale {
              */
             "canSearchWithHanamiSearchV1": string;
             /**
+             * HanamiSearch v2 βの利用
+             */
+            "canSearchWithHanamiSearchV2": string;
+            /**
              * ユーザー検索の利用
              */
             "canSearchUsers": string;
@@ -13523,6 +13527,10 @@ export interface Locale extends ILocale {
              * 精度が大幅改善 / 演算子などで高度な検索が可能
              */
             "v1Description": string;
+            /**
+             * v1の機能＋類義語考慮でもっと見つけやすく
+             */
+            "v2Description": string;
         };
         "_willBeMergedToUpstream": {
             /**

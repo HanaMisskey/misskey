@@ -73,6 +73,7 @@ import { UtilityService } from './UtilityService.js';
 import { FileInfoService } from './FileInfoService.js';
 import { SearchService } from './SearchService.js';
 import { HanamiSearchService } from './hanamisearch/HanamiSearchService.js';
+import { HanamiSearchV2Service } from './hanamisearch/HanamiSearchV2Service.js';
 import { ClipService } from './ClipService.js';
 import { FeaturedService } from './FeaturedService.js';
 import { FanoutTimelineService } from './FanoutTimelineService.js';
@@ -223,6 +224,7 @@ const $FileInfoService: Provider = { provide: 'FileInfoService', useExisting: Fi
 const $FlashService: Provider = { provide: 'FlashService', useExisting: FlashService };
 const $SearchService: Provider = { provide: 'SearchService', useExisting: SearchService };
 const $HanamiSearchService: Provider = { provide: 'HanamiSearchService', useExisting: HanamiSearchService };
+const $HanamiSearchV2Service: Provider = { provide: 'HanamiSearchV2Service', useExisting: HanamiSearchV2Service };
 const $ClipService: Provider = { provide: 'ClipService', useExisting: ClipService };
 const $FeaturedService: Provider = { provide: 'FeaturedService', useExisting: FeaturedService };
 const $FanoutTimelineService: Provider = { provide: 'FanoutTimelineService', useExisting: FanoutTimelineService };
@@ -378,6 +380,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		FlashService,
 		SearchService,
 		HanamiSearchService,
+		HanamiSearchV2Service,
 		ClipService,
 		FeaturedService,
 		FanoutTimelineService,
@@ -529,6 +532,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$FlashService,
 		$SearchService,
 		$HanamiSearchService,
+		$HanamiSearchV2Service,
 		$ClipService,
 		$FeaturedService,
 		$FanoutTimelineService,
@@ -681,6 +685,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		FlashService,
 		SearchService,
 		HanamiSearchService,
+		HanamiSearchV2Service,
 		ClipService,
 		FeaturedService,
 		FanoutTimelineService,
@@ -830,6 +835,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$FileInfoService,
 		$SearchService,
 		$HanamiSearchService,
+		$HanamiSearchV2Service,
 		$ClipService,
 		$FeaturedService,
 		$FanoutTimelineService,

@@ -517,6 +517,8 @@ import type {
 	NotesHanamiTimelineResponse,
 	NotesHanamisearchV1Request,
 	NotesHanamisearchV1Response,
+	NotesHanamisearchV2Request,
+	NotesHanamisearchV2Response,
 	NotesHybridTimelineRequest,
 	NotesHybridTimelineResponse,
 	NotesLocalTimelineRequest,
@@ -1005,6 +1007,7 @@ export type Endpoints = {
 	'notes/global-timeline': { req: NotesGlobalTimelineRequest; res: NotesGlobalTimelineResponse };
 	'notes/hanami-timeline': { req: NotesHanamiTimelineRequest; res: NotesHanamiTimelineResponse };
 	'notes/hanamisearch-v1': { req: NotesHanamisearchV1Request; res: NotesHanamisearchV1Response };
+	'notes/hanamisearch-v2': { req: NotesHanamisearchV2Request; res: NotesHanamisearchV2Response };
 	'notes/hybrid-timeline': { req: NotesHybridTimelineRequest; res: NotesHybridTimelineResponse };
 	'notes/local-timeline': { req: NotesLocalTimelineRequest; res: NotesLocalTimelineResponse };
 	'notes/mentions': { req: NotesMentionsRequest; res: NotesMentionsResponse };

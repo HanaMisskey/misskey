@@ -14,6 +14,10 @@ export const notesSearchAvailable = (
 	false
 ) as boolean;
 
+export const hanamiSearchAvailable = notesSearchAvailable || (
+	$i != null && ($i.policies.canSearchWithHanamiSearchV1 === true || $i.policies.canSearchWithHanamiSearchV2 === true)
+);
+
 export const canSearchNonLocalNotes = (
 	instance.noteSearchableScope === 'global'
 );

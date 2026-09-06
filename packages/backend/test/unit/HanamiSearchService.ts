@@ -1,6 +1,20 @@
-import { describe, expect, test } from '@jest/globals';
-import { buildHanamiSearchDocument } from '@/core/hanamisearch/HanamiSearchService.js';
+import { describe, expect, jest, test } from '@jest/globals';
+import { buildHanamiSearchDocument, HanamiSearchService } from '@/core/hanamisearch/HanamiSearchService.js';
 import { MiNote } from '@/models/Note.js';
+
+/** Oracle: the v2 cursor key is not a prerequisite for v1; existing v1 requests must still reach the search client with missing or invalid key configuration. This unit checks service construction and routing without requiring a database. */
+test.each([undefined, '', 'invalid'])('HanamiSearch v1 searches with cursor encryption key %p', async (cursorEncryptionKey) => {
+	const search = jest.fn<(...args: unknown[]) => Promise<unknown>>().mockResolvedValue({ hits: [] });
+	const dependencies = [
+		{ hanamisearch: { index: 'notes', apiKey: 'test-api-key', cursorEncryptionKey } },
+		{ index: () => ({ updateSettings: jest.fn(), search }) },
+		{}, {}, {}, {}, {}, {},
+	] as unknown as ConstructorParameters<typeof HanamiSearchService>;
+	const service = new HanamiSearchService(...dependencies);
+	await expect(service.searchNote('花', null, { preferredMethod: 'hanamisearchv1' }, { limit: 1 })).resolves.toEqual([]);
+	expect(search).toHaveBeenCalledTimes(1);
+	expect(search).toHaveBeenCalledWith('花', expect.objectContaining({ limit: 1 }));
+});
 
 function note(over: Partial<MiNote> = {}): MiNote {
 	return {
