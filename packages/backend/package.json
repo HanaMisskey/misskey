@@ -85,7 +85,7 @@
 		"@misskey-dev/summaly": "5.2.5",
 		"@napi-rs/canvas": "0.1.88",
 		"@nestjs/common": "11.1.12",
-		"@nestjs/core": "11.1.12",
+		"@nestjs/core": "11.1.18",
 		"@nestjs/testing": "11.1.12",
 		"@peertube/http-signature": "1.7.0",
 		"@sentry/node": "10.34.0",
