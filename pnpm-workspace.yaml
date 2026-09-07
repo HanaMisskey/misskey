@@ -34,3 +34,5 @@ minimumReleaseAge: 10080 # delay 7days to mitigate supply-chain attack
 minimumReleaseAgeExclude:
   - '@syuilo/aiscript'
   - '@fastify/express'
+  # Renovate security update: tar@7.5.21
+  - tar@7.5.21
