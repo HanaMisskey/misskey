@@ -225,8 +225,9 @@ export class ApiCallService implements OnApplicationShutdown {
 				reply.code(400);
 				return;
 			}
-			this.authenticateService.authenticate(token).then(([user, app]) => {
-				this.call(endpoint, user, app, fields, {
+			// Keep the temporary file until authentication and endpoint execution finish.
+			await this.authenticateService.authenticate(token).then(async ([user, app]) => {
+				await this.call(endpoint, user, app, fields, {
 					name: multipartData.filename,
 					path: path,
 				}, request).then((res) => {
