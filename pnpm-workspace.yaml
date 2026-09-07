@@ -34,3 +34,5 @@ minimumReleaseAge: 10080 # delay 7days to mitigate supply-chain attack
 minimumReleaseAgeExclude:
   - '@syuilo/aiscript'
   - '@fastify/express'
+  # Renovate security update: body-parser@1.20.6
+  - body-parser@1.20.6
