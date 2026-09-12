@@ -19,6 +19,7 @@ import type { MiAccessToken } from '@/models/AccessToken.js';
 import type { MiUser } from '@/models/User.js';
 import { MainChannel } from '@/server/api/stream/channels/main.js';
 import { HomeTimelineChannel } from '@/server/api/stream/channels/home-timeline.js';
+import { HanamiTimelineChannel } from '@/server/api/stream/channels/hanami-timeline.js';
 import { LocalTimelineChannel } from '@/server/api/stream/channels/local-timeline.js';
 import { HybridTimelineChannel } from '@/server/api/stream/channels/hybrid-timeline.js';
 import { GlobalTimelineChannel } from '@/server/api/stream/channels/global-timeline.js';
@@ -330,6 +331,7 @@ export default class Connection {
 		switch (name) {
 			case 'main': return MainChannel;
 			case 'homeTimeline': return HomeTimelineChannel;
+			case 'hanamiTimeline': return HanamiTimelineChannel;
 			case 'localTimeline': return LocalTimelineChannel;
 			case 'hybridTimeline': return HybridTimelineChannel;
 			case 'globalTimeline': return GlobalTimelineChannel;
