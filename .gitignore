@@ -35,6 +35,8 @@ coverage
 !/.config/docker_example.yml
 !/.config/docker_example.env
 !/.config/playwright-devcontainer.yml
+!/.config/sensitive-detector.env.example
+!/.config/sensitive-detector.mjs
 docker-compose.yml
 /compose.yml
 .devcontainer/compose.yml
