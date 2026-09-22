@@ -18,6 +18,7 @@ services:
     networks:
       - internal_network
       - external_network
+#      - sensitive_detector_network
     # env_file:
     #   - .config/docker.env
     volumes:
@@ -52,6 +53,35 @@ services:
       test: "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"
       interval: 5s
       retries: 20
+
+#  sensitive-detector:
+#    image: kanarikanaru/sensitive-detector:main-0.0.2-hanami.26-afa0a9e@sha256:f47d2c81daa87c4b9f10d64981209b4147b95d335014580de0c48f33d27b4f7c
+#    restart: unless-stopped
+#    env_file:
+#      - .config/sensitive-detector.env
+#    networks:
+#      sensitive_detector_network:
+#        ipv4_address: 10.253.255.2
+#    volumes:
+#      - ./.config/sensitive-detector.mjs:/config/config.mjs:ro
+#    deploy:
+#      resources:
+#        limits:
+#          memory: 2g
+#        reservations:
+#          memory: 512m
+#    security_opt:
+#      - no-new-privileges:true
+#    cap_drop:
+#      - ALL
+#    read_only: true
+#    tmpfs:
+#      - /tmp
+#    logging:
+#      driver: json-file
+#      options:
+#        max-size: "10m"
+#        max-file: "3"
 
 #  mcaptcha:
 #    restart: always
@@ -113,3 +143,9 @@ networks:
   internal_network:
     internal: true
   external_network:
+#  sensitive_detector_network:
+#    internal: true
+#    ipam:
+#      config:
+#        - subnet: 10.253.255.0/29
+#          ip_range: 10.253.255.4/30
