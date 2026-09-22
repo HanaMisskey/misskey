@@ -109,6 +109,7 @@ export class SensitiveMediaDetectionService {
 		}
 
 		const apiKey = this.meta.sensitiveMediaDetectionApiKey;
+		const useProxy = this.meta.sensitiveMediaDetectionUseProxy ?? true;
 		const timeout = this.meta.sensitiveMediaDetectionTimeout;
 		const chunkSize = Math.max(1, this.meta.sensitiveMediaDetectionMaxImagesPerRequest);
 
@@ -124,13 +125,13 @@ export class SensitiveMediaDetectionService {
 		const results: (Prediction[] | null)[] = [];
 		for (let i = 0; i < sources.length; i += chunkSize) {
 			const chunk = sources.slice(i, i + chunkSize);
-			results.push(...await this.detectChunk(url, apiKey, timeout, chunk));
+			results.push(...await this.detectChunk(url, apiKey, useProxy, timeout, chunk));
 		}
 		return results;
 	}
 
 	@bindThis
-	private async detectChunk(url: string, apiKey: string | null, timeout: number, chunk: Buffer[]): Promise<(Prediction[] | null)[]> {
+	private async detectChunk(url: string, apiKey: string | null, useProxy: boolean, timeout: number, chunk: Buffer[]): Promise<(Prediction[] | null)[]> {
 		try {
 			const form = new FormData();
 			for (let i = 0; i < chunk.length; i++) {
@@ -150,6 +151,8 @@ export class SensitiveMediaDetectionService {
 				headers,
 				body: form,
 				timeout,
+				bypassProxy: !useProxy,
+				isLocalAddressAllowed: true,
 			}, {
 				throwErrorWhenResponseNotOk: false,
 			});

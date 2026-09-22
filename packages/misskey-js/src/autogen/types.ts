@@ -9523,6 +9523,7 @@ export interface operations {
                         enableSensitiveMediaDetectionForVideos: boolean;
                         sensitiveMediaDetectionApiUrl: string | null;
                         sensitiveMediaDetectionApiKey: string | null;
+                        sensitiveMediaDetectionUseProxy: boolean | null;
                         sensitiveMediaDetectionTimeout: number;
                         sensitiveMediaDetectionMaxImagesPerRequest: number;
                         /** Format: id */
@@ -13052,6 +13053,7 @@ export interface operations {
                     enableSensitiveMediaDetectionForVideos?: boolean;
                     sensitiveMediaDetectionApiUrl?: string | null;
                     sensitiveMediaDetectionApiKey?: string | null;
+                    sensitiveMediaDetectionUseProxy?: boolean | null;
                     sensitiveMediaDetectionTimeout?: number;
                     sensitiveMediaDetectionMaxImagesPerRequest?: number;
                     maintainerName?: string | null;

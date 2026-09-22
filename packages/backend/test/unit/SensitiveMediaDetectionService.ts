@@ -16,6 +16,7 @@ const DEFAULT_META = {
 	sensitiveMediaDetectionApiKey: null as string | null,
 	sensitiveMediaDetectionTimeout: 5000,
 	sensitiveMediaDetectionMaxImagesPerRequest: 4,
+	sensitiveMediaDetectionUseProxy: null as boolean | null,
 };
 
 function makeService(metaOverrides: Partial<typeof DEFAULT_META> = {}): SensitiveMediaDetectionService {
@@ -80,9 +81,25 @@ describe('SensitiveMediaDetectionService', () => {
 			headers: {},
 			body: expect.any(FormData),
 			timeout: 5000,
+			bypassProxy: false,
+			isLocalAddressAllowed: true,
 		}, {
 			throwErrorWhenResponseNotOk: false,
 		});
+	});
+
+	/**
+	 * Oracle: S3 と同じ管理者指定サービスの通信契約。未指定は既存 Proxy 経路を維持し、
+	 * 明示した false のときだけ Proxy を回避する。内部 Service のアドレスは許可する。
+	 */
+	test.each([
+		{ useProxy: null, bypassProxy: false },
+		{ useProxy: true, bypassProxy: false },
+		{ useProxy: false, bypassProxy: true },
+	])('Proxy 設定 $useProxy で管理者の接続方式を採用する', async ({ useProxy, bypassProxy }) => {
+		sendMock.mockResolvedValue(okResponse([{ success: true, predictions: prediction() }]));
+		await makeService({ sensitiveMediaDetectionUseProxy: useProxy }).detectSensitive(buf('a'));
+		expect(sendMock.mock.calls[0][1]).toMatchObject({ bypassProxy, isLocalAddressAllowed: true });
 	});
 
 	test('detectSensitive: 単一画像はバッチの先頭を返す', async () => {

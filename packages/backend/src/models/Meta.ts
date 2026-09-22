@@ -307,6 +307,11 @@ export class MiMeta {
 	})
 	public sensitiveMediaDetectionApiKey: string | null;
 
+	@Column('boolean', {
+		nullable: true,
+	})
+	public sensitiveMediaDetectionUseProxy: boolean | null;
+
 	@Column('integer', {
 		default: 60000,
 	})

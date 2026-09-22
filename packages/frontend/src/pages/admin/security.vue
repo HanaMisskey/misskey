@@ -53,6 +53,20 @@ SPDX-License-Identifier: AGPL-3.0-only
 								</MkInput>
 							</SearchMarker>
 
+							<SearchMarker :keywords="['proxy', 'sensitive']">
+								<MkSelect
+									v-model="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionUseProxy"
+									:items="[
+										{ value: 'default', label: i18n.ts._sensitiveMediaDetection.useDefaultProxy },
+										{ value: 'on', label: i18n.ts.enabled },
+										{ value: 'off', label: i18n.ts.disabled },
+									]"
+								>
+									<template #label><SearchLabel>{{ i18n.ts._sensitiveMediaDetection.useProxy }}</SearchLabel></template>
+									<template #caption><SearchText>{{ i18n.ts._sensitiveMediaDetection.useProxyDescription }}</SearchText></template>
+								</MkSelect>
+							</SearchMarker>
+
 							<SearchMarker :keywords="['timeout', 'sensitive']">
 								<MkInput v-model="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionTimeout" type="number" :min="1">
 									<template #label><SearchLabel>{{ i18n.ts._sensitiveMediaDetection.timeout }}</SearchLabel></template>
@@ -200,6 +214,7 @@ import MkRadios from '@/components/MkRadios.vue';
 import MkSwitch from '@/components/MkSwitch.vue';
 import MkRange from '@/components/MkRange.vue';
 import MkInput from '@/components/MkInput.vue';
+import MkSelect from '@/components/MkSelect.vue';
 import MkTextarea from '@/components/MkTextarea.vue';
 import MkInfo from '@/components/MkInfo.vue';
 import * as os from '@/os.js';
@@ -223,6 +238,7 @@ const sensitiveMediaDetectionForm = useForm({
 	enableSensitiveMediaDetectionForVideos: meta.enableSensitiveMediaDetectionForVideos,
 	sensitiveMediaDetectionApiUrl: meta.sensitiveMediaDetectionApiUrl,
 	sensitiveMediaDetectionApiKey: meta.sensitiveMediaDetectionApiKey,
+	sensitiveMediaDetectionUseProxy: meta.sensitiveMediaDetectionUseProxy == null ? 'default' as const : meta.sensitiveMediaDetectionUseProxy ? 'on' as const : 'off' as const,
 	sensitiveMediaDetectionTimeout: meta.sensitiveMediaDetectionTimeout,
 	sensitiveMediaDetectionMaxImagesPerRequest: meta.sensitiveMediaDetectionMaxImagesPerRequest,
 }, async (state) => {
@@ -239,6 +255,7 @@ const sensitiveMediaDetectionForm = useForm({
 		enableSensitiveMediaDetectionForVideos: state.enableSensitiveMediaDetectionForVideos,
 		sensitiveMediaDetectionApiUrl: state.sensitiveMediaDetectionApiUrl,
 		sensitiveMediaDetectionApiKey: state.sensitiveMediaDetectionApiKey,
+		sensitiveMediaDetectionUseProxy: state.sensitiveMediaDetectionUseProxy === 'default' ? null : state.sensitiveMediaDetectionUseProxy === 'on',
 		sensitiveMediaDetectionTimeout: state.sensitiveMediaDetectionTimeout,
 		sensitiveMediaDetectionMaxImagesPerRequest: state.sensitiveMediaDetectionMaxImagesPerRequest,
 	});
