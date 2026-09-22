@@ -313,14 +313,14 @@ export class MiMeta {
 	public sensitiveMediaDetectionUseProxy: boolean | null;
 
 	@Column('integer', {
-		default: 60000,
+		nullable: true,
 	})
-	public sensitiveMediaDetectionTimeout: number;
+	public sensitiveMediaDetectionTimeout: number | null;
 
 	@Column('integer', {
-		default: 4,
+		nullable: true,
 	})
-	public sensitiveMediaDetectionMaxImagesPerRequest: number;
+	public sensitiveMediaDetectionMaxImagesPerRequest: number | null;
 
 	@Column('boolean', {
 		default: false,

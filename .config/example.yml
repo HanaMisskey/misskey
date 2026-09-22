@@ -413,6 +413,17 @@ proxyBypassHosts:
 #   https://example.com/thumbnail.webp?thumbnail=1&url=https%3A%2F%2Fstorage.example.com%2Fpath%2Fto%2Fvideo.mp4
 #videoThumbnailGenerator: https://example.com
 
+# Sensitive media detection service
+# Values saved in the control panel override these defaults for each setting.
+# Omitted settings use no URL, no authentication, useProxy: true, timeout: 60000,
+# and maxImagesPerRequest: 4. Restart Misskey after changing this file.
+#sensitiveMediaDetection:
+#  apiUrl: http://sensitive-detector:3009
+#  apiKey: your-api-key
+#  useProxy: false
+#  timeout: 60000
+#  maxImagesPerRequest: 4
+
 # For security reasons, uploading attachments from the intranet is prohibited,
 # but exceptions can be made from the following settings. Default value is "undefined".
 # Read changelog to learn more (Improvements of 12.90.0 (2021/09/04)).

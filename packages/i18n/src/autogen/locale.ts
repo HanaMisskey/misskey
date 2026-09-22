@@ -8542,7 +8542,7 @@ export interface Locale extends ILocale {
          */
         "apiUrl": string;
         /**
-         * sensitive-detector サービスのベースURL (例: http://localhost:3009)。プライベートネットワーク上のサービスにも接続できます。直接接続する場合は「Proxyを利用する」を無効にしてください。空欄の場合、センシティブ判定は行われません。
+         * sensitive-detector サービスのベースURL (例: http://localhost:3009)。プライベートネットワーク上のサービスにも接続できます。直接接続する場合は「Proxyを利用する」を無効にしてください。サーバー設定にも接続先がない場合、センシティブ判定は行われません。
          */
         "apiUrlDescription": string;
         /**
@@ -8550,7 +8550,7 @@ export interface Locale extends ILocale {
          */
         "apiKey": string;
         /**
-         * 判定サービス側で認証 (Bearerトークン) を設定している場合に入力します。設定していない場合は空欄のままにしてください。
+         * 判定サービス側の認証 (Bearerトークン) に使用します。「サーバー設定を使用」は設定ファイルのキーを使用します。「認証なし」は設定ファイルにキーがあっても送信しません。
          */
         "apiKeyDescription": string;
         /**
@@ -8558,9 +8558,21 @@ export interface Locale extends ILocale {
          */
         "useProxy": string;
         /**
-         * 既定値を使用（有効）
+         * サーバー設定を使用
          */
-        "useDefaultProxy": string;
+        "useServerSetting": string;
+        /**
+         * キーを指定
+         */
+        "specifyApiKey": string;
+        /**
+         * 認証なし
+         */
+        "noAuthentication": string;
+        /**
+         * サーバー設定は {value} です。未指定の場合に使用します。
+         */
+        "serverSettingDescription": ParameterizedString<"value">;
         /**
          * 有効の場合はサーバーのProxy設定と除外設定に従います。無効の場合は判定サービスへ直接接続します。
          */

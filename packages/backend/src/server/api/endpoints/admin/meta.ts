@@ -10,6 +10,7 @@ import type { Config } from '@/config.js';
 import { DI } from '@/di-symbols.js';
 import { DEFAULT_POLICIES } from '@/core/RoleService.js';
 import { SystemAccountService } from '@/core/SystemAccountService.js';
+import { resolveSensitiveMediaDetectionConfig } from '@/misc/sensitive-media-detection-config.js';
 
 export const meta = {
 	tags: ['meta'],
@@ -256,11 +257,33 @@ export const meta = {
 			},
 			sensitiveMediaDetectionTimeout: {
 				type: 'number',
-				optional: false, nullable: false,
+				optional: false, nullable: true,
 			},
 			sensitiveMediaDetectionMaxImagesPerRequest: {
 				type: 'number',
+				optional: false, nullable: true,
+			},
+			sensitiveMediaDetectionDefaults: {
+				type: 'object',
 				optional: false, nullable: false,
+				properties: {
+					apiUrl: {
+						type: 'string',
+						optional: false, nullable: true,
+					},
+					useProxy: {
+						type: 'boolean',
+						optional: false, nullable: false,
+					},
+					timeout: {
+						type: 'number',
+						optional: false, nullable: false,
+					},
+					maxImagesPerRequest: {
+						type: 'number',
+						optional: false, nullable: false,
+					},
+				},
 			},
 			proxyAccountId: {
 				type: 'string',
@@ -650,6 +673,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 	) {
 		super(meta, paramDef, async () => {
 			const instance = await this.metaService.fetch(true);
+			const { apiUrl, useProxy, timeout, maxImagesPerRequest } = resolveSensitiveMediaDetectionConfig(this.config.sensitiveMediaDetection);
 
 			const proxy = await this.systemAccountService.fetch('proxy');
 
@@ -724,6 +748,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				sensitiveMediaDetectionUseProxy: instance.sensitiveMediaDetectionUseProxy,
 				sensitiveMediaDetectionTimeout: instance.sensitiveMediaDetectionTimeout,
 				sensitiveMediaDetectionMaxImagesPerRequest: instance.sensitiveMediaDetectionMaxImagesPerRequest,
+				sensitiveMediaDetectionDefaults: { apiUrl, useProxy, timeout, maxImagesPerRequest },
 				proxyAccountId: proxy.id,
 				email: instance.email,
 				smtpSecure: instance.smtpSecure,

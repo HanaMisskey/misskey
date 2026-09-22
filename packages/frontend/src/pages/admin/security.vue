@@ -19,7 +19,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 						<template v-else-if="sensitiveMediaDetectionForm.savedState.sensitiveMediaDetection === 'remote'" #suffix>{{ i18n.ts.remoteOnly }}</template>
 						<template v-else #suffix>{{ i18n.ts.none }}</template>
 						<template v-if="sensitiveMediaDetectionForm.modified.value" #footer>
-							<MkFormFooter :form="sensitiveMediaDetectionForm"/>
+							<MkFormFooter :form="sensitiveMediaDetectionForm" :canSaving="canSaveSensitiveMediaDetection"/>
 						</template>
 
 						<div class="_gaps_m">
@@ -41,15 +41,28 @@ SPDX-License-Identifier: AGPL-3.0-only
 							<SearchMarker :keywords="['api', 'url', 'endpoint', 'sensitive']">
 								<MkInput v-model="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionApiUrl" type="url">
 									<template #label><SearchLabel>{{ i18n.ts._sensitiveMediaDetection.apiUrl }}</SearchLabel></template>
-									<template #caption><SearchText>{{ i18n.ts._sensitiveMediaDetection.apiUrlDescription }}</SearchText></template>
+									<template #caption>
+										<SearchText>{{ i18n.ts._sensitiveMediaDetection.apiUrlDescription }}</SearchText><br>
+										<SearchText>{{ i18n.tsx._sensitiveMediaDetection.serverSettingDescription({ value: meta.sensitiveMediaDetectionDefaults.apiUrl ?? i18n.ts.notSet }) }}</SearchText>
+									</template>
 								</MkInput>
 							</SearchMarker>
 
 							<SearchMarker :keywords="['api', 'key', 'token', 'sensitive']">
-								<MkInput v-model="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionApiKey" type="password" autocomplete="new-password">
-									<template #prefix><i class="ti ti-key"></i></template>
+								<MkSelect
+									v-model="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionApiKeyMode"
+									:items="[
+										{ value: 'inherit', label: i18n.ts._sensitiveMediaDetection.useServerSetting },
+										{ value: 'custom', label: i18n.ts._sensitiveMediaDetection.specifyApiKey },
+										{ value: 'none', label: i18n.ts._sensitiveMediaDetection.noAuthentication },
+									]"
+								>
 									<template #label><SearchLabel>{{ i18n.ts._sensitiveMediaDetection.apiKey }}</SearchLabel></template>
 									<template #caption><SearchText>{{ i18n.ts._sensitiveMediaDetection.apiKeyDescription }}</SearchText></template>
+								</MkSelect>
+								<MkInput v-if="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionApiKeyMode === 'custom'" v-model="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionApiKey" type="password" autocomplete="new-password" required>
+									<template #prefix><i class="ti ti-key"></i></template>
+									<template #label><SearchLabel>{{ i18n.ts._sensitiveMediaDetection.specifyApiKey }}</SearchLabel></template>
 								</MkInput>
 							</SearchMarker>
 
@@ -57,27 +70,43 @@ SPDX-License-Identifier: AGPL-3.0-only
 								<MkSelect
 									v-model="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionUseProxy"
 									:items="[
-										{ value: 'default', label: i18n.ts._sensitiveMediaDetection.useDefaultProxy },
+										{ value: 'default', label: i18n.ts._sensitiveMediaDetection.useServerSetting },
 										{ value: 'on', label: i18n.ts.enabled },
 										{ value: 'off', label: i18n.ts.disabled },
 									]"
 								>
 									<template #label><SearchLabel>{{ i18n.ts._sensitiveMediaDetection.useProxy }}</SearchLabel></template>
-									<template #caption><SearchText>{{ i18n.ts._sensitiveMediaDetection.useProxyDescription }}</SearchText></template>
+									<template #caption>
+										<SearchText>{{ i18n.ts._sensitiveMediaDetection.useProxyDescription }}</SearchText><br>
+										<SearchText>{{ i18n.tsx._sensitiveMediaDetection.serverSettingDescription({ value: meta.sensitiveMediaDetectionDefaults.useProxy ? i18n.ts.enabled : i18n.ts.disabled }) }}</SearchText>
+									</template>
 								</MkSelect>
 							</SearchMarker>
 
 							<SearchMarker :keywords="['timeout', 'sensitive']">
-								<MkInput v-model="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionTimeout" type="number" :min="1">
+								<!-- MkInput に null を戻すと 0 が再通知されるため、継承中の空欄は NaN で渡す。 -->
+								<MkInput
+									:modelValue="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionTimeout ?? Number.NaN" type="number" :min="1" :max="2147483647" :step="1"
+									@update:modelValue="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionTimeout = Number.isNaN($event) ? null : $event"
+								>
 									<template #label><SearchLabel>{{ i18n.ts._sensitiveMediaDetection.timeout }}</SearchLabel></template>
-									<template #caption><SearchText>{{ i18n.ts._sensitiveMediaDetection.timeoutDescription }}</SearchText></template>
+									<template #caption>
+										<SearchText>{{ i18n.ts._sensitiveMediaDetection.timeoutDescription }}</SearchText><br>
+										<SearchText>{{ i18n.tsx._sensitiveMediaDetection.serverSettingDescription({ value: `${meta.sensitiveMediaDetectionDefaults.timeout}ms` }) }}</SearchText>
+									</template>
 								</MkInput>
 							</SearchMarker>
 
 							<SearchMarker :keywords="['max', 'images', 'chunk', 'sensitive']">
-								<MkInput v-model="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionMaxImagesPerRequest" type="number" :min="1">
+								<MkInput
+									:modelValue="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionMaxImagesPerRequest ?? Number.NaN" type="number" :min="1" :max="2147483647" :step="1"
+									@update:modelValue="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionMaxImagesPerRequest = Number.isNaN($event) ? null : $event"
+								>
 									<template #label><SearchLabel>{{ i18n.ts._sensitiveMediaDetection.maxImagesPerRequest }}</SearchLabel></template>
-									<template #caption><SearchText>{{ i18n.ts._sensitiveMediaDetection.maxImagesPerRequestDescription }}</SearchText></template>
+									<template #caption>
+										<SearchText>{{ i18n.ts._sensitiveMediaDetection.maxImagesPerRequestDescription }}</SearchText><br>
+										<SearchText>{{ i18n.tsx._sensitiveMediaDetection.serverSettingDescription({ value: meta.sensitiveMediaDetectionDefaults.maxImagesPerRequest }) }}</SearchText>
+									</template>
 								</MkInput>
 							</SearchMarker>
 
@@ -237,7 +266,8 @@ const sensitiveMediaDetectionForm = useForm({
 	setSensitiveFlagAutomatically: meta.setSensitiveFlagAutomatically,
 	enableSensitiveMediaDetectionForVideos: meta.enableSensitiveMediaDetectionForVideos,
 	sensitiveMediaDetectionApiUrl: meta.sensitiveMediaDetectionApiUrl,
-	sensitiveMediaDetectionApiKey: meta.sensitiveMediaDetectionApiKey,
+	sensitiveMediaDetectionApiKey: meta.sensitiveMediaDetectionApiKey ?? '',
+	sensitiveMediaDetectionApiKeyMode: meta.sensitiveMediaDetectionApiKey == null ? 'inherit' as const : meta.sensitiveMediaDetectionApiKey === '' ? 'none' as const : 'custom' as const,
 	sensitiveMediaDetectionUseProxy: meta.sensitiveMediaDetectionUseProxy == null ? 'default' as const : meta.sensitiveMediaDetectionUseProxy ? 'on' as const : 'off' as const,
 	sensitiveMediaDetectionTimeout: meta.sensitiveMediaDetectionTimeout,
 	sensitiveMediaDetectionMaxImagesPerRequest: meta.sensitiveMediaDetectionMaxImagesPerRequest,
@@ -254,12 +284,19 @@ const sensitiveMediaDetectionForm = useForm({
 		setSensitiveFlagAutomatically: state.setSensitiveFlagAutomatically,
 		enableSensitiveMediaDetectionForVideos: state.enableSensitiveMediaDetectionForVideos,
 		sensitiveMediaDetectionApiUrl: state.sensitiveMediaDetectionApiUrl,
-		sensitiveMediaDetectionApiKey: state.sensitiveMediaDetectionApiKey,
+		sensitiveMediaDetectionApiKey: state.sensitiveMediaDetectionApiKeyMode === 'inherit' ? null : state.sensitiveMediaDetectionApiKeyMode === 'none' ? '' : state.sensitiveMediaDetectionApiKey,
 		sensitiveMediaDetectionUseProxy: state.sensitiveMediaDetectionUseProxy === 'default' ? null : state.sensitiveMediaDetectionUseProxy === 'on',
 		sensitiveMediaDetectionTimeout: state.sensitiveMediaDetectionTimeout,
 		sensitiveMediaDetectionMaxImagesPerRequest: state.sensitiveMediaDetectionMaxImagesPerRequest,
 	});
 	fetchInstance(true);
+});
+
+const canSaveSensitiveMediaDetection = computed(() => {
+	const state = sensitiveMediaDetectionForm.state;
+	return (state.sensitiveMediaDetectionApiKeyMode !== 'custom' || state.sensitiveMediaDetectionApiKey !== '') &&
+		[state.sensitiveMediaDetectionTimeout, state.sensitiveMediaDetectionMaxImagesPerRequest]
+			.every(value => value == null || (Number.isInteger(value) && value >= 1 && value <= 2147483647));
 });
 
 const ipLoggingForm = useForm({
