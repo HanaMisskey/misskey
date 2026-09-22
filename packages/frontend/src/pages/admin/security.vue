@@ -42,8 +42,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 								<MkInput v-model="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionApiUrl" type="url">
 									<template #label><SearchLabel>{{ i18n.ts._sensitiveMediaDetection.apiUrl }}</SearchLabel></template>
 									<template #caption>
-										<SearchText>{{ i18n.ts._sensitiveMediaDetection.apiUrlDescription }}</SearchText><br>
-										<SearchText>{{ i18n.tsx._sensitiveMediaDetection.serverSettingDescription({ value: meta.sensitiveMediaDetectionDefaults.apiUrl ?? i18n.ts.notSet }) }}</SearchText>
+										<SearchText>{{ i18n.ts._sensitiveMediaDetection.apiUrlDescription }}</SearchText>
+										<div>{{ i18n.tsx._sensitiveMediaDetection.serverSettingDescription({ value: meta.sensitiveMediaDetectionDefaults.apiUrl ?? i18n.ts.notSet }) }}</div>
 									</template>
 								</MkInput>
 							</SearchMarker>
@@ -77,22 +77,22 @@ SPDX-License-Identifier: AGPL-3.0-only
 								>
 									<template #label><SearchLabel>{{ i18n.ts._sensitiveMediaDetection.useProxy }}</SearchLabel></template>
 									<template #caption>
-										<SearchText>{{ i18n.ts._sensitiveMediaDetection.useProxyDescription }}</SearchText><br>
-										<SearchText>{{ i18n.tsx._sensitiveMediaDetection.serverSettingDescription({ value: meta.sensitiveMediaDetectionDefaults.useProxy ? i18n.ts.enabled : i18n.ts.disabled }) }}</SearchText>
+										<SearchText>{{ i18n.ts._sensitiveMediaDetection.useProxyDescription }}</SearchText>
+										<div>{{ i18n.tsx._sensitiveMediaDetection.serverSettingDescription({ value: meta.sensitiveMediaDetectionDefaults.useProxy ? i18n.ts.enabled : i18n.ts.disabled }) }}</div>
 									</template>
 								</MkSelect>
 							</SearchMarker>
 
+							<!-- MkInput に null を戻すと 0 が再通知されるため、継承中の空欄は NaN で渡す。 -->
 							<SearchMarker :keywords="['timeout', 'sensitive']">
-								<!-- MkInput に null を戻すと 0 が再通知されるため、継承中の空欄は NaN で渡す。 -->
 								<MkInput
 									:modelValue="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionTimeout ?? Number.NaN" type="number" :min="1" :max="2147483647" :step="1"
 									@update:modelValue="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionTimeout = Number.isNaN($event) ? null : $event"
 								>
 									<template #label><SearchLabel>{{ i18n.ts._sensitiveMediaDetection.timeout }}</SearchLabel></template>
 									<template #caption>
-										<SearchText>{{ i18n.ts._sensitiveMediaDetection.timeoutDescription }}</SearchText><br>
-										<SearchText>{{ i18n.tsx._sensitiveMediaDetection.serverSettingDescription({ value: `${meta.sensitiveMediaDetectionDefaults.timeout}ms` }) }}</SearchText>
+										<SearchText>{{ i18n.ts._sensitiveMediaDetection.timeoutDescription }}</SearchText>
+										<div>{{ i18n.tsx._sensitiveMediaDetection.serverSettingDescription({ value: `${meta.sensitiveMediaDetectionDefaults.timeout}ms` }) }}</div>
 									</template>
 								</MkInput>
 							</SearchMarker>
@@ -104,8 +104,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 								>
 									<template #label><SearchLabel>{{ i18n.ts._sensitiveMediaDetection.maxImagesPerRequest }}</SearchLabel></template>
 									<template #caption>
-										<SearchText>{{ i18n.ts._sensitiveMediaDetection.maxImagesPerRequestDescription }}</SearchText><br>
-										<SearchText>{{ i18n.tsx._sensitiveMediaDetection.serverSettingDescription({ value: meta.sensitiveMediaDetectionDefaults.maxImagesPerRequest }) }}</SearchText>
+										<SearchText>{{ i18n.ts._sensitiveMediaDetection.maxImagesPerRequestDescription }}</SearchText>
+										<div>{{ i18n.tsx._sensitiveMediaDetection.serverSettingDescription({ value: meta.sensitiveMediaDetectionDefaults.maxImagesPerRequest }) }}</div>
 									</template>
 								</MkInput>
 							</SearchMarker>
