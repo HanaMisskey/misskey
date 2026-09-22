@@ -34,7 +34,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Set up Homebrew
-        uses: Homebrew/actions/setup-homebrew@master
+        uses: Homebrew/actions/setup-homebrew@main
       - name: Install jaq
         env:
           HOMEBREW_NO_AUTO_UPDATE: 1
