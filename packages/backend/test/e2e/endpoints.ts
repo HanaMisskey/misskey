@@ -30,6 +30,32 @@ describe('Endpoints', () => {
 		await api('admin/update-meta', { federation: 'all' }, alice as misskey.entities.SignupResponse);
 	}, 1000 * 60 * 2);
 
+	/** PR #424: 空キー・false は明示値として保存でき、null を保存すればファイル設定の継承へ戻せる。 */
+	test('admin/meta はセンシティブ判定の明示値と継承への復帰を保存・取得できる', async () => {
+		const original = await api('admin/meta', {}, alice);
+		expect(original.status).toBe(200);
+		try {
+			for (const settings of [
+				{ sensitiveMediaDetectionApiKey: '', sensitiveMediaDetectionUseProxy: false,
+					sensitiveMediaDetectionTimeout: 8000, sensitiveMediaDetectionMaxImagesPerRequest: 2 },
+				{ sensitiveMediaDetectionApiKey: null, sensitiveMediaDetectionUseProxy: null,
+					sensitiveMediaDetectionTimeout: null, sensitiveMediaDetectionMaxImagesPerRequest: null },
+			]) {
+				expect((await api('admin/update-meta', settings, alice)).status).toBe(204);
+				const response = await api('admin/meta', {}, alice);
+				expect(response.status).toBe(200);
+				expect(response.body).toMatchObject(settings);
+			}
+		} finally {
+			expect((await api('admin/update-meta', {
+				sensitiveMediaDetectionApiKey: original.body.sensitiveMediaDetectionApiKey,
+				sensitiveMediaDetectionUseProxy: original.body.sensitiveMediaDetectionUseProxy,
+				sensitiveMediaDetectionTimeout: original.body.sensitiveMediaDetectionTimeout,
+				sensitiveMediaDetectionMaxImagesPerRequest: original.body.sensitiveMediaDetectionMaxImagesPerRequest,
+			}, alice)).status).toBe(204);
+		}
+	});
+
 	describe('signup', () => {
 		test('不正なユーザー名でアカウントが作成できない', async () => {
 			const res = await api('signup', {

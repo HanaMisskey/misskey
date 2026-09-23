@@ -102,8 +102,8 @@ export const paramDef = {
 		sensitiveMediaDetectionApiUrl: { type: 'string', nullable: true },
 		sensitiveMediaDetectionApiKey: { type: 'string', nullable: true },
 		sensitiveMediaDetectionUseProxy: { type: 'boolean', nullable: true },
-		sensitiveMediaDetectionTimeout: { type: 'integer', nullable: true, minimum: 1, maximum: 2147483647 },
-		sensitiveMediaDetectionMaxImagesPerRequest: { type: 'integer', nullable: true, minimum: 1, maximum: 2147483647 },
+		sensitiveMediaDetectionTimeout: { type: 'integer', nullable: true, minimum: 1 },
+		sensitiveMediaDetectionMaxImagesPerRequest: { type: 'integer', nullable: true, minimum: 1 },
 		maintainerName: { type: 'string', nullable: true },
 		maintainerEmail: { type: 'string', nullable: true },
 		langs: {

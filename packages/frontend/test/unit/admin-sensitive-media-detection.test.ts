@@ -90,34 +90,25 @@ describe('センシティブ判定設定フォーム', () => {
 		}));
 	});
 
-	test.each([
-		{ name: 'タイムアウト', inputIndex: 0, field: 'sensitiveMediaDetectionTimeout', value: 7000 },
-		{ name: '一括枚数', inputIndex: 1, field: 'sensitiveMediaDetectionMaxImagesPerRequest', value: 3 },
-	])('保存済みの $name を入力欄から消すと null を送る', async ({ inputIndex, field, value }) => {
-		initialMeta[field] = value;
+	test('保存済みの数値を入力欄から消すと null を送る', async () => {
+		initialMeta.sensitiveMediaDetectionTimeout = 7000;
+		initialMeta.sensitiveMediaDetectionMaxImagesPerRequest = 3;
 		const view = await renderSecurity();
-		const input = view.container.querySelectorAll<HTMLInputElement>('input[type="number"]')[inputIndex];
-		expect(input.value).toBe(String(value));
-
-		await fireEvent.update(input, '');
-		expect(input.value).toBe('');
+		const inputs = [...view.container.querySelectorAll<HTMLInputElement>('input[type="number"]')];
+		expect(inputs.map(input => input.value)).toEqual(['7000', '3']);
+		for (const input of inputs) await fireEvent.update(input, '');
 		await fireEvent.click(view.getByRole('button', { name: i18n.ts.save }));
-
-		await waitFor(() => expect(updates.at(-1)).toMatchObject({ [field]: null }));
+		await waitFor(() => expect(updates.at(-1)).toMatchObject({
+			sensitiveMediaDetectionTimeout: null, sensitiveMediaDetectionMaxImagesPerRequest: null,
+		}));
 	});
 
-	test('API キーの認証なしを選んで保存すると空文字を送る', async () => {
+	test('認証なしと Proxy 無効を選ぶと空キーと false を送る', async () => {
 		const view = await renderSecurity();
 		await chooseSetting(view, 0, i18n.ts._hana._sensitiveMediaDetection.noAuthentication);
+		await chooseSetting(view, 0, i18n.ts.disabled);
 		await fireEvent.click(view.getByRole('button', { name: i18n.ts.save }));
-		await waitFor(() => expect(updates.at(-1)).toMatchObject({ sensitiveMediaDetectionApiKey: '' }));
-	});
-
-	test('Proxy 利用を無効にして保存すると false を送る', async () => {
-		const view = await renderSecurity();
-		await chooseSetting(view, 1, i18n.ts.disabled);
-		await fireEvent.click(view.getByRole('button', { name: i18n.ts.save }));
-		await waitFor(() => expect(updates.at(-1)).toMatchObject({ sensitiveMediaDetectionUseProxy: false }));
+		await waitFor(() => expect(updates.at(-1)).toMatchObject({ sensitiveMediaDetectionApiKey: '', sensitiveMediaDetectionUseProxy: false }));
 	});
 
 	test('API キーの指定を選ぶと入力するまで保存できず、入力後にそのキーを送る', async () => {

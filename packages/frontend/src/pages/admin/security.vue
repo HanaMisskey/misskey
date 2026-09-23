@@ -19,7 +19,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 						<template v-else-if="sensitiveMediaDetectionForm.savedState.sensitiveMediaDetection === 'remote'" #suffix>{{ i18n.ts.remoteOnly }}</template>
 						<template v-else #suffix>{{ i18n.ts.none }}</template>
 						<template v-if="sensitiveMediaDetectionForm.modified.value" #footer>
-							<MkFormFooter :form="sensitiveMediaDetectionForm" :canSaving="canSaveSensitiveMediaDetection"/>
+							<MkFormFooter :form="sensitiveMediaDetectionForm" :canSaving="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionApiKeyMode !== 'custom' || sensitiveMediaDetectionForm.state.sensitiveMediaDetectionApiKey !== ''"/>
 						</template>
 
 						<div class="_gaps_m">
@@ -86,7 +86,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 							<!-- MkInput に null を戻すと 0 が再通知されるため、継承中の空欄は NaN で渡す。 -->
 							<SearchMarker :keywords="['timeout', 'sensitive']">
 								<MkInput
-									:modelValue="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionTimeout ?? Number.NaN" type="number" :min="1" :max="2147483647" :step="1"
+									:modelValue="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionTimeout ?? Number.NaN" type="number" :min="1"
 									@update:modelValue="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionTimeout = Number.isNaN($event) ? null : $event"
 								>
 									<template #label><SearchLabel>{{ i18n.ts._sensitiveMediaDetection.timeout }}</SearchLabel></template>
@@ -99,7 +99,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 							<SearchMarker :keywords="['max', 'images', 'chunk', 'sensitive']">
 								<MkInput
-									:modelValue="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionMaxImagesPerRequest ?? Number.NaN" type="number" :min="1" :max="2147483647" :step="1"
+										:modelValue="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionMaxImagesPerRequest ?? Number.NaN" type="number" :min="1"
 									@update:modelValue="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionMaxImagesPerRequest = Number.isNaN($event) ? null : $event"
 								>
 									<template #label><SearchLabel>{{ i18n.ts._sensitiveMediaDetection.maxImagesPerRequest }}</SearchLabel></template>
@@ -290,13 +290,6 @@ const sensitiveMediaDetectionForm = useForm({
 		sensitiveMediaDetectionMaxImagesPerRequest: state.sensitiveMediaDetectionMaxImagesPerRequest,
 	});
 	fetchInstance(true);
-});
-
-const canSaveSensitiveMediaDetection = computed(() => {
-	const state = sensitiveMediaDetectionForm.state;
-	return (state.sensitiveMediaDetectionApiKeyMode !== 'custom' || state.sensitiveMediaDetectionApiKey !== '') &&
-		[state.sensitiveMediaDetectionTimeout, state.sensitiveMediaDetectionMaxImagesPerRequest]
-			.every(value => value == null || (Number.isInteger(value) && value >= 1 && value <= 2147483647));
 });
 
 const ipLoggingForm = useForm({

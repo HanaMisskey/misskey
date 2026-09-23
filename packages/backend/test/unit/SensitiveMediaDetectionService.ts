@@ -17,7 +17,6 @@ const DEFAULT_META = {
 	sensitiveMediaDetectionApiKey: null as string | null,
 	sensitiveMediaDetectionTimeout: 5000,
 	sensitiveMediaDetectionMaxImagesPerRequest: 4,
-	sensitiveMediaDetectionUseProxy: null as boolean | null,
 };
 
 function makeService(metaOverrides: Partial<typeof DEFAULT_META> = {}): SensitiveMediaDetectionService {
@@ -67,6 +66,24 @@ describe('SensitiveMediaDetectionService', () => {
 			prediction(),
 			prediction(0.8),
 		]);
+		expect(sendMock).toHaveBeenCalledTimes(1);
+		expect(sendMock.mock.calls[0][0]).toBe('http://localhost:3009/v1/detect-images');
+	});
+
+	test('外部サービス: HttpRequestService を使用する', async () => {
+		sendMock.mockResolvedValue(okResponse([{ success: true, predictions: prediction() }]));
+		const svc = makeService({ sensitiveMediaDetectionApiUrl: 'https://detector.example.com' });
+
+		await svc.detectSensitiveMany([buf('a')]);
+
+		expect(sendMock).toHaveBeenCalledWith('https://detector.example.com/v1/detect-images', expect.objectContaining({
+			method: 'POST',
+			headers: {},
+			body: expect.any(FormData),
+			timeout: 5000,
+		}), {
+			throwErrorWhenResponseNotOk: false,
+		});
 	});
 
 	test('detectSensitive: 単一画像はバッチの先頭を返す', async () => {
@@ -101,10 +118,62 @@ describe('SensitiveMediaDetectionService', () => {
 		expect(res).toEqual([null]);
 	});
 
-	test('接続先未設定: 全画像を検出不能として返す', async () => {
+	test('接続先未設定: HTTP を叩かず全件 null', async () => {
 		const svc = makeService({ sensitiveMediaDetectionApiUrl: null });
 		const res = await svc.detectSensitiveMany([buf('a'), buf('b')]);
 		expect(res).toEqual([null, null]);
+		expect(sendMock).not.toHaveBeenCalled();
+	});
+
+	test('チャンク分割: 各チャンクの画像と結果の順序を保つ', async () => {
+		sendMock
+			.mockResolvedValueOnce(okResponse([
+				{ success: true, predictions: prediction(0.1) },
+				{ success: true, predictions: prediction(0.2) },
+			]))
+			.mockResolvedValueOnce(okResponse([
+				{ success: true, predictions: prediction(0.3) },
+				{ success: true, predictions: prediction(0.4) },
+			]))
+			.mockResolvedValueOnce(okResponse([{ success: true, predictions: prediction(0.5) }]));
+		const svc = makeService({ sensitiveMediaDetectionMaxImagesPerRequest: 2 });
+		const res = await svc.detectSensitiveMany([buf('a'), buf('b'), buf('c'), buf('d'), buf('e')]);
+		expect(sendMock).toHaveBeenCalledTimes(3);
+		const sentImages = await Promise.all(sendMock.mock.calls.map(async ([, request]) => {
+			const form = (request as { body: FormData }).body;
+			return Promise.all([...form.values()].map(part => (part as File).text()));
+		}));
+		expect(sentImages).toEqual([['a', 'b'], ['c', 'd'], ['e']]);
+		expect(res).toEqual([prediction(0.1), prediction(0.2), prediction(0.3), prediction(0.4), prediction(0.5)]);
+	});
+
+	test('APIキー設定時のみ Authorization: Bearer を付与する', async () => {
+		sendMock.mockResolvedValue(okResponse([{ success: true, predictions: prediction() }]));
+
+		const withKey = makeService({ sensitiveMediaDetectionApiKey: 'secret' });
+		await withKey.detectSensitiveMany([buf('a')]);
+		const withKeyHeaders = (sendMock.mock.calls[0][1] as { headers: Record<string, string> }).headers;
+		expect(withKeyHeaders.Authorization).toBe('Bearer secret');
+
+		sendMock.mockClear();
+		sendMock.mockResolvedValue(okResponse([{ success: true, predictions: prediction() }]));
+		const withoutKey = makeService();
+		await withoutKey.detectSensitiveMany([buf('a')]);
+		const withoutKeyHeaders = (sendMock.mock.calls[0][1] as { headers: Record<string, string> }).headers;
+		expect(withoutKeyHeaders.Authorization).toBeUndefined();
+	});
+
+	test('multipart の各画像を PNG として送信順に保持し、boundary を手動設定しない', async () => {
+		sendMock.mockResolvedValue(okResponse([
+			{ success: true, predictions: prediction(0.1) },
+			{ success: true, predictions: prediction(0.9) },
+		]));
+		await makeService().detectSensitiveMany([buf('first-png'), buf('second-png')]);
+		const request = sendMock.mock.calls[0][1] as { body: FormData; headers: Record<string, string> };
+		const parts = [...request.body.values()] as File[];
+		expect(parts.map(part => part.type)).toEqual(['image/png', 'image/png']);
+		expect(await Promise.all(parts.map(part => part.text()))).toEqual(['first-png', 'second-png']);
+		expect(Object.keys(request.headers).some(name => name.toLowerCase() === 'content-type')).toBe(false);
 	});
 
 	test.each([1, 3])('2画像に対し結果が%i件なら順序対応を保証できないチャンク全体を検出不能にする', async (count) => {

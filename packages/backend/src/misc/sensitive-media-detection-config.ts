@@ -19,18 +19,10 @@ type SensitiveMediaDetectionOverrides = {
 	sensitiveMediaDetectionMaxImagesPerRequest?: number | null;
 };
 
-export type ResolvedSensitiveMediaDetectionConfig = {
-	apiUrl: string | null;
-	apiKey: string | null;
-	useProxy: boolean;
-	timeout: number;
-	maxImagesPerRequest: number;
-};
-
 export function resolveSensitiveMediaDetectionConfig(
 	fileConfig?: SensitiveMediaDetectionConfig,
 	meta?: SensitiveMediaDetectionOverrides,
-): ResolvedSensitiveMediaDetectionConfig {
+) {
 	return {
 		apiUrl: meta?.sensitiveMediaDetectionApiUrl?.trim() || fileConfig?.apiUrl?.trim() || null,
 		apiKey: meta?.sensitiveMediaDetectionApiKey ?? fileConfig?.apiKey ?? null,
