@@ -8,10 +8,9 @@ import { cleanup, fireEvent, render, waitFor } from '@testing-library/vue';
 import { defineComponent, h, Suspense } from 'vue';
 import Security from '@/pages/admin/security.vue';
 import { i18n } from '@/i18n.js';
+import Common from '@/ui/_common_/common.vue';
+import { popups } from '@/os.js';
 
-const { fetchMeta, saveMeta, popupMenu } = vi.hoisted(() => ({ fetchMeta: vi.fn(), saveMeta: vi.fn(), popupMenu: vi.fn() }));
-vi.mock('@/utility/misskey-api.js', () => ({ misskeyApi: fetchMeta }));
-vi.mock('@/os.js', () => ({ apiWithDialog: saveMeta, popupMenu }));
 vi.mock('@/instance.js', () => ({ fetchInstance: vi.fn(), instance: { policies: {} } }));
 vi.mock('@/page.js', () => ({ definePage: vi.fn() }));
 vi.mock('@/pages/admin/bot-protection.vue', () => ({ default: { render: () => null } }));
@@ -27,22 +26,43 @@ const saved = {
 	enableActiveEmailValidation: false, enableVerifymailApi: false, enableTruemailApi: false, enableIpLogging: false,
 };
 
+/**
+ * PR #424 の継承要件と、roles.policy-editor.vue の maxFileSize 説明欄を基準にする。
+ * サーバー値を入力値へ代入すると再保存で継承が失われるため、説明欄と編集値を分ける。
+ */
 describe('センシティブ判定設定フォーム', () => {
+	let initialMeta: Record<string, unknown>;
+	const updates: unknown[] = [];
+
 	beforeEach(() => {
-		fetchMeta.mockReset().mockResolvedValue(saved);
-		saveMeta.mockReset().mockResolvedValue(undefined);
-		popupMenu.mockReset();
+		initialMeta = { ...saved };
+		updates.length = 0;
+		fetchMock.doMock(async request => {
+			if (new URL(request.url).pathname === '/api/admin/meta') {
+				return { status: 200, body: JSON.stringify(initialMeta) };
+			}
+			if (new URL(request.url).pathname === '/api/admin/update-meta') {
+				updates.push(await request.json());
+				return { status: 204, body: '' };
+			}
+			throw new Error(`Unexpected API request: ${request.url}`);
+		});
 	});
-	afterEach(cleanup);
+	afterEach(() => {
+		cleanup();
+		popups.value = [];
+		fetchMock.resetMocks();
+	});
 
 	async function renderSecurity() {
-		const view = render({ render: () => h('div', [h(Suspense, null, { default: () => h(Security) })]) }, {
+		const view = render({ render: () => h('div', [h(Suspense, null, { default: () => h(Security) }), h(Common)]) }, {
 			global: {
 				stubs: {
 					PageWithHeader: slots, SearchMarker: slots, SearchIcon: slots, SearchLabel: slots, SearchText: slots,
 					MkFolder: slots, MkRadios: true, MkSwitch: true, MkRange: true, MkTextarea: true, MkInfo: slots,
+					XNavbar: true, XStreamIndicator: true,
 				},
-				directives: { 'adaptive-border': {} },
+				directives: { 'adaptive-border': {}, hotkey: {} },
 			},
 		});
 		await waitFor(() => expect(view.container.querySelectorAll('input[type="number"]')).toHaveLength(2));
@@ -51,8 +71,7 @@ describe('センシティブ判定設定フォーム', () => {
 
 	async function chooseSetting(view: Awaited<ReturnType<typeof renderSecurity>>, index: number, label: string) {
 		await fireEvent.mouseDown(view.getAllByText(i18n.ts._hana._sensitiveMediaDetection.useServerSetting)[index]);
-		const menu = popupMenu.mock.lastCall![0] as { text: string; action: () => void }[];
-		await menu.find(item => item.text === label)!.action();
+		await fireEvent.click(await view.findByRole('menuitem', { name: label }));
 	}
 
 	test('URL だけを変更して保存しても、継承中の数値・キー・Proxy 設定は null のまま送る', async () => {
@@ -65,17 +84,17 @@ describe('センシティブ判定設定フォーム', () => {
 		await fireEvent.update(view.container.querySelector<HTMLInputElement>('input[type="url"]')!, 'https://custom.example');
 		await fireEvent.click(view.getByRole('button', { name: i18n.ts.save }));
 
-		await waitFor(() => expect(saveMeta).toHaveBeenCalledWith('admin/update-meta', expect.objectContaining({
+		await waitFor(() => expect(updates.at(-1)).toMatchObject({
 			sensitiveMediaDetectionApiUrl: 'https://custom.example', sensitiveMediaDetectionTimeout: null,
 			sensitiveMediaDetectionMaxImagesPerRequest: null, sensitiveMediaDetectionApiKey: null, sensitiveMediaDetectionUseProxy: null,
-		})));
+		}));
 	});
 
 	test.each([
 		{ name: 'タイムアウト', inputIndex: 0, field: 'sensitiveMediaDetectionTimeout', value: 7000 },
 		{ name: '一括枚数', inputIndex: 1, field: 'sensitiveMediaDetectionMaxImagesPerRequest', value: 3 },
 	])('保存済みの $name を入力欄から消すと null を送る', async ({ inputIndex, field, value }) => {
-		fetchMeta.mockResolvedValue({ ...saved, [field]: value });
+		initialMeta[field] = value;
 		const view = await renderSecurity();
 		const input = view.container.querySelectorAll<HTMLInputElement>('input[type="number"]')[inputIndex];
 		expect(input.value).toBe(String(value));
@@ -84,21 +103,21 @@ describe('センシティブ判定設定フォーム', () => {
 		expect(input.value).toBe('');
 		await fireEvent.click(view.getByRole('button', { name: i18n.ts.save }));
 
-		await waitFor(() => expect(saveMeta).toHaveBeenCalledWith('admin/update-meta', expect.objectContaining({ [field]: null })));
+		await waitFor(() => expect(updates.at(-1)).toMatchObject({ [field]: null }));
 	});
 
 	test('API キーの認証なしを選んで保存すると空文字を送る', async () => {
 		const view = await renderSecurity();
 		await chooseSetting(view, 0, i18n.ts._hana._sensitiveMediaDetection.noAuthentication);
 		await fireEvent.click(view.getByRole('button', { name: i18n.ts.save }));
-		await waitFor(() => expect(saveMeta).toHaveBeenCalledWith('admin/update-meta', expect.objectContaining({ sensitiveMediaDetectionApiKey: '' })));
+		await waitFor(() => expect(updates.at(-1)).toMatchObject({ sensitiveMediaDetectionApiKey: '' }));
 	});
 
 	test('Proxy 利用を無効にして保存すると false を送る', async () => {
 		const view = await renderSecurity();
 		await chooseSetting(view, 1, i18n.ts.disabled);
 		await fireEvent.click(view.getByRole('button', { name: i18n.ts.save }));
-		await waitFor(() => expect(saveMeta).toHaveBeenCalledWith('admin/update-meta', expect.objectContaining({ sensitiveMediaDetectionUseProxy: false })));
+		await waitFor(() => expect(updates.at(-1)).toMatchObject({ sensitiveMediaDetectionUseProxy: false }));
 	});
 
 	test('API キーの指定を選ぶと入力するまで保存できず、入力後にそのキーを送る', async () => {
@@ -107,12 +126,12 @@ describe('センシティブ判定設定フォーム', () => {
 		const save = view.getByRole('button', { name: i18n.ts.save }) as HTMLButtonElement;
 		expect(save.disabled).toBe(true);
 		await fireEvent.click(save);
-		expect(saveMeta).not.toHaveBeenCalled();
+		expect(updates).toHaveLength(0);
 
 		await fireEvent.update(view.container.querySelector<HTMLInputElement>('input[type="password"]')!, 'custom-key');
 		expect(save.disabled).toBe(false);
 		await fireEvent.click(save);
 
-		await waitFor(() => expect(saveMeta).toHaveBeenCalledWith('admin/update-meta', expect.objectContaining({ sensitiveMediaDetectionApiKey: 'custom-key' })));
+		await waitFor(() => expect(updates.at(-1)).toMatchObject({ sensitiveMediaDetectionApiKey: 'custom-key' }));
 	});
 });

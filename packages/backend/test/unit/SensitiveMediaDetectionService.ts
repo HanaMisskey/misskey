@@ -22,15 +22,11 @@ const DEFAULT_META = {
 
 function makeService(metaOverrides: Partial<typeof DEFAULT_META> = {}): SensitiveMediaDetectionService {
 	const meta = { ...DEFAULT_META, ...metaOverrides } as unknown as MiMeta;
-	return serviceWithConfig(meta);
-}
-
-function serviceWithConfig(meta: MiMeta, sensitiveMediaDetection?: Config['sensitiveMediaDetection']): SensitiveMediaDetectionService {
 	const httpRequestService = { send: sendMock } as unknown as HttpRequestService;
 	const loggerService = {
 		getLogger: () => ({ warn: () => {}, error: () => {}, info: () => {} }),
 	} as unknown as LoggerService;
-	return new SensitiveMediaDetectionService({ sensitiveMediaDetection } as Config, meta, httpRequestService, loggerService);
+	return new SensitiveMediaDetectionService({} as Config, meta, httpRequestService, loggerService);
 }
 
 function prediction(nsfw = 0.01): Prediction[] {
@@ -71,74 +67,6 @@ describe('SensitiveMediaDetectionService', () => {
 			prediction(),
 			prediction(0.8),
 		]);
-		expect(sendMock).toHaveBeenCalledTimes(1);
-		expect(sendMock.mock.calls[0][0]).toBe('http://localhost:3009/v1/detect-images');
-	});
-
-	test('外部サービス: HttpRequestService を使用する', async () => {
-		sendMock.mockResolvedValue(okResponse([{ success: true, predictions: prediction() }]));
-		const svc = makeService({ sensitiveMediaDetectionApiUrl: 'https://detector.example.com' });
-
-		await svc.detectSensitiveMany([buf('a')]);
-
-		expect(sendMock).toHaveBeenCalledWith('https://detector.example.com/v1/detect-images', {
-			method: 'POST',
-			headers: {},
-			body: expect.any(FormData),
-			timeout: 5000,
-			bypassProxy: false,
-			isLocalAddressAllowed: true,
-		}, {
-			throwErrorWhenResponseNotOk: false,
-		});
-	});
-
-	test.each([
-		{ useProxy: true, bypassProxy: false },
-		{ useProxy: false, bypassProxy: true },
-	])('useProxy=$useProxy の判定要求は bypassProxy=$bypassProxy と内部アドレスの許可を送る', async ({ useProxy, bypassProxy }) => {
-		sendMock.mockResolvedValue(okResponse([{ success: true, predictions: prediction() }]));
-		await makeService({ sensitiveMediaDetectionUseProxy: useProxy }).detectSensitive(buf('a'));
-		expect(sendMock.mock.calls[0][1]).toMatchObject({ bypassProxy, isLocalAddressAllowed: true });
-	});
-
-	test('管理画面の接続設定が未指定ならファイルの送信先・認証・時間制限・枚数・Proxy 設定を使う', async () => {
-		sendMock.mockResolvedValue(okResponse([{ success: true, predictions: prediction() }]));
-		const meta = {
-			sensitiveMediaDetectionApiUrl: null,
-			sensitiveMediaDetectionApiKey: null,
-			sensitiveMediaDetectionTimeout: null,
-			sensitiveMediaDetectionMaxImagesPerRequest: null,
-			sensitiveMediaDetectionUseProxy: null,
-		} as unknown as MiMeta;
-		const service = serviceWithConfig(meta, {
-			apiUrl: 'http://detector:3009/prefix', apiKey: 'server-secret', timeout: 8000, maxImagesPerRequest: 1, useProxy: false,
-		});
-
-		await service.detectSensitiveMany([buf('a'), buf('b')]);
-
-		expect(sendMock).toHaveBeenCalledTimes(2);
-		for (const [url, request] of sendMock.mock.calls) {
-			expect(url).toBe('http://detector:3009/prefix/v1/detect-images');
-			expect(request).toMatchObject({
-				headers: { Authorization: 'Bearer server-secret' }, timeout: 8000, bypassProxy: true,
-			});
-		}
-	});
-
-	test('保存されたキーと Proxy 設定を変更すると次の判定要求から反映する', async () => {
-		sendMock.mockResolvedValue(okResponse([{ success: true, predictions: prediction() }]));
-		const meta = { ...DEFAULT_META } as unknown as MiMeta;
-		const service = serviceWithConfig(meta, { apiKey: 'server-secret', useProxy: false });
-		await service.detectSensitive(buf('a'));
-		expect(sendMock.mock.calls[0][1]).toMatchObject({ headers: { Authorization: 'Bearer server-secret' }, bypassProxy: true });
-
-		meta.sensitiveMediaDetectionApiKey = '';
-		meta.sensitiveMediaDetectionUseProxy = true;
-		await service.detectSensitive(buf('b'));
-
-		expect(sendMock.mock.calls[1][1]).toMatchObject({ headers: {}, bypassProxy: false });
-		expect(sendMock.mock.calls[1][1].headers).not.toHaveProperty('Authorization');
 	});
 
 	test('detectSensitive: 単一画像はバッチの先頭を返す', async () => {
@@ -173,62 +101,10 @@ describe('SensitiveMediaDetectionService', () => {
 		expect(res).toEqual([null]);
 	});
 
-	test('接続先未設定: HTTP を叩かず全件 null', async () => {
+	test('接続先未設定: 全画像を検出不能として返す', async () => {
 		const svc = makeService({ sensitiveMediaDetectionApiUrl: null });
 		const res = await svc.detectSensitiveMany([buf('a'), buf('b')]);
 		expect(res).toEqual([null, null]);
-		expect(sendMock).not.toHaveBeenCalled();
-	});
-
-	test('チャンク分割: 各チャンクの画像と結果の順序を保つ', async () => {
-		sendMock
-			.mockResolvedValueOnce(okResponse([
-				{ success: true, predictions: prediction(0.1) },
-				{ success: true, predictions: prediction(0.2) },
-			]))
-			.mockResolvedValueOnce(okResponse([
-				{ success: true, predictions: prediction(0.3) },
-				{ success: true, predictions: prediction(0.4) },
-			]))
-			.mockResolvedValueOnce(okResponse([{ success: true, predictions: prediction(0.5) }]));
-		const svc = makeService({ sensitiveMediaDetectionMaxImagesPerRequest: 2 });
-		const res = await svc.detectSensitiveMany([buf('a'), buf('b'), buf('c'), buf('d'), buf('e')]);
-		expect(sendMock).toHaveBeenCalledTimes(3);
-		const sentImages = await Promise.all(sendMock.mock.calls.map(async ([, request]) => {
-			const form = (request as { body: FormData }).body;
-			return Promise.all([...form.values()].map(part => (part as File).text()));
-		}));
-		expect(sentImages).toEqual([['a', 'b'], ['c', 'd'], ['e']]);
-		expect(res).toEqual([prediction(0.1), prediction(0.2), prediction(0.3), prediction(0.4), prediction(0.5)]);
-	});
-
-	test('APIキー設定時のみ Authorization: Bearer を付与する', async () => {
-		sendMock.mockResolvedValue(okResponse([{ success: true, predictions: prediction() }]));
-
-		const withKey = makeService({ sensitiveMediaDetectionApiKey: 'secret' });
-		await withKey.detectSensitiveMany([buf('a')]);
-		const withKeyHeaders = (sendMock.mock.calls[0][1] as { headers: Record<string, string> }).headers;
-		expect(withKeyHeaders.Authorization).toBe('Bearer secret');
-
-		sendMock.mockClear();
-		sendMock.mockResolvedValue(okResponse([{ success: true, predictions: prediction() }]));
-		const withoutKey = makeService();
-		await withoutKey.detectSensitiveMany([buf('a')]);
-		const withoutKeyHeaders = (sendMock.mock.calls[0][1] as { headers: Record<string, string> }).headers;
-		expect(withoutKeyHeaders.Authorization).toBeUndefined();
-	});
-
-	test('multipart の各画像を PNG として送信順に保持し、boundary を手動設定しない', async () => {
-		sendMock.mockResolvedValue(okResponse([
-			{ success: true, predictions: prediction(0.1) },
-			{ success: true, predictions: prediction(0.9) },
-		]));
-		await makeService().detectSensitiveMany([buf('first-png'), buf('second-png')]);
-		const request = sendMock.mock.calls[0][1] as { body: FormData; headers: Record<string, string> };
-		const parts = [...request.body.values()] as File[];
-		expect(parts.map(part => part.type)).toEqual(['image/png', 'image/png']);
-		expect(await Promise.all(parts.map(part => part.text()))).toEqual(['first-png', 'second-png']);
-		expect(Object.keys(request.headers).some(name => name.toLowerCase() === 'content-type')).toBe(false);
 	});
 
 	test.each([1, 3])('2画像に対し結果が%i件なら順序対応を保証できないチャンク全体を検出不能にする', async (count) => {

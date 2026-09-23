@@ -9,6 +9,10 @@ import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { loadConfig } from '@/config.js';
 import { SensitiveMediaDetectionConfigDefaults1790109064226 } from '../../migration/1790109064226-sensitiveMediaDetectionConfigDefaults.js';
 
+/**
+ * 旧スキーマの NOT NULL・60000ms・4枚は migration/1780488454126-sensitiveMediaDetectionExternalService.js に由来する。
+ * DB では既定値と同じ値の明示保存を区別できないため、PR #424 の移行では既存値を null に置換しない。
+ */
 describe('SensitiveMediaDetectionConfigDefaults migration', () => {
 	let client: pg.Client;
 	const migration = new SensitiveMediaDetectionConfigDefaults1790109064226();
