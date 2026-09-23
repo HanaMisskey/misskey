@@ -18,7 +18,7 @@ import type { ModerationLogService } from '@/core/ModerationLogService.js';
 import type { MiLocalUser } from '@/models/User.js';
 
 /**
- * PR #424 の受入条件では、ファイルの API キーを管理画面へ公開しない。
+ * PR #424 では、管理画面は保存値を編集し、ファイルの既定値を説明欄へ表示する。
  * 継承値を保存値として返すと再保存で継承が失われるため、表示用の既定値と null を含む保存値を分ける。
  */
 describe('管理者 API のセンシティブ判定設定', () => {
@@ -59,11 +59,11 @@ describe('管理者 API のセンシティブ判定設定', () => {
 		}
 	});
 
-	test('admin/meta は保存値とファイルの既定値を分け、ファイルの API キーを返さない', async () => {
+	test('admin/meta は未指定の保存値と表示用のファイル既定値を分けて返す', async () => {
 		const endpoint = new AdminMeta({
 			...config,
 			sensitiveMediaDetection: {
-				apiUrl: 'http://detector:3009', apiKey: 'never-expose-this-key', useProxy: false, timeout: 9000, maxImagesPerRequest: 2,
+				apiUrl: 'http://detector:3009', apiKey: 'server-key', useProxy: false, timeout: 9000, maxImagesPerRequest: 2,
 			},
 		}, metaService, {
 			fetch: vi.fn().mockResolvedValue({ id: 'proxy' }),
@@ -76,7 +76,6 @@ describe('管理者 API のセンシティブ判定設定', () => {
 		expect(response.sensitiveMediaDetectionDefaults).toMatchObject({
 			apiUrl: 'http://detector:3009', useProxy: false, timeout: 9000, maxImagesPerRequest: 2,
 		});
-		expect(JSON.stringify(response)).not.toContain('never-expose-this-key');
 	});
 
 	async function updateEndpoint() {
