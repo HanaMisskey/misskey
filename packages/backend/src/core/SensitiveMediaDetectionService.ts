@@ -11,10 +11,6 @@ import { LoggerService } from '@/core/LoggerService.js';
 import type { MiMeta } from '@/models/_.js';
 import type Logger from '@/logger.js';
 
-/**
- * 正規化済み画像に対する nsfwjs 互換の予測値。
- * 推論自体は外部サービス (sensitive-detector) が行い、本体はその生の値を受け取って判定する。
- */
 export type Prediction = {
 	className: string;
 	probability: number;
@@ -25,21 +21,26 @@ type BatchItemResult =
 	| { success: false; error: { code: string; message: string } };
 
 type DetectImagesResponse =
-	| { success: true; result: { results: BatchItemResult[] } }
+	| { success: true; result: { results: unknown[] } }
 	| { success: false; error: { code: string; message: string } };
 
 // #region type guards
 function isPrediction(v: unknown): v is Prediction {
 	if (typeof v !== 'object' || v === null) return false;
 	const obj = v as Record<string, unknown>;
-	return typeof obj['className'] === 'string' && typeof obj['probability'] === 'number';
+	const probability = obj['probability'];
+	return (obj['className'] === 'nsfw' || obj['className'] === 'safe') &&
+		typeof probability === 'number' && Number.isFinite(probability) && probability >= 0 && probability <= 1;
 }
 
 function isBatchItemResult(v: unknown): v is BatchItemResult {
 	if (typeof v !== 'object' || v === null) return false;
 	const obj = v as Record<string, unknown>;
 	if (obj['success'] === true) {
-		return Array.isArray(obj['predictions']) && (obj['predictions'] as unknown[]).every(isPrediction);
+		const predictions = obj['predictions'];
+		return Array.isArray(predictions) && predictions.length === 2 && predictions.every(isPrediction) &&
+			predictions.some(prediction => prediction.className === 'nsfw') &&
+			predictions.some(prediction => prediction.className === 'safe');
 	}
 	if (obj['success'] === false) {
 		const error = obj['error'];
@@ -55,7 +56,7 @@ function isDetectImagesResponse(v: unknown): v is DetectImagesResponse {
 		const result = obj['result'];
 		if (typeof result !== 'object' || result === null) return false;
 		const results = (result as Record<string, unknown>)['results'];
-		return Array.isArray(results) && (results as unknown[]).every(isBatchItemResult);
+		return Array.isArray(results);
 	}
 	if (obj['success'] === false) {
 		const error = obj['error'];
@@ -169,9 +170,20 @@ export class SensitiveMediaDetectionService {
 			}
 
 			const items = body.result.results;
-			return chunk.map((_, i) => {
-				const item = items[i];
-				return (item.success) ? item.predictions : null;
+			if (items.length !== chunk.length) {
+				this.logger.warn(`sensitive detection returned ${items.length} results for ${chunk.length} images`);
+				return chunk.map(() => null);
+			}
+			return items.map((item, i) => {
+				if (!isBatchItemResult(item)) {
+					this.logger.warn(`sensitive detection returned an invalid result for image ${i}`);
+					return null;
+				}
+				if (!item.success) {
+					this.logger.warn(`sensitive detection failed for image ${i}: ${item.error.code}`);
+					return null;
+				}
+				return item.predictions;
 			});
 		} catch (err) {
 			this.logger.warn(`sensitive detection error: ${err instanceof Error ? err.message : String(err)}`);

@@ -164,7 +164,6 @@ export class FileInfoService {
 				path,
 				type.mime,
 				opts.sensitiveThreshold ?? 0.5,
-				opts.sensitiveThresholdForPorn ?? 0.75,
 				opts.enableSensitiveMediaDetectionForVideos ?? false,
 			).then(value => {
 				[sensitive, porn] = value;
@@ -188,21 +187,11 @@ export class FileInfoService {
 	}
 
 	@bindThis
-	private async detectSensitivity(source: string, mime: string, sensitiveThreshold: number, sensitiveThresholdForPorn: number, analyzeVideo: boolean): Promise<[sensitive: boolean, porn: boolean]> {
+	private async detectSensitivity(source: string, mime: string, sensitiveThreshold: number, analyzeVideo: boolean): Promise<[sensitive: boolean, porn: boolean]> {
 		let sensitive = false;
-		let porn = false;
 
-		function judgePrediction(result: readonly Prediction[]): [sensitive: boolean, porn: boolean] {
-			let sensitive = false;
-			let porn = false;
-
-			if ((result.find(x => x.className === 'Sexy')?.probability ?? 0) > sensitiveThreshold) sensitive = true;
-			if ((result.find(x => x.className === 'Hentai')?.probability ?? 0) > sensitiveThreshold) sensitive = true;
-			if ((result.find(x => x.className === 'Porn')?.probability ?? 0) > sensitiveThreshold) sensitive = true;
-
-			if ((result.find(x => x.className === 'Porn')?.probability ?? 0) > sensitiveThresholdForPorn) porn = true;
-
-			return [sensitive, porn];
+		function judgePrediction(result: readonly Prediction[]): boolean {
+			return (result.find(x => x.className === 'nsfw')?.probability ?? 0) > sensitiveThreshold;
 		}
 
 		if (analyzeVideo && (mime === 'image/apng' || mime.startsWith('video/'))) {
@@ -212,7 +201,6 @@ export class FileInfoService {
 					.input(source)
 					.inputOptions([
 						'-skip_frame', 'nokey', // 可能ならキーフレームのみを取得してほしいとする（そうなるとは限らない）
-						'-lowres', '3', // 元の画質でデコードする必要はないので 1/8 画質でデコードしてもよいとする（そうなるとは限らない）
 					])
 					.noAudio()
 					.videoFilters([
@@ -237,18 +225,10 @@ export class FileInfoService {
 								function: 'less', // 50% 未満のフレームを選択する（50% 以上暗部があるフレームだと誤検知を招くかもしれないので）
 							},
 						},
-						{
-							filter: 'scale',
-							options: {
-								w: 299,
-								h: 299,
-							},
-						},
 					])
 					.format('image2')
 					.output(join(outDir, '%d.png'))
-					.outputOptions(['-vsync', '0']); // 可変フレームレートにすることで穴埋めをさせない
-				// 判定対象フレームを選定して正規化済みバッファとして集め、外部サービスへまとめて送る。
+					.outputOptions(['-fps_mode', 'passthrough']); // 固定フレームレートへの補間は、選択済みフレームを重複させるため使わない。
 				const frameBuffers: Buffer[] = [];
 				let frameIndex = 0;
 				let targetIndex = 0;
@@ -261,7 +241,7 @@ export class FileInfoService {
 						}
 						targetIndex = nextIndex;
 						nextIndex += index; // fibonacci sequence によってフレーム数制限を掛ける
-						frameBuffers.push(await fs.promises.readFile(path));
+						frameBuffers.push(await this.normalizeSensitiveImage(path, 'image/png'));
 					} finally {
 						fs.promises.unlink(path);
 					}
@@ -272,32 +252,35 @@ export class FileInfoService {
 				// Math.ceil(0) との比較が 0 >= 0 で真になり全動画がセンシティブ扱いになってしまうため、
 				// 1 件以上判定できたときのみ集約する（失敗時は非センシティブ扱い: misskey-dev/misskey#16804）。
 				if (results.length > 0) {
-					sensitive = results.filter(x => x[0]).length >= Math.ceil(results.length * sensitiveThreshold);
-					porn = results.filter(x => x[1]).length >= Math.ceil(results.length * sensitiveThresholdForPorn);
+					sensitive = results.filter(x => x).length >= Math.ceil(results.length * sensitiveThreshold);
 				}
 			} finally {
 				disposeOutDir();
 			}
 		} else if (isMimeImage(mime, 'sharp-convertible-image-with-bmp')) {
-			/*
-			 * 判定サービス側のデコーダは限られた画像形式しか受け付けないため、sharp で PNG に変換する
-			 * せっかくなので内部処理で使われる最大サイズの299x299に事前にリサイズする
-			 */
-			const png = await (await sharpBmp(source, mime))
-				.resize(299, 299, {
-					withoutEnlargement: false,
-				})
-				.rotate()
-				.flatten({ background: { r: 119, g: 119, b: 119 } }) // 透過部分を18%グレーで塗りつぶす
-				.png()
-				.toBuffer();
+			const png = await this.normalizeSensitiveImage(source, mime);
 			const result = await this.sensitiveMediaDetectionService.detectSensitive(png);
 			if (result) {
-				[sensitive, porn] = judgePrediction(result);
+				sensitive = judgePrediction(result);
 			}
 		}
 
-		return [sensitive, porn];
+		// nsfw/safe の二分類では Porn を識別できないため、nsfw の高さから porn を推定しない。
+		return [sensitive, false];
+	}
+
+	@bindThis
+	private async normalizeSensitiveImage(source: string, mime: string): Promise<Buffer> {
+		const image = await sharpBmp(source, mime);
+		const { autoOrient } = await image.metadata();
+		// 全領域の切り出しを省くと、回転が補間後へ遅延し、JPEG/WebP の縮小デコードも先行し得る。
+		return image
+			.rotate()
+			.extract({ left: 0, top: 0, width: autoOrient.width, height: autoOrient.height })
+			.flatten({ background: { r: 119, g: 119, b: 119 } })
+			.resize(384, 384, { fit: 'fill', kernel: 'cubic' })
+			.png()
+			.toBuffer();
 	}
 
 	private async *asyncIterateFrames(cwd: string, command: FFmpeg.FfmpegCommand): AsyncGenerator<string, void> {
