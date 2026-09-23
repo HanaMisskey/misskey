@@ -22,11 +22,15 @@ const DEFAULT_META = {
 
 function makeService(metaOverrides: Partial<typeof DEFAULT_META> = {}): SensitiveMediaDetectionService {
 	const meta = { ...DEFAULT_META, ...metaOverrides } as unknown as MiMeta;
+	return serviceWithConfig(meta);
+}
+
+function serviceWithConfig(meta: MiMeta, sensitiveMediaDetection?: Config['sensitiveMediaDetection']): SensitiveMediaDetectionService {
 	const httpRequestService = { send: sendMock } as unknown as HttpRequestService;
 	const loggerService = {
 		getLogger: () => ({ warn: () => {}, error: () => {}, info: () => {} }),
 	} as unknown as LoggerService;
-	return new SensitiveMediaDetectionService({} as Config, meta, httpRequestService, loggerService);
+	return new SensitiveMediaDetectionService({ sensitiveMediaDetection } as Config, meta, httpRequestService, loggerService);
 }
 
 function prediction(nsfw = 0.01): Prediction[] {
@@ -89,18 +93,52 @@ describe('SensitiveMediaDetectionService', () => {
 		});
 	});
 
-	/**
-	 * Oracle: S3 と同じ管理者指定サービスの通信契約。未指定は既存 Proxy 経路を維持し、
-	 * 明示した false のときだけ Proxy を回避する。内部 Service のアドレスは許可する。
-	 */
 	test.each([
-		{ useProxy: null, bypassProxy: false },
 		{ useProxy: true, bypassProxy: false },
 		{ useProxy: false, bypassProxy: true },
-	])('Proxy 設定 $useProxy で管理者の接続方式を採用する', async ({ useProxy, bypassProxy }) => {
+	])('useProxy=$useProxy の判定要求は bypassProxy=$bypassProxy と内部アドレスの許可を送る', async ({ useProxy, bypassProxy }) => {
 		sendMock.mockResolvedValue(okResponse([{ success: true, predictions: prediction() }]));
 		await makeService({ sensitiveMediaDetectionUseProxy: useProxy }).detectSensitive(buf('a'));
 		expect(sendMock.mock.calls[0][1]).toMatchObject({ bypassProxy, isLocalAddressAllowed: true });
+	});
+
+	test('管理画面の接続設定が未指定ならファイルの送信先・認証・時間制限・枚数・Proxy 設定を使う', async () => {
+		sendMock.mockResolvedValue(okResponse([{ success: true, predictions: prediction() }]));
+		const meta = {
+			sensitiveMediaDetectionApiUrl: null,
+			sensitiveMediaDetectionApiKey: null,
+			sensitiveMediaDetectionTimeout: null,
+			sensitiveMediaDetectionMaxImagesPerRequest: null,
+			sensitiveMediaDetectionUseProxy: null,
+		} as unknown as MiMeta;
+		const service = serviceWithConfig(meta, {
+			apiUrl: 'http://detector:3009/prefix', apiKey: 'server-secret', timeout: 8000, maxImagesPerRequest: 1, useProxy: false,
+		});
+
+		await service.detectSensitiveMany([buf('a'), buf('b')]);
+
+		expect(sendMock).toHaveBeenCalledTimes(2);
+		for (const [url, request] of sendMock.mock.calls) {
+			expect(url).toBe('http://detector:3009/prefix/v1/detect-images');
+			expect(request).toMatchObject({
+				headers: { Authorization: 'Bearer server-secret' }, timeout: 8000, bypassProxy: true,
+			});
+		}
+	});
+
+	test('保存されたキーと Proxy 設定を変更すると次の判定要求から反映する', async () => {
+		sendMock.mockResolvedValue(okResponse([{ success: true, predictions: prediction() }]));
+		const meta = { ...DEFAULT_META } as unknown as MiMeta;
+		const service = serviceWithConfig(meta, { apiKey: 'server-secret', useProxy: false });
+		await service.detectSensitive(buf('a'));
+		expect(sendMock.mock.calls[0][1]).toMatchObject({ headers: { Authorization: 'Bearer server-secret' }, bypassProxy: true });
+
+		meta.sensitiveMediaDetectionApiKey = '';
+		meta.sensitiveMediaDetectionUseProxy = true;
+		await service.detectSensitive(buf('b'));
+
+		expect(sendMock.mock.calls[1][1]).toMatchObject({ headers: {}, bypassProxy: false });
+		expect(sendMock.mock.calls[1][1].headers).not.toHaveProperty('Authorization');
 	});
 
 	test('detectSensitive: 単一画像はバッチの先頭を返す', async () => {

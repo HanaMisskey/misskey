@@ -9,13 +9,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { HttpRequestService } from '@/core/HttpRequestService.js';
 import type { Config } from '@/config.js';
 
-/**
- * Oracle: 管理者指定の内部サービスへの呼び出しだけが Proxy を回避できる。
- * 既定の呼び出しは Proxy を使い、Proxy 回避だけでは private address を許可しない。
- * 単一マシン上の実 HTTP と CONNECT Proxy で、agent の選択が実通信へ届く境界を検証する。
- * private address の遮断は production でのみ有効なため NODE_ENV を合わせる。
- */
-describe('HttpRequestService の呼び出し単位の接続方式', () => {
+describe('HttpRequestService.send', () => {
 	let target: http.Server;
 	let proxy: http.Server;
 	let targetUrl: string;
@@ -36,6 +30,7 @@ describe('HttpRequestService の呼び出し単位の接続方式', () => {
 	}
 
 	beforeEach(async () => {
+		// test 環境では内部アドレスへの直接通信が制限されないため、production で検証する。
 		vi.stubEnv('NODE_ENV', 'production');
 		proxyConnections = 0;
 		target = http.createServer((_request, response) => response.end('detector reached'));
