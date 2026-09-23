@@ -42,8 +42,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 								<MkInput v-model="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionApiUrl" type="url">
 									<template #label><SearchLabel>{{ i18n.ts._sensitiveMediaDetection.apiUrl }}</SearchLabel></template>
 									<template #caption>
-										<SearchText>{{ i18n.ts._sensitiveMediaDetection.apiUrlDescription }}</SearchText>
-										<div>{{ i18n.tsx._sensitiveMediaDetection.serverSettingDescription({ value: meta.sensitiveMediaDetectionDefaults.apiUrl ?? i18n.ts.notSet }) }}</div>
+										<SearchText>{{ i18n.ts._hana._sensitiveMediaDetection.apiUrlDescription }}</SearchText>
+										<div>{{ i18n.tsx._hana._sensitiveMediaDetection.serverSettingDescription({ value: meta.sensitiveMediaDetectionDefaults.apiUrl ?? i18n.ts.notSet }) }}</div>
 									</template>
 								</MkInput>
 							</SearchMarker>
@@ -52,17 +52,17 @@ SPDX-License-Identifier: AGPL-3.0-only
 								<MkSelect
 									v-model="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionApiKeyMode"
 									:items="[
-										{ value: 'inherit', label: i18n.ts._sensitiveMediaDetection.useServerSetting },
-										{ value: 'custom', label: i18n.ts._sensitiveMediaDetection.specifyApiKey },
-										{ value: 'none', label: i18n.ts._sensitiveMediaDetection.noAuthentication },
+										{ value: 'inherit', label: i18n.ts._hana._sensitiveMediaDetection.useServerSetting },
+										{ value: 'custom', label: i18n.ts._hana._sensitiveMediaDetection.specifyApiKey },
+										{ value: 'none', label: i18n.ts._hana._sensitiveMediaDetection.noAuthentication },
 									]"
 								>
 									<template #label><SearchLabel>{{ i18n.ts._sensitiveMediaDetection.apiKey }}</SearchLabel></template>
-									<template #caption><SearchText>{{ i18n.ts._sensitiveMediaDetection.apiKeyDescription }}</SearchText></template>
+									<template #caption><SearchText>{{ i18n.ts._hana._sensitiveMediaDetection.apiKeyDescription }}</SearchText></template>
 								</MkSelect>
 								<MkInput v-if="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionApiKeyMode === 'custom'" v-model="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionApiKey" type="password" autocomplete="new-password" required>
 									<template #prefix><i class="ti ti-key"></i></template>
-									<template #label><SearchLabel>{{ i18n.ts._sensitiveMediaDetection.specifyApiKey }}</SearchLabel></template>
+									<template #label><SearchLabel>{{ i18n.ts._hana._sensitiveMediaDetection.specifyApiKey }}</SearchLabel></template>
 								</MkInput>
 							</SearchMarker>
 
@@ -70,15 +70,15 @@ SPDX-License-Identifier: AGPL-3.0-only
 								<MkSelect
 									v-model="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionUseProxy"
 									:items="[
-										{ value: 'default', label: i18n.ts._sensitiveMediaDetection.useServerSetting },
+										{ value: 'default', label: i18n.ts._hana._sensitiveMediaDetection.useServerSetting },
 										{ value: 'on', label: i18n.ts.enabled },
 										{ value: 'off', label: i18n.ts.disabled },
 									]"
 								>
-									<template #label><SearchLabel>{{ i18n.ts._sensitiveMediaDetection.useProxy }}</SearchLabel></template>
+									<template #label><SearchLabel>{{ i18n.ts._hana._sensitiveMediaDetection.useProxy }}</SearchLabel></template>
 									<template #caption>
-										<SearchText>{{ i18n.ts._sensitiveMediaDetection.useProxyDescription }}</SearchText>
-										<div>{{ i18n.tsx._sensitiveMediaDetection.serverSettingDescription({ value: meta.sensitiveMediaDetectionDefaults.useProxy ? i18n.ts.enabled : i18n.ts.disabled }) }}</div>
+										<SearchText>{{ i18n.ts._hana._sensitiveMediaDetection.useProxyDescription }}</SearchText>
+										<div>{{ i18n.tsx._hana._sensitiveMediaDetection.serverSettingDescription({ value: meta.sensitiveMediaDetectionDefaults.useProxy ? i18n.ts.enabled : i18n.ts.disabled }) }}</div>
 									</template>
 								</MkSelect>
 							</SearchMarker>
@@ -92,7 +92,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 									<template #label><SearchLabel>{{ i18n.ts._sensitiveMediaDetection.timeout }}</SearchLabel></template>
 									<template #caption>
 										<SearchText>{{ i18n.ts._sensitiveMediaDetection.timeoutDescription }}</SearchText>
-										<div>{{ i18n.tsx._sensitiveMediaDetection.serverSettingDescription({ value: `${meta.sensitiveMediaDetectionDefaults.timeout}ms` }) }}</div>
+										<div>{{ i18n.tsx._hana._sensitiveMediaDetection.serverSettingDescription({ value: `${meta.sensitiveMediaDetectionDefaults.timeout}ms` }) }}</div>
 									</template>
 								</MkInput>
 							</SearchMarker>
@@ -105,7 +105,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 									<template #label><SearchLabel>{{ i18n.ts._sensitiveMediaDetection.maxImagesPerRequest }}</SearchLabel></template>
 									<template #caption>
 										<SearchText>{{ i18n.ts._sensitiveMediaDetection.maxImagesPerRequestDescription }}</SearchText>
-										<div>{{ i18n.tsx._sensitiveMediaDetection.serverSettingDescription({ value: meta.sensitiveMediaDetectionDefaults.maxImagesPerRequest }) }}</div>
+										<div>{{ i18n.tsx._hana._sensitiveMediaDetection.serverSettingDescription({ value: meta.sensitiveMediaDetectionDefaults.maxImagesPerRequest }) }}</div>
 									</template>
 								</MkInput>
 							</SearchMarker>
