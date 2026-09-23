@@ -453,7 +453,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			}
 
 			if (ps.sensitiveMediaDetectionApiUrl !== undefined) {
-				set.sensitiveMediaDetectionApiUrl = ps.sensitiveMediaDetectionApiUrl?.trim() || null;
+				set.sensitiveMediaDetectionApiUrl = ps.sensitiveMediaDetectionApiUrl === '' ? null : ps.sensitiveMediaDetectionApiUrl;
 			}
 
 			if (ps.sensitiveMediaDetectionApiKey !== undefined) {
