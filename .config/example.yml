@@ -463,7 +463,7 @@ proxyBypassHosts:
 #     # default: false
 #     disableQueryTruncation: false
 
-# Hana: sensitive media detection service
+# Sensitive media detection service
 # Control panel settings take precedence.
 #sensitiveMediaDetection:
 #  apiUrl: http://sensitive-detector:3009
