@@ -464,9 +464,7 @@ proxyBypassHosts:
 #     disableQueryTruncation: false
 
 # Hana: sensitive media detection service
-# Values saved in the control panel override these defaults for each setting.
-# Omitted settings use no URL, no authentication, useProxy: true, timeout: 60000,
-# and maxImagesPerRequest: 4. Restart Misskey after changing this file.
+# Control panel settings take precedence.
 #sensitiveMediaDetection:
 #  apiUrl: http://sensitive-detector:3009
 #  apiKey: your-api-key
