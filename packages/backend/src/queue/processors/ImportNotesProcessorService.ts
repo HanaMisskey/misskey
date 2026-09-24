@@ -83,6 +83,23 @@ export class ImportNotesProcessorService {
 	}
 
 	@bindThis
+	private async extractZip(path: string, outputPath: string): Promise<void> {
+		ZipReader.withDestinationPath(outputPath).viaBuffer(await fsp.readFile(path));
+
+		const directories = [outputPath];
+		while (directories.length > 0) {
+			const directory = directories.pop()!;
+			for (const entry of await fsp.readdir(directory, { withFileTypes: true })) {
+				if (entry.isDirectory()) {
+					directories.push(`${directory}/${entry.name}`);
+				} else if (!entry.isFile()) {
+					throw new Error('Unsupported file in archive');
+				}
+			}
+		}
+	}
+
+	@bindThis
 	private async recreateChain(idFieldPath: string[], replyFieldPath: string[], arr: any[], includeOrphans: boolean): Promise<any[]> {
 		type NotesMap = {
 			[id: string]: any;
@@ -196,7 +213,7 @@ export class ImportNotesProcessorService {
 			const outputPath = path + '/twitter';
 			try {
 				this.logger.succ(`Unzipping to ${outputPath}`);
-				ZipReader.withDestinationPath(outputPath).viaBuffer(await fsp.readFile(destPath));
+				await this.extractZip(destPath, outputPath);
 				this.logger.succ('processing ' + outputPath + '/data/tweets.js');
 				const unprocessedTweets = this.parseTwitterFile(await fsp.readFile(outputPath + '/data/tweets.js', 'utf-8'));
 
@@ -235,7 +252,7 @@ export class ImportNotesProcessorService {
 			const outputPath = path + '/facebook';
 			try {
 				this.logger.succ(`Unzipping to ${outputPath}`);
-				ZipReader.withDestinationPath(outputPath).viaBuffer(await fsp.readFile(destPath));
+				await this.extractZip(destPath, outputPath);
 				const postsJson = await fsp.readFile(outputPath + '/your_activity_across_facebook/posts/your_posts__check_ins__photos_and_videos_1.json', 'utf-8');
 				const posts = JSON.parse(postsJson);
 				const facebookFolder = await this.driveFoldersRepository.findOneBy({ name: 'Facebook', userId: job.data.user.id, parentId: folder?.id });
@@ -268,7 +285,7 @@ export class ImportNotesProcessorService {
 			const outputPath = path + '/unknown';
 			try {
 				this.logger.succ(`Unzipping to ${outputPath}`);
-				ZipReader.withDestinationPath(outputPath).viaBuffer(await fsp.readFile(destPath));
+				await this.extractZip(destPath, outputPath);
 				const isInstagram = type === 'Instagram' || fs.existsSync(outputPath + '/instagram_live') || fs.existsSync(outputPath + '/instagram_ads_and_businesses');
 				const isOutbox = type === 'Mastodon' || fs.existsSync(outputPath + '/outbox.json');
 				if (isInstagram) {
