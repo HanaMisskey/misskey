@@ -1,6 +1,6 @@
 services:
   nginx:
-    image: nginx:1.27
+    image: nginx:1.30
     volumes:
       - type: bind
         source: ./certificates/rootCA.crt
@@ -31,6 +31,10 @@ services:
         target: /misskey/packages/backend/built
         read_only: true
       - type: bind
+        source: ../src-js
+        target: /misskey/packages/backend/src-js
+        read_only: true
+      - type: bind
         source: ../migration
         target: /misskey/packages/backend/migration
         read_only: true
@@ -49,6 +53,14 @@ services:
       - type: bind
         source: ../../misskey-js/package.json
         target: /misskey/packages/misskey-js/package.json
+        read_only: true
+      - type: bind
+        source: ../../i18n/built
+        target: /misskey/packages/i18n/built
+        read_only: true
+      - type: bind
+        source: ../../i18n/package.json
+        target: /misskey/packages/i18n/package.json
         read_only: true
       - type: bind
         source: ../../misskey-reversi/built

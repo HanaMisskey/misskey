@@ -7,7 +7,7 @@ process.env.NODE_ENV = 'test';
 
 import * as assert from 'assert';
 import * as crypto from 'node:crypto';
-import cbor from 'cbor';
+import { encode as encodeToCbor } from 'cbor2';
 import * as OTPAuth from 'otpauth';
 import { loadConfig } from '@/config.js';
 import { api, signup, sendEnvUpdateRequest } from '../utils.js';
@@ -18,8 +18,9 @@ import type {
 	PublicKeyCredentialCreationOptionsJSON,
 	PublicKeyCredentialRequestOptionsJSON,
 	RegistrationResponseJSON,
-} from '@simplewebauthn/types';
+} from '@simplewebauthn/server';
 import type * as misskey from 'misskey-js';
+import { describe, beforeAll, beforeEach, test } from 'vitest';
 
 describe('2要素認証', () => {
 	let alice: misskey.entities.SignupResponse;
@@ -60,7 +61,7 @@ describe('2要素認証', () => {
 	const keyDoneParam = (param: {
 		token: string,
 		keyName: string,
-		credentialId: Buffer,
+		credentialId: Uint8Array,
 		creationOptions: PublicKeyCredentialCreationOptionsJSON,
 	}): {
 		token: string,
@@ -69,10 +70,10 @@ describe('2要素認証', () => {
 		credential: RegistrationResponseJSON,
 	} => {
 		// A COSE encoded public key
-		const credentialPublicKey = cbor.encode(new Map<number, unknown>([
+		const credentialPublicKey = encodeToCbor(new Map<number, unknown>([
 			[-1, coseEc2CrvP256],
-			[-2, Buffer.from(coseEc2X, 'hex')],
-			[-3, Buffer.from(coseEc2Y, 'hex')],
+			[-2, Uint8Array.from(Buffer.from(coseEc2X, 'hex'))],
+			[-3, Uint8Array.from(Buffer.from(coseEc2Y, 'hex'))],
 			[1, coseKtyEc2],
 			[2, coseKid],
 			[3, coseAlgEs256],
@@ -84,21 +85,23 @@ describe('2要素認証', () => {
 		credentialIdLength.writeUInt16BE(param.credentialId.length, 0);
 		const authData = Buffer.concat([
 			rpIdHash(), // rpIdHash(32)
-			Buffer.from([0x45]), // flags(1)
-			Buffer.from([0x00, 0x00, 0x00, 0x00]), // signCount(4)
-			Buffer.from([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]), // AAGUID(16)
+			new Uint8Array([0x45]), // flags(1)
+			new Uint8Array(4), // signCount(4)
+			new Uint8Array(16), // AAGUID(16)
 			credentialIdLength,
 			param.credentialId,
 			credentialPublicKey,
 		]);
+
+		const credentialIdBase64url = Buffer.from(param.credentialId).toString('base64url');
 
 		return {
 			password,
 			token: param.token,
 			name: param.keyName,
 			credential: <RegistrationResponseJSON>{
-				id: param.credentialId.toString('base64url'),
-				rawId: param.credentialId.toString('base64url'),
+				id: credentialIdBase64url,
+				rawId: credentialIdBase64url,
 				response: <AuthenticatorAttestationResponseJSON>{
 					clientDataJSON: Buffer.from(JSON.stringify({
 						type: 'webauthn.create',
@@ -106,11 +109,11 @@ describe('2要素認証', () => {
 						origin: config.scheme + '://' + config.host,
 						androidPackageName: 'org.mozilla.firefox',
 					}), 'utf-8').toString('base64url'),
-					attestationObject: cbor.encode({
+					attestationObject: Buffer.from(encodeToCbor({
 						fmt: 'none',
 						attStmt: {},
-						authData,
-					}).toString('base64url'),
+						authData: new Uint8Array(authData),
+					})).toString('base64url'),
 				},
 				clientExtensionResults: {},
 				type: 'public-key',

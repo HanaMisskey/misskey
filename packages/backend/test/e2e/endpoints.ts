@@ -6,12 +6,15 @@
 process.env.NODE_ENV = 'test';
 
 import * as assert from 'assert';
+import { describe, beforeAll, test, expect, vi } from 'vitest';
 // node-fetch only supports it's own Blob yet
 // https://github.com/node-fetch/node-fetch/pull/1664
 import { Blob } from 'node-fetch';
-import { api, castAsError, initTestDb, post, signup, simpleGet, uploadFile } from '../utils.js';
+import { api, castAsError, initTestDb, post, role, signup, simpleGet, uploadFile } from '../utils.js';
 import type * as misskey from 'misskey-js';
 import { MiUser } from '@/models/_.js';
+
+const waitForPushToTlOptions = { timeout: 3000, interval: 25 };
 
 describe('Endpoints', () => {
 	let alice: misskey.entities.SignupResponse;
@@ -26,6 +29,32 @@ describe('Endpoints', () => {
 		dave = await signup({ username: 'dave' });
 		await api('admin/update-meta', { federation: 'all' }, alice as misskey.entities.SignupResponse);
 	}, 1000 * 60 * 2);
+
+	/** PR #424: 空キー・false は明示値として保存でき、null を保存すればファイル設定の継承へ戻せる。 */
+	test('admin/meta はセンシティブ判定の明示値と継承への復帰を保存・取得できる', async () => {
+		const original = await api('admin/meta', {}, alice);
+		expect(original.status).toBe(200);
+		try {
+			for (const settings of [
+				{ sensitiveMediaDetectionApiKey: '', sensitiveMediaDetectionUseProxy: false,
+					sensitiveMediaDetectionTimeout: 8000, sensitiveMediaDetectionMaxImagesPerRequest: 2 },
+				{ sensitiveMediaDetectionApiKey: null, sensitiveMediaDetectionUseProxy: null,
+					sensitiveMediaDetectionTimeout: null, sensitiveMediaDetectionMaxImagesPerRequest: null },
+			]) {
+				expect((await api('admin/update-meta', settings, alice)).status).toBe(204);
+				const response = await api('admin/meta', {}, alice);
+				expect(response.status).toBe(200);
+				expect(response.body).toMatchObject(settings);
+			}
+		} finally {
+			expect((await api('admin/update-meta', {
+				sensitiveMediaDetectionApiKey: original.body.sensitiveMediaDetectionApiKey,
+				sensitiveMediaDetectionUseProxy: original.body.sensitiveMediaDetectionUseProxy,
+				sensitiveMediaDetectionTimeout: original.body.sensitiveMediaDetectionTimeout,
+				sensitiveMediaDetectionMaxImagesPerRequest: original.body.sensitiveMediaDetectionMaxImagesPerRequest,
+			}, alice)).status).toBe(204);
+		}
+	});
 
 	describe('signup', () => {
 		test('不正なユーザー名でアカウントが作成できない', async () => {
@@ -581,6 +610,30 @@ describe('Endpoints', () => {
 	});
 
 	describe('drive/files/create', () => {
+		const assignRole = async (userId: string, policies: Record<string, unknown>) => {
+			const createdRole = await role(alice, {}, policies);
+
+			const assign = await api('admin/roles/assign', {
+				userId,
+				roleId: createdRole.id,
+			}, alice);
+
+			assert.strictEqual(assign.status, 204);
+
+			return createdRole;
+		};
+
+		const cleanupRole = async (userId: string, roleId: string) => {
+			await api('admin/roles/unassign', {
+				userId,
+				roleId,
+			}, alice);
+
+			await api('admin/roles/delete', {
+				roleId,
+			}, alice);
+		};
+
 		test('ファイルを作成できる', async () => {
 			const res = await uploadFile(alice);
 
@@ -659,6 +712,104 @@ describe('Endpoints', () => {
 				assert.strictEqual(webpublicType, 'image/webp');
 			});
 		}
+
+		test('uploadableFileTypes が */* なら任意のファイルをアップロードできる', async () => {
+			const createdRole = await assignRole(bob.id, {
+				uploadableFileTypes: {
+					useDefault: false,
+					priority: 1,
+					value: ['*/*'],
+				},
+			});
+
+			try {
+				const res = await uploadFile(bob, {
+					blob: new Blob([new Uint8Array(10)]),
+				});
+
+				assert.strictEqual(res.status, 200);
+			} finally {
+				await cleanupRole(bob.id, createdRole.id);
+			}
+		});
+
+		test('uploadableFileTypes に含まれない MIME type は拒否される', async () => {
+			const createdRole = await assignRole(bob.id, {
+				uploadableFileTypes: {
+					useDefault: false,
+					priority: 1,
+					value: ['image/png'],
+				},
+			});
+
+			try {
+				const res = await uploadFile(bob, { path: '192.jpg' });
+
+				assert.strictEqual(res.status, 400);
+				assert.ok(res.body);
+				assert.strictEqual(castAsError(res.body).error.code, 'UNALLOWED_FILE_TYPE');
+			} finally {
+				await cleanupRole(bob.id, createdRole.id);
+			}
+		});
+
+		test('maxFileSizeMb 制限付きロールでも制限内ならアップロードできる', async () => {
+			const allowAllTypesRole = await assignRole(bob.id, {
+				uploadableFileTypes: {
+					useDefault: false,
+					priority: 1,
+					value: ['*/*'],
+				},
+			});
+			const tinyAttachmentRole = await assignRole(bob.id, {
+				maxFileSizeMb: {
+					useDefault: false,
+					priority: 1,
+					value: 10 / 1024 / 1024, // 10バイト
+				},
+			});
+
+			try {
+				const res = await uploadFile(bob, {
+					blob: new Blob([new Uint8Array(10)]),
+				});
+
+				assert.strictEqual(res.status, 200);
+			} finally {
+				await cleanupRole(bob.id, tinyAttachmentRole.id);
+				await cleanupRole(bob.id, allowAllTypesRole.id);
+			}
+		});
+
+		test('maxFileSizeMb 制限を超えると 413 になる', async () => {
+			const allowAllTypesRole = await assignRole(bob.id, {
+				uploadableFileTypes: {
+					useDefault: false,
+					priority: 1,
+					value: ['*/*'],
+				},
+			});
+			const tinyAttachmentRole = await assignRole(bob.id, {
+				maxFileSizeMb: {
+					useDefault: false,
+					priority: 1,
+					value: 10 / 1024 / 1024, // 10バイト
+				},
+			});
+
+			try {
+				const res = await uploadFile(bob, {
+					blob: new Blob([new Uint8Array(11)]),
+				});
+
+				assert.strictEqual(res.status, 413);
+				assert.ok(res.body);
+				assert.strictEqual(castAsError(res.body).error.code, 'MAX_FILE_SIZE_EXCEEDED');
+			} finally {
+				await cleanupRole(bob.id, tinyAttachmentRole.id);
+				await cleanupRole(bob.id, allowAllTypesRole.id);
+			}
+		});
 	});
 
 	describe('drive/files/update', () => {
@@ -1026,12 +1177,14 @@ describe('Endpoints', () => {
 				visibility: 'followers',
 			});
 
-			const res = await api('notes/timeline', {}, dave);
+			await vi.waitFor(async () => {
+				const res = await api('notes/timeline', {}, dave);
 
-			assert.strictEqual(res.status, 200);
-			assert.strictEqual(Array.isArray(res.body), true);
-			assert.strictEqual(res.body.length, 1);
-			assert.strictEqual(res.body[0].id, carolPost.id);
+				assert.strictEqual(res.status, 200);
+				assert.strictEqual(Array.isArray(res.body), true);
+				assert.strictEqual(res.body.length, 1);
+				assert.strictEqual(res.body[0].id, carolPost.id);
+			}, waitForPushToTlOptions);
 		});
 	});
 

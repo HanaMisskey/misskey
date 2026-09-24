@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, Scope } from '@nestjs/common';
 import type { Packed } from '@/misc/json-schema.js';
 import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
 import { NoteStreamingHidingService } from '../NoteStreamingHidingService.js';
@@ -12,9 +12,11 @@ import { RoleService } from '@/core/RoleService.js';
 import { isRenotePacked, isQuotePacked } from '@/misc/is-renote.js';
 import type { JsonObject } from '@/misc/json-value.js';
 import { FeaturedService } from '@/core/FeaturedService.js';
-import Channel, { type MiChannelService } from '../channel.js';
+import Channel, { type ChannelRequest } from '../channel.js';
+import { REQUEST } from '@nestjs/core';
 
-class HanamiTimelineChannel extends Channel {
+@Injectable({ scope: Scope.TRANSIENT })
+export class HanamiTimelineChannel extends Channel {
 	public readonly chName = 'hanamiTimeline';
 	public static shouldShare = false;
 	public static requireCredential = true as const;
@@ -27,15 +29,15 @@ class HanamiTimelineChannel extends Channel {
 	private globalNotesRankingCacheLastFetchedAt = 0;
 
 	constructor(
+		@Inject(REQUEST)
+		request: ChannelRequest,
+
 		private noteEntityService: NoteEntityService,
 		private roleService: RoleService,
 		private featuredService: FeaturedService,
 		private noteStreamingHidingService: NoteStreamingHidingService,
-
-		id: string,
-		connection: Channel['connection'],
 	) {
-		super(id, connection);
+		super(request);
 		//this.onNote = this.onNote.bind(this);
 	}
 
@@ -142,32 +144,5 @@ class HanamiTimelineChannel extends Channel {
 	public dispose() {
 		// Unsubscribe events
 		this.subscriber.off('notesStream', this.onNote);
-	}
-}
-
-@Injectable()
-export class HanamiTimelineChannelService implements MiChannelService<true> {
-	public readonly shouldShare = HanamiTimelineChannel.shouldShare;
-	public readonly requireCredential = HanamiTimelineChannel.requireCredential;
-	public readonly kind = HanamiTimelineChannel.kind;
-
-	constructor(
-		private noteEntityService: NoteEntityService,
-		private roleService: RoleService,
-		private featuredService: FeaturedService,
-		private noteStreamingHidingService: NoteStreamingHidingService,
-	) {
-	}
-
-	@bindThis
-	public create(id: string, connection: Channel['connection']): HanamiTimelineChannel {
-		return new HanamiTimelineChannel(
-			this.noteEntityService,
-			this.roleService,
-			this.featuredService,
-			this.noteStreamingHidingService,
-			id,
-			connection,
-		);
 	}
 }

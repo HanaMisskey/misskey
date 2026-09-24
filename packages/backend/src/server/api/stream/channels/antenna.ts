@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Scope } from '@nestjs/common';
 import { DI } from '@/di-symbols.js';
 import type { AntennasRepository } from '@/models/_.js';
 import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
@@ -12,9 +12,11 @@ import { bindThis } from '@/decorators.js';
 import { isRenotePacked, isQuotePacked } from '@/misc/is-renote.js';
 import type { GlobalEvents } from '@/core/GlobalEventService.js';
 import type { JsonObject } from '@/misc/json-value.js';
-import Channel, { type MiChannelService } from '../channel.js';
+import Channel, { type ChannelRequest } from '../channel.js';
+import { REQUEST } from '@nestjs/core';
 
-class AntennaChannel extends Channel {
+@Injectable({ scope: Scope.TRANSIENT })
+export class AntennaChannel extends Channel {
 	public readonly chName = 'antenna';
 	public static shouldShare = false;
 	public static requireCredential = true as const;
@@ -22,14 +24,16 @@ class AntennaChannel extends Channel {
 	private antennaId: string;
 
 	constructor(
+		@Inject(REQUEST)
+		request: ChannelRequest,
+
+		@Inject(DI.antennasRepository)
 		private antennasReposiotry: AntennasRepository,
+
 		private noteEntityService: NoteEntityService,
 		private noteStreamingHidingService: NoteStreamingHidingService,
-
-		id: string,
-		connection: Channel['connection'],
 	) {
-		super(id, connection);
+		super(request);
 		//this.onEvent = this.onEvent.bind(this);
 	}
 
@@ -60,8 +64,7 @@ class AntennaChannel extends Channel {
 		if (data.type === 'note') {
 			let note = await this.noteEntityService.pack(data.body.id, this.user, { detail: true });
 
-			if (note.isHidden) return;
-
+			if (!this.isNoteVisibleForMe(note)) return;
 			if (this.isNoteMutedOrBlocked(note)) return;
 
 			const filtered = await this.noteStreamingHidingService.filter(note, this.user?.id ?? null);
@@ -87,32 +90,5 @@ class AntennaChannel extends Channel {
 	public dispose() {
 		// Unsubscribe events
 		this.subscriber.off(`antennaStream:${this.antennaId}`, this.onEvent);
-	}
-}
-
-@Injectable()
-export class AntennaChannelService implements MiChannelService<true> {
-	public readonly shouldShare = AntennaChannel.shouldShare;
-	public readonly requireCredential = AntennaChannel.requireCredential;
-	public readonly kind = AntennaChannel.kind;
-
-	constructor(
-		@Inject(DI.antennasRepository)
-		private antennasReposiotry: AntennasRepository,
-
-		private noteEntityService: NoteEntityService,
-		private noteStreamingHidingService: NoteStreamingHidingService,
-	) {
-	}
-
-	@bindThis
-	public create(id: string, connection: Channel['connection']): AntennaChannel {
-		return new AntennaChannel(
-			this.antennasReposiotry,
-			this.noteEntityService,
-			this.noteStreamingHidingService,
-			id,
-			connection,
-		);
 	}
 }

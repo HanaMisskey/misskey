@@ -19,7 +19,7 @@ import { UtilityService } from '@/core/UtilityService.js';
 import { isMustRemove } from '@/misc/is-hidden-or-visibility-modified.js';
 import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
 import { removeMutedUsersReactions } from '@/misc/reactions-mute.js';
-import type { Index, MeiliSearch } from 'meilisearch';
+import type { Index, Meilisearch } from 'meilisearch';
 
 const SEARCH_EMPTY_PAGE_RETRY_LIMIT = 5;
 
@@ -122,7 +122,7 @@ export class HanamiSearchService {
 		private config: Config,
 
 		@Inject(DI.hanamisearch)
-		private hanamisearch: MeiliSearch | null,
+		private hanamisearch: Meilisearch | null,
 
 		@Inject(DI.notesRepository)
 		private notesRepository: NotesRepository,
@@ -145,7 +145,7 @@ export class HanamiSearchService {
 		}
 	}
 
-	private initializeIndex(searchClient: MeiliSearch, indexName: string): Index {
+	private initializeIndex(searchClient: Meilisearch, indexName: string): Index {
 		const index = searchClient.index(indexName);
 		index.updateSettings({
 			searchableAttributes: ['text', 'cw'],

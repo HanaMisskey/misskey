@@ -1,4 +1,4 @@
-import { describe, expect, test } from '@jest/globals';
+import { describe, expect, test } from 'vitest';
 import { buildHanamiSearchDocument } from '@/core/hanamisearch/HanamiSearchService.js';
 import { MiNote } from '@/models/Note.js';
 

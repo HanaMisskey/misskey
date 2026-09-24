@@ -38,11 +38,7 @@ export interface BroadcastTypes {
 		emojis: Packed<'EmojiDetailed'>[];
 	};
 	emojiDeleted: {
-		emojis: {
-			id?: string;
-			name: string;
-			[other: string]: any;
-		}[];
+		emojis: Packed<'EmojiDetailed'>[];
 	};
 	announcementCreated: {
 		announcement: Packed<'Announcement'>;
@@ -267,7 +263,7 @@ export interface InternalEventTypes {
 	userListMemberRemoved: { userListId: MiUserList['id']; memberId: MiUser['id']; };
 }
 
-type EventTypesToEventPayload<T> = EventUnionFromDictionary<UndefinedAsNullAll<SerializedAll<T>>>;
+export type EventTypesToEventPayload<T> = EventUnionFromDictionary<UndefinedAsNullAll<SerializedAll<T>>>;
 
 // name/messages(spec) pairs dictionary
 export type GlobalEvents = {

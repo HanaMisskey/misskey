@@ -6,9 +6,10 @@
 import * as Misskey from 'misskey-js';
 import { hemisphere } from '@@/js/intl-const.js';
 import { isTouchUsing } from '@/utility/touch.js';
+import { DEFAULT_EMOJIS } from '@@/js/const.js';
 import { prefersReducedMotion } from '@@/js/config.js';
 import { definePreferences } from './manager.js';
-import type { Theme } from '@/theme.js';
+import type { Theme } from '@@/js/theme.js';
 import type { SoundType } from '@/utility/sound.js';
 import type { Plugin } from '@/plugin.js';
 import type { DeviceKind } from '@/utility/device-kind.js';
@@ -104,7 +105,7 @@ export const PREF_DEF = definePreferences({
 		default: () => [{
 			id: genId(),
 			name: '',
-			emojis: ['👍', '❤️', '😆', '🤔', '😮', '🎉', '💢', '😥', '😇', '🍮'],
+			emojis: DEFAULT_EMOJIS,
 		}] as {
 			id: string;
 			name: string;
@@ -235,7 +236,7 @@ export const PREF_DEF = definePreferences({
 		default: false,
 	},
 	emojiStyle: {
-		default: 'twemoji', // twemoji / fluentEmoji / native
+		default: 'twemoji' as 'native' | 'fluentEmoji' | 'twemoji',
 	},
 	menuStyle: {
 		default: 'auto' as 'auto' | 'popup' | 'drawer',
@@ -326,9 +327,6 @@ export const PREF_DEF = definePreferences({
 	},
 	notificationStackAxis: {
 		default: 'horizontal' as 'vertical' | 'horizontal',
-	},
-	enableCondensedLine: {
-		default: true,
 	},
 	keepScreenOn: {
 		default: false,
@@ -501,7 +499,7 @@ export const PREF_DEF = definePreferences({
 		default: true,
 	},
 	'deck.columnAlign': {
-		default: 'center' as 'left' | 'right' | 'center',
+		default: 'center' as 'left' | 'center',
 	},
 	'deck.columnGap': {
 		default: 6,

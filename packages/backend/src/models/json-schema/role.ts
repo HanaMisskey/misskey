@@ -68,7 +68,7 @@ export const packedRoleCondFormulaValueUserSettingBooleanSchema = {
 		type: {
 			type: 'string',
 			nullable: false, optional: false,
-			enum: ['isSuspended', 'isLocked', 'isBot', 'isCat', 'isExplorable'],
+			enum: ['isSuspended', 'isLocked', 'isBot', 'isCat', 'isExplorable', 'isInHanaMode'],
 		},
 	},
 } as const;
@@ -258,6 +258,10 @@ export const packedRolePoliciesSchema = {
 			optional: false, nullable: false,
 		},
 		canHideAds: {
+			type: 'boolean',
+			optional: false, nullable: false,
+		},
+		canCreateChannel: {
 			type: 'boolean',
 			optional: false, nullable: false,
 		},

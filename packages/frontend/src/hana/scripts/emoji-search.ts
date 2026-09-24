@@ -40,64 +40,58 @@ function postMessageWithHandler<T>(opts: {
 	});
 }
 
-export function initEmojiSearch(regenerateIndex = false, emojis?: Misskey.entities.EmojiSimple[]) {
-	return new Promise<void>(async (resolve) => {
-		if (!emojiSearchWorker || import.meta.env.MODE === 'test') {
-			resolve();
-			return;
-		}
+export async function initEmojiSearch(regenerateIndex = false, emojis?: Misskey.entities.EmojiSimple[]) {
+	if (!emojiSearchWorker || import.meta.env.MODE === 'test') {
+		return;
+	}
 
-		const preCompiledIndexV1 = await get('emojiSearchIndex');
+	const preCompiledIndexV1 = await get('emojiSearchIndex');
 
-		if (preCompiledIndexV1 != null) {
-			await del('emojiSearchIndex');
-		}
+	if (preCompiledIndexV1 != null) {
+		await del('emojiSearchIndex');
+	}
 
-		const preCompiledIndex = await get(INDEX_NAME);
+	const preCompiledIndex = await get(INDEX_NAME);
 
-		if (_DEV_) console.log('[Emoji Search] Initializing Emoji Search', { preCompiledIndex });
+	if (_DEV_) console.log('[Emoji Search] Initializing Emoji Search', { preCompiledIndex });
 
-		try {
+	try {
+		await postMessageWithHandler({
+			worker: emojiSearchWorker,
+			message: { type: 'init', preCompiledIndex: !regenerateIndex && preCompiledIndex instanceof Uint8Array ? preCompiledIndex : undefined },
+			expectedType: 'init',
+		});
+
+		hasInitialized = true;
+
+		if (regenerateIndex || preCompiledIndex == null || !(preCompiledIndex instanceof Uint8Array)) {
+			if (_DEV_) console.log('[Emoji Search] No precompiled index found, creating a new one');
+
+			const _emojis: Misskey.entities.EmojiSimple[] = emojis ?? (await get('emojis')) ?? [];
+
+			const emojisToBeIndexed = {
+				emojis: _emojis.map((emoji) => ({
+					name: emoji.name,
+					aliases: emoji.aliases,
+				})),
+			} satisfies SearchIndex;
+
 			await postMessageWithHandler({
-				worker: emojiSearchWorker,
-				message: { type: 'init', preCompiledIndex: !regenerateIndex && preCompiledIndex instanceof Uint8Array ? preCompiledIndex : undefined },
-				expectedType: 'init',
+				worker: emojiSearchWorker!,
+				message: { type: 'createIndex', emojis: emojisToBeIndexed },
+				expectedType: 'createIndex',
 			});
 
-			hasInitialized = true;
-
-			if (regenerateIndex || preCompiledIndex == null || !(preCompiledIndex instanceof Uint8Array)) {
-				if (_DEV_) console.log('[Emoji Search] No precompiled index found, creating a new one');
-
-				const _emojis: Misskey.entities.EmojiSimple[] = emojis ?? (await get('emojis')) ?? [];
-
-				const emojisToBeIndexed = {
-					emojis: _emojis.map((emoji) => ({
-						name: emoji.name,
-						aliases: emoji.aliases,
-					})),
-				} satisfies SearchIndex;
-
-				await postMessageWithHandler({
-					worker: emojiSearchWorker!,
-					message: { type: 'createIndex', emojis: emojisToBeIndexed },
-					expectedType: 'createIndex',
-				});
-
-				await postMessageWithHandler({
-					worker: emojiSearchWorker!,
-					message: { type: 'dumpIndex' },
-					expectedType: 'dumpIndex',
-					handler: (dumpData) => set(INDEX_NAME, dumpData.data),
-				});
-			}
-
-			resolve();
-		} catch (error) {
-			console.error('Failed to initialize Emoji Search', error);
-			resolve();
+			await postMessageWithHandler({
+				worker: emojiSearchWorker!,
+				message: { type: 'dumpIndex' },
+				expectedType: 'dumpIndex',
+				handler: (dumpData) => set(INDEX_NAME, dumpData.data),
+			});
 		}
-	});
+	} catch (error) {
+		console.error('Failed to initialize Emoji Search', error);
+	}
 }
 
 export async function searchCustomEmojis(query: string, limit = 10) {

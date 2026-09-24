@@ -28,8 +28,8 @@ import { makeHotkey } from '@/utility/hotkey.js';
 import { addCustomEmoji, removeCustomEmojis, updateCustomEmojis } from '@/custom-emojis.js';
 import { prefer } from '@/preferences.js';
 import { updateCurrentAccountPartial } from '@/accounts.js';
-import { migrateOldSettings } from '@/pref-migrate.js';
 import { unisonReload } from '@/utility/unison-reload.js';
+import { isBirthday } from '@/utility/is-birthday.js';
 
 export async function mainBoot() {
 	const { isClientUpdated, lastVersion } = await common(async () => {
@@ -69,14 +69,6 @@ export async function mainBoot() {
 		const { dispose } = popup(defineAsyncComponent(() => import('@/components/HanaUpdated.vue')), {}, {
 			closed: () => dispose(),
 		});
-
-		// prefereces migration
-		// TODO: そのうち消す
-		if (lastVersion && (compareVersions('2025.3.2-alpha.0', lastVersion) === 1)) {
-			console.log('Preferences migration');
-
-			migrateOldSettings();
-		}
 	}
 
 	try {
@@ -142,12 +134,8 @@ export async function mainBoot() {
 		const m = now.getMonth() + 1;
 		const d = now.getDate();
 
-		if ($i.birthday) {
-			const bm = parseInt($i.birthday.split('-')[1]);
-			const bd = parseInt($i.birthday.split('-')[2]);
-			if (m === bm && d === bd) {
-				claimAchievement('loggedInOnBirthday');
-			}
+		if (isBirthday($i, now)) {
+			claimAchievement('loggedInOnBirthday');
 		}
 
 		if (m === 1 && d === 1) {
@@ -395,8 +383,20 @@ export async function mainBoot() {
 			if ($i == null) return;
 			post();
 		},
-		'd': () => {
-			store.set('darkMode', !store.s.darkMode);
+		'd': async () => {
+			const value = !store.s.darkMode;
+			if (prefer.s.syncDeviceDarkMode) {
+				const { canceled } = await confirm({
+					type: 'question',
+					text: i18n.tsx.switchDarkModeManuallyWhenSyncEnabledConfirm({ x: i18n.ts.syncDeviceDarkMode }),
+				});
+				if (canceled) return;
+
+				prefer.commit('syncDeviceDarkMode', false);
+				store.set('darkMode', value);
+			} else {
+				store.set('darkMode', value);
+			}
 		},
 		's': () => {
 			mainRouter.push('/search');

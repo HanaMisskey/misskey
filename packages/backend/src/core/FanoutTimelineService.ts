@@ -142,4 +142,9 @@ export class FanoutTimelineService {
 		}
 		await pipeline.exec();
 	}
+
+	@bindThis
+	public remove(name: FanoutTimelineName, id: string) {
+		return this.redisForTimelines.lrem('list:' + name, 1, id);
+	}
 }

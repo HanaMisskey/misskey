@@ -1,0 +1,13 @@
+{
+	"version": 1,
+	"migrations": [
+		{
+			"name": "BirthdayIndex1767169026317",
+			"source": "1767169026317-birthday-index.js",
+			"sourceSha256": "c6fb2aa46cba57bd8a22dae861e94f85b205fcdfe9a6c18f829710f00fa0c880",
+			"implementation": "online/1767169026317-birthday-index.js",
+			"dependencies": ["online/concurrent-index.js"],
+			"recoverableIndexes": ["public.IDX_USERPROFILE_BIRTHDAY_DATE", "public.IDX_de22cd2b445eee31ae51cdbe99"]
+		}
+	]
+}
