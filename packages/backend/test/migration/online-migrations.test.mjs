@@ -1,8 +1,3 @@
-/*
- * SPDX-FileCopyrightText: syuilo and misskey-project
- * SPDX-License-Identifier: AGPL-3.0-only
- */
-
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { appendFile, cp, mkdtemp, readFile, readdir, rename, rm, writeFile } from 'node:fs/promises';

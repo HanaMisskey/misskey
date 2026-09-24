@@ -1,8 +1,3 @@
-/*
- * SPDX-FileCopyrightText: syuilo and misskey-project
- * SPDX-License-Identifier: AGPL-3.0-only
- */
-
 export async function ensureConcurrentIndex(queryRunner, qualifiedName, createSql) {
 	const status = async () => (await queryRunner.query(
 		'SELECT indisvalid FROM pg_index WHERE indexrelid = to_regclass($1)', [qualifiedName],
