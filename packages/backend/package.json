@@ -11,7 +11,7 @@
 		"start:inspect": "node --inspect ./built/entry.js",
 		"start:test": "cross-env NODE_ENV=test node ./built/entry.js",
 		"migrate": "pnpm typeorm migration:run -d ormconfig.js",
-		"revert": "pnpm typeorm migration:revert -d ormconfig.js",
+		"revert": "node ./scripts/revert_migration.js",
 		"cli": "node ./built/cli.js",
 		"check:connect": "node ./scripts/check_connect.js",
 		"build": "rolldown -c",
@@ -30,6 +30,7 @@
 		"test-and-coverage": "pnpm build:unit && vitest --coverage --config vitest.config.unit.ts",
 		"test-and-coverage:e2e": "pnpm build:e2e && vitest --coverage --config vitest.config.e2e.ts",
 		"check-migrations": "node scripts/check_migrations_clean.js",
+		"test:migrations": "node --test test/migration/*.test.mjs",
 		"generate-api-json": "node ./scripts/generate_api_json.js"
 	},
 	"optionalDependencies": {
