@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { load as loadYaml } from 'js-yaml';
 import { type FastifyServerOptions } from 'fastify';
+import type { SensitiveMediaDetectionConfig } from './misc/sensitive-media-detection-config.js';
 import type * as Sentry from '@sentry/node';
 import type * as SentryVue from '@sentry/vue';
 import type { RedisOptions as IoRedisRedisOptions } from 'ioredis';
@@ -102,6 +103,7 @@ type Source = {
 	allowedPrivateNetworks?: string[];
 
 	maxFileSize?: number;
+	sensitiveMediaDetection?: SensitiveMediaDetectionConfig;
 
 	clusterLimit?: number;
 	threadPoolSize?: number;
@@ -195,6 +197,7 @@ export type Config = {
 	proxyBypassHosts: string[] | undefined;
 	allowedPrivateNetworks: string[] | undefined;
 	maxFileSize: number;
+	sensitiveMediaDetection?: SensitiveMediaDetectionConfig;
 	clusterLimit: number | undefined;
 	threadPoolSize: number;
 	id: string;
@@ -364,6 +367,7 @@ export function loadConfig(): Config {
 		proxyBypassHosts: config.proxyBypassHosts,
 		allowedPrivateNetworks: config.allowedPrivateNetworks,
 		maxFileSize: config.maxFileSize ?? 262144000,
+		sensitiveMediaDetection: config.sensitiveMediaDetection,
 		clusterLimit: config.clusterLimit,
 		threadPoolSize: config.threadPoolSize ?? 1,
 		outgoingAddress: config.outgoingAddress,

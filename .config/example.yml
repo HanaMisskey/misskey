@@ -462,3 +462,12 @@ proxyBypassHosts:
 #     # Disable query truncation. If set to true, the full text of the query will be output to the log.
 #     # default: false
 #     disableQueryTruncation: false
+
+# Sensitive media detection service
+# Control panel settings take precedence.
+#sensitiveMediaDetection:
+#  apiUrl: http://sensitive-detector:3009
+#  apiKey: your-api-key
+#  useProxy: false
+#  timeout: 60000
+#  maxImagesPerRequest: 4

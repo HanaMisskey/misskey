@@ -7,6 +7,7 @@ import { describe, test, expect, vi, beforeEach } from 'vitest';
 import type { MiMeta } from '@/models/_.js';
 import type { HttpRequestService } from '@/core/HttpRequestService.js';
 import type { LoggerService } from '@/core/LoggerService.js';
+import type { Config } from '@/config.js';
 import { SensitiveMediaDetectionService, type Prediction } from '@/core/SensitiveMediaDetectionService.js';
 
 const sendMock = vi.fn();
@@ -24,7 +25,7 @@ function makeService(metaOverrides: Partial<typeof DEFAULT_META> = {}): Sensitiv
 	const loggerService = {
 		getLogger: () => ({ warn: () => {}, error: () => {}, info: () => {} }),
 	} as unknown as LoggerService;
-	return new SensitiveMediaDetectionService(meta, httpRequestService, loggerService);
+	return new SensitiveMediaDetectionService({} as Config, meta, httpRequestService, loggerService);
 }
 
 function prediction(nsfw = 0.01): Prediction[] {
@@ -75,12 +76,12 @@ describe('SensitiveMediaDetectionService', () => {
 
 		await svc.detectSensitiveMany([buf('a')]);
 
-		expect(sendMock).toHaveBeenCalledWith('https://detector.example.com/v1/detect-images', {
+		expect(sendMock).toHaveBeenCalledWith('https://detector.example.com/v1/detect-images', expect.objectContaining({
 			method: 'POST',
 			headers: {},
 			body: expect.any(FormData),
 			timeout: 5000,
-		}, {
+		}), {
 			throwErrorWhenResponseNotOk: false,
 		});
 	});

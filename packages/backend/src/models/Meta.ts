@@ -307,15 +307,20 @@ export class MiMeta {
 	})
 	public sensitiveMediaDetectionApiKey: string | null;
 
-	@Column('integer', {
-		default: 60000,
+	@Column('boolean', {
+		nullable: true,
 	})
-	public sensitiveMediaDetectionTimeout: number;
+	public sensitiveMediaDetectionUseProxy: boolean | null;
 
 	@Column('integer', {
-		default: 4,
+		nullable: true,
 	})
-	public sensitiveMediaDetectionMaxImagesPerRequest: number;
+	public sensitiveMediaDetectionTimeout: number | null;
+
+	@Column('integer', {
+		nullable: true,
+	})
+	public sensitiveMediaDetectionMaxImagesPerRequest: number | null;
 
 	@Column('boolean', {
 		default: false,

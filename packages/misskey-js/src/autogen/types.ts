@@ -9523,8 +9523,15 @@ export interface operations {
                         enableSensitiveMediaDetectionForVideos: boolean;
                         sensitiveMediaDetectionApiUrl: string | null;
                         sensitiveMediaDetectionApiKey: string | null;
-                        sensitiveMediaDetectionTimeout: number;
-                        sensitiveMediaDetectionMaxImagesPerRequest: number;
+                        sensitiveMediaDetectionUseProxy: boolean | null;
+                        sensitiveMediaDetectionTimeout: number | null;
+                        sensitiveMediaDetectionMaxImagesPerRequest: number | null;
+                        sensitiveMediaDetectionDefaults: {
+                            apiUrl: string | null;
+                            useProxy: boolean;
+                            timeout: number;
+                            maxImagesPerRequest: number;
+                        };
                         /** Format: id */
                         proxyAccountId: string;
                         email: string | null;
@@ -13052,8 +13059,9 @@ export interface operations {
                     enableSensitiveMediaDetectionForVideos?: boolean;
                     sensitiveMediaDetectionApiUrl?: string | null;
                     sensitiveMediaDetectionApiKey?: string | null;
-                    sensitiveMediaDetectionTimeout?: number;
-                    sensitiveMediaDetectionMaxImagesPerRequest?: number;
+                    sensitiveMediaDetectionUseProxy?: boolean | null;
+                    sensitiveMediaDetectionTimeout?: number | null;
+                    sensitiveMediaDetectionMaxImagesPerRequest?: number | null;
                     maintainerName?: string | null;
                     maintainerEmail?: string | null;
                     langs?: string[];

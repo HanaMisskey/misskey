@@ -8,6 +8,8 @@ import { DI } from '@/di-symbols.js';
 import { bindThis } from '@/decorators.js';
 import { HttpRequestService } from '@/core/HttpRequestService.js';
 import { LoggerService } from '@/core/LoggerService.js';
+import { getSensitiveMediaDetectionConfig } from '@/misc/sensitive-media-detection-config.js';
+import type { Config } from '@/config.js';
 import type { MiMeta } from '@/models/_.js';
 import type Logger from '@/logger.js';
 
@@ -74,6 +76,9 @@ export class SensitiveMediaDetectionService {
 	private logger: Logger;
 
 	constructor(
+		@Inject(DI.config)
+		private config: Config,
+
 		@Inject(DI.meta)
 		private meta: MiMeta,
 
@@ -102,15 +107,13 @@ export class SensitiveMediaDetectionService {
 	public async detectSensitiveMany(sources: Buffer[]): Promise<(Prediction[] | null)[]> {
 		if (sources.length === 0) return [];
 
-		const baseUrl = this.meta.sensitiveMediaDetectionApiUrl;
+		const { apiUrl: baseUrl, apiKey, useProxy, timeout, maxImagesPerRequest } = getSensitiveMediaDetectionConfig(this.config.sensitiveMediaDetection, this.meta);
 		if (baseUrl == null || baseUrl.trim() === '') {
 			// 接続先が未設定なら検出不能。全件 null（非センシティブ扱い）を返す。
 			return sources.map(() => null);
 		}
 
-		const apiKey = this.meta.sensitiveMediaDetectionApiKey;
-		const timeout = this.meta.sensitiveMediaDetectionTimeout;
-		const chunkSize = Math.max(1, this.meta.sensitiveMediaDetectionMaxImagesPerRequest);
+		const chunkSize = Math.max(1, maxImagesPerRequest);
 
 		const base = baseUrl.endsWith('/') ? baseUrl : baseUrl + '/';
 		let url: string;
@@ -124,13 +127,13 @@ export class SensitiveMediaDetectionService {
 		const results: (Prediction[] | null)[] = [];
 		for (let i = 0; i < sources.length; i += chunkSize) {
 			const chunk = sources.slice(i, i + chunkSize);
-			results.push(...await this.detectChunk(url, apiKey, timeout, chunk));
+			results.push(...await this.detectChunk(url, apiKey, useProxy, timeout, chunk));
 		}
 		return results;
 	}
 
 	@bindThis
-	private async detectChunk(url: string, apiKey: string | null, timeout: number, chunk: Buffer[]): Promise<(Prediction[] | null)[]> {
+	private async detectChunk(url: string, apiKey: string | null, useProxy: boolean, timeout: number, chunk: Buffer[]): Promise<(Prediction[] | null)[]> {
 		try {
 			const form = new FormData();
 			for (let i = 0; i < chunk.length; i++) {
@@ -150,6 +153,8 @@ export class SensitiveMediaDetectionService {
 				headers,
 				body: form,
 				timeout,
+				bypassProxy: !useProxy,
+				isLocalAddressAllowed: true,
 			}, {
 				throwErrorWhenResponseNotOk: false,
 			});

@@ -101,8 +101,9 @@ export const paramDef = {
 		enableSensitiveMediaDetectionForVideos: { type: 'boolean' },
 		sensitiveMediaDetectionApiUrl: { type: 'string', nullable: true },
 		sensitiveMediaDetectionApiKey: { type: 'string', nullable: true },
-		sensitiveMediaDetectionTimeout: { type: 'integer', minimum: 1 },
-		sensitiveMediaDetectionMaxImagesPerRequest: { type: 'integer', minimum: 1 },
+		sensitiveMediaDetectionUseProxy: { type: 'boolean', nullable: true },
+		sensitiveMediaDetectionTimeout: { type: 'integer', nullable: true, minimum: 1 },
+		sensitiveMediaDetectionMaxImagesPerRequest: { type: 'integer', nullable: true, minimum: 1 },
 		maintainerName: { type: 'string', nullable: true },
 		maintainerEmail: { type: 'string', nullable: true },
 		langs: {
@@ -456,7 +457,11 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			}
 
 			if (ps.sensitiveMediaDetectionApiKey !== undefined) {
-				set.sensitiveMediaDetectionApiKey = ps.sensitiveMediaDetectionApiKey === '' ? null : ps.sensitiveMediaDetectionApiKey;
+				set.sensitiveMediaDetectionApiKey = ps.sensitiveMediaDetectionApiKey;
+			}
+
+			if (ps.sensitiveMediaDetectionUseProxy !== undefined) {
+				set.sensitiveMediaDetectionUseProxy = ps.sensitiveMediaDetectionUseProxy;
 			}
 
 			if (ps.sensitiveMediaDetectionTimeout !== undefined) {
