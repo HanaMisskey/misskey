@@ -204,3 +204,7 @@ jobs:
         run: MISSKEY_CONFIG_YML=test.yml pnpm --filter backend migrate
       - name: Check no migrations are remaining
         run: MISSKEY_CONFIG_YML=test.yml pnpm --filter backend check-migrations
+      - name: Test online migrations
+        run: pnpm --filter backend test:migrations
+        env:
+          MISSKEY_MIGRATION_TEST_DATABASE_URL: postgres://postgres@127.0.0.1:54312/postgres
