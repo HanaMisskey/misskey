@@ -52,7 +52,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 								<MkSelect
 									v-model="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionApiKeyMode"
 									:items="[
-										{ value: 'inherit', label: i18n.ts._hana._sensitiveMediaDetection.useServerSetting },
+										{ value: 'default', label: i18n.ts._hana._sensitiveMediaDetection.useServerSetting },
 										{ value: 'custom', label: i18n.ts._hana._sensitiveMediaDetection.specifyApiKey },
 										{ value: 'none', label: i18n.ts._hana._sensitiveMediaDetection.noAuthentication },
 									]"
@@ -68,7 +68,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 							<SearchMarker :keywords="['proxy', 'sensitive']">
 								<MkSelect
-									v-model="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionUseProxy"
+									v-model="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionUseProxyMode"
 									:items="[
 										{ value: 'default', label: i18n.ts._hana._sensitiveMediaDetection.useServerSetting },
 										{ value: 'on', label: i18n.ts.enabled },
@@ -267,8 +267,8 @@ const sensitiveMediaDetectionForm = useForm({
 	enableSensitiveMediaDetectionForVideos: meta.enableSensitiveMediaDetectionForVideos,
 	sensitiveMediaDetectionApiUrl: meta.sensitiveMediaDetectionApiUrl,
 	sensitiveMediaDetectionApiKey: meta.sensitiveMediaDetectionApiKey ?? '',
-	sensitiveMediaDetectionApiKeyMode: meta.sensitiveMediaDetectionApiKey == null ? 'inherit' as const : meta.sensitiveMediaDetectionApiKey === '' ? 'none' as const : 'custom' as const,
-	sensitiveMediaDetectionUseProxy: meta.sensitiveMediaDetectionUseProxy == null ? 'default' as const : meta.sensitiveMediaDetectionUseProxy ? 'on' as const : 'off' as const,
+	sensitiveMediaDetectionApiKeyMode: meta.sensitiveMediaDetectionApiKey == null ? 'default' as const : meta.sensitiveMediaDetectionApiKey === '' ? 'none' as const : 'custom' as const,
+	sensitiveMediaDetectionUseProxyMode: meta.sensitiveMediaDetectionUseProxy == null ? 'default' as const : meta.sensitiveMediaDetectionUseProxy ? 'on' as const : 'off' as const,
 	sensitiveMediaDetectionTimeout: meta.sensitiveMediaDetectionTimeout,
 	sensitiveMediaDetectionMaxImagesPerRequest: meta.sensitiveMediaDetectionMaxImagesPerRequest,
 }, async (state) => {
@@ -284,8 +284,8 @@ const sensitiveMediaDetectionForm = useForm({
 		setSensitiveFlagAutomatically: state.setSensitiveFlagAutomatically,
 		enableSensitiveMediaDetectionForVideos: state.enableSensitiveMediaDetectionForVideos,
 		sensitiveMediaDetectionApiUrl: state.sensitiveMediaDetectionApiUrl,
-		sensitiveMediaDetectionApiKey: state.sensitiveMediaDetectionApiKeyMode === 'inherit' ? null : state.sensitiveMediaDetectionApiKeyMode === 'none' ? '' : state.sensitiveMediaDetectionApiKey,
-		sensitiveMediaDetectionUseProxy: state.sensitiveMediaDetectionUseProxy === 'default' ? null : state.sensitiveMediaDetectionUseProxy === 'on',
+		sensitiveMediaDetectionApiKey: state.sensitiveMediaDetectionApiKeyMode === 'default' ? null : state.sensitiveMediaDetectionApiKeyMode === 'none' ? '' : state.sensitiveMediaDetectionApiKey,
+		sensitiveMediaDetectionUseProxy: state.sensitiveMediaDetectionUseProxyMode === 'default' ? null : state.sensitiveMediaDetectionUseProxyMode === 'on',
 		sensitiveMediaDetectionTimeout: state.sensitiveMediaDetectionTimeout,
 		sensitiveMediaDetectionMaxImagesPerRequest: state.sensitiveMediaDetectionMaxImagesPerRequest,
 	});

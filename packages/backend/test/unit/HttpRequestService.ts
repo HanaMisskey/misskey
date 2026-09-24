@@ -27,7 +27,7 @@ describe('センシティブ判定サービスへの HTTP 接続', () => {
 	let target: http.Server;
 	let proxy: http.Server;
 	let targetUrl: string;
-	let service: HttpRequestService;
+	let httpRequestService: HttpRequestService;
 	let proxyConnections: number;
 	const requests: { path: string; authorization?: string }[] = [];
 	const sockets = new Set<net.Socket>();
@@ -62,30 +62,30 @@ describe('センシティブ判定サービスへの HTTP 接続', () => {
 			});
 			sockets.add(upstream);
 		});
-		service = new HttpRequestService({ proxy: `http://127.0.0.1:${await listen(proxy)}` } as Config);
+		httpRequestService = new HttpRequestService({ proxy: `http://127.0.0.1:${await listen(proxy)}` } as Config);
 	});
 
 	afterEach(async () => {
-		for (const bypassProxy of [false, true]) service.getAgentByUrl(new URL(targetUrl), bypassProxy, true).destroy();
+		for (const bypassProxy of [false, true]) httpRequestService.getAgentByUrl(new URL(targetUrl), bypassProxy, true).destroy();
 		for (const socket of sockets) socket.destroy();
 		sockets.clear();
 		await Promise.all([target, proxy].map(server => new Promise<void>(resolve => server.close(() => resolve()))));
 		vi.unstubAllEnvs();
 	});
 
-	async function detector(config: Config['sensitiveMediaDetection'], meta = {} as MiMeta) {
+	async function makeService(config: Config['sensitiveMediaDetection'], meta = {} as MiMeta) {
 		writeFileSync(configFile, `${baseConfig}\nsensitiveMediaDetection: ${JSON.stringify(config)}\n`);
 		vi.stubEnv('MISSKEY_CONFIG_YML', configFile);
 		const { loadConfig } = await import('@/config.js');
-		return new SensitiveMediaDetectionService(loadConfig(), meta, service, {
+		return new SensitiveMediaDetectionService(loadConfig(), meta, httpRequestService, {
 			getLogger: () => ({ warn: vi.fn() }),
 		} as unknown as LoggerService);
 	}
 
 	test('ファイル指定の内部サービスへ接続し、DB の空キーと Proxy 利用への変更を反映する', async () => {
 		const meta = {} as MiMeta;
-		const client = await detector({ apiUrl: `${targetUrl}/prefix`, apiKey: 'server-key', maxImagesPerRequest: 1, useProxy: false }, meta);
-		expect(await client.detectSensitiveMany([Buffer.from('a'), Buffer.from('b')])).toEqual([predictions, predictions]);
+		const service = await makeService({ apiUrl: `${targetUrl}/prefix`, apiKey: 'server-key', maxImagesPerRequest: 1, useProxy: false }, meta);
+		expect(await service.detectSensitiveMany([Buffer.from('a'), Buffer.from('b')])).toEqual([predictions, predictions]);
 		expect(requests).toEqual([
 			{ path: '/prefix/v1/detect-images', authorization: 'Bearer server-key' },
 			{ path: '/prefix/v1/detect-images', authorization: 'Bearer server-key' },
@@ -94,14 +94,14 @@ describe('センシティブ判定サービスへの HTTP 接続', () => {
 
 		meta.sensitiveMediaDetectionApiKey = '';
 		meta.sensitiveMediaDetectionUseProxy = true;
-		expect(await client.detectSensitive(Buffer.from('c'))).toEqual(predictions);
+		expect(await service.detectSensitive(Buffer.from('c'))).toEqual(predictions);
 		expect(requests[2]).toEqual({ path: '/prefix/v1/detect-images', authorization: undefined });
 		expect(proxyConnections).toBeGreaterThan(0);
 	});
 
 	test('ファイル指定の時間まで応答がなければ検出不能を返す', async () => {
-		const client = await detector({ apiUrl: `${targetUrl}/no-response`, apiKey: '', timeout: 200 });
-		expect(await client.detectSensitive(Buffer.from('a'))).toBeNull();
+		const service = await makeService({ apiUrl: `${targetUrl}/no-response`, apiKey: '', timeout: 200 });
+		expect(await service.detectSensitive(Buffer.from('a'))).toBeNull();
 		expect(requests).toEqual([{ path: '/no-response/v1/detect-images', authorization: undefined }]);
 	}, 5000);
 });

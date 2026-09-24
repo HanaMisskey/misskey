@@ -8,7 +8,7 @@ import { DI } from '@/di-symbols.js';
 import { bindThis } from '@/decorators.js';
 import { HttpRequestService } from '@/core/HttpRequestService.js';
 import { LoggerService } from '@/core/LoggerService.js';
-import { resolveSensitiveMediaDetectionConfig } from '@/misc/sensitive-media-detection-config.js';
+import { getSensitiveMediaDetectionConfig } from '@/misc/sensitive-media-detection-config.js';
 import type { Config } from '@/config.js';
 import type { MiMeta } from '@/models/_.js';
 import type Logger from '@/logger.js';
@@ -107,7 +107,7 @@ export class SensitiveMediaDetectionService {
 	public async detectSensitiveMany(sources: Buffer[]): Promise<(Prediction[] | null)[]> {
 		if (sources.length === 0) return [];
 
-		const { apiUrl: baseUrl, apiKey, useProxy, timeout, maxImagesPerRequest } = resolveSensitiveMediaDetectionConfig(this.config.sensitiveMediaDetection, this.meta);
+		const { apiUrl: baseUrl, apiKey, useProxy, timeout, maxImagesPerRequest } = getSensitiveMediaDetectionConfig(this.config.sensitiveMediaDetection, this.meta);
 		if (baseUrl == null || baseUrl.trim() === '') {
 			// 接続先が未設定なら検出不能。全件 null（非センシティブ扱い）を返す。
 			return sources.map(() => null);

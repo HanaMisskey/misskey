@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import type { MiMeta } from '@/models/Meta.js';
+
 export type SensitiveMediaDetectionConfig = {
 	apiUrl?: string;
 	apiKey?: string;
@@ -11,23 +13,21 @@ export type SensitiveMediaDetectionConfig = {
 	maxImagesPerRequest?: number;
 };
 
-type SensitiveMediaDetectionOverrides = {
-	sensitiveMediaDetectionApiUrl?: string | null;
-	sensitiveMediaDetectionApiKey?: string | null;
-	sensitiveMediaDetectionUseProxy?: boolean | null;
-	sensitiveMediaDetectionTimeout?: number | null;
-	sensitiveMediaDetectionMaxImagesPerRequest?: number | null;
-};
-
-export function resolveSensitiveMediaDetectionConfig(
-	fileConfig?: SensitiveMediaDetectionConfig,
-	meta?: SensitiveMediaDetectionOverrides,
+export function getSensitiveMediaDetectionConfig(
+	config?: SensitiveMediaDetectionConfig,
+	meta?: Partial<Pick<MiMeta,
+		'sensitiveMediaDetectionApiUrl' |
+		'sensitiveMediaDetectionApiKey' |
+		'sensitiveMediaDetectionUseProxy' |
+		'sensitiveMediaDetectionTimeout' |
+		'sensitiveMediaDetectionMaxImagesPerRequest'
+	>>,
 ) {
 	return {
-		apiUrl: meta?.sensitiveMediaDetectionApiUrl?.trim() || fileConfig?.apiUrl?.trim() || null,
-		apiKey: meta?.sensitiveMediaDetectionApiKey ?? fileConfig?.apiKey ?? null,
-		useProxy: meta?.sensitiveMediaDetectionUseProxy ?? fileConfig?.useProxy ?? true,
-		timeout: meta?.sensitiveMediaDetectionTimeout ?? fileConfig?.timeout ?? 60000,
-		maxImagesPerRequest: meta?.sensitiveMediaDetectionMaxImagesPerRequest ?? fileConfig?.maxImagesPerRequest ?? 4,
+		apiUrl: meta?.sensitiveMediaDetectionApiUrl?.trim() || config?.apiUrl?.trim() || null,
+		apiKey: meta?.sensitiveMediaDetectionApiKey ?? config?.apiKey ?? null,
+		useProxy: meta?.sensitiveMediaDetectionUseProxy ?? config?.useProxy ?? true,
+		timeout: meta?.sensitiveMediaDetectionTimeout ?? config?.timeout ?? 60000,
+		maxImagesPerRequest: meta?.sensitiveMediaDetectionMaxImagesPerRequest ?? config?.maxImagesPerRequest ?? 4,
 	};
 }

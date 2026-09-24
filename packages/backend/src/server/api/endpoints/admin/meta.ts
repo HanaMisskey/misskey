@@ -10,7 +10,7 @@ import type { Config } from '@/config.js';
 import { DI } from '@/di-symbols.js';
 import { DEFAULT_POLICIES } from '@/core/RoleService.js';
 import { SystemAccountService } from '@/core/SystemAccountService.js';
-import { resolveSensitiveMediaDetectionConfig } from '@/misc/sensitive-media-detection-config.js';
+import { getSensitiveMediaDetectionConfig } from '@/misc/sensitive-media-detection-config.js';
 
 export const meta = {
 	tags: ['meta'],
@@ -673,7 +673,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 	) {
 		super(meta, paramDef, async () => {
 			const instance = await this.metaService.fetch(true);
-			const { apiUrl, useProxy, timeout, maxImagesPerRequest } = resolveSensitiveMediaDetectionConfig(this.config.sensitiveMediaDetection);
+			const { apiUrl, useProxy, timeout, maxImagesPerRequest } = getSensitiveMediaDetectionConfig(this.config.sensitiveMediaDetection);
 
 			const proxy = await this.systemAccountService.fetch('proxy');
 
