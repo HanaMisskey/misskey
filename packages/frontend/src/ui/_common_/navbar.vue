@@ -26,7 +26,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 				<div v-if="item === '-'" :class="$style.divider"></div>
 				<component
 					:is="navbarItemDef[item].to ? 'MkA' : 'button'"
-					v-else-if="navbarItemDef[item] && (navbarItemDef[item].show == null || navbarItemDef[item].show.value !== false)"
+					v-else-if="navbarItemDef[item] && (unref(navbarItemDef[item].show) !== false)"
 					v-tooltip.noDelay.right="navbarItemDef[item].title"
 					class="_button"
 					:class="[$style.item]"
@@ -104,7 +104,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 </template>
 
 <script lang="ts" setup>
-import { computed, defineAsyncComponent, ref, watch } from 'vue';
+import { computed, defineAsyncComponent, ref, unref, watch } from 'vue';
 import { openInstanceMenu } from './common.js';
 import * as os from '@/os.js';
 import { navbarItemDef } from '@/navbar.js';
