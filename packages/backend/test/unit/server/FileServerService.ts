@@ -404,7 +404,7 @@ describe('FileServerService', () => {
 			expect(res.rawPayload).toEqual(thumbnailBuffer.subarray(0, 4));
 		});
 
-		/** Content-Length は配信する派生画像のバイト数であり、原画像のサイズではない。 */
+		/** Content-Length は、内蔵ストレージに保存したサムネイルのバイト数と一致する。 */
 		test('GET /files/:key thumbnail のファイル名と配信サイズを検証する', async () => {
 			const accessKey = randomString();
 			const thumbnailKey = randomString();
@@ -433,7 +433,7 @@ describe('FileServerService', () => {
 			expect(res.headers['content-length']).toBe(String(thumbnailBuffer.length));
 		});
 
-		/** Content-Length は配信する派生画像のバイト数であり、原画像のサイズではない。 */
+		/** Content-Length は、Web公開用に変換して内蔵ストレージに保存した画像のバイト数と一致する。 */
 		test('GET /files/:key webpublic のファイル名と配信サイズを検証する', async () => {
 			const accessKey = randomString();
 			const webpublicKey = randomString();
