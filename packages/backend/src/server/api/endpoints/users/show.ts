@@ -15,6 +15,7 @@ import { DI } from '@/di-symbols.js';
 import PerUserPvChart from '@/core/chart/charts/per-user-pv.js';
 import { RoleService } from '@/core/RoleService.js';
 import { removeMutedUsersReactions } from '@/misc/reactions-mute.js';
+import { Packed } from '@/misc/json-schema.js';
 import { ApiError } from '../../error.js';
 import { ApiLoggerService } from '../../ApiLoggerService.js';
 import type { FindOptionsWhere } from 'typeorm';
@@ -193,13 +194,16 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 					schema: 'UserDetailed',
 					pinNotesWithReactionAndUserPairCache: true,
 				});
-				if (packedUserProfile.pinnedNotes.length > 0) {
-					const userIdsWhoMeMuting = me ? await this.cacheService.userMutingsCache.fetch(me.id) : new Set<string>();
-					await Promise.all(
-						packedUserProfile.pinnedNotes.map(note => removeMutedUsersReactions(note, userIdsWhoMeMuting)),
-					);
+				const userProfiles = Array.isArray(packedUserProfile) ? packedUserProfile : [packedUserProfile];
+				const userIdsWhoMeMuting = me ? await this.cacheService.userMutingsCache.fetch(me.id) : new Set<string>();
+				for (const userProfile of userProfiles) {
+					if (Array.isArray(userProfile.pinnedNotes) && userProfile.pinnedNotes.length > 0) {
+						await Promise.all(
+							userProfile.pinnedNotes.map((note: Packed<'Note'>) => removeMutedUsersReactions(note, userIdsWhoMeMuting)),
+						);
+					}
 				}
-				return packedUserProfile;
+				return userProfiles.length === 1 ? userProfiles[0] : userProfiles;
 			}
 		});
 	}
