@@ -4,6 +4,7 @@
  */
 
 import * as fs from 'node:fs';
+import * as Path from 'node:path';
 import type { DriveFilesRepository, MiDriveFile } from '@/models/_.js';
 import { createTemp } from '@/misc/create-temp.js';
 import type { DownloadService } from '@/core/DownloadService.js';
@@ -101,6 +102,8 @@ export class FileServerFileResolver {
 		if (!/^[a-zA-Z0-9._-]+$/.test(key) || key === '.' || key === '..') return { kind: 'not-found' };
 
 		const path = this.internalStorageService.resolvePath(key);
+		const storageRoot = this.internalStorageService.resolvePath('');
+		if (!path.startsWith(storageRoot + Path.sep)) return { kind: 'not-found' };
 
 		if (isThumbnail || isWebpublic) {
 			const { mime, ext } = await this.fileInfoService.detectType(path);
