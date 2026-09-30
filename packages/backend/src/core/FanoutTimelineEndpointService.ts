@@ -65,6 +65,19 @@ export class FanoutTimelineEndpointService {
 
 	@bindThis
 	async timeline(ps: TimelineOptions): Promise<Packed<'Note'>[]> {
+		if (ps.me == null && this.meta.ugcVisibilityForVisitor !== 'all') {
+			const parentFilter = ps.noteFilter;
+			ps = {
+				...ps,
+				noteFilter: (note) => {
+					if (this.meta.ugcVisibilityForVisitor === 'none') return false;
+					if (this.meta.ugcVisibilityForVisitor === 'local' && note.userHost != null) return false;
+
+					return parentFilter?.(note) ?? true;
+				},
+			};
+		}
+
 		const packedNotes = await this.noteEntityService.packMany(await this.getMiNotes(ps), ps.me, ps.me ? { withReactionAndUserPairCache: true } : undefined);
 		if (ps.me) {
 			const userIdsWhoMeMuting = await this.cacheService.userMutingsCache.fetch(ps.me.id);
