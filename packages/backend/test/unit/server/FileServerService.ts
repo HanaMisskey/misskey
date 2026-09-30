@@ -4,12 +4,13 @@
  */
 
 import * as fs from 'node:fs';
+import * as os from 'node:os';
 import * as path from 'node:path';
 import fastifyStatic from '@fastify/static';
 import Fastify, { type FastifyInstance } from 'fastify';
-import { describe, expect, test, beforeAll, afterAll, afterEach } from 'vitest';
+import { describe, expect, test, beforeAll, afterAll, afterEach, vi } from 'vitest';
 import sharp from 'sharp';
-import { DataSource, type Repository } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { initTestDb, randomString } from '../../utils.js';
 import type { SensitiveMediaDetectionService } from '@/core/SensitiveMediaDetectionService.js';
 import { DownloadService } from '@/core/DownloadService.js';
@@ -22,7 +23,9 @@ import { LoggerService } from '@/core/LoggerService.js';
 import { VideoProcessingService } from '@/core/VideoProcessingService.js';
 import { loadConfig, type Config } from '@/config.js';
 import { MiDriveFile } from '@/models/DriveFile.js';
+import { miRepository, type DriveFilesRepository, type MiRepository } from '@/models/_.js';
 import { FileServerService } from '@/server/FileServerService.js';
+import { FileServerFileResolver } from '@/server/file/FileServerFileResolver.js';
 
 const dummyPath = path.resolve('test/resources/dummy-for-file-server-service.png');
 const dummySize = fs.statSync(dummyPath).size;
@@ -75,17 +78,19 @@ describe('FileServerService', () => {
 	let db: DataSource;
 	let fastify: FastifyInstance;
 	let externalFastify: FastifyInstance;
-	let driveFilesRepository: Repository<MiDriveFile>;
+	let driveFilesRepository: DriveFilesRepository;
 	let internalStorageService: InternalStorageService;
 	let idService: IdService;
 	let config: Config;
 	let fileServerService: FileServerService;
+	let fileResolver: FileServerFileResolver;
 	let externalFileServerService: FileServerService;
 	let remoteServer: FastifyInstance;
 	let remotePngUrl: string;
 	let remoteSvgUrl: string;
 	let remoteTextUrl: string;
 	let remoteFlatPngUrl: string;
+	let storageFixtureDir: string;
 	const storedPaths: string[] = [];
 	let createdFallbackAssets = false;
 	let fallbackAssetsDir = '';
@@ -144,7 +149,7 @@ describe('FileServerService', () => {
 	beforeAll(async () => {
 		config = loadConfig();
 		db = await initTestDb(false);
-		driveFilesRepository = db.getRepository(MiDriveFile);
+		driveFilesRepository = db.getRepository(MiDriveFile).extend(miRepository as MiRepository<MiDriveFile>);
 
 		const loggerService = new LoggerService();
 		const sensitiveMediaDetectionService = {
@@ -156,11 +161,21 @@ describe('FileServerService', () => {
 		const downloadService = new DownloadService(config, httpRequestService, loggerService);
 		const imageProcessingService = new ImageProcessingService();
 		const videoProcessingService = new VideoProcessingService(config, imageProcessingService);
-		internalStorageService = new InternalStorageService(config);
+		storageFixtureDir = fs.mkdtempSync(path.join(os.tmpdir(), 'misskey-file-server-'));
+		internalStorageService = new InternalStorageService({
+			...config,
+			rootDir: path.join(storageFixtureDir, 'storage'),
+		});
+		fileResolver = new FileServerFileResolver(
+			driveFilesRepository,
+			fileInfoService,
+			downloadService,
+			internalStorageService,
+		);
 		idService = new IdService(config);
 		fileServerService = new FileServerService(
 			config,
-			driveFilesRepository as any,
+			driveFilesRepository,
 			fileInfoService,
 			downloadService,
 			imageProcessingService,
@@ -184,7 +199,7 @@ describe('FileServerService', () => {
 		} as Config;
 		externalFileServerService = new FileServerService(
 			externalConfig,
-			driveFilesRepository as any,
+			driveFilesRepository,
 			fileInfoService,
 			downloadService,
 			imageProcessingService,
@@ -232,6 +247,7 @@ describe('FileServerService', () => {
 		await externalFastify.close();
 		await remoteServer.close();
 		await db.destroy();
+		fs.rmSync(storageFixtureDir, { recursive: true, force: true });
 		if (createdFallbackAssets) {
 			fs.rmSync(fallbackAssetsDir, { recursive: true, force: true });
 		}
@@ -288,6 +304,117 @@ describe('FileServerService', () => {
 	});
 
 	describe('GET /files/:key', () => {
+		/**
+		 * #135 の契約: 内蔵ストレージのキーは単一ファイル名だけを許す。
+		 * DB に一致するキーが実在しても、パス入力は 404 となり保存領域のパス解決を呼ばない。
+		 * 実 PostgreSQL と一時保存領域を使い、DB の未一致による 404 と区別する。
+		 * sentinel は保存領域の root 外へ手入力の内容で置き、その内容を HTTP 応答へ含めない。
+		 */
+		test.each([
+			['親ディレクトリ', '../../sentinel.txt'],
+			['絶対パス', 'absolute'],
+			['下位ディレクトリ', 'nested/sentinel.txt'],
+			['バックスラッシュ', '..\\sentinel.txt'],
+		])('GET /files/:key 内蔵ストレージの%sを DB 一致後も拒否する', async (_name, fixtureKey) => {
+			const sentinel = Buffer.from('outside-storage-sentinel-135', 'utf8');
+			const sentinelPath = path.join(storageFixtureDir, 'sentinel.txt');
+			fs.writeFileSync(sentinelPath, sentinel);
+			storedPaths.push(sentinelPath);
+			const accessKey = fixtureKey === 'absolute' ? sentinelPath : fixtureKey;
+			if (fixtureKey === 'nested/sentinel.txt' || fixtureKey === '..\\sentinel.txt') {
+				writeInternalFile(accessKey, sentinel);
+			}
+			await insertDriveFile({
+				accessKey,
+				storedInternal: true,
+				isLink: false,
+				type: 'text/plain',
+				size: sentinel.length,
+			});
+			const resolvePath = vi.spyOn(internalStorageService, 'resolvePath');
+			const encodedKey = encodeURIComponent(accessKey).replaceAll('.', '%2E');
+
+			const res = await fastify.inject({ method: 'GET', url: `/files/${encodedKey}` });
+
+			expect(res.statusCode).toBe(404);
+			expect(res.rawPayload.includes(sentinel)).toBe(false);
+			expect(resolvePath).not.toHaveBeenCalled();
+		});
+
+		/**
+		 * '.' と '..' は単一ファイル名ではなく、DB 一致後も not-found としパスを解決しない。
+		 * HTTP 層の URL 正規化で当該キーに到達しないため、保証が必要な resolver の境界で検査する。
+		 */
+		test.each(['.', '..'])('resolver は DB 一致済みの %s をパス解決せず拒否する', async (accessKey) => {
+			await insertDriveFile({ accessKey, storedInternal: true, isLink: false });
+			const resolvePath = vi.spyOn(internalStorageService, 'resolvePath');
+
+			const result = await fileResolver.resolveFileByAccessKey(accessKey);
+
+			expect(result).toEqual({ kind: 'not-found' });
+			expect(resolvePath).not.toHaveBeenCalled();
+		});
+
+		/** 元画像・サムネイル・Web 公開画像のいずれも、内蔵ストレージの root 外を読み出せない。 */
+		test.each(['thumbnailAccessKey', 'webpublicAccessKey'] as const)(
+			'GET /files/:key %s にある DB 一致済みのパス入力を拒否する',
+			async (fileRoleKey) => {
+				const sentinel = Buffer.from('outside-storage-role-sentinel-135', 'utf8');
+				const sentinelPath = path.join(storageFixtureDir, 'sentinel.txt');
+				fs.writeFileSync(sentinelPath, sentinel);
+				storedPaths.push(sentinelPath);
+				await insertDriveFile({
+					accessKey: randomString(),
+					[fileRoleKey]: '../../sentinel.txt',
+					storedInternal: true,
+					isLink: false,
+				});
+				const resolvePath = vi.spyOn(internalStorageService, 'resolvePath');
+
+				const res = await fastify.inject({ method: 'GET', url: '/files/%2E%2E%2F%2E%2E%2Fsentinel%2Etxt' });
+
+				expect(res.statusCode).toBe(404);
+				expect(res.rawPayload.includes(sentinel)).toBe(false);
+				expect(resolvePath).not.toHaveBeenCalled();
+			},
+		);
+
+		/** 既存の単一ファイル名は拡張子付きでも許し、保存した PNG の全バイトを 200 で返す。 */
+		test.each([
+			'550e8400-e29b-41d4-a716-446655440000',
+			'thumbnail-550e8400-e29b-41d4-a716-446655440000',
+			'legacy-file.png',
+		])('GET /files/:key 内蔵ストレージの単一ファイル名 %s を配信する', async (accessKey) => {
+			writeInternalFile(accessKey);
+			await insertDriveFile({ accessKey, storedInternal: true, isLink: false });
+
+			const res = await fastify.inject({ method: 'GET', url: `/files/${accessKey}` });
+
+			expect(res.statusCode).toBe(200);
+			expect(res.rawPayload).toEqual(dummyBuffer);
+		});
+
+		/** 外部リンクのキーはローカルパスに使わず、prefix 付きのキーも取得元の PNG を 200 で返す。 */
+		test('GET /files/:key 外部リンクの prefix 付きキーを配信する', async () => {
+			const accessKey = 'remote-prefix/legacy-file.png';
+			await insertDriveFile({ accessKey, storedInternal: false, isLink: true, uri: remotePngUrl });
+
+			const res = await fastify.inject({ method: 'GET', url: `/files/${encodeURIComponent(accessKey)}` });
+
+			expect(res.statusCode).toBe(200);
+			expect(res.rawPayload).toEqual(dummyBuffer);
+		});
+
+		/** 内蔵ストレージにも外部リンクにも該当しないキーは prefix を含んでも既存契約の 204 を返す。 */
+		test('GET /files/:key 外部ストレージの prefix 付きキーは未配信のまま扱う', async () => {
+			const accessKey = 'object-prefix/legacy-file.png';
+			await insertDriveFile({ accessKey, storedInternal: false, isLink: false });
+
+			const res = await fastify.inject({ method: 'GET', url: `/files/${encodeURIComponent(accessKey)}` });
+
+			expect(res.statusCode).toBe(204);
+		});
+
 		test('GET /files/:key 404 のときダミー画像を返す', async () => {
 			const accessKey = randomString();
 
