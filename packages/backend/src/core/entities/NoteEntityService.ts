@@ -276,8 +276,21 @@ export class NoteEntityService implements OnModuleInit {
 	@bindThis
 	public async isVisibleForMe(note: MiNote, meId: MiUser['id'] | null): Promise<boolean> {
 		// This code must always be synchronized with the checks in QueryService.generateVisibilityQuery.
+		if (meId === note.userId) return true;
+
+		const author = note.user ?? await this.cacheService.findUserById(note.userId);
+		if (meId == null && author.requireSigninToViewContents) return false;
+
+		const createdAt = this.idService.parse(note.id).date;
+		if (shouldHideNoteByTime(author.makeNotesHiddenBefore, createdAt)) return false;
+
+		const visibility = (note.visibility === 'public' || note.visibility === 'home')
+			&& shouldHideNoteByTime(author.makeNotesFollowersOnlyBefore, createdAt)
+			? 'followers'
+			: note.visibility;
+
 		// visibility が specified かつ自分が指定されていなかったら非表示
-		if (note.visibility === 'specified') {
+		if (visibility === 'specified') {
 			if (meId == null) {
 				return false;
 			} else if (meId === note.userId) {
@@ -289,7 +302,7 @@ export class NoteEntityService implements OnModuleInit {
 		}
 
 		// visibility が followers かつ自分が投稿者のフォロワーでなかったら非表示
-		if (note.visibility === 'followers') {
+		if (visibility === 'followers') {
 			if (meId == null) {
 				return false;
 			} else if (meId === note.userId) {
