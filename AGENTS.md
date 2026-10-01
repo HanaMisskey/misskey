@@ -45,6 +45,8 @@
 
 9. **ユーザーの明示指示なしに PR を merge / close / force-push しない**
 10. **ユーザーの明示指示なしに external service (GitHub comments / Slack / メール 等) へ送信しない**
+   - Misskey本家の変更を取り込むときは、PR・Issue本文、コミットメッセージ、公開ドキュメントに、本家へのURLやGitHubの相互参照になる表記を新たに追加しない。
+   - 元の作者・共同作者情報を保持し、出典は `Source-Commit` に完全SHAをインラインコードで記録する。
 11. **secrets / 認証情報をリポジトリにコミットしない** (`.config/*.yml` の本番値、`.env` ファイル、API token、private key 等)
 12. **脆弱性報告を通常の Issue / PR 経由で行わない** (脆弱性報告を行う場合のルールは `creating-issues-and-prs` スキルを参照すること)
 
