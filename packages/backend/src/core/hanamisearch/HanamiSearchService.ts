@@ -18,6 +18,7 @@ import { IdService } from '@/core/IdService.js';
 import { UtilityService } from '@/core/UtilityService.js';
 import { isMustRemove } from '@/misc/is-hidden-or-visibility-modified.js';
 import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
+import { QueryService } from '@/core/QueryService.js';
 import { removeMutedUsersReactions } from '@/misc/reactions-mute.js';
 import type { Index, Meilisearch } from 'meilisearch';
 
@@ -131,6 +132,7 @@ export class HanamiSearchService {
 		private meta: MiMeta,
 
 		private noteEntityService: NoteEntityService,
+		private queryService: QueryService,
 		private cacheService: CacheService,
 		private idService: IdService,
 		private utilityService: UtilityService,
@@ -288,6 +290,7 @@ export class HanamiSearchService {
 				.leftJoinAndSelect('renote.user', 'renoteUser');
 
 			query.where('note.id IN (:...noteIds)', { noteIds: res.hits.map(x => x.id) });
+			if (me == null) this.queryService.generateUgcVisibilityQueryForVisitor(query);
 
 			const rawNotes = await query.getMany();
 			const nextUserFilters = me && rawNotes.length > 0

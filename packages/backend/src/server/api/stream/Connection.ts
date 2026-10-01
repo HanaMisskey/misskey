@@ -251,13 +251,8 @@ export default class Connection {
 			}
 		}
 
-		if (this.user == null) {
-			if (this.meta.ugcVisibilityForVisitor === 'none') return;
-			if (this.meta.ugcVisibilityForVisitor === 'local') {
-				const author = await this.cacheService.findUserById(data.body.userId);
-				if (author.host != null) return;
-			}
-		}
+		// TODO: ugcVisibilityForVisitor が local の場合の扱いを NoteEntityService.shouldHideNote と揃える
+		if (this.user == null && this.meta.ugcVisibilityForVisitor === 'none') return;
 
 		this.sendMessageToWs('noteUpdated', {
 			id: data.body.id,
