@@ -31,6 +31,11 @@
 	],
 	packageRules: [
 		{
+			matchManagers: ['custom.regex'],
+			matchPackageNames: ['HanaMisskey/hanami-wasm-search'],
+			prBodyNotes: ['配布アーカイブの更新後、pnpm-lock.yaml を再生成して CI を確認してください。'],
+		},
+		{
 			groupName: '[Backend] Update dependencies',
 			matchFileNames: [
 				'packages/backend/**/package.json',
@@ -129,6 +134,13 @@
 		},
 	],
 	customManagers: [
+		{
+			customType: 'regex',
+			managerFilePatterns: ['/^packages/frontend/package\\.json$/'],
+			matchStrings: ['https://codeload\\.github\\.com/HanaMisskey/hanami-wasm-search/tar\\.gz/(?<currentValue>[^\"\\s]+)'],
+			datasourceTemplate: 'github-tags',
+			depNameTemplate: 'HanaMisskey/hanami-wasm-search',
+		},
 		{
 			customType: 'regex',
 			managerFilePatterns: ['/^Dockerfile$/'],
