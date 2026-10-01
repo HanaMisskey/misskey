@@ -68,7 +68,6 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				throw err;
 			});
 
-			// check visibility
 			if (!await this.noteEntityService.isVisibleForMe(note, me.id)) {
 				throw new ApiError(meta.errors.noSuchNote);
 			}
