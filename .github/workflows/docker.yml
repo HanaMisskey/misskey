@@ -2,8 +2,8 @@ name: Publish Docker image
 
 on:
   push:
-    branches-ignore:
-      - dependabot/**
+    branches:
+      - hanami
 
   workflow_dispatch:
 
