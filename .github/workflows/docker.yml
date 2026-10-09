@@ -5,6 +5,8 @@ on:
     branches:
       - hanami
 
+  workflow_dispatch:
+
 env:
   REGISTRY_IMAGE: kanarikanaru/hanamisskey
 
