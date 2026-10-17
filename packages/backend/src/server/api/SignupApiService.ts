@@ -292,6 +292,7 @@ export class SignupApiService {
 
 		if ((result.affected ?? 0) > 0) return true;
 
+		// 期限切れの pendingUser に紐付いたままのコードは、紐付けを解除してから確保し直す
 		if (this.meta.emailRequiredForSignup) {
 			const stale = await this.registrationTicketsRepository.findOneBy({
 				id: ticket.id,
