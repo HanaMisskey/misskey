@@ -60,8 +60,8 @@ minimumReleaseAgeExclude:
   - nodemailer@9.1.1
   # Renovate security update: sanitize-html@2.18.0
   - sanitize-html@2.18.0
-  # Renovate security update: fastify@5.12.5
-  - fastify@5.12.5
+  # Renovate security update: fastify@5.12.5 || 5.12.6
+  - fastify@5.12.5 || 5.12.6
 overrides:
   '@aiscript-dev/aiscript-languageserver': '-'
   chokidar: 5.0.0
