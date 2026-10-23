@@ -130,6 +130,8 @@ describe('ユーザー', () => {
 			autoSensitive: user.autoSensitive,
 			carefulBot: user.carefulBot,
 			autoAcceptFollowed: user.autoAcceptFollowed,
+			followApprovalLocalSeconds: user.followApprovalLocalSeconds,
+			followApprovalRemoteSeconds: user.followApprovalRemoteSeconds,
 			noCrawle: user.noCrawle,
 			preventAiLearning: user.preventAiLearning,
 			isExplorable: user.isExplorable,
@@ -370,6 +372,8 @@ describe('ユーザー', () => {
 		assert.strictEqual(response.autoSensitive, false);
 		assert.strictEqual(response.carefulBot, false);
 		assert.strictEqual(response.autoAcceptFollowed, true);
+		assert.strictEqual(response.followApprovalLocalSeconds, null);
+		assert.strictEqual(response.followApprovalRemoteSeconds, null);
 		assert.strictEqual(response.noCrawle, false);
 		assert.strictEqual(response.preventAiLearning, true);
 		assert.strictEqual(response.isExplorable, true);
@@ -734,6 +738,12 @@ describe('ユーザー', () => {
 		const parameters = { query: 'carol', limit: 10 };
 		const response = await successfulApiCall({ endpoint: 'users/search', parameters, user: alice });
 		const expected = [await show(carol.id, alice)];
+		assert.deepStrictEqual(response, expected);
+	});
+	test('を検索することができる(未認証)', async () => {
+		const parameters = { query: 'carol', limit: 10 };
+		const response = await successfulApiCall({ endpoint: 'users/search', parameters, user: undefined });
+		const expected = [await successfulApiCall({ endpoint: 'users/show', parameters: { userId: carol.id }, user: undefined })];
 		assert.deepStrictEqual(response, expected);
 	});
 	test('を検索することができる(UserLite)', async () => {

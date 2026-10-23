@@ -38,7 +38,7 @@ import MkTextarea from '@/components/MkTextarea.vue';
 import FormSlot from '@/components/form/slot.vue';
 import MkInfo from '@/components/MkInfo.vue';
 import * as os from '@/os.js';
-import { updateCurrentAccountPartial } from '@/accounts.js';
+import { updateCurrentAccount } from '@/accounts.js';
 import type { TutorialPageCommonExpose } from '@/components/MkTutorial.vue';
 import { ensureSignin } from '@/i.js';
 
@@ -58,7 +58,7 @@ watch(name, () => {
 			text: i18n.ts.yourNameContainsProhibitedWordsDescription,
 		},
 	});
-	updateCurrentAccountPartial({ name: name.value });
+	updateCurrentAccount({ name: name.value });
 });
 
 watch(description, () => {
@@ -67,7 +67,7 @@ watch(description, () => {
 
 		description: description.value || null,
 	});
-	updateCurrentAccountPartial({ description: description.value });
+	updateCurrentAccount({ description: description.value });
 });
 
 async function setAvatar(ev: PointerEvent) {
