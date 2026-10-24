@@ -27,6 +27,9 @@ on:
       - .github/pgdog/**
       - .github/workflows/test-frontend.yml
       - .github/misskey/test.yml
+permissions:
+  contents: read
+
 jobs:
   vitest:
     name: Unit tests (frontend)

@@ -21,6 +21,9 @@ on:
       - .github/workflows/test-federation.yml
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   test:
     name: Federation test (${{ matrix.database-route }})

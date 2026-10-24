@@ -25,6 +25,9 @@ on:
       - .github/misskey/test.yml
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   unit:
     name: Unit tests (backend, ${{ matrix.database-route }})
