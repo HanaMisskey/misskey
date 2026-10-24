@@ -93,10 +93,6 @@ services:
         target: /misskey/packages/misskey-reversi/node_modules
 
 networks:
-  default:
-    ipam:
-      config:
-        - subnet: 172.24.0.0/16
   external_network:
     driver: bridge
     ipam:

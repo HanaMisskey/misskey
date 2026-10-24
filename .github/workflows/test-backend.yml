@@ -10,23 +10,17 @@ on:
       - packages/misskey-js/**
       - .github/actions/setup-pgdog/**
       - .github/pgdog/**
-      - pnpm-lock.yaml
-      - .node-version
-      - .github/min.node-version
       - .github/workflows/test-backend.yml
       - .github/misskey/test.yml
   pull_request:
-    branches:
-      - hanami
+    branches-ignore:
+      - master
     paths:
       - packages/backend/**
       # for permissions
       - packages/misskey-js/**
       - .github/actions/setup-pgdog/**
       - .github/pgdog/**
-      - pnpm-lock.yaml
-      - .node-version
-      - .github/min.node-version
       - .github/workflows/test-backend.yml
       - .github/misskey/test.yml
   workflow_dispatch:
@@ -35,7 +29,6 @@ jobs:
   unit:
     name: Unit tests (backend, ${{ matrix.database-route }})
     runs-on: ubuntu-latest
-    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -67,8 +60,6 @@ jobs:
         env:
           MEILI_NO_ANALYTICS: 'true'
           MEILI_ENV: 'development'
-          MEILI_MAX_INDEXING_MEMORY: '256Mb'
-          MEILI_MAX_INDEXING_THREADS: '2'
       hanamisearch:
         image: getmeili/meilisearch:latest
         ports:
@@ -76,8 +67,6 @@ jobs:
         env:
           MEILI_NO_ANALYTICS: 'true'
           MEILI_ENV: 'development'
-          MEILI_MAX_INDEXING_MEMORY: '256Mb'
-          MEILI_MAX_INDEXING_THREADS: '2'
 
     steps:
     - uses: actions/checkout@v7.0.1
@@ -119,7 +108,6 @@ jobs:
   e2e:
     name: E2E tests (backend, ${{ matrix.database-route }})
     runs-on: ubuntu-latest
-    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -151,8 +139,6 @@ jobs:
         env:
           MEILI_NO_ANALYTICS: 'true'
           MEILI_ENV: 'development'
-          MEILI_MAX_INDEXING_MEMORY: '256Mb'
-          MEILI_MAX_INDEXING_THREADS: '2'
       hanamisearch:
         image: getmeili/meilisearch:latest
         ports:
@@ -160,8 +146,6 @@ jobs:
         env:
           MEILI_NO_ANALYTICS: 'true'
           MEILI_ENV: 'development'
-          MEILI_MAX_INDEXING_MEMORY: '256Mb'
-          MEILI_MAX_INDEXING_THREADS: '2'
 
     steps:
       - uses: actions/checkout@v7.0.1
@@ -199,7 +183,6 @@ jobs:
   migration:
     name: Migration tests (backend, ${{ matrix.database-route }})
     runs-on: ubuntu-latest
-    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:

@@ -1,5 +1,5 @@
-name: Setup PgDog for Misskey tests
-description: Route the disposable test database through a transaction pool.
+name: Setup PgDog
+description: Start PgDog and configure the test database endpoint.
 runs:
   using: composite
   steps:

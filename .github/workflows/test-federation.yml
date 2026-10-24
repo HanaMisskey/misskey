@@ -9,21 +9,15 @@ on:
       - packages/misskey-js/**
       - .github/actions/setup-pgdog/**
       - .github/pgdog/**
-      - pnpm-lock.yaml
-      - .node-version
-      - .github/min.node-version
       - .github/workflows/test-federation.yml
   pull_request:
-    branches:
-      - hanami
+    branches-ignore:
+      - master
     paths:
       - packages/backend/**
       - packages/misskey-js/**
       - .github/actions/setup-pgdog/**
       - .github/pgdog/**
-      - pnpm-lock.yaml
-      - .node-version
-      - .github/min.node-version
       - .github/workflows/test-federation.yml
   workflow_dispatch:
 
@@ -31,7 +25,6 @@ jobs:
   test:
     name: Federation test (${{ matrix.database-route }})
     runs-on: ubuntu-latest
-    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:

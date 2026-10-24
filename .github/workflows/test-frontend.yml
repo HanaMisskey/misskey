@@ -12,14 +12,11 @@ on:
       - packages/backend/**
       - .github/actions/setup-pgdog/**
       - .github/pgdog/**
-      - pnpm-lock.yaml
-      - .node-version
-      - .github/min.node-version
       - .github/workflows/test-frontend.yml
       - .github/misskey/test.yml
   pull_request:
-    branches:
-      - hanami
+    branches-ignore:
+      - master
     paths:
       - packages/frontend/**
       # for permissions
@@ -28,24 +25,12 @@ on:
       - packages/backend/**
       - .github/actions/setup-pgdog/**
       - .github/pgdog/**
-      - pnpm-lock.yaml
-      - .node-version
-      - .github/min.node-version
       - .github/workflows/test-frontend.yml
       - .github/misskey/test.yml
-  workflow_dispatch:
-    inputs:
-      debug_browser:
-        description: 'Diagnose the first page load on the direct database route'
-        type: boolean
-        default: false
-
 jobs:
   vitest:
-    if: github.event_name != 'workflow_dispatch' || !inputs.debug_browser
     name: Unit tests (frontend)
     runs-on: ubuntu-latest
-    timeout-minutes: 45
 
     steps:
     - uses: actions/checkout@v7.0.1
@@ -77,10 +62,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        database-route: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_browser && fromJSON('["direct"]') || fromJSON('["direct", "pgdog"]') }}
+        database-route: [direct, pgdog]
     name: E2E tests (frontend, ${{ matrix.database-route }})
     runs-on: ubuntu-latest
-    timeout-minutes: 45
 
     services:
       postgres:
@@ -101,8 +85,6 @@ jobs:
         env:
           MEILI_NO_ANALYTICS: 'true'
           MEILI_ENV: 'development'
-          MEILI_MAX_INDEXING_MEMORY: '256Mb'
-          MEILI_MAX_INDEXING_THREADS: '2'
       hanamisearch:
         image: getmeili/meilisearch:latest
         ports:
@@ -110,8 +92,6 @@ jobs:
         env:
           MEILI_NO_ANALYTICS: 'true'
           MEILI_ENV: 'development'
-          MEILI_MAX_INDEXING_MEMORY: '256Mb'
-          MEILI_MAX_INDEXING_THREADS: '2'
 
     steps:
     - uses: actions/checkout@v7.0.1
@@ -134,75 +114,11 @@ jobs:
     - name: Playwright install
       working-directory: packages/frontend
       run: pnpm exec playwright install --with-deps chromium
-    - name: Prepare browser network diagnostics
-      if: github.event_name == 'workflow_dispatch' && inputs.debug_browser
-      env:
-        NETWORK_DEBUG_DIR: ${{ runner.temp }}/frontend-network-debug
-      run: |
-        mkdir -p "$NETWORK_DEBUG_DIR"
-        python3 - <<'PYTHON'
-        from pathlib import Path
-        Path('packages/frontend/playwright.network-debug.config.ts').write_text("/*\n * SPDX-FileCopyrightText: syuilo and misskey-project\n * SPDX-License-Identifier: AGPL-3.0-only\n */\nimport { defineConfig } from '@playwright/test';\nimport { join } from 'node:path';\nimport base from './playwright.config';\n\nexport default defineConfig(base, {\n  retries: 0,\n  workers: 1,\n  use: {\n    trace: 'on',\n    launchOptions: {\n      args: [\n        `--log-net-log=${join(process.env.NETWORK_DEBUG_DIR!, 'chromium-netlog.json')}`,\n        '--net-log-duration=150',\n      ],\n    },\n  },\n});\n")
-        PYTHON
-        python3 - <<'PYTHON'
-        import datetime, json, os, pathlib, subprocess
-        root = pathlib.Path(os.environ['NETWORK_DEBUG_DIR'])
-        dns = subprocess.run(['getent', 'ahosts', 'static-assets.misskey.flowers'], capture_output=True, text=True)
-        (root / 'runner-network.json').write_text(json.dumps({
-            'time': datetime.datetime.now(datetime.timezone.utc).isoformat(),
-            'dns_exit_code': dns.returncode, 'dns_stdout': dns.stdout, 'dns_stderr': dns.stderr,
-            'resolv_conf': pathlib.Path('/etc/resolv.conf').read_text(),
-        }, indent=2) + '\n')
-        PYTHON
-        cat > "$NETWORK_DEBUG_DIR/probe.py" <<'PYTHON'
-        import json, os, pathlib, subprocess
-        root = pathlib.Path(os.environ['NETWORK_DEBUG_DIR'])
-        url = 'https://static-assets.misskey.flowers/fonts/hana-icons/font.css'
-        user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36'
-        results = []
-        for family in ['4', '6']:
-            for protocol in ['http1.1', 'http2']:
-                name = f'ipv{family}-{protocol}'
-                command = ['curl', f'-{family}', f'--{protocol}', '--silent', '--show-error', '--verbose',
-                    '--connect-timeout', '5', '--max-time', '12', '--user-agent', user_agent,
-                    '--referer', 'http://localhost:61812/', '--output', '/dev/null',
-                    '--dump-header', str(root / f'{name}-headers.txt'), '--write-out', '%{json}', url]
-                with (root / f'{name}-connection.txt').open('w') as log:
-                    result = subprocess.run(command, stdout=subprocess.PIPE, stderr=log, text=True, timeout=20)
-                results.append({'name': name, 'exit_code': result.returncode,
-                    'curl': json.loads(result.stdout) if result.stdout else None})
-        (root / 'curl-results.json').write_text(json.dumps(results, indent=2) + '\n')
-        PYTHON
     - name: Test
-      if: github.event_name != 'workflow_dispatch' || !inputs.debug_browser
       run: pnpm start-server-and-test "pnpm --filter backend start:test" http://localhost:61812 "pnpm --filter frontend test:e2e"
       timeout-minutes: 15
-    - name: Debug first page load
-      if: github.event_name == 'workflow_dispatch' && inputs.debug_browser
-      env:
-        DEBUG: pw:browser
-        NETWORK_DEBUG_DIR: ${{ runner.temp }}/frontend-network-debug
-      run: >-
-        pnpm start-server-and-test "pnpm --filter backend start:test" http://localhost:61812
-        "pnpm --filter frontend exec playwright test --config playwright.network-debug.config.ts basic.spec.ts --grep 'Before setup instance.*successfully loads' --max-failures=1"
-      timeout-minutes: 5
-    - name: Probe external CSS from runner
-      if: always() && github.event_name == 'workflow_dispatch' && inputs.debug_browser
-      env:
-        NETWORK_DEBUG_DIR: ${{ runner.temp }}/frontend-network-debug
-      run: python3 "$NETWORK_DEBUG_DIR/probe.py"
-    - name: Upload network diagnostics
-      if: always() && github.event_name == 'workflow_dispatch' && inputs.debug_browser
-      uses: actions/upload-artifact@v7
-      with:
-        name: frontend-network-debug-${{ github.run_attempt }}
-        path: |
-          ${{ runner.temp }}/frontend-network-debug
-          packages/frontend/test/e2e/artifacts
-        if-no-files-found: error
-        retention-days: 7
     - uses: actions/upload-artifact@v7
-      if: failure() && (github.event_name != 'workflow_dispatch' || !inputs.debug_browser)
+      if: failure()
       with:
         name: playwright-e2e-artifacts-${{ matrix.database-route }}
         path: packages/frontend/test/e2e/artifacts
