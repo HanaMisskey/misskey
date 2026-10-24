@@ -8,25 +8,38 @@ on:
       - packages/backend/**
       # for permissions
       - packages/misskey-js/**
+      - .github/actions/setup-pgdog/**
+      - .github/pgdog/**
+      - pnpm-lock.yaml
+      - .node-version
+      - .github/min.node-version
       - .github/workflows/test-backend.yml
       - .github/misskey/test.yml
   pull_request:
-    branches-ignore:
-      - master
+    branches:
+      - hanami
     paths:
       - packages/backend/**
       # for permissions
       - packages/misskey-js/**
+      - .github/actions/setup-pgdog/**
+      - .github/pgdog/**
+      - pnpm-lock.yaml
+      - .node-version
+      - .github/min.node-version
       - .github/workflows/test-backend.yml
       - .github/misskey/test.yml
   workflow_dispatch:
 
 jobs:
   unit:
-    name: Unit tests (backend)
+    name: Unit tests (backend, ${{ matrix.database-route }})
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     strategy:
+      fail-fast: false
       matrix:
+        database-route: [direct, pgdog]
         node-version-file:
           - .node-version
           - .github/min.node-version
@@ -54,6 +67,8 @@ jobs:
         env:
           MEILI_NO_ANALYTICS: 'true'
           MEILI_ENV: 'development'
+          MEILI_MAX_INDEXING_MEMORY: '256Mb'
+          MEILI_MAX_INDEXING_THREADS: '2'
       hanamisearch:
         image: getmeili/meilisearch:latest
         ports:
@@ -61,6 +76,8 @@ jobs:
         env:
           MEILI_NO_ANALYTICS: 'true'
           MEILI_ENV: 'development'
+          MEILI_MAX_INDEXING_MEMORY: '256Mb'
+          MEILI_MAX_INDEXING_THREADS: '2'
 
     steps:
     - uses: actions/checkout@v7.0.1
@@ -82,23 +99,31 @@ jobs:
       run: git diff --exit-code pnpm-lock.yaml
     - name: Copy Configure
       run: cp .github/misskey/test.yml .config
+    - uses: ./.github/actions/setup-pgdog
+      if: matrix.database-route == 'pgdog'
     - name: Build
       run: pnpm build
     - name: Test
       run: pnpm --filter backend ${{ matrix.coverage && 'test-and-coverage' || 'test' }}
     - name: Upload to Codecov
-      if: ${{ matrix.coverage }}
+      if: ${{ matrix.coverage && matrix.database-route == 'direct' }}
       uses: codecov/codecov-action@v7
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         files: ./packages/backend/coverage/coverage-final.json
 
+    - name: PgDog logs
+      if: always() && matrix.database-route == 'pgdog'
+      run: docker logs misskey-test-pgdog
+
   e2e:
-    name: E2E tests (backend)
+    name: E2E tests (backend, ${{ matrix.database-route }})
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
+        database-route: [direct, pgdog]
         node-version-file:
           - .node-version
           - .github/min.node-version
@@ -126,6 +151,8 @@ jobs:
         env:
           MEILI_NO_ANALYTICS: 'true'
           MEILI_ENV: 'development'
+          MEILI_MAX_INDEXING_MEMORY: '256Mb'
+          MEILI_MAX_INDEXING_THREADS: '2'
       hanamisearch:
         image: getmeili/meilisearch:latest
         ports:
@@ -133,6 +160,8 @@ jobs:
         env:
           MEILI_NO_ANALYTICS: 'true'
           MEILI_ENV: 'development'
+          MEILI_MAX_INDEXING_MEMORY: '256Mb'
+          MEILI_MAX_INDEXING_THREADS: '2'
 
     steps:
       - uses: actions/checkout@v7.0.1
@@ -150,22 +179,31 @@ jobs:
         run: git diff --exit-code pnpm-lock.yaml
       - name: Copy Configure
         run: cp .github/misskey/test.yml .config
+      - uses: ./.github/actions/setup-pgdog
+        if: matrix.database-route == 'pgdog'
       - name: Build
         run: pnpm build
       - name: Test
         run: pnpm --filter backend ${{ matrix.coverage && 'test-and-coverage:e2e' || 'test:e2e' }}
       - name: Upload to Codecov
-        if: ${{ matrix.coverage }}
+        if: ${{ matrix.coverage && matrix.database-route == 'direct' }}
         uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./packages/backend/coverage/coverage-final.json
 
+      - name: PgDog logs
+        if: always() && matrix.database-route == 'pgdog'
+        run: docker logs misskey-test-pgdog
+
   migration:
-    name: Migration tests (backend)
+    name: Migration tests (backend, ${{ matrix.database-route }})
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     strategy:
+      fail-fast: false
       matrix:
+        database-route: [direct, pgdog]
         node-version-file:
           - .node-version
           #- .github/min.node-version
@@ -198,13 +236,20 @@ jobs:
         run: git diff --exit-code pnpm-lock.yaml
       - name: Copy Configure
         run: cp .github/misskey/test.yml .config
+      - uses: ./.github/actions/setup-pgdog
+        if: matrix.database-route == 'pgdog'
       - name: Build
         run: pnpm build
       - name: Run migrations
         run: MISSKEY_CONFIG_YML=test.yml pnpm --filter backend migrate
       - name: Check no migrations are remaining
         run: MISSKEY_CONFIG_YML=test.yml pnpm --filter backend check-migrations
-      - name: Test online migrations
+      - name: Test online migrations (direct fixture)
+        if: matrix.database-route == 'direct'
         run: pnpm --filter backend test:migrations
         env:
           MISSKEY_MIGRATION_TEST_DATABASE_URL: postgres://postgres@127.0.0.1:54312/postgres
+
+      - name: PgDog logs
+        if: always() && matrix.database-route == 'pgdog'
+        run: docker logs misskey-test-pgdog

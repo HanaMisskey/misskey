@@ -1,0 +1,29 @@
+services:
+  pgdog.a.test:
+    image: ghcr.io/pgdogdev/pgdog:v0.1.62@sha256:956980d35a2358ae670b411359f971b02fac60c279527a4e998de91cbce595f7
+    depends_on:
+      db.a.test:
+        condition: service_healthy
+    networks:
+      - internal_network_a
+    volumes:
+      - ./.config/pgdog.a.toml:/pgdog/pgdog.toml:ro
+      - ./.config/pgdog.users.toml:/pgdog/users.toml:ro
+  misskey.a.test:
+    depends_on:
+      pgdog.a.test:
+        condition: service_started
+  pgdog.b.test:
+    image: ghcr.io/pgdogdev/pgdog:v0.1.62@sha256:956980d35a2358ae670b411359f971b02fac60c279527a4e998de91cbce595f7
+    depends_on:
+      db.b.test:
+        condition: service_healthy
+    networks:
+      - internal_network_b
+    volumes:
+      - ./.config/pgdog.b.toml:/pgdog/pgdog.toml:ro
+      - ./.config/pgdog.users.toml:/pgdog/users.toml:ro
+  misskey.b.test:
+    depends_on:
+      pgdog.b.test:
+        condition: service_started

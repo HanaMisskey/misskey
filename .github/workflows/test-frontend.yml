@@ -10,23 +10,34 @@ on:
       - packages/misskey-js/**
       # for e2e
       - packages/backend/**
+      - .github/actions/setup-pgdog/**
+      - .github/pgdog/**
+      - pnpm-lock.yaml
+      - .node-version
+      - .github/min.node-version
       - .github/workflows/test-frontend.yml
       - .github/misskey/test.yml
   pull_request:
-    branches-ignore:
-      - master
+    branches:
+      - hanami
     paths:
       - packages/frontend/**
       # for permissions
       - packages/misskey-js/**
       # for e2e
       - packages/backend/**
+      - .github/actions/setup-pgdog/**
+      - .github/pgdog/**
+      - pnpm-lock.yaml
+      - .node-version
+      - .github/min.node-version
       - .github/workflows/test-frontend.yml
       - .github/misskey/test.yml
 jobs:
   vitest:
     name: Unit tests (frontend)
     runs-on: ubuntu-latest
+    timeout-minutes: 45
 
     steps:
     - uses: actions/checkout@v7.0.1
@@ -55,8 +66,13 @@ jobs:
         files: ./packages/frontend/coverage/coverage-final.json
 
   e2e:
-    name: E2E tests (frontend)
+    strategy:
+      fail-fast: false
+      matrix:
+        database-route: [direct, pgdog]
+    name: E2E tests (frontend, ${{ matrix.database-route }})
     runs-on: ubuntu-latest
+    timeout-minutes: 45
 
     services:
       postgres:
@@ -77,6 +93,8 @@ jobs:
         env:
           MEILI_NO_ANALYTICS: 'true'
           MEILI_ENV: 'development'
+          MEILI_MAX_INDEXING_MEMORY: '256Mb'
+          MEILI_MAX_INDEXING_THREADS: '2'
       hanamisearch:
         image: getmeili/meilisearch:latest
         ports:
@@ -84,6 +102,8 @@ jobs:
         env:
           MEILI_NO_ANALYTICS: 'true'
           MEILI_ENV: 'development'
+          MEILI_MAX_INDEXING_MEMORY: '256Mb'
+          MEILI_MAX_INDEXING_THREADS: '2'
 
     steps:
     - uses: actions/checkout@v7.0.1
@@ -99,16 +119,22 @@ jobs:
     - run: pnpm i --frozen-lockfile
     - name: Copy Configure
       run: cp .github/misskey/test.yml .config
+    - uses: ./.github/actions/setup-pgdog
+      if: matrix.database-route == 'pgdog'
     - name: Build
       run: pnpm build
     - name: Playwright install
       working-directory: packages/frontend
       run: pnpm exec playwright install --with-deps chromium
     - name: Test
-      run: pnpm start-server-and-test start:test http://localhost:61812 "pnpm --filter frontend test:e2e"
+      run: pnpm start-server-and-test "pnpm --filter backend start:test" http://localhost:61812 "pnpm --filter frontend test:e2e"
       timeout-minutes: 15
     - uses: actions/upload-artifact@v7
       if: failure()
       with:
-        name: playwright-e2e-artifacts
+        name: playwright-e2e-artifacts-${{ matrix.database-route }}
         path: packages/frontend/test/e2e/artifacts
+
+    - name: PgDog logs
+      if: always() && matrix.database-route == 'pgdog'
+      run: docker logs misskey-test-pgdog

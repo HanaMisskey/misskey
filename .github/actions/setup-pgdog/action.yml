@@ -1,0 +1,34 @@
+name: Setup PgDog for Misskey tests
+description: Route the disposable test database through a transaction pool.
+runs:
+  using: composite
+  steps:
+    - name: Start PgDog
+      shell: bash
+      run: |
+        docker run -d --name misskey-test-pgdog --network host \
+          -v "$GITHUB_WORKSPACE/.github/pgdog:/pgdog:ro" \
+          ghcr.io/pgdogdev/pgdog:v0.1.62@sha256:956980d35a2358ae670b411359f971b02fac60c279527a4e998de91cbce595f7
+        ready=0
+        for i in {1..30}; do
+          if docker run --rm --network host postgres:18 psql \
+            'postgres://postgres@127.0.0.1:56432/test-misskey?connect_timeout=2' \
+            -v ON_ERROR_STOP=1 -Atc 'SELECT 1'; then
+            ready=1
+            break
+          fi
+          sleep 1
+        done
+        test "$ready" = 1
+    - name: Route Misskey through PgDog
+      shell: bash
+      run: |
+        python3 - <<'PYTHON'
+        from pathlib import Path
+        path = Path('.config/test.yml')
+        text = path.read_text()
+        old = '  port: 54312\n'
+        if text.count(old) != 1:
+            raise SystemExit('Expected exactly one direct database port in test.yml')
+        path.write_text(text.replace(old, '  port: 56432\n'))
+        PYTHON

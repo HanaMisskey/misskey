@@ -1,0 +1,12 @@
+[general]
+host = "127.0.0.1"
+port = 56432
+auth_type = "trust"
+pooler_mode = "transaction"
+default_pool_size = 30
+
+[[databases]]
+name = "test-misskey"
+host = "127.0.0.1"
+port = 54312
+role = "primary"

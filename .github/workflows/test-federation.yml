@@ -7,22 +7,35 @@ on:
     paths:
       - packages/backend/**
       - packages/misskey-js/**
+      - .github/actions/setup-pgdog/**
+      - .github/pgdog/**
+      - pnpm-lock.yaml
+      - .node-version
+      - .github/min.node-version
       - .github/workflows/test-federation.yml
   pull_request:
-    branches-ignore:
-      - master
+    branches:
+      - hanami
     paths:
       - packages/backend/**
       - packages/misskey-js/**
+      - .github/actions/setup-pgdog/**
+      - .github/pgdog/**
+      - pnpm-lock.yaml
+      - .node-version
+      - .github/min.node-version
       - .github/workflows/test-federation.yml
   workflow_dispatch:
 
 jobs:
   test:
-    name: Federation test
+    name: Federation test (${{ matrix.database-route }})
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     strategy:
+      fail-fast: false
       matrix:
+        database-route: [direct, pgdog]
         node-version-file:
           - .node-version
           - .github/min.node-version
@@ -51,6 +64,21 @@ jobs:
           cd packages/backend/test-federation
           bash ./setup.sh
           sudo chmod 644 ./certificates/*.test.key
+      - name: Configure PgDog federation route
+        if: matrix.database-route == 'pgdog'
+        run: |
+          cd packages/backend/test-federation
+          python3 - <<'PYTHON'
+          from pathlib import Path
+          for host in ['a.test', 'b.test']:
+              path = Path(f'.config/{host}.default.yml')
+              text = path.read_text()
+              old = f'  host: db.{host}\n'
+              if text.count(old) != 1:
+                  raise SystemExit(f'Expected database host in {path}')
+              path.write_text(text.replace(old, f'  host: pgdog.{host}\n'))
+          PYTHON
+          echo 'COMPOSE_FILE=compose.yml:compose.override.yaml:compose.pgdog.yml' >> "$GITHUB_ENV"
       - name: Start servers
         id: start_servers
         continue-on-error: true
