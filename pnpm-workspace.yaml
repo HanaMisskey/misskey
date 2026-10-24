@@ -56,8 +56,8 @@ minimumReleaseAgeExclude:
   - slacc-win32-x64-msvc
   - '@typescript/native-preview*'
   - undici@6.28.1 || 7.29.1 # そのうち消す
-  # Renovate security update: nodemailer@9.1.1
-  - nodemailer@9.1.1
+  # Renovate security update: nodemailer@9.1.1 || 10.1.4
+  - nodemailer@9.1.1 || 10.1.4
   # Renovate security update: sanitize-html@2.18.0
   - sanitize-html@2.18.0
   # Renovate security update: fastify@5.12.5
