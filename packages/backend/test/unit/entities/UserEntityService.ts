@@ -51,6 +51,7 @@ import { AccountMoveService } from '@/core/AccountMoveService.js';
 import { ReactionService } from '@/core/ReactionService.js';
 import { NotificationService } from '@/core/NotificationService.js';
 import { ReactionsBufferingService } from '@/core/ReactionsBufferingService.js';
+import { HanaReactionMuteService } from '@/core/HanaReactionMuteService.js';
 import { ChatService } from '@/core/ChatService.js';
 
 process.env.NODE_ENV = 'test';
@@ -173,6 +174,7 @@ describe('UserEntityService', () => {
 				AccountMoveService,
 				ReactionService,
 				ReactionsBufferingService,
+				HanaReactionMuteService,
 				NotificationService,
 				ChatService,
 			];
