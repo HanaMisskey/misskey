@@ -88,7 +88,6 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			const toDatabaseReaction = (type: string) => type.endsWith('@.:') ? type.slice(0, -3) + ':' : type;
 			if (ps.types) {
 				query.andWhere('reaction.reaction IN (:...types)', { types: ps.types.map(toDatabaseReaction) });
-				query.orderBy('reaction.id', 'DESC');
 			} else if (ps.type) {
 				query.andWhere('reaction.reaction = :type', { type: toDatabaseReaction(ps.type) });
 			}

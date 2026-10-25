@@ -245,6 +245,77 @@ describe('Endpoints', () => {
 
 	/** 集約表示の元種類は和集合として絞り、通常のID順ページングとlocal表記を維持する。 */
 	describe('notes/reactions types', () => {
+		/**
+		 * Oracle: 既存cursor契約ではsinceだけのページはanchor直後から新しい順へ進む。
+		 * 同じ種類の反応をalice→bob→carol→daveの順に作り、sinceId=aliceの次はbob、
+		 * fixtureと独立した2020年の日付以降の最初はalice。typeとtypesは同じページを返す。
+		 */
+		test.each(['sinceId', 'sinceDate'] as const)('同じ種類のtypeとtypesは%sの直後の1件を返す', async (cursor) => {
+			const note = await post(alice, { text: `same reaction forward page ${cursor}` });
+			for (const user of [alice, bob, carol, dave]) {
+				expect((await api('notes/reactions/create', { noteId: note.id, reaction: '😺' }, user)).status).toBe(204);
+			}
+			const all = await api('notes/reactions', { noteId: note.id, type: '😺' });
+			expect(all.status).toBe(200);
+			expect(all.body.map(reaction => reaction.user.id)).toEqual([dave.id, carol.id, bob.id, alice.id]);
+			const anchor = all.body.find(reaction => reaction.user.id === alice.id)!;
+			const sinceDate = Date.parse('2020-01-01T00:00:00.000Z');
+			expect(Date.parse(anchor.createdAt)).toBeGreaterThan(sinceDate);
+			const pagination = cursor === 'sinceId' ? { sinceId: anchor.id } : { sinceDate };
+			const scalar = await api('notes/reactions', { noteId: note.id, type: '😺', limit: 1, ...pagination });
+			const grouped = await api('notes/reactions', { noteId: note.id, types: ['😺'], limit: 1, ...pagination });
+			expect(scalar.status).toBe(200);
+			expect(grouped.status).toBe(200);
+			const expected = [{ userId: cursor === 'sinceId' ? bob.id : alice.id, type: '😺' }];
+			expect(scalar.body.map(reaction => ({ userId: reaction.user.id, type: reaction.type }))).toEqual(expected);
+			expect(grouped.body.map(reaction => ({ userId: reaction.user.id, type: reaction.type }))).toEqual(expected);
+			expect(grouped.body.map(reaction => reaction.id)).toEqual(scalar.body.map(reaction => reaction.id));
+		});
+
+		/**
+		 * Oracle: 種類の和集合全体にcursorとlimitを適用する。
+		 * alice😺→bob❤→carol😺→dave❤の作成順なのでaliceの次はbob、
+		 * fixture以前の独立した日付anchorの次はalice。各種類の最新1件へ飛ばない。
+		 */
+		test.each(['sinceId', 'sinceDate'] as const)('複数種類の和集合から%sの直後の1件を返す', async (cursor) => {
+			const note = await post(alice, { text: `mixed reaction forward page ${cursor}` });
+			for (const [user, reaction] of [[alice, '😺'], [bob, '❤'], [carol, '😺'], [dave, '❤']] as const) {
+				expect((await api('notes/reactions/create', { noteId: note.id, reaction }, user)).status).toBe(204);
+			}
+			const all = await api('notes/reactions', { noteId: note.id, types: ['😺', '❤'] });
+			expect(all.status).toBe(200);
+			expect(all.body.map(reaction => reaction.user.id)).toEqual([dave.id, carol.id, bob.id, alice.id]);
+			const anchor = all.body.find(reaction => reaction.user.id === alice.id)!;
+			const sinceDate = Date.parse('2020-01-01T00:00:00.000Z');
+			expect(Date.parse(anchor.createdAt)).toBeGreaterThan(sinceDate);
+			const pagination = cursor === 'sinceId' ? { sinceId: anchor.id } : { sinceDate };
+			const response = await api('notes/reactions', { noteId: note.id, types: ['😺', '❤'], limit: 1, ...pagination });
+			expect(response.status).toBe(200);
+			expect(response.body.map(reaction => ({ userId: reaction.user.id, type: reaction.type })))
+				.toEqual(cursor === 'sinceId' ? [{ userId: bob.id, type: '❤' }] : [{ userId: alice.id, type: '😺' }]);
+		});
+
+		/** 古い方向の契約は同じ作成順を逆に辿り、未指定はdave、untilId=daveの次はcarol。 */
+		test('typeとtypesはcursor未指定とuntilIdで古い方向の順序を維持する', async () => {
+			const note = await post(alice, { text: 'same reaction backward page' });
+			for (const user of [alice, bob, carol, dave]) {
+				expect((await api('notes/reactions/create', { noteId: note.id, reaction: '😺' }, user)).status).toBe(204);
+			}
+			const scalar = await api('notes/reactions', { noteId: note.id, type: '😺', limit: 1 });
+			const grouped = await api('notes/reactions', { noteId: note.id, types: ['😺'], limit: 1 });
+			expect(scalar.status).toBe(200);
+			expect(grouped.status).toBe(200);
+			expect(scalar.body.map(reaction => reaction.user.id)).toEqual([dave.id]);
+			expect(grouped.body.map(reaction => reaction.id)).toEqual(scalar.body.map(reaction => reaction.id));
+			const untilId = scalar.body[0].id;
+			const scalarNext = await api('notes/reactions', { noteId: note.id, type: '😺', limit: 1, untilId });
+			const groupedNext = await api('notes/reactions', { noteId: note.id, types: ['😺'], limit: 1, untilId });
+			expect(scalarNext.status).toBe(200);
+			expect(groupedNext.status).toBe(200);
+			expect(scalarNext.body.map(reaction => reaction.user.id)).toEqual([carol.id]);
+			expect(groupedNext.body.map(reaction => reaction.id)).toEqual(scalarNext.body.map(reaction => reaction.id));
+		});
+
 		/** frontendが送れるハートの二表記は、作成後には同じ実ハートとして検索できる。 */
 		test('色付きハートの追加は実ハートとして検索できる', async () => {
 			const note = await post(alice, { text: 'real heart' });
