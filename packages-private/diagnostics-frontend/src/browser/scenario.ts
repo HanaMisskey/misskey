@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { closeUserSetupDialog, postNote, registerUser, resetState, signupThroughUi, visitHome } from '../../../../packages/frontend/test/e2e/shared';
+import { postNote, registerUser, resetState, signupThroughUi, visitHome } from '../../../../packages/frontend/test/e2e/shared';
 import { sleep } from './server';
 import type { HeadlessChromeController } from './controller';
 
@@ -23,7 +23,10 @@ export async function runSignupAndPostScenario(chrome: HeadlessChromeController,
 
 	await visitHome(page, baseUrl);
 	await signupThroughUi(page, { username: 'alice', password: 'password' });
-	await closeUserSetupDialog(page);
+	await page.waitForURL('**/onboarding', { timeout: 30_000 });
+	await page.getByTestId('user-setup-close').last().click({ timeout: 30_000 });
+	await page.getByTestId('modal-dialog-ok').click();
+	await page.waitForURL(`${baseUrl}/`, { timeout: 30_000 });
 	await postNote(page, noteText, 10_000);
 
 	// 投稿直後の非同期処理が落ち着いてから計測したいので少し待つ
