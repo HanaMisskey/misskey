@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { computed, toValue } from 'vue';
+import type { MaybeRefOrGetter } from 'vue';
 import type * as Misskey from 'misskey-js';
 import { getEmojiMuteKey, isMuted } from '@/utility/emoji-mute.js';
 import { misskeyApi } from '@/utility/misskey-api.js';
@@ -32,6 +34,19 @@ export function groupReactions(reactions: Record<string, number>): ReactionGroup
 
 export function includesReaction(sources: string[], reaction: string | null | undefined): boolean {
 	return reaction != null && sources.some(source => getEmojiMuteKey(source) === getEmojiMuteKey(reaction));
+}
+
+export function useHanaReactionGroups(
+	reactions: MaybeRefOrGetter<Record<string, number>>,
+	myReaction: MaybeRefOrGetter<string | null | undefined>,
+) {
+	const groups = computed(() => groupReactions(toValue(reactions)));
+	const groupsByReaction = computed(() => new Map(groups.value.map(group => [group.reaction, group])));
+	return {
+		reactions: computed(() => Object.fromEntries(groups.value.map(group => [group.reaction, group.count]))),
+		myReaction: computed(() => groups.value.find(group => includesReaction(group.sources, toValue(myReaction)))?.reaction),
+		sourcesFor: (reaction: string) => groupsByReaction.value.get(reaction)?.sources ?? [],
+	};
 }
 
 export async function fetchReactionGroup(params: Misskey.Endpoints['notes/reactions']['req']): Promise<Misskey.entities.NoteReaction[]> {

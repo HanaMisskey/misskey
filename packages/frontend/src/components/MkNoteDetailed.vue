@@ -250,7 +250,7 @@ import { userPage } from '@/filters/user.js';
 import { notePage } from '@/filters/note.js';
 import { isEnabledUrlPreview } from '@/utility/url-preview.js';
 import { Paginator } from '@/utility/paginator.js';
-import { fetchReactionGroup, groupReactions } from '@/utility/reaction-groups.js';
+import { fetchReactionGroup, groupReactions } from '@/utility/HanaReactionGroups.js';
 import { misskeyApi } from '@/utility/misskey-api.js';
 import number from '@/filters/number.js';
 import { DI } from '@/di.js';

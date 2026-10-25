@@ -39,7 +39,7 @@ import { prefer } from '@/preferences.js';
 import { DI } from '@/di.js';
 import { noteEvents } from '@/composables/use-note-capture.js';
 import { getEmojiMuteKey, mute as muteEmoji, unmute as unmuteEmoji, isMuted as isEmojiMuted } from '@/utility/emoji-mute.js';
-import { fetchReactionGroup, includesReaction } from '@/utility/reaction-groups.js';
+import { fetchReactionGroup, includesReaction } from '@/utility/HanaReactionGroups.js';
 import { addToEmojiPalette } from '@/utility/emoji-palette.js';
 import { haptic } from '@/utility/haptic.js';
 
