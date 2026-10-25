@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { In } from 'typeorm';
+import { Any } from 'typeorm';
 import { DI } from '@/di-symbols.js';
 import type { Packed } from '@/misc/json-schema.js';
 import type { MiUser, NoteReactionsRepository } from '@/models/_.js';
@@ -37,7 +37,7 @@ export class HanaReactionMuteService {
 
 		// The pair cache is bounded and may still contain a buffered cancellation.
 		const reactions = await this.noteReactionsRepository.find({
-			where: { noteId: In(noteIds), userId: In(myReactions ? [...mutedUserIds, meId] : [...mutedUserIds]) },
+			where: { noteId: Any(noteIds), userId: Any(myReactions ? [...mutedUserIds, meId] : [...mutedUserIds]) },
 			select: { noteId: true, userId: true, reaction: true },
 		});
 		for (const { noteId, userId, reaction } of reactions) {

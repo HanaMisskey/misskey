@@ -672,13 +672,15 @@ export class NoteEntityService implements OnModuleInit {
 
 		const bufferedReactionsMap = this.meta.enableReactionsBuffering ? await this.reactionsBufferingService.getMany(noteIds) : null;
 
-		const mutedReactions = await this.hanaReactionMuteService.fetchMutedReactions(notes.map(note => note.id), meId);
+		const reactionsByNoteId = new Map(notes.map(note => [note.id, this.reactionService.convertLegacyReactions(
+			this.reactionsBufferingService.mergeReactions(note.reactions, bufferedReactionsMap?.get(note.id)?.deltas ?? {}),
+		)]));
+		const noteIdsWithReactions = [...reactionsByNoteId].filter(([, reactions]) => Object.values(reactions).some(count => count > 0)).map(([noteId]) => noteId);
+		const mutedReactions = await this.hanaReactionMuteService.fetchMutedReactions(noteIdsWithReactions, meId);
 
 		const packings = notes.map(note => {
-			const bufferedReactions = bufferedReactionsMap?.get(note.id);
-
 			const reactions = removeMutedUsersReactions(
-				this.reactionService.convertLegacyReactions(this.reactionsBufferingService.mergeReactions(note.reactions, bufferedReactions?.deltas ?? {})),
+				reactionsByNoteId.get(note.id)!,
 				mutedReactions.get(note.id) ?? [],
 			);
 
