@@ -16,6 +16,7 @@ import { UserSearchService } from '@/core/UserSearchService.js';
 import { WebhookTestService } from '@/core/WebhookTestService.js';
 import { FlashService } from '@/core/FlashService.js';
 import { ChannelMutingService } from '@/core/ChannelMutingService.js';
+import { HanaReactionMuteService } from '@/core/HanaReactionMuteService.js';
 import { AccountMoveService } from './AccountMoveService.js';
 import { AccountUpdateService } from './AccountUpdateService.js';
 import { SensitiveMediaDetectionService } from './SensitiveMediaDetectionService.js';
@@ -205,6 +206,7 @@ const $SignupService: Provider = { provide: 'SignupService', useExisting: Signup
 const $WebAuthnService: Provider = { provide: 'WebAuthnService', useExisting: WebAuthnService };
 const $UserBlockingService: Provider = { provide: 'UserBlockingService', useExisting: UserBlockingService };
 const $CacheService: Provider = { provide: 'CacheService', useExisting: CacheService };
+const $HanaReactionMuteService: Provider = { provide: 'HanaReactionMuteService', useExisting: HanaReactionMuteService };
 const $UserService: Provider = { provide: 'UserService', useExisting: UserService };
 const $UserFollowingService: Provider = { provide: 'UserFollowingService', useExisting: UserFollowingService };
 const $UserKeypairService: Provider = { provide: 'UserKeypairService', useExisting: UserKeypairService };
@@ -359,6 +361,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		WebAuthnService,
 		UserBlockingService,
 		CacheService,
+		HanaReactionMuteService,
 		UserService,
 		UserFollowingService,
 		UserKeypairService,
@@ -511,6 +514,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$WebAuthnService,
 		$UserBlockingService,
 		$CacheService,
+		$HanaReactionMuteService,
 		$UserService,
 		$UserFollowingService,
 		$UserKeypairService,
@@ -663,6 +667,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		WebAuthnService,
 		UserBlockingService,
 		CacheService,
+		HanaReactionMuteService,
 		UserService,
 		UserFollowingService,
 		UserKeypairService,
@@ -814,6 +819,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$WebAuthnService,
 		$UserBlockingService,
 		$CacheService,
+		$HanaReactionMuteService,
 		$UserService,
 		$UserFollowingService,
 		$UserKeypairService,

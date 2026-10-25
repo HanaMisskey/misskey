@@ -19,6 +19,7 @@ import { shouldHideNoteByTime } from '@/misc/should-hide-note-by-time.js';
 import { ReactionsBufferingService } from '@/core/ReactionsBufferingService.js';
 import { CacheService } from '@/core/CacheService.js';
 import { removeMutedUsersReactions } from '@/misc/reactions-mute.js';
+import type { HanaReactionMuteService } from '@/core/HanaReactionMuteService.js';
 import type { OnModuleInit } from '@nestjs/common';
 import type { CustomEmojiService } from '../CustomEmojiService.js';
 import type { ReactionService } from '../ReactionService.js';
@@ -74,7 +75,7 @@ export class NoteEntityService implements OnModuleInit {
 	private idService: IdService;
 	private cacheService: CacheService;
 	private noteLoader = new DebounceLoader(this.findNoteOrFail);
-	private projectedMyReactions = new WeakMap<object, { userId: MiUser['id']; reaction: string | null }>();
+	private hanaReactionMuteService: HanaReactionMuteService;
 
 	constructor(
 		private moduleRef: ModuleRef,
@@ -121,6 +122,7 @@ export class NoteEntityService implements OnModuleInit {
 		this.reactionsBufferingService = this.moduleRef.get('ReactionsBufferingService');
 		this.idService = this.moduleRef.get('IdService');
 		this.cacheService = this.moduleRef.get('CacheService');
+		this.hanaReactionMuteService = this.moduleRef.get('HanaReactionMuteService');
 	}
 
 	@bindThis
@@ -242,8 +244,8 @@ export class NoteEntityService implements OnModuleInit {
 	public async populateMyReaction(note: { id: MiNote['id']; reactions: MiNote['reactions']; reactionAndUserPairCache?: MiNote['reactionAndUserPairCache']; }, meId: MiUser['id'], _hint_?: {
 		myReactions: Map<MiNote['id'], string | null>;
 	}) {
-		const projected = this.projectedMyReactions.get(note);
-		if (projected?.userId === meId) {
+		const projected = this.hanaReactionMuteService.getMyReaction(note, meId);
+		if (projected) {
 			return projected.reaction ? this.reactionService.convertLegacyReaction(projected.reaction) : undefined;
 		}
 
@@ -634,62 +636,8 @@ export class NoteEntityService implements OnModuleInit {
 	}
 
 	@bindThis
-	private async fetchMutedReactions(noteIds: string[], meId: MiUser['id'] | null, myReactions?: Map<string, string | null>): Promise<Map<string, string[]>> {
-		const result = new Map<string, string[]>();
-		if (meId == null || noteIds.length === 0) return result;
-		const mutedUserIds = await this.cacheService.userMutingsCache.fetch(meId);
-		if (mutedUserIds.size === 0) return result;
-		if (myReactions) {
-			for (const noteId of noteIds) myReactions.set(noteId, null);
-		}
-
-		// The pair cache is bounded and may still contain a buffered cancellation.
-		const reactions = await this.noteReactionsRepository.find({
-			where: { noteId: In(noteIds), userId: In(myReactions ? [...mutedUserIds, meId] : [...mutedUserIds]) },
-			select: { noteId: true, userId: true, reaction: true },
-		});
-		for (const { noteId, userId, reaction } of reactions) {
-			if (myReactions && userId === meId) {
-				myReactions.set(noteId, reaction);
-				continue;
-			}
-			const muted = result.get(noteId) ?? [];
-			muted.push(this.reactionService.convertLegacyReaction(reaction));
-			result.set(noteId, muted);
-		}
-		return result;
-	}
-
-	@bindThis
 	public async filterMutedReactions(notes: Packed<'Note'>[], meId: MiUser['id'] | null, withReactionAndUserPairCache = false): Promise<void> {
-		if (meId == null) return;
-		const targets = new Set<Packed<'Note'>>();
-		const collect = (note: Packed<'Note'>) => {
-			if (targets.has(note)) return;
-			targets.add(note);
-			if (note.renote) collect(note.renote);
-			if (note.reply) collect(note.reply);
-		};
-		for (const note of notes) collect(note);
-		const noteIds = [...new Set([...targets].filter(note => Object.keys(note.reactions).length > 0).map(note => note.id))];
-		const myReactions = new Map<string, string | null>();
-		const mutedReactions = await this.fetchMutedReactions(noteIds, meId, myReactions);
-		for (const note of targets) {
-			const muted = mutedReactions.get(note.id) ?? [];
-			const hasMutedReactions = muted.some(reaction => (note.reactions[reaction] ?? 0) > 0);
-			note.reactions = removeMutedUsersReactions(note.reactions, muted);
-			note.reactionCount = Object.values(note.reactions).reduce((total, count) => total + count, 0);
-			if (myReactions.has(note.id)) {
-				const reaction = myReactions.get(note.id)!;
-				// Stream channels must not infer the viewer's reaction from a reduced count or a cancelled pair.
-				this.projectedMyReactions.set(note, { userId: meId, reaction });
-				if (withReactionAndUserPairCache || Object.hasOwn(note, 'myReaction')) {
-					note.myReaction = reaction ? this.reactionService.convertLegacyReaction(reaction) : undefined;
-				}
-			}
-			// A reduced count cannot prove that the bounded pair cache includes the viewer.
-			if (!withReactionAndUserPairCache || hasMutedReactions) delete note.reactionAndUserPairCache;
-		}
+		await this.hanaReactionMuteService.filterMutedReactions(notes, meId, withReactionAndUserPairCache);
 	}
 
 	@bindThis
@@ -724,7 +672,7 @@ export class NoteEntityService implements OnModuleInit {
 
 		const bufferedReactionsMap = this.meta.enableReactionsBuffering ? await this.reactionsBufferingService.getMany(noteIds) : null;
 
-		const mutedReactions = await this.fetchMutedReactions(notes.map(note => note.id), meId);
+		const mutedReactions = await this.hanaReactionMuteService.fetchMutedReactions(notes.map(note => note.id), meId);
 
 		const packings = notes.map(note => {
 			const bufferedReactions = bufferedReactionsMap?.get(note.id);
