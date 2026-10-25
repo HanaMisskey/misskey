@@ -10,6 +10,7 @@ import { type Config, loadConfig } from '@/config.js';
 import { GlobalModule } from '@/GlobalModule.js';
 import { CoreModule } from '@/core/CoreModule.js';
 import { SearchService } from '@/core/SearchService.js';
+import { HanamiSearchService } from '@/core/hanamisearch/HanamiSearchService.js';
 import { CacheService } from '@/core/CacheService.js';
 import { IdService } from '@/core/IdService.js';
 import { DI } from '@/di-symbols.js';
@@ -30,6 +31,7 @@ describe('SearchService', () => {
 	type TestContext = {
 		app: TestingModule;
 		service: SearchService;
+		hanamiService: HanamiSearchService;
 		cacheService: CacheService;
 		idService: IdService;
 		mutingsRepository: MutingsRepository;
@@ -56,6 +58,7 @@ describe('SearchService', () => {
 			'userHost',
 			'channelId',
 			'tags',
+			'fileIds',
 		],
 		typoTolerance: {
 			enabled: false,
@@ -78,12 +81,14 @@ describe('SearchService', () => {
 		}
 
 		const app = await builder.compile();
+		await app.init();
 
 		app.enableShutdownHooks();
 
 		return {
 			app,
 			service: app.get(SearchService),
+			hanamiService: app.get(HanamiSearchService),
 			cacheService: app.get(CacheService),
 			idService: app.get(IdService),
 			mutingsRepository: app.get(DI.mutingsRepository),
@@ -521,6 +526,48 @@ describe('SearchService', () => {
 		});
 	}
 
+	function defineHostLiteralTests(getCtx: () => TestContext, useHanamiSearch: boolean) {
+		/**
+		 * Oracle: Meilisearch Search API 3.1.2.1 treats quoted filter values as strings.
+		 * Meilisearch v1.4 also requires escaping each backslash in filter values.
+		 * The selected host must leave the author/channel/file constraints intact;
+		 * only the explicitly matching note belongs to this result.
+		 * https://specs.meilisearch.dev/specifications/text/0118-search-api.html#_3-1-2-1-string-syntax
+		 * https://www.meilisearch.com/blog/v1-4-release
+		 */
+		test.each([
+			['local', null],
+			['ordinary host', 'example.com'],
+			['single quote', "quote'example.com"],
+			['double quote', 'quote"example.com'],
+			['backslash before the closing quote', 'example.com\\'],
+			['backslash followed by a quote', "example\\'host.com"],
+			['filter operators inside a value', "example.com' OR userHost IS NOT NULL OR userHost = 'example.com"],
+		])('keeps %s literal alongside other filters', async (_label, host) => {
+			const ctx = getCtx();
+			const viewer = await createUser(ctx);
+			const author = await createUser(ctx, { host });
+			const other = await createUser(ctx, { host });
+			const channel = await createChannel(ctx, viewer);
+			const otherChannel = await createChannel(ctx, viewer);
+			const data = { text: 'literalhost', channelId: channel.id, fileIds: [ctx.idService.gen()] };
+			const expected = await createNote(ctx, author, data);
+			await createNote(ctx, other, data);
+			await createNote(ctx, author, { ...data, channelId: otherChannel.id });
+			await createNote(ctx, author, { ...data, userHost: 'other.example' });
+			if (useHanamiSearch) await createNote(ctx, author, { ...data, fileIds: [] });
+
+			const service = useHanamiSearch ? ctx.hanamiService : ctx.service;
+			const result = await service.searchNote('literalhost', viewer, {
+				host: host ?? '.',
+				userId: author.id,
+				channelId: channel.id,
+				...(useHanamiSearch ? { onlyWithFiles: true } : {}),
+			}, { limit: 10 });
+			expect(result.map(note => note.id)).toEqual([expected.id]);
+		});
+	}
+
 	describe('sqlLike', () => {
 		let ctx: TestContext;
 
@@ -550,6 +597,7 @@ describe('SearchService', () => {
 		let ctx: TestContext;
 		let meilisearch: Meilisearch;
 		let meilisearchIndex: Index;
+		let hanamiSearchIndex: Index;
 		let meiliConfig: Config;
 
 		beforeAll(async () => {
@@ -569,22 +617,28 @@ describe('SearchService', () => {
 				},
 			};
 
+			meiliConfig.hanamisearch = { ...meiliConfig.meilisearch!, index: 'test-host-literal-hanami' };
 			ctx = await buildContext(meiliConfig);
 			meilisearch = ctx.app.get(DI.meilisearch) as Meilisearch;
 			meilisearchIndex = meilisearch.index(`${meiliConfig.meilisearch!.index}---notes`);
+			hanamiSearchIndex = meilisearch.index(`${meiliConfig.hanamisearch!.index}---notes`);
 
 			const settingsTask = await meilisearchIndex.updateSettings(meilisearchSettings);
 			await meilisearch.tasks.waitForTask(settingsTask.taskUid);
+			const hanamiSettingsTask = await hanamiSearchIndex.updateSettings(meilisearchSettings);
+			await meilisearch.tasks.waitForTask(hanamiSettingsTask.taskUid);
 
 			const clearTask = await meilisearchIndex.deleteAllDocuments();
 			await meilisearch.tasks.waitForTask(clearTask.taskUid);
+			const hanamiClearTask = await hanamiSearchIndex.deleteAllDocuments();
+			await meilisearch.tasks.waitForTask(hanamiClearTask.taskUid);
 
 			ctx.indexer = async (note: MiNote) => {
 				if (note.text == null && note.cw == null) return;
 				if (!['home', 'public'].includes(note.visibility)) return;
 				if (meiliConfig.meilisearch?.scope === 'local' && note.userHost != null) return;
 
-				const task = await meilisearchIndex.addDocuments([{
+				const documents = [{
 					id: note.id,
 					createdAt: ctx.idService.parse(note.id).date.getTime(),
 					userId: note.userId,
@@ -593,10 +647,12 @@ describe('SearchService', () => {
 					cw: note.cw,
 					text: note.text,
 					tags: note.tags,
-				}], {
-					primaryKey: 'id',
-				});
-				await meilisearch.tasks.waitForTask(task.taskUid);
+					fileIds: note.fileIds.length > 0 ? note.fileIds : null,
+				}];
+				for (const index of [meilisearchIndex, hanamiSearchIndex]) {
+					const task = await index.addDocuments(documents, { primaryKey: 'id' });
+					await meilisearch.tasks.waitForTask(task.taskUid);
+				}
 			};
 		});
 
@@ -608,8 +664,12 @@ describe('SearchService', () => {
 			await cleanupContext(ctx);
 			const clearTask = await meilisearchIndex.deleteAllDocuments();
 			await meilisearch.tasks.waitForTask(clearTask.taskUid);
+			const hanamiClearTask = await hanamiSearchIndex.deleteAllDocuments();
+			await meilisearch.tasks.waitForTask(hanamiClearTask.taskUid);
 		});
 
 		defineSearchNoteTests(() => ctx, { supportsFollowersVisibility: false, sinceIdOrder: 'desc' });
+		describe('SearchService host strings', () => defineHostLiteralTests(() => ctx, false));
+		describe('HanamiSearchService host strings', () => defineHostLiteralTests(() => ctx, true));
 	});
 });
