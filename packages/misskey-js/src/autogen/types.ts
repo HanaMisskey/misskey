@@ -31130,6 +31130,7 @@ export interface operations {
                     /** Format: misskey:id */
                     noteId: string;
                     type?: string | null;
+                    types?: string[];
                     /** @default 10 */
                     limit?: number;
                     /** Format: misskey:id */

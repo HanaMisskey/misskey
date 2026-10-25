@@ -3,14 +3,24 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { computed } from 'vue';
+import { computed, toValue } from 'vue';
+import type { MaybeRefOrGetter } from 'vue';
 import { normalizeCustomEmojiName } from '@@/js/emoji-name.js';
 import { prefer } from '@/preferences.js';
 
-// custom絵文字の情報からキーを作成する
 export function makeEmojiMuteKey(props: { name: string; host?: string | null }) {
-	return props.name.startsWith(':') ? props.name : `:${props.name}${props.host ? `@${props.host}` : ''}:`;
+	const [name, embeddedHost] = normalizeCustomEmojiName(props.name).split('@');
+	const host = props.host ?? embeddedHost;
+	return `:${name}${host && host !== '.' ? `@${host}` : ''}:`;
 }
+
+export function getEmojiMuteKey(emoji: string): string {
+	return emoji.startsWith(':') && emoji.endsWith(':')
+		? makeEmojiMuteKey({ name: emoji })
+		: emoji.replace(/\uFE0F/g, '');
+}
+
+const mutedKeys = computed(() => new Set(prefer.r.mutingEmojis.value.map(getEmojiMuteKey)));
 
 export function extractCustomEmojiName (name:string) {
 	return normalizeCustomEmojiName(name).split('@')[0];
@@ -31,40 +41,24 @@ export function extractCustomEmojiHost (name:string) {
 }
 
 export function mute(emoji: string) {
-	const isCustomEmoji = emoji.startsWith(':') && emoji.endsWith(':');
-	const emojiMuteKey = isCustomEmoji ?
-		makeEmojiMuteKey({ name: extractCustomEmojiName(emoji), host: extractCustomEmojiHost(emoji) }) :
-		emoji;
+	const emojiMuteKey = getEmojiMuteKey(emoji);
 	const mutedEmojis = prefer.r.mutingEmojis.value;
-	if (!mutedEmojis.includes(emojiMuteKey)) {
+	if (!mutedKeys.value.has(emojiMuteKey)) {
 		return prefer.commit('mutingEmojis', [...mutedEmojis, emojiMuteKey]);
 	}
 	throw new Error('Emoji is already muted', { cause: `${emojiMuteKey} is Already Muted` });
 }
 
 export function unmute(emoji:string) {
-	const isCustomEmoji = emoji.startsWith(':') && emoji.endsWith(':');
-	const emojiMuteKey = isCustomEmoji ?
-		makeEmojiMuteKey({ name: extractCustomEmojiName(emoji), host: extractCustomEmojiHost(emoji) }) :
-		emoji;
+	const emojiMuteKey = getEmojiMuteKey(emoji);
 	const mutedEmojis = prefer.r.mutingEmojis.value;
-	console.log('unmute', emoji, emojiMuteKey);
-	console.log('mutedEmojis', mutedEmojis);
-	prefer.commit('mutingEmojis', mutedEmojis.filter((e) => e !== emojiMuteKey));
+	prefer.commit('mutingEmojis', mutedEmojis.filter((e) => getEmojiMuteKey(e) !== emojiMuteKey));
 }
 
-export function checkMuted(emoji: string) {
-	const isCustomEmoji = emoji.startsWith(':') && emoji.endsWith(':');
-	const emojiMuteKey = isCustomEmoji ?
-		makeEmojiMuteKey({ name: extractCustomEmojiName(emoji), host: extractCustomEmojiHost(emoji) }) :
-		emoji;
-	return computed(() => prefer.r.mutingEmojis.value.includes(emojiMuteKey));
+export function checkMuted(emoji: MaybeRefOrGetter<string>) {
+	return computed(() => isMuted(toValue(emoji)));
 }
 
 export function isMuted(emoji: string): boolean {
-	const isCustomEmoji = emoji.startsWith(':') && emoji.endsWith(':');
-	const emojiMuteKey = isCustomEmoji ?
-		makeEmojiMuteKey({ name: extractCustomEmojiName(emoji), host: extractCustomEmojiHost(emoji) }) :
-		emoji;
-	return prefer.r.mutingEmojis.value.includes(emojiMuteKey);
+	return mutedKeys.value.has(getEmojiMuteKey(emoji));
 }

@@ -211,9 +211,9 @@ SPDX-License-Identifier: AGPL-3.0-only
 			</div>
 			<div v-else-if="tab === 'reactions'" :class="$style.tab_reactions">
 				<div :class="$style.reactionTabs">
-					<button v-for="reaction in Object.keys($appearNote.reactions)" :key="reaction" :class="[$style.reactionTab, { [$style.reactionTabActive]: reactionTabType === reaction }]" class="_button" @click="reactionTabType = reaction">
-						<MkReactionIcon :reaction="reaction"/>
-						<span style="margin-left: 4px;">{{ $appearNote.reactions[reaction] }}</span>
+					<button v-for="group in reactionGroups" :key="group.reaction" :class="[$style.reactionTab, { [$style.reactionTabActive]: reactionTabType === group.reaction }]" class="_button" @click="reactionTabType = group.reaction">
+						<MkReactionIcon :reaction="group.reaction"/>
+						<span style="margin-left: 4px;">{{ group.count }}</span>
 					</button>
 				</div>
 				<MkPagination v-if="reactionTabType" :key="reactionTabType" :paginator="reactionsPaginator" :forceDisableInfiniteScroll="true">
@@ -241,7 +241,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 </template>
 
 <script lang="ts" setup>
-import { inject, provide, ref, useTemplateRef, markRaw, computed } from 'vue';
+import { inject, provide, ref, useTemplateRef, markRaw, computed, watch } from 'vue';
 import * as Misskey from 'misskey-js';
 import { useNote } from '@/composables/use-note.js';
 import { prefer } from '@/preferences.js';
@@ -250,6 +250,7 @@ import { userPage } from '@/filters/user.js';
 import { notePage } from '@/filters/note.js';
 import { isEnabledUrlPreview } from '@/utility/url-preview.js';
 import { Paginator } from '@/utility/paginator.js';
+import { fetchReactionGroup, groupReactions } from '@/utility/reaction-groups.js';
 import { misskeyApi } from '@/utility/misskey-api.js';
 import number from '@/filters/number.js';
 import { DI } from '@/di.js';
@@ -334,6 +335,10 @@ provide(DI.mfmEmojiReactCallback, reactViaMfmEmoji);
 // MkNoteDetailed固有
 const tab = ref(props.initialTab);
 const reactionTabType = ref<string | null>(null);
+const reactionGroups = computed(() => groupReactions($appearNote.reactions));
+watch(reactionGroups, groups => {
+	if (!groups.some(group => group.reaction === reactionTabType.value)) reactionTabType.value = null;
+});
 
 const renotesPaginator = markRaw(new Paginator('notes/renotes', {
 	limit: 10,
@@ -344,9 +349,10 @@ const renotesPaginator = markRaw(new Paginator('notes/renotes', {
 
 const reactionsPaginator = markRaw(new Paginator('notes/reactions', {
 	limit: 10,
+	request: params => params.types ? fetchReactionGroup(params) : Promise.resolve([]),
 	computedParams: computed(() => ({
 		noteId: appearNote.id,
-		type: reactionTabType.value,
+		types: reactionGroups.value.find(group => group.reaction === reactionTabType.value)?.sources,
 	})),
 }));
 

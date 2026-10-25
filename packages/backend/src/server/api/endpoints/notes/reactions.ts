@@ -4,15 +4,12 @@
  */
 
 import { Inject, Injectable } from '@nestjs/common';
-import { Brackets, type FindOptionsWhere } from 'typeorm';
 import type { NoteReactionsRepository } from '@/models/_.js';
-import type { MiNoteReaction } from '@/models/NoteReaction.js';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { NoteReactionEntityService } from '@/core/entities/NoteReactionEntityService.js';
 import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
 import { DI } from '@/di-symbols.js';
 import { QueryService } from '@/core/QueryService.js';
-import { isThisReactionUserRelated } from '@/misc/is-user-related.js';
 import { CacheService } from '@/core/CacheService.js';
 import { GetterService } from '@/server/api/GetterService.js';
 import { ApiError } from '../../error.js';
@@ -46,6 +43,7 @@ export const paramDef = {
 	properties: {
 		noteId: { type: 'string', format: 'misskey:id' },
 		type: { type: 'string', nullable: true },
+		types: { type: 'array', minItems: 1, maxItems: 1000, items: { type: 'string' } },
 		limit: { type: 'integer', minimum: 1, maximum: 100, default: 10 },
 		sinceId: { type: 'string', format: 'misskey:id' },
 		untilId: { type: 'string', format: 'misskey:id' },
@@ -53,6 +51,7 @@ export const paramDef = {
 		untilDate: { type: 'integer' },
 	},
 	required: ['noteId'],
+	not: { required: ['type', 'types'] },
 } as const;
 
 @Injectable()
@@ -86,18 +85,19 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				.leftJoinAndSelect('reaction.user', 'user')
 				.leftJoinAndSelect('reaction.note', 'note');
 
-			if (ps.type) {
-				// ローカルリアクションはホスト名が . とされているが
-				// DB 上ではそうではないので、必要に応じて変換
-				const suffix = '@.:';
-				const type = ps.type.endsWith(suffix) ? ps.type.slice(0, ps.type.length - suffix.length) + ':' : ps.type;
-				query.andWhere('reaction.reaction = :type', { type });
+			const toDatabaseReaction = (type: string) => type.endsWith('@.:') ? type.slice(0, -3) + ':' : type;
+			if (ps.types) {
+				query.andWhere('reaction.reaction IN (:...types)', { types: ps.types.map(toDatabaseReaction) });
+				query.orderBy('reaction.id', 'DESC');
+			} else if (ps.type) {
+				query.andWhere('reaction.reaction = :type', { type: toDatabaseReaction(ps.type) });
 			}
 
-			const reactions = (await query.limit(ps.limit).getMany()).filter(reactions => {
-				if (me && isThisReactionUserRelated(reactions, userIdsWhoMeMuting)) return false;
-				return true;
-			});
+			if (userIdsWhoMeMuting.size > 0) {
+				query.andWhere('reaction.userId NOT IN (:...mutedUserIds)', { mutedUserIds: [...userIdsWhoMeMuting] });
+			}
+
+			const reactions = await query.limit(ps.limit).getMany();
 
 			return await this.noteReactionEntityService.packMany(reactions, me);
 		});

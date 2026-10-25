@@ -69,7 +69,7 @@ const react = inject(DI.mfmEmojiReactCallback, null);
 
 const customEmojiName = computed(() => normalizeCustomEmojiName(props.name));
 const isLocal = computed(() => isLocalCustomEmojiName(customEmojiName.value, props.host));
-const emojiCodeToMute = makeEmojiMuteKey(props);
+const emojiCodeToMute = computed(() => makeEmojiMuteKey(props));
 const isMuted = checkEmojiMuted(emojiCodeToMute);
 const shouldMute = computed(() => !props.ignoreMuted && isMuted.value);
 
@@ -208,7 +208,7 @@ async function edit(name: string) {
 function mute() {
 	const titleEmojiName = isLocal.value
 		? `:${customEmojiName.value}:`
-		: emojiCodeToMute;
+		: emojiCodeToMute.value;
 	os.confirm({
 		type: 'question',
 		title: i18n.tsx.muteX({ x: titleEmojiName }),
@@ -216,14 +216,14 @@ function mute() {
 		if (canceled) {
 			return;
 		}
-		muteEmoji(emojiCodeToMute);
+		muteEmoji(emojiCodeToMute.value);
 	});
 }
 
 function unmute() {
 	const titleEmojiName = isLocal.value
 		? `:${customEmojiName.value}:`
-		: emojiCodeToMute;
+		: emojiCodeToMute.value;
 	os.confirm({
 		type: 'question',
 		title: i18n.tsx.unmuteX({ x: titleEmojiName }),
@@ -231,7 +231,7 @@ function unmute() {
 		if (canceled) {
 			return;
 		}
-		unmuteEmoji(emojiCodeToMute);
+		unmuteEmoji(emojiCodeToMute.value);
 	});
 }
 

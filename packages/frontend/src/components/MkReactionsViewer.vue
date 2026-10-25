@@ -14,12 +14,13 @@ SPDX-License-Identifier: AGPL-3.0-only
 	tag="div" :class="$style.root"
 >
 	<XReaction
-		v-for="[reaction, count] in _reactions"
-		:key="reaction"
-		:reaction="reaction"
+		v-for="group in _reactions"
+		:key="group.reaction"
+		:reaction="group.reaction"
+		:sourceReactions="group.sources"
 		:reactionEmojis="props.reactionEmojis"
-		:count="count"
-		:isInitial="initialReactions.has(reaction)"
+		:count="group.count"
+		:isInitial="group.sources.some(source => initialReactions.has(source))"
 		:noteId="props.noteId"
 		:myReaction="props.myReaction"
 		@reactionToggled="onMockToggleReaction"
@@ -30,7 +31,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 <script lang="ts" setup>
 import * as Misskey from 'misskey-js';
-import { inject, watch, ref } from 'vue';
+import { computed, inject, watch, ref } from 'vue';
 import { TransitionGroup } from 'vue';
 import { isSupportedEmoji } from '@@/js/emojilist.js';
 import { getEmojiNameFromReaction, isLocalCustomEmojiReaction } from '@@/js/emoji-name.js';
@@ -39,7 +40,8 @@ import { $i } from '@/i.js';
 import { prefer } from '@/preferences.js';
 import { customEmojisMap } from '@/custom-emojis.js';
 import { DI } from '@/di.js';
-import { isMuted } from '@/utility/emoji-mute.js';
+import { groupReactions, includesReaction } from '@/utility/reaction-groups.js';
+import type { ReactionGroup } from '@/utility/reaction-groups.js';
 
 const props = withDefaults(defineProps<{
 	noteId: Misskey.entities.Note['id'];
@@ -59,20 +61,15 @@ const emit = defineEmits<{
 
 const initialReactions = new Set(Object.keys(props.reactions));
 
-const _reactions = ref<[string, number][]>([]);
+const _reactions = ref<ReactionGroup[]>([]);
 const hasMoreReactions = ref(false);
-
-if (props.myReaction != null && !(props.myReaction in props.reactions)) {
-	_reactions.value.push([props.myReaction, props.reactions[props.myReaction]]);
-}
+const groups = computed(() => groupReactions(props.reactions));
 
 function onMockToggleReaction(emoji: string, count: number) {
 	if (!mock) return;
-
-	const i = _reactions.value.findIndex((item) => item[0] === emoji);
-	if (i < 0) return;
-
-	emit('mockUpdateMyReaction', emoji, (count - _reactions.value[i][1]));
+	const group = _reactions.value.find(item => includesReaction(item.sources, emoji));
+	if (!group) return;
+	emit('mockUpdateMyReaction', emoji, count - group.count);
 }
 
 function canReact(reaction: string) {
@@ -83,53 +80,24 @@ function canReact(reaction: string) {
 		: isSupportedEmoji(reaction);
 }
 
-watch([() => props.reactions, () => props.maxNumber], ([newSource, maxNumber]) => {
-	const processed: Record<string, number> = {};
-	for (const [r, c] of Object.entries(newSource)) {
-		const key = isMuted(r) ? '❤️' : r;
-		processed[key] = (processed[key] ?? 0) + c;
-	}
-	newSource = processed;
-	let newReactions: [string, number][] = [];
-	hasMoreReactions.value = Object.keys(newSource).length > maxNumber;
-
-	for (let i = 0; i < _reactions.value.length; i++) {
-		const reaction = _reactions.value[i][0];
-		if (reaction in newSource && newSource[reaction] !== 0) {
-			_reactions.value[i][1] = newSource[reaction];
-			newReactions.push(_reactions.value[i]);
-		}
-	}
-
-	const sorted = Object.entries(newSource);
+watch([groups, () => props.maxNumber, () => props.myReaction], ([newSource, maxNumber]) => {
+	hasMoreReactions.value = newSource.length > maxNumber;
+	const byReaction = new Map(newSource.map(group => [group.reaction, group]));
+	const retained = _reactions.value.flatMap(group => {
+		const updated = byReaction.get(group.reaction);
+		return updated ? [updated] : [];
+	});
+	const sorted = [...newSource];
 	if (prefer.s.showAvailableReactionsFirstInNote) {
-		// ソートの比較関数内で評価すると同じ絵文字に対して何度も実行されるため、事前に1回だけ評価しておく
-		const canReactCache = new Map<string, boolean>();
-		for (const [emoji] of sorted) {
-			canReactCache.set(emoji, canReact(emoji));
-		}
-		sorted.sort(([emojiA, countA], [emojiB, countB]) => {
-			const canReactA = canReactCache.get(emojiA)!;
-			const canReactB = canReactCache.get(emojiB)!;
-			if (canReactA !== canReactB) return canReactA ? -1 : 1;
-			return countB - countA;
-		});
+		const canReactCache = new Map(sorted.map(group => [group.reaction, canReact(group.reaction)]));
+		sorted.sort((a, b) => Number(canReactCache.get(b.reaction)) - Number(canReactCache.get(a.reaction)) || b.count - a.count);
 	} else {
-		sorted.sort(([, countA], [, countB]) => countB - countA);
+		sorted.sort((a, b) => b.count - a.count);
 	}
-
-	const newReactionsNames = new Set(newReactions.map(([x]) => x));
-	newReactions = [
-		...newReactions,
-		...sorted.filter(([y], i) => i < maxNumber && !newReactionsNames.has(y)),
-	];
-
-	newReactions = newReactions.slice(0, props.maxNumber);
-
-	if (props.myReaction && !newReactions.some(([x]) => x === props.myReaction)) {
-		newReactions.push([props.myReaction, newSource[props.myReaction]]);
-	}
-
+	const retainedNames = new Set(retained.map(group => group.reaction));
+	const newReactions = [...retained, ...sorted.filter(group => !retainedNames.has(group.reaction))].slice(0, maxNumber);
+	const myGroup = newSource.find(group => includesReaction(group.sources, props.myReaction));
+	if (myGroup && !newReactions.includes(myGroup)) newReactions.push(myGroup);
 	_reactions.value = newReactions;
 }, { immediate: true, deep: true });
 </script>
