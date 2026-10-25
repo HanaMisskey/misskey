@@ -8,8 +8,6 @@ import { isInstanceMuted } from '@/misc/is-instance-muted.js';
 import { isUserRelated } from '@/misc/is-user-related.js';
 import { isQuotePacked, isRenotePacked } from '@/misc/is-renote.js';
 import { isChannelRelated } from '@/misc/is-channel-related.js';
-import { removeMutedUsersReactions } from '@/misc/reactions-mute.js';
-import { deepClone } from '@/misc/clone.js';
 import type { Awaitable } from '@/types.js';
 import type { Packed } from '@/misc/json-schema.js';
 import type { JsonObject, JsonValue } from '@/misc/json-value.js';
@@ -123,11 +121,6 @@ export default abstract class Channel {
 		if (isChannelRelated(note, this.mutingChannels)) return true;
 
 		return false;
-	}
-
-	protected async removeMutedReactions(note: Packed<'Note'>): Promise<Packed<'Note'>> {
-		const cloned = deepClone(note);
-		return await removeMutedUsersReactions(cloned, this.userIdsWhoMeMuting, false);
 	}
 
 	constructor(request: ChannelRequest) {

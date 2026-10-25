@@ -68,6 +68,7 @@ export class NoteDraftEntityService implements OnModuleInit {
 			detail?: boolean;
 			skipHide?: boolean;
 			withReactionAndUserPairCache?: boolean;
+			_skipReactionsMute?: boolean;
 			_hint_?: {
 				packedFiles: Map<MiNote['fileIds'][number], Packed<'DriveFile'> | null>;
 				packedUsers: Map<MiUser['id'], Packed<'UserLite'>>
@@ -140,11 +141,13 @@ export class NoteDraftEntityService implements OnModuleInit {
 				reply: noteDraft.replyId ? nullIfEntityNotFound(this.noteEntityService.pack(noteDraft.replyId, me, {
 					detail: false,
 					skipHide: opts.skipHide,
+					_skipReactionsMute: opts._skipReactionsMute,
 				})) : undefined,
 
 				renote: noteDraft.renoteId ? nullIfEntityNotFound(this.noteEntityService.pack(noteDraft.renoteId, me, {
 					detail: true,
 					skipHide: opts.skipHide,
+					_skipReactionsMute: opts._skipReactionsMute,
 				})) : undefined,
 			} : {} ),
 		});
@@ -171,13 +174,16 @@ export class NoteDraftEntityService implements OnModuleInit {
 		const packedUsers = await this.userEntityService.packMany(users, me)
 			.then(users => new Map(users.map(u => [u.id, u])));
 
-		return await Promise.all(noteDrafts.map(n => this.pack(n, me, {
+		const packed = await Promise.all(noteDrafts.map(n => this.pack(n, me, {
 			...options,
+			_skipReactionsMute: true,
 			_hint_: {
 				packedFiles,
 				packedUsers,
 			},
 		})));
+		await this.noteEntityService.filterMutedReactions(packed.flatMap(draft => [draft.reply, draft.renote]).filter(note => note != null), me?.id ?? null);
+		return packed;
 	}
 
 	@bindThis

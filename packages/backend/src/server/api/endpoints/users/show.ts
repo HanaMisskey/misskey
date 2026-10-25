@@ -8,13 +8,11 @@ import { Inject, Injectable } from '@nestjs/common';
 import type { MiMeta, UsersRepository } from '@/models/_.js';
 import type { MiUser } from '@/models/User.js';
 import { Endpoint } from '@/server/api/endpoint-base.js';
-import { CacheService } from '@/core/CacheService.js';
 import { UserEntityService } from '@/core/entities/UserEntityService.js';
 import { RemoteUserResolveService } from '@/core/RemoteUserResolveService.js';
 import { DI } from '@/di-symbols.js';
 import PerUserPvChart from '@/core/chart/charts/per-user-pv.js';
 import { RoleService } from '@/core/RoleService.js';
-import { removeMutedUsersReactions } from '@/misc/reactions-mute.js';
 import { ApiError } from '../../error.js';
 import { ApiLoggerService } from '../../ApiLoggerService.js';
 import type { FindOptionsWhere } from 'typeorm';
@@ -111,7 +109,6 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		@Inject(DI.usersRepository)
 		private usersRepository: UsersRepository,
 
-		private cacheService: CacheService,
 		private userEntityService: UserEntityService,
 		private remoteUserResolveService: RemoteUserResolveService,
 		private roleService: RoleService,
@@ -192,14 +189,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 
 				const packedUserProfile = await this.userEntityService.pack(user, me, {
 					schema: 'UserDetailed',
-					pinNotesWithReactionAndUserPairCache: true,
+					pinNotesWithReactionAndUserPairCache: false,
 				});
-				if (packedUserProfile.pinnedNotes.length > 0) {
-					const userIdsWhoMeMuting = me ? await this.cacheService.userMutingsCache.fetch(me.id) : new Set<string>();
-					await Promise.all(
-						packedUserProfile.pinnedNotes.map(note => removeMutedUsersReactions(note, userIdsWhoMeMuting)),
-					);
-				}
 				return packedUserProfile;
 			}
 		});

@@ -29,6 +29,7 @@ export class NoteFavoriteEntityService {
 		src: MiNoteFavorite['id'] | MiNoteFavorite,
 		me?: { id: MiUser['id'] } | null | undefined,
 		withReactionAndUserPairCache?: boolean,
+		skipReactionsMute = false,
 	) {
 		const favorite = typeof src === 'object' ? src : await this.noteFavoritesRepository.findOneByOrFail({ id: src });
 
@@ -36,16 +37,18 @@ export class NoteFavoriteEntityService {
 			id: favorite.id,
 			createdAt: this.idService.parse(favorite.id).date.toISOString(),
 			noteId: favorite.noteId,
-			note: await this.noteEntityService.pack(favorite.note ?? favorite.noteId, me, { withReactionAndUserPairCache: withReactionAndUserPairCache }),
+			note: await this.noteEntityService.pack(favorite.note ?? favorite.noteId, me, { withReactionAndUserPairCache: withReactionAndUserPairCache, _skipReactionsMute: skipReactionsMute }),
 		};
 	}
 
 	@bindThis
-	public packMany(
+	public async packMany(
 		favorites: any[],
 		me: { id: MiUser['id'] },
 		withReactionAndUserPairCache?: boolean,
 	) {
-		return Promise.all(favorites.map(x => this.pack(x, me, withReactionAndUserPairCache)));
+		const packed = await Promise.all(favorites.map(x => this.pack(x, me, withReactionAndUserPairCache, true)));
+		await this.noteEntityService.filterMutedReactions(packed.map(favorite => favorite.note), me.id);
+		return packed;
 	}
 }

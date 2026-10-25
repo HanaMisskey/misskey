@@ -33,17 +33,6 @@ export class NoteStreamingHidingService {
 		return renoteChain;
 	}
 
-	/**
-	 * ストリーミング配信用にノートの内容を隠す（あるいはそもそも送信しない）判定及び処理を行う。
-	 *
-	 * 隠す処理が必要な場合は元のノートをクローンして変更を適用したものを返し、
-	 * 送信すべきでない場合は `null` を返す。
-	 * 変更が不要な場合は元のノートの参照をそのまま返す。
-	 *
-	 * @param note - 処理対象のノート
-	 * @param meId - 閲覧者のユーザー ID （未ログインの場合は `null`）
-	 * @returns 配信するノートオブジェクト、または配信スキップの場合は `null`
-	 */
 	@bindThis
 	public async filter(note: Packed<'Note'>, meId: MiUser['id'] | null): Promise<Packed<'Note'> | null> {
 		if (meId == null) {
@@ -54,11 +43,6 @@ export class NoteStreamingHidingService {
 		const renoteChain = this.collectRenoteChain(note);
 		const shouldHide = await Promise.all(renoteChain.map(n => this.noteEntityService.shouldHideNote(n, meId)));
 		const shouldHideReply = await Promise.all(renoteChain.map(n => n.reply ? this.noteEntityService.shouldHideNote(n.reply, meId) : false));
-
-		if (!shouldHide.some(h => h) && !shouldHideReply.some(h => h)) {
-			// 隠す必要がない場合は元のノートをそのまま返す
-			return note;
-		}
 
 		if (shouldHide.some(h => h) && renoteChain.some(n => isRenotePacked(n) && !isQuotePacked(n))) {
 			// 純粋リノートの場合は配信をスキップする
@@ -78,6 +62,7 @@ export class NoteStreamingHidingService {
 			currentCloned = currentCloned.renote!;
 		}
 
+		await this.noteEntityService.filterMutedReactions([clonedNote], meId, true);
 		return clonedNote;
 	}
 }

@@ -87,7 +87,8 @@ export class NoteReactionEntityService implements OnModuleInit {
 		me?: { id: MiUser['id'] } | null | undefined,
 		options?: object,
 		hints?: {
-			packedUser?: Packed<'UserLite'>
+			packedUser?: Packed<'UserLite'>;
+			skipReactionsMute?: boolean;
 		},
 	): Promise<Packed<'NoteReactionWithNote'>> {
 		const _opts = Object.assign({
@@ -100,7 +101,7 @@ export class NoteReactionEntityService implements OnModuleInit {
 			createdAt: this.idService.parse(reaction.id).date.toISOString(),
 			user: hints?.packedUser ?? await this.userEntityService.pack(reaction.user ?? reaction.userId, me),
 			type: this.reactionService.convertLegacyReaction(reaction.reaction),
-			note: await this.noteEntityService.pack(reaction.note ?? reaction.noteId, me),
+			note: await this.noteEntityService.pack(reaction.note ?? reaction.noteId, me, { _skipReactionsMute: hints?.skipReactionsMute }),
 		};
 	}
 
@@ -115,6 +116,8 @@ export class NoteReactionEntityService implements OnModuleInit {
 		const _users = reactions.map(({ user, userId }) => user ?? userId);
 		const _userMap = await this.userEntityService.packMany(_users, me)
 			.then(users => new Map(users.map(u => [u.id, u])));
-		return Promise.all(reactions.map(reaction => this.packWithNote(reaction, me, opts, { packedUser: _userMap.get(reaction.userId) })));
+		const packed = await Promise.all(reactions.map(reaction => this.packWithNote(reaction, me, opts, { packedUser: _userMap.get(reaction.userId), skipReactionsMute: true })));
+		await this.noteEntityService.filterMutedReactions(packed.map(reaction => reaction.note), me?.id ?? null);
+		return packed;
 	}
 }

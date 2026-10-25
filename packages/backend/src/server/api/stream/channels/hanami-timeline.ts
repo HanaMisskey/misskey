@@ -121,12 +121,9 @@ export class HanamiTimelineChannel extends Channel {
 
 		if (this.isNoteMutedOrBlocked(note)) return;
 
-		let reactionMutedNote = await this.removeMutedReactions(note);
-
-		const filtered = await this.noteStreamingHidingService.filter(reactionMutedNote, this.user?.id ?? null);
+		const filtered = await this.noteStreamingHidingService.filter(note, this.user?.id ?? null);
 		if (!filtered) return;
-		// eslint-disable-next-line no-param-reassign -- これ以降元の Note オブジェクトは見てはいけないので、いっそ再代入した方が安全
-		reactionMutedNote = filtered;
+		const reactionMutedNote = filtered;
 
 		if (this.user) {
 			if (isRenotePacked(reactionMutedNote) && !isQuotePacked(reactionMutedNote)) {

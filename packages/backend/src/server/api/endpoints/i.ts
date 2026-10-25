@@ -6,10 +6,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { UserProfilesRepository } from '@/models/_.js';
 import { Endpoint } from '@/server/api/endpoint-base.js';
-import { CacheService } from '@/core/CacheService.js';
 import { UserEntityService } from '@/core/entities/UserEntityService.js';
 import { DI } from '@/di-symbols.js';
-import { removeMutedUsersReactions } from '@/misc/reactions-mute.js';
 import { ApiError } from '../error.js';
 
 export const meta = {
@@ -46,7 +44,6 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		@Inject(DI.userProfilesRepository)
 		private userProfilesRepository: UserProfilesRepository,
 
-		private cacheService: CacheService,
 		private userEntityService: UserEntityService,
 	) {
 		super(meta, paramDef, async (ps, user, token) => {
@@ -78,14 +75,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				schema: 'MeDetailed',
 				includeSecrets: isSecure,
 				userProfile,
-				pinNotesWithReactionAndUserPairCache: true,
+				pinNotesWithReactionAndUserPairCache: false,
 			});
-			if (packedUserProfile.pinnedNotes.length > 0) {
-				const userIdsWhoMeMuting = await this.cacheService.userMutingsCache.fetch(user.id);
-				await Promise.all(
-					packedUserProfile.pinnedNotes.map(note => removeMutedUsersReactions(note, userIdsWhoMeMuting)),
-				);
-			}
 			return packedUserProfile;
 		});
 	}

@@ -10,7 +10,6 @@ import type { NotesRepository, ClipsRepository, ClipNotesRepository } from '@/mo
 import { QueryService } from '@/core/QueryService.js';
 import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
 import { DI } from '@/di-symbols.js';
-import { removeMutedUsersReactions } from '@/misc/reactions-mute.js';
 import { CacheService } from '@/core/CacheService.js';
 import { isInstanceMuted } from '@/misc/is-instance-muted.js';
 import { isUserRelated } from '@/misc/is-user-related.js';
@@ -132,10 +131,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				return true;
 			});
 
-			const packedNotes = await this.noteEntityService.packMany(notes, me, { withReactionAndUserPairCache: true });
-			await Promise.all(
-				packedNotes.map(note => removeMutedUsersReactions(note, userIdsWhoMeMuting)),
-			);
+			const packedNotes = await this.noteEntityService.packMany(notes, me);
 			return packedNotes;
 		});
 	}

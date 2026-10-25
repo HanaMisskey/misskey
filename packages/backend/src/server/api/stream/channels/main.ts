@@ -7,6 +7,7 @@ import { Inject, Injectable, Scope } from '@nestjs/common';
 import { isInstanceMuted, isUserFromMutedInstance } from '@/misc/is-instance-muted.js';
 import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
 import { bindThis } from '@/decorators.js';
+import { deepClone } from '@/misc/clone.js';
 import type { JsonObject } from '@/misc/json-value.js';
 import type { MainEventTypes, EventTypesToEventPayload } from '@/core/GlobalEventService.js';
 import Channel, { type ChannelRequest } from '../channel.js';
@@ -63,6 +64,13 @@ export class MainChannel extends Channel {
 					data.body = note;
 				}
 				break;
+			}
+			case 'reply':
+			case 'renote': {
+				const note = deepClone(data.body);
+				await this.noteEntityService.filterMutedReactions([note], this.user!.id);
+				this.send(data.type, note);
+				return;
 			}
 		}
 

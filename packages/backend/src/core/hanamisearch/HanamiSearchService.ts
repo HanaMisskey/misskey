@@ -19,7 +19,6 @@ import { UtilityService } from '@/core/UtilityService.js';
 import { isMustRemove } from '@/misc/is-hidden-or-visibility-modified.js';
 import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
 import { QueryService } from '@/core/QueryService.js';
-import { removeMutedUsersReactions } from '@/misc/reactions-mute.js';
 import type { Index, Meilisearch } from 'meilisearch';
 
 const SEARCH_EMPTY_PAGE_RETRY_LIMIT = 5;
@@ -323,11 +322,7 @@ export class HanamiSearchService {
 				return searchNext(nextOffset, remainingRetries - 1, nextUserFilters);
 			}
 
-			const packedNotes = (await this.noteEntityService.packMany(notes, me, { withReactionAndUserPairCache: true })).filter(note => !isMustRemove(note, 'home'));
-			const userIdsWhoMeMuting = nextUserFilters?.userIdsWhoMeMuting ?? new Set<string>();
-			await Promise.all(
-				packedNotes.map(note => removeMutedUsersReactions(note, userIdsWhoMeMuting)),
-			);
+			const packedNotes = (await this.noteEntityService.packMany(notes, me)).filter(note => !isMustRemove(note, 'home'));
 
 			if (packedNotes.length > 0) {
 				return packedNotes;

@@ -7,8 +7,6 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
 import { GetterService } from '@/server/api/GetterService.js';
-import { CacheService } from '@/core/CacheService.js';
-import { removeMutedUsersReactions } from '@/misc/reactions-mute.js';
 import { DI } from '@/di-symbols.js';
 import { MiMeta } from '@/models/Meta.js';
 import { ApiError } from '../../error.js';
@@ -60,7 +58,6 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private serverSettings: MiMeta,
 
 		private noteEntityService: NoteEntityService,
-		private cacheService: CacheService,
 		private getterService: GetterService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
@@ -83,16 +80,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 
 			const packedNote = await this.noteEntityService.pack(note, me, {
 				detail: true,
-				withReactionAndUserPairCache: true,
 			});
 
-			if (!me) {
-				delete packedNote.reactionAndUserPairCache;
-				return packedNote;
-			} else {
-				const userIdsWhoMeMuting = await this.cacheService.userMutingsCache.fetch(me.id);
-				return await removeMutedUsersReactions(packedNote, userIdsWhoMeMuting);
-			}
+			return packedNote;
 		});
 	}
 }

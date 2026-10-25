@@ -412,6 +412,7 @@ export class UserEntityService implements OnModuleInit {
 			userRelations?: Map<MiUser['id'], UserRelation>,
 			userMemos?: Map<MiUser['id'], string | null>,
 			pinNotes?: Map<MiUser['id'], MiUserNotePining[]>,
+			packedPinNotes?: Map<MiUser['id'], Packed<'Note'>[]>,
 			pinNotesWithReactionAndUserPairCache?: boolean,
 		},
 	): Promise<Packed<S>> {
@@ -552,7 +553,7 @@ export class UserEntityService implements OnModuleInit {
 				followingCount: followingCount ?? 0,
 				notesCount: user.notesCount,
 				pinnedNoteIds: pins.map(pin => pin.noteId),
-				pinnedNotes: this.noteEntityService.packMany(pins.map(pin => pin.note!), me, {
+				pinnedNotes: opts.packedPinNotes?.get(user.id) ?? this.noteEntityService.packMany(pins.map(pin => pin.note!), me, {
 					detail: true,
 					withReactionAndUserPairCache: opts.pinNotesWithReactionAndUserPairCache,
 				}),
@@ -691,8 +692,9 @@ export class UserEntityService implements OnModuleInit {
 		let userRelations: Map<MiUser['id'], UserRelation> = new Map();
 		let userMemos: Map<MiUser['id'], string | null> = new Map();
 		let pinNotes: Map<MiUser['id'], MiUserNotePining[]> = new Map();
+		let packedPinNotes: Map<MiUser['id'], Packed<'Note'>[]> | undefined;
 
-		if (options?.schema !== 'UserLite') {
+		if (options?.schema != null && options.schema !== 'UserLite') {
 			profilesMap = await this.userProfilesRepository.findBy({ userId: In(_userIds) })
 				.then(profiles => new Map(profiles.map(p => [p.userId, p])));
 
@@ -722,6 +724,9 @@ export class UserEntityService implements OnModuleInit {
 						});
 				}
 			}
+			const packedNotes = await this.noteEntityService.packMany([...pinNotes.values()].flat().map(pin => pin.note!), me, { detail: true });
+			const packedNotesById = new Map(packedNotes.map(note => [note.id, note]));
+			packedPinNotes = new Map(_users.map(user => [user.id, (pinNotes.get(user.id) ?? []).map(pin => packedNotesById.get(pin.noteId)!)]));
 		}
 
 		return Promise.all(
@@ -734,6 +739,7 @@ export class UserEntityService implements OnModuleInit {
 					userRelations: userRelations,
 					userMemos: userMemos,
 					pinNotes: pinNotes,
+					packedPinNotes,
 				},
 			)),
 		);

@@ -19,7 +19,6 @@ import { isQuote, isRenote } from '@/misc/is-renote.js';
 import { CacheService } from '@/core/CacheService.js';
 import { isReply } from '@/misc/is-reply.js';
 import { isInstanceMuted } from '@/misc/is-instance-muted.js';
-import { removeMutedUsersReactions } from '@/misc/reactions-mute.js';
 import { ChannelMutingService } from '@/core/ChannelMutingService.js';
 import { isChannelRelated } from '@/misc/is-channel-related.js';
 
@@ -78,13 +77,7 @@ export class FanoutTimelineEndpointService {
 			};
 		}
 
-		const packedNotes = await this.noteEntityService.packMany(await this.getMiNotes(ps), ps.me, ps.me ? { withReactionAndUserPairCache: true } : undefined);
-		if (ps.me) {
-			const userIdsWhoMeMuting = await this.cacheService.userMutingsCache.fetch(ps.me.id);
-			await Promise.all(
-				packedNotes.map(note => removeMutedUsersReactions(note, userIdsWhoMeMuting)),
-			);
-		}
+		const packedNotes = await this.noteEntityService.packMany(await this.getMiNotes(ps), ps.me);
 		return packedNotes;
 	}
 
