@@ -10,6 +10,7 @@ import { loadConfig } from '@/config.js';
 import type { Config } from '@/config.js';
 import { configureLogging, shutdownLogging } from '@/logging/logging-runtime.js';
 import { initTelemetry, shutdownTelemetry } from '@/core/telemetry/telemetry-registry.js';
+import { shutdownRoleHealth } from '@/health/role-health.js';
 import { initExtraThreadPool, jobQueue, server } from './common.js';
 import { installShutdownSignalHandlers } from './shutdown-handler.js';
 
@@ -40,7 +41,7 @@ export async function workerMain() {
 		process.exit(1);
 	}
 	installShutdownSignalHandlers({
-		shutdownTasks: [shutdownTelemetry, shutdownLogging],
+		shutdownTasks: [shutdownRoleHealth, shutdownTelemetry, shutdownLogging],
 		onRegistered: message => bootLogger.info(message),
 	});
 

@@ -61,3 +61,26 @@ Support us with a ⭐ !
 [![Star History Chart](https://api.star-history.com/svg?repos=misskey-dev/misskey&type=Date)](https://star-history.com/#misskey-dev/misskey&Date)
 
 </div>
+
+### Internal role probes
+
+Set `MK_INTERNAL_HEALTH_PORT` to a decimal port from 1 to 65535, different from
+`port` in the application configuration, to enable private `/livez` and
+`/startupz` endpoints. Without this variable no internal listener or worker
+watchdog starts. All responses have empty bodies and `Cache-Control: no-store`.
+Keep this port out of public Services and reverse proxy routes; allow only the
+cluster's kubelet probe path.
+
+Supported modes are Web (`MK_ONLY_SERVER`) with clustering enabled or disabled,
+and Queue (`MK_ONLY_QUEUE`) with `MK_DISABLE_CLUSTERING=true`. A standalone
+combined Web/Queue process is also supported. Clustered Queue or combined mode
+is rejected when opting in: a primary-only probe cannot represent independent
+child consumers. Existing modes are unchanged without the opt-in variable.
+
+Web probes observe real listeners and serving worker IPC. A previously serving
+worker that stops responding is replaced through the existing cluster restart
+path while responsive siblings continue serving. Queue probes observe the
+lifecycle of every registered BullMQ worker run loop. Empty queues, long jobs,
+and temporary database or Redis failures do not alone make a role unhealthy.
+This does not detect every unresolved asynchronous job or guarantee job progress.
+Public `/healthz` retains its dependency-based readiness behavior.

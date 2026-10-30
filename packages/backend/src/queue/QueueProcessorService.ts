@@ -6,6 +6,8 @@
 import { Inject, Injectable, OnApplicationShutdown } from '@nestjs/common';
 import * as Bull from 'bullmq';
 import type { Config } from '@/config.js';
+import { isShutdownInProgress } from '@/boot/shutdown-handler.js';
+import { queueWorkerHealth } from '@/health/role-health.js';
 import { DI } from '@/di-symbols.js';
 import type Logger from '@/logger.js';
 import { bindThis } from '@/decorators.js';
@@ -81,6 +83,8 @@ function getJobInfo(job: Bull.Job | undefined, increment = false): string {
 @Injectable()
 export class QueueProcessorService implements OnApplicationShutdown {
 	private logger: Logger;
+	private readonly workers: Bull.Worker[] = [];
+	private stopping = false;
 	private systemQueueWorker: Bull.Worker;
 	private dbQueueWorker: Bull.Worker;
 	private deliverQueueWorker: Bull.Worker;
@@ -184,7 +188,7 @@ export class QueueProcessorService implements OnApplicationShutdown {
 			};
 			const logger = this.logger.createSubLogger('system');
 
-			this.systemQueueWorker = new Bull.Worker(QUEUE.SYSTEM, (job) => {
+			this.systemQueueWorker = this.registerWorker(new Bull.Worker(QUEUE.SYSTEM, (job) => {
 				return runQueueJob(
 					this.telemetryService,
 					'Queue: System: ' + job.name,
@@ -200,7 +204,7 @@ export class QueueProcessorService implements OnApplicationShutdown {
 			}, {
 				...baseWorkerOptions(this.config, QUEUE.SYSTEM),
 				autorun: false,
-			});
+			}));
 
 			this.systemQueueWorker
 				.on('active', (job) => logger.debug(`active id=${job.id}`))
@@ -244,7 +248,7 @@ export class QueueProcessorService implements OnApplicationShutdown {
 			};
 			const logger = this.logger.createSubLogger('db');
 
-			this.dbQueueWorker = new Bull.Worker(QUEUE.DB, (job) => {
+			this.dbQueueWorker = this.registerWorker(new Bull.Worker(QUEUE.DB, (job) => {
 				return runQueueJob(
 					this.telemetryService,
 					'Queue: DB: ' + job.name,
@@ -261,7 +265,7 @@ export class QueueProcessorService implements OnApplicationShutdown {
 				...baseWorkerOptions(this.config, QUEUE.DB),
 				concurrency: 10,
 				autorun: false,
-			});
+			}));
 
 			this.dbQueueWorker
 				.on('active', (job) => logger.debug(`active id=${job.id}`))
@@ -275,7 +279,7 @@ export class QueueProcessorService implements OnApplicationShutdown {
 		{
 			const logger = this.logger.createSubLogger('deliver');
 
-			this.deliverQueueWorker = new Bull.Worker(QUEUE.DELIVER, (job) => {
+			this.deliverQueueWorker = this.registerWorker(new Bull.Worker(QUEUE.DELIVER, (job) => {
 				return runQueueJob(
 					this.telemetryService,
 					'Queue: Deliver',
@@ -299,7 +303,7 @@ export class QueueProcessorService implements OnApplicationShutdown {
 				settings: {
 					backoffStrategy: httpRelatedBackoff,
 				},
-			});
+			}));
 
 			this.deliverQueueWorker
 				.on('active', (job) => logger.debug(`active ${getJobInfo(job, true)} to=${job.data.to}`))
@@ -313,7 +317,7 @@ export class QueueProcessorService implements OnApplicationShutdown {
 		{
 			const logger = this.logger.createSubLogger('inbox');
 
-			this.inboxQueueWorker = new Bull.Worker(QUEUE.INBOX, (job) => {
+			this.inboxQueueWorker = this.registerWorker(new Bull.Worker(QUEUE.INBOX, (job) => {
 				return runQueueJob(
 					this.telemetryService,
 					'Queue: Inbox',
@@ -338,7 +342,7 @@ export class QueueProcessorService implements OnApplicationShutdown {
 				settings: {
 					backoffStrategy: httpRelatedBackoff,
 				},
-			});
+			}));
 
 			this.inboxQueueWorker
 				.on('active', (job) => logger.debug(`active ${getJobInfo(job, true)}`))
@@ -352,7 +356,7 @@ export class QueueProcessorService implements OnApplicationShutdown {
 		{
 			const logger = this.logger.createSubLogger('user-webhook');
 
-			this.userWebhookDeliverQueueWorker = new Bull.Worker(QUEUE.USER_WEBHOOK_DELIVER, (job) => {
+			this.userWebhookDeliverQueueWorker = this.registerWorker(new Bull.Worker(QUEUE.USER_WEBHOOK_DELIVER, (job) => {
 				return runQueueJob(
 					this.telemetryService,
 					'Queue: UserWebhookDeliver',
@@ -376,7 +380,7 @@ export class QueueProcessorService implements OnApplicationShutdown {
 				settings: {
 					backoffStrategy: httpRelatedBackoff,
 				},
-			});
+			}));
 
 			this.userWebhookDeliverQueueWorker
 				.on('active', (job) => logger.debug(`active ${getJobInfo(job, true)} to=${job.data.to}`))
@@ -390,7 +394,7 @@ export class QueueProcessorService implements OnApplicationShutdown {
 		{
 			const logger = this.logger.createSubLogger('system-webhook');
 
-			this.systemWebhookDeliverQueueWorker = new Bull.Worker(QUEUE.SYSTEM_WEBHOOK_DELIVER, (job) => {
+			this.systemWebhookDeliverQueueWorker = this.registerWorker(new Bull.Worker(QUEUE.SYSTEM_WEBHOOK_DELIVER, (job) => {
 				return runQueueJob(
 					this.telemetryService,
 					'Queue: SystemWebhookDeliver',
@@ -414,7 +418,7 @@ export class QueueProcessorService implements OnApplicationShutdown {
 				settings: {
 					backoffStrategy: httpRelatedBackoff,
 				},
-			});
+			}));
 
 			this.systemWebhookDeliverQueueWorker
 				.on('active', (job) => logger.debug(`active ${getJobInfo(job, true)} to=${job.data.to}`))
@@ -437,7 +441,7 @@ export class QueueProcessorService implements OnApplicationShutdown {
 			};
 			const logger = this.logger.createSubLogger('relationship');
 
-			this.relationshipQueueWorker = new Bull.Worker(QUEUE.RELATIONSHIP, (job) => {
+			this.relationshipQueueWorker = this.registerWorker(new Bull.Worker(QUEUE.RELATIONSHIP, (job) => {
 				return runQueueJob(
 					this.telemetryService,
 					'Queue: Relationship: ' + job.name,
@@ -458,7 +462,7 @@ export class QueueProcessorService implements OnApplicationShutdown {
 					max: this.config.relationshipJobPerSec ?? 64,
 					duration: 1000,
 				},
-			});
+			}));
 
 			this.relationshipQueueWorker
 				.on('active', (job) => logger.debug(`active id=${job.id}`))
@@ -479,7 +483,7 @@ export class QueueProcessorService implements OnApplicationShutdown {
 			};
 			const logger = this.logger.createSubLogger('objectStorage');
 
-			this.objectStorageQueueWorker = new Bull.Worker(QUEUE.OBJECT_STORAGE, (job) => {
+			this.objectStorageQueueWorker = this.registerWorker(new Bull.Worker(QUEUE.OBJECT_STORAGE, (job) => {
 				return runQueueJob(
 					this.telemetryService,
 					'Queue: ObjectStorage: ' + job.name,
@@ -496,7 +500,7 @@ export class QueueProcessorService implements OnApplicationShutdown {
 				...baseWorkerOptions(this.config, QUEUE.OBJECT_STORAGE),
 				autorun: false,
 				concurrency: 16,
-			});
+			}));
 
 			this.objectStorageQueueWorker
 				.on('active', (job) => logger.debug(`active id=${job.id}`))
@@ -510,7 +514,7 @@ export class QueueProcessorService implements OnApplicationShutdown {
 		{
 			const logger = this.logger.createSubLogger('ended-poll-notification');
 
-			this.endedPollNotificationQueueWorker = new Bull.Worker(QUEUE.ENDED_POLL_NOTIFICATION, (job) => {
+			this.endedPollNotificationQueueWorker = this.registerWorker(new Bull.Worker(QUEUE.ENDED_POLL_NOTIFICATION, (job) => {
 				return runQueueJob(
 					this.telemetryService,
 					'Queue: EndedPollNotification',
@@ -526,7 +530,7 @@ export class QueueProcessorService implements OnApplicationShutdown {
 			}, {
 				...baseWorkerOptions(this.config, QUEUE.ENDED_POLL_NOTIFICATION),
 				autorun: false,
-			});
+			}));
 		}
 		//#endregion
 
@@ -534,7 +538,7 @@ export class QueueProcessorService implements OnApplicationShutdown {
 		{
 			const logger = this.logger.createSubLogger('post-scheduled-note');
 
-			this.postScheduledNoteQueueWorker = new Bull.Worker(QUEUE.POST_SCHEDULED_NOTE, (job) => {
+			this.postScheduledNoteQueueWorker = this.registerWorker(new Bull.Worker(QUEUE.POST_SCHEDULED_NOTE, (job) => {
 				return runQueueJob(
 					this.telemetryService,
 					'Queue: PostScheduledNote',
@@ -550,41 +554,52 @@ export class QueueProcessorService implements OnApplicationShutdown {
 			}, {
 				...baseWorkerOptions(this.config, QUEUE.POST_SCHEDULED_NOTE),
 				autorun: false,
-			});
+			}));
 		}
 		//#endregion
 	}
 
+	private registerWorker<T extends Bull.Worker>(worker: T): T {
+		this.workers.push(worker);
+		return worker;
+	}
+
 	@bindThis
 	public async start(): Promise<void> {
-		await Promise.all([
-			this.systemQueueWorker.run(),
-			this.dbQueueWorker.run(),
-			this.deliverQueueWorker.run(),
-			this.inboxQueueWorker.run(),
-			this.userWebhookDeliverQueueWorker.run(),
-			this.systemWebhookDeliverQueueWorker.run(),
-			this.relationshipQueueWorker.run(),
-			this.objectStorageQueueWorker.run(),
-			this.endedPollNotificationQueueWorker.run(),
-			this.postScheduledNoteQueueWorker.run(),
-		]);
+		const loops = this.workers.map(worker => {
+			const loop = worker.run();
+			if (!queueWorkerHealth) return loop;
+			queueWorkerHealth.register(worker, loop);
+			return loop.then(() => {
+				if (this.stopping || isShutdownInProgress()) return;
+				this.logger.error({
+					message: 'Queue worker run loop ended unexpectedly',
+					eventName: 'queue.worker.run_ended',
+					attributes: { queue: worker.name, termination: 'resolved' },
+				});
+			}, error => {
+				if (this.stopping || isShutdownInProgress()) return;
+				this.logger.error({
+					message: 'Queue worker run loop failed',
+					eventName: 'queue.worker.run_failed',
+					attributes: { queue: worker.name, termination: 'rejected' },
+					error,
+				});
+			});
+		});
+		queueWorkerHealth?.completeRegistration();
+		if (queueWorkerHealth) {
+			await Promise.allSettled(loops);
+		} else {
+			await Promise.all(loops);
+		}
 	}
 
 	@bindThis
 	public async stop(): Promise<void> {
-		await Promise.all([
-			this.systemQueueWorker.close(),
-			this.dbQueueWorker.close(),
-			this.deliverQueueWorker.close(),
-			this.inboxQueueWorker.close(),
-			this.userWebhookDeliverQueueWorker.close(),
-			this.systemWebhookDeliverQueueWorker.close(),
-			this.relationshipQueueWorker.close(),
-			this.objectStorageQueueWorker.close(),
-			this.endedPollNotificationQueueWorker.close(),
-			this.postScheduledNoteQueueWorker.close(),
-		]);
+		this.stopping = true;
+		queueWorkerHealth?.stop();
+		await Promise.all(this.workers.map(worker => worker.close()));
 	}
 
 	@bindThis
