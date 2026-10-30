@@ -1,8 +1,3 @@
-/*
- * SPDX-FileCopyrightText: syuilo and misskey-project
- * SPDX-License-Identifier: AGPL-3.0-only
- */
-
 import { randomUUID } from 'node:crypto';
 
 interface Channel {
@@ -25,7 +20,7 @@ interface WorkerState {
 	pending?: { token: string; finish: (live: boolean) => void };
 }
 
-export class WebWorkerHealth {
+export class HanaWebWorkerHealth {
 	private readonly workers = new Map<Worker, WorkerState>();
 	private stopped = false;
 	private checking?: Promise<boolean>;
@@ -38,7 +33,7 @@ export class WebWorkerHealth {
 			started: false,
 			failed: false,
 			receive: message => {
-				if (message == null || typeof message !== 'object' || !('type' in message) || message.type !== 'internal-health:response') return;
+				if (message == null || typeof message !== 'object' || !('type' in message) || message.type !== 'hana-liveness:response') return;
 				if (!('token' in message) || message.token !== state.pending?.token) return;
 				state.pending?.finish('listening' in message && message.listening === true);
 			},
@@ -88,7 +83,7 @@ export class WebWorkerHealth {
 			};
 			state.pending = { token, finish };
 			try {
-				worker.send({ type: 'internal-health:probe', token }, error => { if (error) finish(false); });
+				worker.send({ type: 'hana-liveness:probe', token }, error => { if (error) finish(false); });
 			} catch {
 				finish(false);
 			}
@@ -107,10 +102,10 @@ export class WebWorkerHealth {
 	}
 }
 
-export function installWebWorkerHealthResponder(options: { channel: Channel; isListening: () => boolean }): () => void {
+export function installHanaWebWorkerHealthResponder(options: { channel: Channel; isListening: () => boolean }): () => void {
 	const receive = (message: unknown) => {
-		if (message == null || typeof message !== 'object' || !('type' in message) || message.type !== 'internal-health:probe' || !('token' in message)) return;
-		options.channel.send({ type: 'internal-health:response', token: message.token, listening: options.isListening() });
+		if (message == null || typeof message !== 'object' || !('type' in message) || message.type !== 'hana-liveness:probe' || !('token' in message)) return;
+		options.channel.send({ type: 'hana-liveness:response', token: message.token, listening: options.isListening() });
 	};
 	options.channel.on('message', receive);
 	return () => { options.channel.off('message', receive); };

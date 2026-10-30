@@ -7,7 +7,7 @@ import { Inject, Injectable, OnApplicationShutdown } from '@nestjs/common';
 import * as Bull from 'bullmq';
 import type { Config } from '@/config.js';
 import { isShutdownInProgress } from '@/boot/shutdown-handler.js';
-import { queueWorkerHealth } from '@/health/role-health.js';
+import { hanaQueueWorkerHealth } from '@/hanami-liveness/HanaLiveness.js';
 import { DI } from '@/di-symbols.js';
 import type Logger from '@/logger.js';
 import { bindThis } from '@/decorators.js';
@@ -568,8 +568,8 @@ export class QueueProcessorService implements OnApplicationShutdown {
 	public async start(): Promise<void> {
 		const loops = this.workers.map(worker => {
 			const loop = worker.run();
-			if (!queueWorkerHealth) return loop;
-			queueWorkerHealth.register(worker, loop);
+			if (!hanaQueueWorkerHealth) return loop;
+			hanaQueueWorkerHealth.register(worker, loop);
 			return loop.then(() => {
 				if (this.stopping || isShutdownInProgress()) return;
 				this.logger.error({
@@ -587,8 +587,8 @@ export class QueueProcessorService implements OnApplicationShutdown {
 				});
 			});
 		});
-		queueWorkerHealth?.completeRegistration();
-		if (queueWorkerHealth) {
+		hanaQueueWorkerHealth?.completeRegistration();
+		if (hanaQueueWorkerHealth) {
 			await Promise.allSettled(loops);
 		} else {
 			await Promise.all(loops);
@@ -598,7 +598,7 @@ export class QueueProcessorService implements OnApplicationShutdown {
 	@bindThis
 	public async stop(): Promise<void> {
 		this.stopping = true;
-		queueWorkerHealth?.stop();
+		hanaQueueWorkerHealth?.stop();
 		await Promise.all(this.workers.map(worker => worker.close()));
 	}
 

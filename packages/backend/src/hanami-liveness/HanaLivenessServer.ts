@@ -1,12 +1,7 @@
-/*
- * SPDX-FileCopyrightText: syuilo and misskey-project
- * SPDX-License-Identifier: AGPL-3.0-only
- */
-
 import { createServer } from 'node:http';
 import type { Server } from 'node:http';
 
-export function parseInternalHealthPort(raw: string | undefined, publicPort: number): number | undefined {
+export function parseHanaLivenessPort(raw: string | undefined, publicPort: number): number | undefined {
 	if (raw === undefined) return undefined;
 	const port = Number(raw);
 	if (!/^[0-9]+$/.test(raw) || !Number.isInteger(port) || port < 1 || port > 65535 || port === publicPort) {
@@ -15,13 +10,13 @@ export function parseInternalHealthPort(raw: string | undefined, publicPort: num
 	return port;
 }
 
-export async function startInternalHealthServer(options: {
+export async function startHanaLivenessServer(options: {
 	port: number | undefined;
 	isLive: () => boolean | Promise<boolean>;
 	isStarted: () => boolean | Promise<boolean>;
 }): Promise<Server | undefined> {
 	if (options.port === undefined) return undefined;
-	parseInternalHealthPort(String(options.port), -1);
+	parseHanaLivenessPort(String(options.port), -1);
 	const server = createServer(async (request, response) => {
 		response.setHeader('Cache-Control', 'no-store');
 		response.setHeader('Content-Length', '0');

@@ -1,14 +1,9 @@
-/*
- * SPDX-FileCopyrightText: syuilo and misskey-project
- * SPDX-License-Identifier: AGPL-3.0-only
- */
-
 interface QueueWorker {
 	on(event: 'closed', listener: () => void): unknown;
 	off(event: 'closed', listener: () => void): unknown;
 }
 
-export class QueueWorkerHealth {
+export class HanaQueueWorkerHealth {
 	private readonly workers = new Map<QueueWorker, { live: boolean; closed: () => void }>();
 	private complete = false;
 	private stopped = false;
