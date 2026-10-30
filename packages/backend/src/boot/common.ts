@@ -5,6 +5,7 @@
 
 import { NestFactory } from '@nestjs/core';
 import { init } from 'slacc';
+import { observeHanaWebListener } from '@/hanami-liveness/HanaLiveness.js';
 import { NestLogger } from '@/NestLogger.js';
 import { envOption } from '@/env.js';
 import type { Config } from '@/config.js';
@@ -31,6 +32,7 @@ export async function server() {
 
 	const serverService = app.get(ServerService);
 	await serverService.launch();
+	observeHanaWebListener(() => serverService.fastify.server.listening);
 
 	if (process.env.NODE_ENV !== 'test' && !envOption.noDaemons) {
 		const { ChartManagementService } = await import('../core/chart/ChartManagementService.js');

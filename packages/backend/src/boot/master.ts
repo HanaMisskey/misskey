@@ -16,6 +16,7 @@ import type { LogFormat } from '@/logging/types.js';
 import { showMachineInfo } from '@/misc/show-machine-info.js';
 import { envOption } from '@/env.js';
 import { initTelemetry, shutdownTelemetry } from '@/core/telemetry/telemetry-registry.js';
+import { initializeHanaLiveness, shutdownHanaLiveness } from '@/hanami-liveness/HanaLiveness.js';
 import { initExtraThreadPool, jobQueue, server } from './common.js';
 import { installShutdownSignalHandlers } from './shutdown-handler.js';
 
@@ -80,6 +81,8 @@ export async function masterMain() {
 
 	bootLogger.succ('Misskey initialized');
 
+	await initializeHanaLiveness(config.port);
+
 	initExtraThreadPool(config);
 
 	try {
@@ -89,7 +92,7 @@ export async function masterMain() {
 		process.exit(1);
 	}
 	installShutdownSignalHandlers({
-		shutdownTasks: [shutdownTelemetry, shutdownLogging],
+		shutdownTasks: [shutdownHanaLiveness, shutdownTelemetry, shutdownLogging],
 		onRegistered: message => bootLogger.info(message),
 	});
 
