@@ -729,7 +729,7 @@ describe('Streaming', () => {
 			/**
 			 * Oracle: an accepted vote belongs to its voter. HTTP and antenna deliveries
 			 * of the same quoted poll must mark B for the voter and neither choice for
-			 * a different user, regardless of their subscription order.
+			 * a different user who receives the same quote.
 			 */
 			test('引用されたアンケートの投票済み状態を閲覧者ごとに返す', async () => {
 				const poll = await post(kyoko, { poll: { choices: ['A', 'B'] } });
