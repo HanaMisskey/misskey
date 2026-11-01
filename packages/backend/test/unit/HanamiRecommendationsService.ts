@@ -137,4 +137,41 @@ describe('signed page references and final validation', () => {
 		await expect(f.service.submitFeedback(viewer, feedback)).resolves.toEqual({ revision: 2, refreshRequired: true });
 		await expect(f.service.submitImpressions(viewer, { events: [{ eventId: 'old', snapshotId: 's', entryId: 'e' }] })).rejects.toMatchObject({ code: 'REFRESH_REQUIRED' });
 	});
+
+	/** Oracle: ADR-0023's wire shape does not establish request-dependent limits, unique reference identity, or forward cursor progress. The requesting service must retain these checks after transport decoding. */
+	test.each([
+		authorize(['a', 'a']), authorize(['a', 'b', 'c', 'd']),
+		{ ...authorize(['a', 'b']), items: [reference('a'), { ...reference('b'), entryId: 'entry-a' }] },
+		page(['a', 'a']), page(['a', 'b', 'c', 'd']),
+		{ ...page(['a', 'b']), page: { ...page(['a', 'b']).page, items: [reference('a'), { ...reference('b'), entryId: 'entry-a' }] } },
+	])('rejects valid wire shapes with duplicate identities or too many references %p', async response => {
+		const f = fixture();
+		f.request.mockResolvedValue(response);
+		await expect(f.service.getRecommendations(viewer, input)).rejects.toMatchObject({ code: 'UNAVAILABLE' });
+		expect(f.pack).not.toHaveBeenCalled();
+	});
+
+	test('rejects a page that returns the requested cursor again', async () => {
+		const f = fixture();
+		f.request.mockResolvedValue(page([], 'opaque-requested'));
+		await expect(f.service.getRecommendations(viewer, { ...input, cursor: 'opaque-requested' })).rejects.toMatchObject({ code: 'UNAVAILABLE' });
+	});
+
+	/** Oracle: ADR-0023 ACK counts cover the submitted records; completion IDs are a duplicate-free subset of the submitted observation series. These checks depend on the request, beyond the decoded ACK shape. */
+	test.each([
+		{ accepted: 0, duplicates: 0, completedEventIds: [] },
+		{ accepted: 1, duplicates: 1, completedEventIds: [] },
+		{ accepted: 1, duplicates: 0, completedEventIds: ['other-event'] },
+		{ accepted: 1, duplicates: 0, completedEventIds: ['event1', 'event1'] },
+	])('rejects a well-shaped observation ACK that does not match the submitted batch %p', async response => {
+		const f = fixture();
+		f.request.mockResolvedValue(response);
+		await expect(f.service.submitImpressions(viewer, { version: 2, observations: [{ eventId: 'event1', snapshotId: 's', entryId: 'e', sequence: 0, elapsedMs: 0, visibleArea: 7, availableArea: 19, documentVisible: true, ended: false }] })).rejects.toMatchObject({ code: 'UNAVAILABLE' });
+	});
+
+	test('rejects a legacy ACK that does not account for the submitted batch', async () => {
+		const f = fixture();
+		f.request.mockResolvedValue({ accepted: 0, duplicates: 0 });
+		await expect(f.service.submitImpressions(viewer, { events: [{ eventId: 'event1', snapshotId: 's', entryId: 'e' }] })).rejects.toMatchObject({ code: 'UNAVAILABLE' });
+	});
 });
