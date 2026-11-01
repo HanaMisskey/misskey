@@ -119,7 +119,7 @@ describe('Hanami signed wire response decoding', () => {
 	test.each(operations)('copies only allowlisted response fields for $path', async operation => {
 		const f = fixture();
 		const source = addPrivateFields(operation.response);
-		const before = structuredClone(source);
+		const before: unknown = JSON.parse(JSON.stringify(source));
 		f.send.mockResolvedValue({ ok: true, json: async (): Promise<unknown> => source });
 		const result = await operation.send(f.client);
 		expect(result).toStrictEqual(operation.response);
