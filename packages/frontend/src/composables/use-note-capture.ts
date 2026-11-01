@@ -3,10 +3,11 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { onUnmounted, reactive } from 'vue';
+import { inject, onUnmounted, reactive } from 'vue';
 import * as Misskey from 'misskey-js';
 import { EventEmitter } from 'eventemitter3';
 import type { Reactive } from 'vue';
+import { DI } from '@/di.js';
 import { useStream } from '@/stream.js';
 import { $i } from '@/i.js';
 import { store } from '@/store.js';
@@ -193,11 +194,13 @@ export function useNoteCapture(props: {
 	note: Misskey.entities.Note;
 	parentNote: Misskey.entities.Note | null;
 	mock?: boolean;
+	httpOnly?: boolean;
 }): {
 		$note: Reactive<ReactiveNoteData>;
 		subscribe: () => void;
 	} {
 	const { note, parentNote, mock } = props;
+	const httpOnly = props.httpOnly ?? inject(DI.noteCaptureHttpOnly, false);
 
 	const $note = reactive<ReactiveNoteData>({
 		reactions: Object.entries(note.reactions).reduce((acc, [name, count]) => {
@@ -286,7 +289,7 @@ export function useNoteCapture(props: {
 			return;
 		}
 
-		if ($i && store.s.realtimeMode) {
+		if ($i && store.s.realtimeMode && !httpOnly) {
 			realtimeSubscribe({
 				note,
 			});

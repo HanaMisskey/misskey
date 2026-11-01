@@ -2267,6 +2267,24 @@ export type paths = {
          */
         post: operations['get-online-users-count'];
     };
+    '/hanami-feedback': {
+        /**
+         * hanami-feedback
+         * @description No description provided.
+         *
+         *     **Credential required**: *Yes* / **Permission**: *write:account*
+         */
+        post: operations['hanami-feedback'];
+    };
+    '/hanami-impressions': {
+        /**
+         * hanami-impressions
+         * @description No description provided.
+         *
+         *     **Credential required**: *Yes* / **Permission**: *write:account*
+         */
+        post: operations['hanami-impressions'];
+    };
     '/hashtags/list': {
         /**
          * hashtags/list
@@ -3092,6 +3110,15 @@ export type paths = {
          *     **Credential required**: *No*
          */
         post: operations['notes___global-timeline'];
+    };
+    '/notes/hanami-recommendations': {
+        /**
+         * notes/hanami-recommendations
+         * @description No description provided.
+         *
+         *     **Credential required**: *Yes* / **Permission**: *read:account*
+         */
+        post: operations['notes___hanami-recommendations'];
     };
     '/notes/hanami-timeline': {
         /**
@@ -5434,6 +5461,7 @@ export type components = {
             map: string[];
         };
         MetaLite: {
+            hanamiRecommendationsEnabled: boolean;
             maintainerName: string | null;
             maintainerEmail: string | null;
             version: string;
@@ -23767,6 +23795,173 @@ export interface operations {
             };
         };
     };
+    'hanami-feedback': {
+        requestBody: {
+            content: {
+                'application/json': {
+                    i?: string;
+                    eventId: string;
+                    snapshotId: string;
+                    entryId: string;
+                    target: {
+                        /** @enum {string} */
+                        kind: 'author' | 'tag' | 'note';
+                        id: string;
+                    };
+                    /** @enum {string} */
+                    action: 'more' | 'less' | 'reset';
+                };
+            };
+        };
+        responses: {
+            /** @description OK (with results) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': {
+                        revision: number;
+                        refreshRequired: boolean;
+                    };
+                };
+            };
+            /** @description Client error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Authentication error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Forbidden error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description I'm Ai */
+            418: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+        };
+    };
+    'hanami-impressions': {
+        requestBody: {
+            content: {
+                'application/json': {
+                    i?: string;
+                    /** @constant */
+                    version: 2;
+                    observations: {
+                        eventId: string;
+                        snapshotId: string;
+                        entryId: string;
+                        sequence: number;
+                        elapsedMs: number;
+                        visibleArea: number;
+                        availableArea: number;
+                        documentVisible: boolean;
+                        ended: boolean;
+                    }[];
+                } | {
+                    i?: string;
+                    events: {
+                        eventId: string;
+                        snapshotId: string;
+                        entryId: string;
+                    }[];
+                };
+            };
+        };
+        responses: {
+            /** @description OK (with results) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': {
+                        accepted: number;
+                        duplicates: number;
+                        completedEventIds?: string[];
+                    };
+                };
+            };
+            /** @description Client error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Authentication error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Forbidden error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description I'm Ai */
+            418: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+        };
+    };
     hashtags___list: {
         requestBody: {
             content: {
@@ -30123,6 +30318,92 @@ export interface operations {
                 };
                 content: {
                     'application/json': components['schemas']['Note'][];
+                };
+            };
+            /** @description Client error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Authentication error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Forbidden error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description I'm Ai */
+            418: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+        };
+    };
+    'notes___hanami-recommendations': {
+        requestBody: {
+            content: {
+                'application/json': {
+                    i?: string;
+                    /** @default 20 */
+                    limit?: number;
+                    cursor?: string;
+                    /** @default false */
+                    refresh?: boolean;
+                    /**
+                     * @default any
+                     * @enum {string}
+                     */
+                    imageFilter?: 'any' | 'with_image' | 'without_image';
+                    /** @default false */
+                    withFiles?: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description OK (with results) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': {
+                        items: {
+                            entryId: string;
+                            note: components['schemas']['Note'];
+                        }[];
+                        nextCursor: string | null;
+                        snapshotId: string;
+                        algorithmVersion: string;
+                        revision: number;
+                    };
                 };
             };
             /** @description Client error */

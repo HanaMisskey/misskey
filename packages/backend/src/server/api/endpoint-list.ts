@@ -448,3 +448,7 @@ export * as 'i/import-notes' from './endpoints/i/import-notes.js';
 export * as 'notes/hanami-timeline' from './endpoints/notes/hanami-timeline.js';
 export * as 'notes/hanamisearch-v1' from './endpoints/notes/hanamisearch-v1.js';
 export * as 'notes/hanamisearch-v2' from './endpoints/notes/hanamisearch-v2.js';
+
+export * as 'notes/hanami-recommendations' from './endpoints/notes/hanami-recommendations.js';
+export * as 'hanami-feedback' from './endpoints/hanami-feedback.js';
+export * as 'hanami-impressions' from './endpoints/hanami-impressions.js';

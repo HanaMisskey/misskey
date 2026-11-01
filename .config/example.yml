@@ -373,3 +373,14 @@ proxyBypassHosts:
 #     # Disable query truncation. If set to true, the full text of the query will be output to the log.
 #     # default: false
 #     disableQueryTruncation: false
+
+# CDCが共有索引を管理するローカル構成では、hanamisearch内のreadOnly: trueで
+# 旧settings/index/unindexの書き込みを止める。検索の読み取りは維持する。
+# hanamiPlatformを省略した場合は従来の検索とタイムラインを使う。
+# 設定が存在する場合は署名した検索・おすすめを使い、不正な設定は利用不可となる。
+# hanamiPlatform:
+#   url: http://127.0.0.1:18080
+#   keyId: local-v1
+#   signingKey: <ローカル専用鍵>
+#   sourceId: local-misskey
+#   generation: 1

@@ -4,7 +4,9 @@
  */
 
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
+import { HanamiPlatformClient, HanamiPlatformError } from '@/core/hanamifeed/HanamiPlatformClient.js';
+import { HanamiNoteAccessService } from '@/core/hanamifeed/HanamiNoteAccessService.js';
 import { DI } from '@/di-symbols.js';
 import type { Config } from '@/config.js';
 import type { MiMeta, MiNote, MiUser, NotesRepository } from '@/models/_.js';
@@ -29,7 +31,7 @@ type SearchPage = { notes: Packed<'Note'>[]; nextCursor: string | null };
 type SearchResponse = { hits: { id: string }[]; nextCursor?: string | null };
 
 export class HanamiSearchV2Error extends Error {
-	constructor(public readonly code: 'UNAVAILABLE' | 'INVALID_CURSOR' | 'INVALID_QUERY') {
+	constructor(public readonly code: 'UNAVAILABLE' | 'INVALID_CURSOR' | 'INVALID_QUERY' | 'REFRESH_REQUIRED') {
 		super(code === 'UNAVAILABLE' ? 'HanamiSearch v2 is unavailable.' : code === 'INVALID_CURSOR' ? 'Invalid HanamiSearch v2 cursor.' : 'Invalid HanamiSearch v2 query.');
 	}
 }
@@ -44,6 +46,8 @@ export class HanamiSearchV2Service {
 		private cacheService: CacheService,
 		private utilityService: UtilityService,
 		private httpRequestService: HttpRequestService,
+		@Optional() private hanamiPlatformClient?: HanamiPlatformClient,
+		@Optional() private hanamiNoteAccessService?: HanamiNoteAccessService,
 	) {}
 
 	public async searchNote(q: string, me: MiUser | null, opts: SearchOptions, pagination: SearchPagination): Promise<SearchPage> {
@@ -52,13 +56,17 @@ export class HanamiSearchV2Service {
 		} catch (error) {
 			// 元の例外を添付すると、公開エラーへ接続先や応答内容が流出する。
 			if (error instanceof HanamiSearchV2Error) throw error;
+			if (error && typeof error === 'object' && 'code' in error && error.code === 'REFRESH_REQUIRED') throw new HanamiSearchV2Error('REFRESH_REQUIRED');
+			if (error instanceof HanamiPlatformError && error.code === 'INVALID_CURSOR') throw new HanamiSearchV2Error('INVALID_CURSOR');
+			if (error instanceof HanamiPlatformError && error.code === 'INVALID_REQUEST') throw new HanamiSearchV2Error('INVALID_QUERY');
 			throw new HanamiSearchV2Error('UNAVAILABLE');
 		}
 	}
 
 	private async search(q: string, me: MiUser | null, opts: SearchOptions, pagination: SearchPagination): Promise<SearchPage> {
 		const settings = this.config.hanamisearch;
-		if (!settings?.apiKey) throw new HanamiSearchV2Error('UNAVAILABLE');
+		const platform = Object.hasOwn(this.config, 'hanamiPlatform');
+		if (!settings || (!platform && !settings.apiKey)) throw new HanamiSearchV2Error('UNAVAILABLE');
 		if (typeof settings.cursorEncryptionKey !== 'string' || settings.cursorEncryptionKey.length !== 64 || !/^[0-9a-fA-F]{64}$/.test(settings.cursorEncryptionKey)) {
 			throw new HanamiSearchV2Error('UNAVAILABLE');
 		}
@@ -70,61 +78,98 @@ export class HanamiSearchV2Service {
 		if (opts.onlyWithFiles) filter.push('fileIds IS NOT NULL');
 		const fingerprint = createHash('sha256').update(JSON.stringify([
 			q, me?.id ?? null, filter, limit, settings.host, settings.port, settings.index,
+			...(platform ? [this.config.hanamiPlatform?.url, this.config.hanamiPlatform?.sourceId, this.config.hanamiPlatform?.generation] : []),
 		])).digest('hex');
 		const key = Buffer.from(settings.cursorEncryptionKey, 'hex');
 		let cursor = pagination.cursor == null ? null : this.readCursor(pagination.cursor, key, fingerprint);
 		const seenCursors = new Set<string>();
 		if (cursor) seenCursors.add(cursor);
-		const [muted, blocked, mutedInstances] = me ? await Promise.all([
+		const [muted, blocked, mutedInstances] = me && !platform ? await Promise.all([
 			this.cacheService.userMutingsCache.fetch(me.id),
 			this.cacheService.userBlockedCache.fetch(me.id),
 			this.cacheService.userProfileCache.fetch(me.id).then(profile => new Set(profile.mutedInstances)),
 		]) : [new Set<string>(), new Set<string>(), new Set<string>()];
 		const url = `${settings.ssl ? 'https' : 'http'}://${settings.host}:${settings.port}/indexes/${encodeURIComponent(`${settings.index}---notes`)}/search`;
 
+		const collected: Packed<'Note'>[] = [];
+		const collectedIds = new Set<string>();
 		for (let page = 0; page < 5; page++) {
-			const response = await this.httpRequestService.send(url, {
-				method: 'POST',
-				headers: { Authorization: `Bearer ${settings.apiKey}`, 'Content-Type': 'application/json' },
-				body: JSON.stringify({ q, hanamiSearchVersion: 'v2', sort: [], attributesToRetrieve: ['id'], filter: filter.join(' AND '), limit, ...(cursor ? { cursor } : {}) }),
-				timeout: 10000,
-				size: 1024 * 1024,
-				isLocalAddressAllowed: true,
-			}, { throwErrorWhenResponseNotOk: false, validators: [] });
-			if (!response.ok) {
-				if (response.status === 400) throw new HanamiSearchV2Error(cursor ? 'INVALID_CURSOR' : 'INVALID_QUERY');
-				throw new HanamiSearchV2Error('UNAVAILABLE');
+			const pageLimit = platform ? limit - collected.length : limit;
+			const body = { q, hanamiSearchVersion: 'v2', sort: [], attributesToRetrieve: ['id'], filter: filter.join(' AND '), limit: pageLimit, ...(cursor ? { cursor } : {}) };
+			let result: unknown;
+			if (platform) {
+				if (!me || !this.hanamiPlatformClient || !this.hanamiNoteAccessService) throw new HanamiSearchV2Error('UNAVAILABLE');
+				result = await this.hanamiPlatformClient.request(me, '/internal/v1/search', body);
+			} else {
+				const response = await this.httpRequestService.send(url, {
+					method: 'POST',
+					headers: { Authorization: `Bearer ${settings.apiKey}`, 'Content-Type': 'application/json' },
+					body: JSON.stringify(body),
+					timeout: 10000,
+					size: 1024 * 1024,
+					isLocalAddressAllowed: true,
+				}, { throwErrorWhenResponseNotOk: false, validators: [] });
+				if (!response.ok) {
+					if (response.status === 400) throw new HanamiSearchV2Error(cursor ? 'INVALID_CURSOR' : 'INVALID_QUERY');
+					throw new HanamiSearchV2Error('UNAVAILABLE');
+				}
+				result = await response.json();
 			}
-			const result: unknown = await response.json();
-			if (!this.isSearchResponse(result, limit)) throw new HanamiSearchV2Error('UNAVAILABLE');
+			if (!this.isSearchResponse(result, pageLimit)) throw new HanamiSearchV2Error('UNAVAILABLE');
 			cursor = result.nextCursor ?? null;
 			if (cursor && seenCursors.has(cursor)) throw new HanamiSearchV2Error('UNAVAILABLE');
 			if (cursor) seenCursors.add(cursor);
 			let notes: Packed<'Note'>[] = [];
 			if (result.hits.length > 0) {
 				const ids = [...new Set(result.hits.map(hit => hit.id))];
-				const rows = await this.notesRepository.createQueryBuilder('note')
-					.innerJoinAndSelect('note.user', 'user')
-					.leftJoinAndSelect('note.reply', 'reply')
-					.leftJoinAndSelect('note.renote', 'renote')
-					.leftJoinAndSelect('reply.user', 'replyUser')
-					.leftJoinAndSelect('renote.user', 'renoteUser')
-					.where('note.id IN (:...noteIds)', { noteIds: ids })
-					.getMany();
-				const rowsById = new Map(rows.map(note => [note.id, note]));
-				// ID順へ並べ直すと、HanamiSearch v2の検索順位を失う。
-				const ordered = ids.flatMap(id => {
-					const note = rowsById.get(id);
-					return note && this.isAllowed(note, opts, muted, blocked, mutedInstances) ? [note] : [];
-				});
-				notes = (await this.noteEntityService.packMany(ordered, me, { withReactionAndUserPairCache: true }))
-					.filter(note => !isMustRemove(note, 'home'));
-				await Promise.all(notes.map(note => removeMutedUsersReactions(note, muted)));
+				if (platform) {
+					if (!me || !this.hanamiNoteAccessService) throw new HanamiSearchV2Error('UNAVAILABLE');
+					notes = await this.hanamiNoteAccessService.packSearchResults(ids, me, opts);
+				} else {
+					const rows = await this.notesRepository.createQueryBuilder('note')
+						.innerJoinAndSelect('note.user', 'user')
+						.leftJoinAndSelect('note.reply', 'reply')
+						.leftJoinAndSelect('note.renote', 'renote')
+						.leftJoinAndSelect('reply.user', 'replyUser')
+						.leftJoinAndSelect('renote.user', 'renoteUser')
+						.where('note.id IN (:...noteIds)', { noteIds: ids })
+						.getMany();
+					const rowsById = new Map(rows.map(note => [note.id, note]));
+					// ID順へ並べ直すと、HanamiSearch v2の検索順位を失う。
+					const ordered = ids.flatMap(id => {
+						const note = rowsById.get(id);
+						return note && this.isAllowed(note, opts, muted, blocked, mutedInstances) ? [note] : [];
+					});
+					notes = (await this.noteEntityService.packMany(ordered, me, { withReactionAndUserPairCache: true }))
+						.filter(note => !isMustRemove(note, 'home'));
+					await Promise.all(notes.map(note => removeMutedUsersReactions(note, muted)));
+				}
 			}
-			if (notes.length > 0 || !cursor) return { notes, nextCursor: cursor ? this.writeCursor(cursor, key, fingerprint) : null };
+			if (platform) {
+				for (const note of notes) {
+					if (!collectedIds.has(note.id)) {
+						collected.push(note);
+						collectedIds.add(note.id);
+					}
+				}
+				if (collected.length === limit || !cursor) break;
+			} else if (notes.length > 0 || !cursor) return { notes, nextCursor: cursor ? this.writeCursor(cursor, key, fingerprint) : null };
+		}
+		if (platform) {
+			if (!me || !this.hanamiNoteAccessService) throw new HanamiSearchV2Error('UNAVAILABLE');
+			// 後続ページのHTTP待機中に、保持済み投稿や作者の公開設定が変わり得る。
+			const current = await this.hanamiNoteAccessService.packSearchResults(collected.map(note => note.id), me, opts);
+			const currentNotes = new Map(current.map(note => [note.id, note]));
+			return {
+				notes: collected.flatMap(note => {
+					const latest = currentNotes.get(note.id);
+					return latest ? [latest] : [];
+				}),
+				nextCursor: cursor ? this.writeCursor(cursor, key, fingerprint) : null,
+			};
 		}
 		// 空配列だけで終端にすると、除外されたページの後にある投稿へ到達できない。
-		return { notes: [], nextCursor: cursor ? this.writeCursor(cursor, key, fingerprint) : null };
+		return { notes: collected, nextCursor: cursor ? this.writeCursor(cursor, key, fingerprint) : null };
 	}
 
 	private isAllowed(note: MiNote, opts: SearchOptions, muted: Set<string>, blocked: Set<string>, mutedInstances: Set<string>): boolean {

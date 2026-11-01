@@ -251,8 +251,10 @@ const props = withDefaults(defineProps<{
 	pinned?: boolean;
 	mock?: boolean;
 	withHardMute?: boolean;
+	additionalMenuItems?: () => MenuItem[];
 }>(), {
 	mock: false,
+	additionalMenuItems: undefined,
 });
 
 provide(DI.mock, props.mock);
@@ -608,6 +610,7 @@ function onContextmenu(ev: MouseEvent): void {
 		react();
 	} else {
 		const { menu, cleanup } = getNoteMenu({ note: note, translating, translation, currentClip: currentClip?.value });
+		menu.push(...(props.additionalMenuItems?.() ?? []));
 		os.contextMenu(menu, ev).then(focus).finally(cleanup);
 	}
 }
@@ -618,6 +621,7 @@ function showMenu(): void {
 	}
 
 	const { menu, cleanup } = getNoteMenu({ note: note, translating, translation, currentClip: currentClip?.value });
+	menu.push(...(props.additionalMenuItems?.() ?? []));
 	os.popupMenu(menu, menuButton.value).then(focus).finally(cleanup);
 }
 

@@ -77,6 +77,7 @@ import { i18n } from '@/i18n.js';
 import { globalEvents, useGlobalEvent } from '@/events.js';
 import { isSeparatorNeeded, getSeparatorInfo } from '@/utility/timeline-date-separate.js';
 import { Paginator } from '@/utility/paginator.js';
+import { DI } from '@/di.js';
 
 const props = withDefaults(defineProps<{
 	src: BasicTimelineType | 'mentions' | 'directs' | 'list' | 'antenna' | 'channel' | 'role';
@@ -102,6 +103,9 @@ const props = withDefaults(defineProps<{
 provide('inTimeline', true);
 provide('tl_withSensitive', computed(() => props.withSensitive));
 provide('inChannel', computed(() => props.src === 'channel'));
+if (props.src === 'hanami') provide(DI.noteCaptureHttpOnly, true);
+
+const realtimeEnabled = computed(() => store.s.realtimeMode && props.src !== 'hanami');
 
 let paginator: IPaginator<Misskey.entities.Note>;
 
@@ -256,7 +260,7 @@ const POLLING_INTERVAL =
 	prefer.s.pollingInterval === 3 ? MIN_POLLING_INTERVAL :
 	MIN_POLLING_INTERVAL;
 
-if (!store.s.realtimeMode) {
+if (!realtimeEnabled.value) {
 	// TODO: 先頭のノートの作成日時が1日以上前であれば流速が遅いTLと見做してインターバルを通常より延ばす
 	useInterval(async () => {
 		paginator.fetchNewer({
@@ -305,12 +309,11 @@ function prepend(note: Misskey.entities.Note & MisskeyEntity) {
 	}
 }
 
-const stream = store.s.realtimeMode ? useStream() : null;
+const stream = realtimeEnabled.value ? useStream() : null;
 
 const connections = {
 	antenna: null as Misskey.IChannelConnection<Misskey.Channels['antenna']> | null,
 	homeTimeline: null as Misskey.IChannelConnection<Misskey.Channels['homeTimeline']> | null,
-	hanamiTimeline: null as Misskey.IChannelConnection<Misskey.Channels['hanamiTimeline']> | null,
 	localTimeline: null as Misskey.IChannelConnection<Misskey.Channels['localTimeline']> | null,
 	hybridTimeline: null as Misskey.IChannelConnection<Misskey.Channels['hybridTimeline']> | null,
 	globalTimeline: null as Misskey.IChannelConnection<Misskey.Channels['globalTimeline']> | null,
@@ -335,12 +338,6 @@ function connectChannel() {
 		});
 		connections.main = stream.useChannel('main');
 		connections.homeTimeline.on('note', prepend);
-	} else if (props.src === 'hanami') {
-		connections.hanamiTimeline = stream.useChannel('hanamiTimeline', {
-			withRenotes: props.withRenotes,
-			withFiles: props.onlyFiles ? true : undefined,
-		});
-		connections.hanamiTimeline.on('note', prepend);
 	} else if (props.src === 'local') {
 		connections.localTimeline = stream.useChannel('localTimeline', {
 			withRenotes: props.withRenotes,
@@ -405,12 +402,12 @@ function disconnectChannel() {
 	}
 }
 
-if (store.s.realtimeMode) {
+if (realtimeEnabled.value) {
 	connectChannel();
 }
 
 watch(() => [props.list, props.antenna, props.channel, props.role, props.withRenotes], () => {
-	if (store.s.realtimeMode) {
+	if (realtimeEnabled.value) {
 		disconnectChannel();
 		connectChannel();
 	}

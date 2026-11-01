@@ -13547,6 +13547,96 @@ export interface Locale extends ILocale {
          */
         "notesCreatedInHanaModeWillBeExcluded": string;
     };
+    "_hanamiRecommendations": {
+        /**
+         * あなたの関心や調整に合わせて、公開投稿をおすすめします。
+         */
+        "description": string;
+        /**
+         * おすすめを更新
+         */
+        "refresh": string;
+        /**
+         * おすすめの調整
+         */
+        "adjust": string;
+        /**
+         * 画像
+         */
+        "image": string;
+        /**
+         * すべて
+         */
+        "imageAny": string;
+        /**
+         * 画像あり
+         */
+        "imageWith": string;
+        /**
+         * 画像なし
+         */
+        "imageWithout": string;
+        /**
+         * さらに表示
+         */
+        "more": string;
+        /**
+         * 確認中
+         */
+        "loading": string;
+        /**
+         * おすすめを利用できません。更新してください。
+         */
+        "unavailable": string;
+        /**
+         * おすすめを更新してください。
+         */
+        "refreshRequired": string;
+        /**
+         * 調整を保存できませんでした。もう一度お試しください。
+         */
+        "feedbackFailed": string;
+        /**
+         * 表示できるおすすめがありません。
+         */
+        "empty": string;
+        /**
+         * この作者をもっと表示
+         */
+        "authorMore": string;
+        /**
+         * この作者を減らす
+         */
+        "authorLess": string;
+        /**
+         * この作者の調整をリセット
+         */
+        "authorReset": string;
+        /**
+         * #{tag}をもっと表示
+         */
+        "tagMore": ParameterizedString<"tag">;
+        /**
+         * #{tag}を減らす
+         */
+        "tagLess": ParameterizedString<"tag">;
+        /**
+         * #{tag}の調整をリセット
+         */
+        "tagReset": ParameterizedString<"tag">;
+        /**
+         * この内容に近い投稿をもっと表示
+         */
+        "noteMore": string;
+        /**
+         * この内容に近い投稿を減らす
+         */
+        "noteLess": string;
+        /**
+         * この内容の調整をリセット
+         */
+        "noteReset": string;
+    };
 }
 declare const locales: {
     [lang: string]: Locale;

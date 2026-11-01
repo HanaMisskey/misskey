@@ -104,8 +104,18 @@ export class TokenPaginator<
 			this.pushItems(notes);
 			this.nextCursor = page.nextCursor;
 			this.canFetchOlder.value = page.nextCursor != null;
-		} catch {
-			if (generation === this.generation) error.value = true;
+		} catch (cause) {
+			if (generation === this.generation) {
+				error.value = true;
+				if (cause && typeof cause === 'object' && 'code' in cause && cause.code === 'REFRESH_REQUIRED') {
+					this.items.value = [];
+					this.aheadQueue = [];
+					this.queuedAheadItemsCount.value = 0;
+					this.nextCursor = null;
+					this.canFetchOlder.value = false;
+					this.error.value = true;
+				}
+			}
 		} finally {
 			if (generation === this.generation) loading.value = false;
 		}
