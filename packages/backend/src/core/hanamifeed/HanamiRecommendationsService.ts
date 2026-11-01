@@ -5,12 +5,9 @@ import { HanamiPlatformClient, HanamiPlatformError } from './HanamiPlatformClien
 import { HanamiNoteAccessService } from './HanamiNoteAccessService.js';
 import { validHanamiNoteReference } from './HanamiNoteReference.js';
 import type { HanamiNoteReference } from './HanamiNoteReference.js';
+import type { HanamiRecommendationRequest, HanamiFeedbackRequest, HanamiImpressionsRequest } from './HanamiPlatformWire.js';
 
-export type HanamiRecommendationRequest = { limit: number; cursor?: string; refresh: boolean; imageFilter: 'any' | 'with_image' | 'without_image'; withFiles?: boolean };
-export type HanamiFeedbackRequest = { eventId: string; target: { kind: 'author' | 'tag' | 'note'; id: string }; action: 'more' | 'less' | 'reset'; snapshotId: string; entryId: string };
-type Event = { eventId: string; snapshotId: string; entryId: string };
-export type HanamiObservation = Event & { sequence: number; elapsedMs: number; visibleArea: number; availableArea: number; documentVisible: boolean; ended: boolean };
-export type HanamiImpressionsRequest = { events: Event[] } | { version: 2; observations: HanamiObservation[] };
+export type { HanamiRecommendationRequest, HanamiFeedbackRequest, HanamiObservation, HanamiImpressionsRequest } from './HanamiPlatformWire.js';
 type PageMetadata = { nextCursor: string | null; snapshotId: string; algorithmVersion: string; revision: number };
 type Page = PageMetadata & { items: { entryId: string; note: Packed<'Note'> }[] };
 type RemotePage = PageMetadata & { items: HanamiNoteReference[]; validationToken: string };
@@ -38,7 +35,7 @@ export class HanamiRecommendationsService {
 				return result;
 			} finally { clearTimeout(timer); }
 		};
-		let response = await within(() => this.client.request(me, '/internal/v1/recommendations', input));
+		let response: unknown = await within(() => this.client.request(me, '/internal/v1/recommendations', input));
 		const continuations = new Set<string>();
 		while (isObject(response) && response.kind === 'authorize') {
 			if (!text(response.continuation) || !references(response.items, input.limit) || continuations.has(response.continuation)) throw new HanamiPlatformError();
@@ -52,7 +49,7 @@ export class HanamiRecommendationsService {
 		if (!isObject(response) || response.kind !== 'page' || !validPage(response.page, input.limit) || (input.cursor != null && response.page.nextCursor === input.cursor)) throw new HanamiPlatformError();
 		const page = response.page;
 		const packed = await within(() => this.access.packReferences(page.items, me, async () => {
-			const result = await within(() => this.client.request(me, '/internal/v1/recommendations/validate', { validationToken: page.validationToken }));
+			const result: unknown = await within(() => this.client.request(me, '/internal/v1/recommendations/validate', { validationToken: page.validationToken }));
 			if (!isObject(result) || result.valid !== true) throw new HanamiPlatformError();
 		}));
 		const notes = new Map(packed.map(note => [note.id, note]));
@@ -66,7 +63,7 @@ export class HanamiRecommendationsService {
 	}
 
 	public async submitFeedback(me: MiUser, request: HanamiFeedbackRequest): Promise<{ revision: number; refreshRequired: true }> {
-		const result = await this.client.request(me, '/internal/v1/feedback', request);
+		const result: unknown = await this.client.request(me, '/internal/v1/feedback', request);
 		if (!isObject(result) || !nonnegativeInteger(result.revision) || result.refreshRequired !== true) throw new HanamiPlatformError();
 		return { revision: result.revision, refreshRequired: true };
 	}
@@ -74,10 +71,12 @@ export class HanamiRecommendationsService {
 	public async submitImpressions(me: MiUser, request: HanamiImpressionsRequest): Promise<{ accepted: number; duplicates: number; completedEventIds?: string[] }> {
 		const observations = 'observations' in request;
 		const records = observations ? request.observations : request.events;
-		const result = await this.client.request(me, observations ? '/internal/v1/observations' : '/internal/v1/impressions', request);
+		const result = observations
+			? await this.client.request(me, '/internal/v1/observations', request)
+			: await this.client.request(me, '/internal/v1/impressions', request);
 		if (!isObject(result) || !nonnegativeInteger(result.accepted) || !nonnegativeInteger(result.duplicates) || result.accepted + result.duplicates !== records.length) throw new HanamiPlatformError();
 		if (!observations) return { accepted: result.accepted, duplicates: result.duplicates };
-		if (!Array.isArray(result.completedEventIds) || !result.completedEventIds.every(text) || new Set(result.completedEventIds).size !== result.completedEventIds.length || result.completedEventIds.some(id => !records.some(record => record.eventId === id))) throw new HanamiPlatformError();
+		if (!('completedEventIds' in result) || !Array.isArray(result.completedEventIds) || !result.completedEventIds.every(text) || new Set(result.completedEventIds).size !== result.completedEventIds.length || result.completedEventIds.some(id => !records.some(record => record.eventId === id))) throw new HanamiPlatformError();
 		return { accepted: result.accepted, duplicates: result.duplicates, completedEventIds: result.completedEventIds };
 	}
 }

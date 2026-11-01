@@ -6,6 +6,7 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto';
 import { Inject, Injectable, Optional } from '@nestjs/common';
 import { HanamiPlatformClient, HanamiPlatformError } from '@/core/hanamifeed/HanamiPlatformClient.js';
+import type { HanamiSearchRequest, HanamiSearchResponse } from '@/core/hanamifeed/HanamiPlatformWire.js';
 import { HanamiNoteAccessService } from '@/core/hanamifeed/HanamiNoteAccessService.js';
 import { DI } from '@/di-symbols.js';
 import type { Config } from '@/config.js';
@@ -28,7 +29,6 @@ type SearchOptions = {
 };
 type SearchPagination = { limit?: number; cursor?: string | null };
 type SearchPage = { notes: Packed<'Note'>[]; nextCursor: string | null };
-type SearchResponse = { hits: { id: string }[]; nextCursor?: string | null };
 
 export class HanamiSearchV2Error extends Error {
 	constructor(public readonly code: 'UNAVAILABLE' | 'INVALID_CURSOR' | 'INVALID_QUERY' | 'REFRESH_REQUIRED') {
@@ -95,7 +95,7 @@ export class HanamiSearchV2Service {
 		const collectedIds = new Set<string>();
 		for (let page = 0; page < 5; page++) {
 			const pageLimit = platform ? limit - collected.length : limit;
-			const body = { q, hanamiSearchVersion: 'v2', sort: [], attributesToRetrieve: ['id'], filter: filter.join(' AND '), limit: pageLimit, ...(cursor ? { cursor } : {}) };
+			const body: HanamiSearchRequest = { q, hanamiSearchVersion: 'v2', sort: [], attributesToRetrieve: ['id'], filter: filter.join(' AND '), limit: pageLimit, ...(cursor ? { cursor } : {}) };
 			let result: unknown;
 			if (platform) {
 				if (!me || !this.hanamiPlatformClient || !this.hanamiNoteAccessService) throw new HanamiSearchV2Error('UNAVAILABLE');
@@ -187,7 +187,7 @@ export class HanamiSearchV2Service {
 		return !isInstanceMuted(note, mutedInstances);
 	}
 
-	private isSearchResponse(value: unknown, limit: number): value is SearchResponse {
+	private isSearchResponse(value: unknown, limit: number): value is HanamiSearchResponse {
 		if (value == null || typeof value !== 'object' || !('hits' in value)) return false;
 		if (!Array.isArray(value.hits) || value.hits.length > limit) return false;
 		if (!value.hits.every(hit => hit != null && typeof hit === 'object' && typeof hit.id === 'string' && /^[a-zA-Z0-9]{1,128}$/.test(hit.id))) return false;

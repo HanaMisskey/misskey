@@ -6,6 +6,8 @@ import { DI } from '@/di-symbols.js';
 import { MiUser, MiFollowing, MiBlocking, MiMuting, MiRenoteMuting, MiUserProfile, MiMeta } from '@/models/_.js';
 import { MiHanamiReadBarrier } from '@/models/HanamiReadBarrier.js';
 import { HttpRequestService } from '@/core/HttpRequestService.js';
+import { decodeHanamiPlatformResponse } from './HanamiPlatformResponse.js';
+import type { HanamiPlatformContract, HanamiPlatformPath, HanamiPlatformRequest, HanamiPlatformResponse } from './HanamiPlatformWire.js';
 import type { DataSource, EntityManager } from 'typeorm';
 
 export type HanamiErrorCode = 'UNAVAILABLE' | 'REFRESH_REQUIRED' | 'INVALID_CURSOR' | 'INVALID_REQUEST' | 'EVENT_CONFLICT' | 'AUTHENTICATION_FAILED';
@@ -56,7 +58,14 @@ export class HanamiPlatformClient {
 		};
 	}
 
-	public async request(me: MiUser, path: '/internal/v1/recommendations' | '/internal/v1/recommendations/advance' | '/internal/v1/recommendations/validate' | '/internal/v1/observations' | '/internal/v1/search' | '/internal/v1/feedback' | '/internal/v1/impressions', request: unknown): Promise<unknown> {
+	public request(me: MiUser, path: '/internal/v1/recommendations', request: HanamiPlatformContract['/internal/v1/recommendations']['request']): Promise<HanamiPlatformContract['/internal/v1/recommendations']['response']>;
+	public request(me: MiUser, path: '/internal/v1/recommendations/advance', request: HanamiPlatformContract['/internal/v1/recommendations/advance']['request']): Promise<HanamiPlatformContract['/internal/v1/recommendations/advance']['response']>;
+	public request(me: MiUser, path: '/internal/v1/recommendations/validate', request: HanamiPlatformContract['/internal/v1/recommendations/validate']['request']): Promise<HanamiPlatformContract['/internal/v1/recommendations/validate']['response']>;
+	public request(me: MiUser, path: '/internal/v1/feedback', request: HanamiPlatformContract['/internal/v1/feedback']['request']): Promise<HanamiPlatformContract['/internal/v1/feedback']['response']>;
+	public request(me: MiUser, path: '/internal/v1/impressions', request: HanamiPlatformContract['/internal/v1/impressions']['request']): Promise<HanamiPlatformContract['/internal/v1/impressions']['response']>;
+	public request(me: MiUser, path: '/internal/v1/observations', request: HanamiPlatformContract['/internal/v1/observations']['request']): Promise<HanamiPlatformContract['/internal/v1/observations']['response']>;
+	public request(me: MiUser, path: '/internal/v1/search', request: HanamiPlatformContract['/internal/v1/search']['request']): Promise<HanamiPlatformContract['/internal/v1/search']['response']>;
+	public async request(me: MiUser, path: HanamiPlatformPath, request: HanamiPlatformRequest): Promise<HanamiPlatformResponse> {
 		try {
 			const settings = this.config.hanamiPlatform;
 			if (!settings || !settings.url || !settings.keyId || !settings.signingKey || !settings.sourceId || !Number.isSafeInteger(settings.generation) || settings.generation < 1) throw new HanamiPlatformError();
@@ -88,7 +97,7 @@ export class HanamiPlatformClient {
 				const current = await this.db.transaction('REPEATABLE READ', manager => this.authorization(manager, me, Date.now()));
 				if (createHanamiAuthzVersion(current) !== authzVersion) throw new HanamiPlatformError('REFRESH_REQUIRED');
 			}
-			return result;
+			return decodeHanamiPlatformResponse(path, result);
 		} catch (error) {
 			if (error instanceof HanamiPlatformError) throw error;
 			throw new HanamiPlatformError();
