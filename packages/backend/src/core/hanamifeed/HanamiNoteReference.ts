@@ -1,8 +1,9 @@
 import { createHash } from 'node:crypto';
 import type { MiNote, MiUser } from '@/models/_.js';
 import { HanamiPlatformError } from './HanamiPlatformClient.js';
+import type { HanamiNoteReference } from './HanamiPlatformWire.js';
 
-export type HanamiNoteReference = { entryId: string; noteId: string; guard: { contentDigest: string; validUntilMs: number } };
+export type { HanamiNoteReference } from './HanamiPlatformWire.js';
 export type HanamiNoteGraph = { note: MiNote & { user: MiUser }; detail: boolean; reply?: HanamiNoteGraph; renote?: HanamiNoteGraph };
 const object = (value: unknown): value is Record<string, unknown> => value !== null && typeof value === 'object' && !Array.isArray(value);
 const text = (value: unknown): value is string => typeof value === 'string' && value.length > 0;

@@ -1,4 +1,4 @@
-import type { HanamiNoteReference } from './HanamiNoteReference.js';
+export type HanamiNoteReference = { entryId: string; noteId: string; guard: { contentDigest: string; validUntilMs: number } };
 
 export type HanamiRecommendationRequest = { limit: number; cursor?: string; refresh?: boolean; imageFilter: 'any' | 'with_image' | 'without_image'; withFiles?: boolean };
 export type HanamiFeedbackRequest = { eventId: string; target: { kind: 'author' | 'tag' | 'note'; id: string }; action: 'more' | 'less' | 'reset'; snapshotId: string; entryId: string };
