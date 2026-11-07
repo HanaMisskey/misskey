@@ -442,7 +442,7 @@ export class ImportNotesProcessorService {
 		const hashtags = extractApHashtagObjects(toot.object.tag).map((x) => x.name).filter((x): x is string => x != null);
 
 		try {
-			text = await this.mfmService.fromHtml(toot.object.content, hashtags);
+			text = await this.mfmService.fromHtml(toot.object.content, { hashtagNames: hashtags });
 		} catch (error) {
 			text = undefined;
 		}
@@ -500,7 +500,7 @@ export class ImportNotesProcessorService {
 		const hashtags = extractApHashtagObjects(post.object.tag).map((x) => x.name).filter((x): x is string => x != null);
 
 		try {
-			text = await this.mfmService.fromHtml(post.object.content, hashtags);
+			text = await this.mfmService.fromHtml(post.object.content, { hashtagNames: hashtags });
 		} catch (error) {
 			text = undefined;
 		}
