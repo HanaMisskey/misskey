@@ -696,16 +696,17 @@ export class UserEntityService implements OnModuleInit {
 		let pinNotes: Map<MiUser['id'], MiUserNotePining[]> = new Map();
 		let packedPinNotes: Map<MiUser['id'], Packed<'Note'>[]> | undefined;
 
-		if (options?.schema != null && options.schema !== 'UserLite') {
+		const schema = (options?.schema ?? 'UserLite') as S;
+		if (schema !== 'UserLite') {
 			profilesMap = await this.userProfilesRepository.findBy({ userId: In(_userIds) })
 				.then(profiles => new Map(profiles.map(p => [p.userId, p])));
 
 			const meId = me ? me.id : null;
 			if (meId) {
-				userMemos = await this.userMemosRepository.findBy({ userId: meId })
-					.then(memos => new Map(memos.map(memo => [memo.targetUserId, memo.memo])));
-
 				if (_userIds.length > 0) {
+					userMemos = await this.userMemosRepository.findBy({ userId: meId, targetUserId: In(_userIds) })
+						.then(memos => new Map(memos.map(memo => [memo.targetUserId, memo.memo])));
+
 					userRelations = await this.getRelations(meId, _userIds);
 					pinNotes = await this.userNotePiningsRepository.createQueryBuilder('pin')
 						.where('pin.userId IN (:...userIds)', { userIds: _userIds })
@@ -737,6 +738,7 @@ export class UserEntityService implements OnModuleInit {
 				me,
 				{
 					...options,
+					schema,
 					userProfile: profilesMap?.get(u.id),
 					userRelations: userRelations,
 					userMemos: userMemos,

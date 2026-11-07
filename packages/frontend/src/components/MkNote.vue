@@ -577,7 +577,6 @@ const keymap = {
 	&.useSticky {
 		position: sticky !important;
 		top: calc(22px + var(--MI-stickyTop, 0px));
-		left: 0;
 	}
 }
 
