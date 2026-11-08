@@ -762,6 +762,14 @@ SPDX-License-Identifier: AGPL-3.0-only
 								</MkPreferenceContainer>
 							</SearchMarker>
 
+							<SearchMarker :keywords="['url', 'preview', 'autoplay', 'player', 'embed']">
+								<MkPreferenceContainer k="autoplayEmbededPlayerOfUrlPreview">
+									<MkSwitch v-model="autoplayEmbededPlayerOfUrlPreview">
+										<template #label><SearchLabel>{{ i18n.ts._settings.autoplayEmbededPlayerOfUrlPreview }}</SearchLabel></template>
+									</MkSwitch>
+								</MkPreferenceContainer>
+							</SearchMarker>
+
 							<SearchMarker :keywords="['effect', 'show']">
 								<MkSwitch v-model="flowerEffect">
 									<template #label><SearchLabel>{{ i18n.ts._hana.flowerEffect }}</SearchLabel></template>
@@ -950,6 +958,7 @@ const showMediaListByGridInWideArea = prefer.model('showMediaListByGridInWideAre
 const reactionsDisplaySize = prefer.model('reactionsDisplaySize');
 const limitWidthOfReaction = prefer.model('limitWidthOfReaction');
 const squareAvatars = prefer.model('squareAvatars');
+const autoplayEmbededPlayerOfUrlPreview = prefer.model('autoplayEmbededPlayerOfUrlPreview');
 const enableSeasonalScreenEffect = prefer.model('enableSeasonalScreenEffect');
 const flowerEffect = hanaStore.model('flowerEffect');
 const alwaysUseAbsoluteTime = prefer.model('alwaysUseAbsoluteTime');
