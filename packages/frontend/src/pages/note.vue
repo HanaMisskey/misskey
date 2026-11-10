@@ -62,6 +62,7 @@ import { pleaseLogin } from '@/utility/please-login.js';
 import { getAppearNote } from '@/utility/get-appear-note.js';
 import { serverContext, assertServerContext } from '@/server-context.js';
 import { $i } from '@/i.js';
+import { hanamiContextForNote, withHanamiRecommendation } from '@/utility/hanami-recommendation-context.js';
 import { Paginator } from '@/utility/paginator.js';
 
 // contextは非ログイン状態の情報しかないためログイン時は利用できない
@@ -69,6 +70,7 @@ const CTX_NOTE = !$i && assertServerContext(serverContext, 'note') ? serverConte
 
 const props = defineProps<{
 	noteId: string;
+	hanami?: string;
 	initialTab?: string;
 }>();
 
@@ -125,7 +127,8 @@ function fetchNote() {
 	misskeyApi('notes/show', {
 		noteId: props.noteId,
 	}).then(res => {
-		note.value = res;
+		const context = hanamiContextForNote(props.hanami, res.id);
+		note.value = context ? withHanamiRecommendation(res, context) : res;
 		const appearNote = getAppearNote(res) ?? res;
 		// 古いノートは被クリップ数をカウントしていないので、2023-10-01以前のものは強制的にnotes/clipsを叩く
 		if ((appearNote.clippedCount ?? 0) > 0 || new Date(appearNote.createdAt).getTime() < new Date('2023-10-01').getTime()) {
@@ -150,7 +153,7 @@ function fetchNote() {
 	});
 }
 
-watch(() => props.noteId, fetchNote, {
+watch(() => [props.noteId, props.hanami], fetchNote, {
 	immediate: true,
 });
 

@@ -8,7 +8,6 @@ import { bindThis } from '@/decorators.js';
 import { HybridTimelineChannelService } from './channels/hybrid-timeline.js';
 import { LocalTimelineChannelService } from './channels/local-timeline.js';
 import { HomeTimelineChannelService } from './channels/home-timeline.js';
-import { HanamiTimelineChannelService } from './channels/hanami-timeline.js';
 import { GlobalTimelineChannelService } from './channels/global-timeline.js';
 import { MainChannelService } from './channels/main.js';
 import { ChannelChannelService } from './channels/channel.js';
@@ -30,7 +29,6 @@ import { type MiChannelService } from './channel.js';
 export class ChannelsService {
 	constructor(
 		private mainChannelService: MainChannelService,
-		private hanamiTimelineChannelService: HanamiTimelineChannelService,
 		private homeTimelineChannelService: HomeTimelineChannelService,
 		private localTimelineChannelService: LocalTimelineChannelService,
 		private hybridTimelineChannelService: HybridTimelineChannelService,
@@ -55,7 +53,6 @@ export class ChannelsService {
 	public getChannelService(name: string): MiChannelService<boolean> {
 		switch (name) {
 			case 'main': return this.mainChannelService;
-			case 'hanamiTimeline': return this.hanamiTimelineChannelService;
 			case 'homeTimeline': return this.homeTimelineChannelService;
 			case 'localTimeline': return this.localTimelineChannelService;
 			case 'hybridTimeline': return this.hybridTimelineChannelService;

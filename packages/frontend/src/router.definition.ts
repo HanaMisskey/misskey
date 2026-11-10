@@ -41,10 +41,12 @@ export const ROUTE_DEF = [{
 	name: 'user',
 	path: '/@:acct/:page?',
 	component: page(() => import('@/pages/user/index.vue')),
+	query: { hanami: 'hanami' },
 }, {
 	name: 'note',
 	path: '/notes/:noteId/:initialTab?',
 	component: page(() => import('@/pages/note.vue')),
+	query: { hanami: 'hanami' },
 }, {
 	name: 'list',
 	path: '/list/:listId',

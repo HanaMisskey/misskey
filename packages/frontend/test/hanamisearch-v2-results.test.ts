@@ -5,8 +5,8 @@
 
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/vue';
-import type { Component } from 'vue';
 import { defineComponent, markRaw, onBeforeUnmount, shallowRef, watch } from 'vue';
+import type { Component } from 'vue';
 import { prefer } from '@/preferences.js';
 import { TokenPaginator } from '@/hana/scripts/token-paginator.js';
 import MkNotesTimeline from '@/components/MkNotesTimeline.vue';
@@ -38,7 +38,6 @@ vi.mock('@/preferences.js', async () => {
 	return { prefer: { s: { enablePullToRefresh: true, animation: false }, r: { enableInfiniteScroll: ref(true) } } };
 });
 vi.mock('@/os.js', () => ({ contextMenu: vi.fn() }));
-vi.mock('@/utility/timeline-date-separate.js', () => ({ isSeparatorNeeded: () => false, getSeparatorInfo: () => null }));
 vi.mock('@/components/MkPaginationControl.vue', () => ({ default: { template: '<div />' } }));
 vi.mock('@/components/MkPullToRefresh.vue', () => ({ default: { props: ['refresher'], template: '<div><button @click="refresher()">Refresh</button><slot /></div>' } }));
 vi.mock('@/components/MkNote.vue', () => ({ default: { props: ['note'], template: '<p>{{ note.id }}</p>' } }));
@@ -61,6 +60,16 @@ afterEach(() => { cleanup(); request.mockReset(); appeared.mockReset(); prefer.r
 
 /** Oracle: the search screen must expose continuation even for an empty page, and offer retry without hiding earlier notes. */
 describe('HanamiSearch v2 result controls', () => {
+	/** Oracle: extending the common timeline for recommendations must preserve existing search date separators and received note order by default. Dates deliberately span separate calendar days. */
+	test('keeps the existing search date separators by default', async () => {
+		request.mockResolvedValueOnce({ notes: [{ id: 'newer', createdAt: '2026-11-01T12:00:00.000Z' }, { id: 'older', createdAt: '2026-10-29T12:00:00.000Z' }], nextCursor: null });
+		const view = mount();
+		await view.findByText('newer');
+		expect(view.getByText('11/1')).toBeTruthy();
+		expect(view.getByText('10/29')).toBeTruthy();
+		expect([...view.container.querySelectorAll('p')].filter(element => ['newer', 'older'].includes(element.textContent)).map(element => element.textContent)).toEqual(['newer', 'older']);
+	});
+
 	test('shows a continuation control for an empty page and renders the next notes', async () => {
 		request.mockResolvedValueOnce({ notes: [], nextCursor: 'second' }).mockResolvedValueOnce({ notes: [{ id: 'visible-note' }], nextCursor: null });
 		const view = mount();

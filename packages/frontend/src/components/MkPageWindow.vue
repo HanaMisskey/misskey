@@ -36,7 +36,7 @@ import type { PageMetadata } from '@/page.js';
 import RouterView from '@/components/global/RouterView.vue';
 import MkWindow from '@/components/MkWindow.vue';
 import { popout as _popout } from '@/utility/popout.js';
-import { copyToClipboard } from '@/utility/copy-to-clipboard.js';
+import { copyHanamiNavigationLink } from '@/utility/hanami-interactions.js';
 import { i18n } from '@/i18n.js';
 import { provideMetadataReceiver, provideReactiveMetadata } from '@/page.js';
 import { openingWindowsCount } from '@/os.js';
@@ -140,7 +140,7 @@ const contextmenu = computed(() => ([{
 	icon: 'ti ti-link',
 	text: i18n.ts.copyLink,
 	action: () => {
-		copyToClipboard(url + windowRouter.getCurrentFullPath());
+		copyHanamiNavigationLink(url + windowRouter.getCurrentFullPath());
 	},
 }]));
 

@@ -31,6 +31,7 @@ import { acct as getAcct } from '@/filters/user.js';
 import { misskeyApi } from '@/utility/misskey-api.js';
 import { definePage } from '@/page.js';
 import { i18n } from '@/i18n.js';
+import { hanamiContextForUser } from '@/utility/hanami-recommendation-context.js';
 import { $i } from '@/i.js';
 import { serverContext, assertServerContext } from '@/server-context.js';
 
@@ -52,6 +53,7 @@ const CTX_USER = !$i && assertServerContext(serverContext, 'user') ? serverConte
 
 const props = withDefaults(defineProps<{
 	acct: string;
+	hanami?: string;
 	page?: string;
 }>(), {
 	page: 'home',
@@ -77,13 +79,14 @@ function fetchUser(): void {
 		username,
 		host,
 	}).then(u => {
-		user.value = u;
+		const recommendation = hanamiContextForUser(props.hanami, u.id);
+		user.value = recommendation ? Object.assign(u, { hanamiRecommendation: recommendation.eventId }) : u;
 	}).catch(err => {
 		error.value = err;
 	});
 }
 
-watch(() => props.acct, fetchUser, {
+watch(() => [props.acct, props.hanami], fetchUser, {
 	immediate: true,
 });
 

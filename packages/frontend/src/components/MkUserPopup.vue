@@ -61,6 +61,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 import { onMounted, ref } from 'vue';
 import * as Misskey from 'misskey-js';
 import MkFollowButton from '@/components/MkFollowButton.vue';
+import { hanamiContextForUser } from '@/utility/hanami-recommendation-context.js';
 import { userPage } from '@/filters/user.js';
 import * as os from '@/os.js';
 import { misskeyApi } from '@/utility/misskey-api.js';
@@ -96,9 +97,15 @@ function showMenu(ev: MouseEvent) {
 	os.popupMenu(menu, ev.currentTarget ?? ev.target).finally(cleanup);
 }
 
+function withRecommendation(user: Misskey.entities.UserDetailed) {
+	const token = props.source.closest('[data-hanami-recommendation]')?.getAttribute('data-hanami-recommendation') ?? undefined;
+	const recommendation = hanamiContextForUser(token, user.id);
+	return recommendation ? { ...user, hanamiRecommendation: recommendation.eventId } : user;
+}
+
 async function fetchUser() {
 	if (typeof props.q === 'object') {
-		user.value = props.q;
+		user.value = withRecommendation(props.q);
 		error.value = false;
 	} else {
 		const query: Misskey.entities.UsersShowRequest = props.q.startsWith('@') ?
@@ -108,7 +115,7 @@ async function fetchUser() {
 		// @ts-expect-error payloadの引数側の型が正常に解決されない
 		misskeyApi('users/show', query).then(res => {
 			if (!props.showing) return;
-			user.value = res;
+			user.value = withRecommendation(res);
 			error.value = false;
 		}, () => {
 			error.value = true;

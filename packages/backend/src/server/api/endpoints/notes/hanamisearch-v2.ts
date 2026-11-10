@@ -21,6 +21,7 @@ export const meta = {
 		},
 	},
 	errors: {
+		refreshRequired: { message: 'Refresh is required.', code: 'REFRESH_REQUIRED', id: '6c915747-e84f-42ac-b658-e1ed21d70d24', httpStatusCode: 409 },
 		unavailable: { message: 'HanamiSearch v2 is unavailable.', code: 'UNAVAILABLE', id: '3de6c729-d637-492c-b8f8-12019551e288', kind: 'server', httpStatusCode: 503 },
 		invalidCursor: { message: 'Invalid HanamiSearch v2 cursor.', code: 'INVALID_CURSOR', id: 'd441a984-cc17-44d7-a868-f42c6008e006' },
 		invalidQuery: { message: 'Invalid HanamiSearch v2 query.', code: 'INVALID_QUERY', id: '2289bc61-ad2e-408b-a63d-526b65e4c188' },
@@ -50,6 +51,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 					userId: ps.userId, channelId: ps.channelId, host: ps.host, onlyWithFiles: ps.onlyWithFiles,
 				}, { limit: ps.limit, cursor: ps.cursor });
 			} catch (error) {
+				if (error instanceof HanamiSearchV2Error && error.code === 'REFRESH_REQUIRED') throw new ApiError(meta.errors.refreshRequired);
 				if (error instanceof HanamiSearchV2Error && error.code === 'INVALID_CURSOR') throw new ApiError(meta.errors.invalidCursor);
 				if (error instanceof HanamiSearchV2Error && error.code === 'INVALID_QUERY') throw new ApiError(meta.errors.invalidQuery);
 				throw new ApiError(meta.errors.unavailable);

@@ -2267,6 +2267,24 @@ export type paths = {
          */
         post: operations['get-online-users-count'];
     };
+    '/hanami-feedback': {
+        /**
+         * hanami-feedback
+         * @description No description provided.
+         *
+         *     **Credential required**: *Yes* / **Permission**: *write:account*
+         */
+        post: operations['hanami-feedback'];
+    };
+    '/hanami-impressions': {
+        /**
+         * hanami-impressions
+         * @description No description provided.
+         *
+         *     **Credential required**: *Yes* / **Permission**: *write:account*
+         */
+        post: operations['hanami-impressions'];
+    };
     '/hashtags/list': {
         /**
          * hashtags/list
@@ -3092,6 +3110,15 @@ export type paths = {
          *     **Credential required**: *No*
          */
         post: operations['notes___global-timeline'];
+    };
+    '/notes/hanami-recommendations': {
+        /**
+         * notes/hanami-recommendations
+         * @description No description provided.
+         *
+         *     **Credential required**: *Yes* / **Permission**: *read:account*
+         */
+        post: operations['notes___hanami-recommendations'];
     };
     '/notes/hanami-timeline': {
         /**
@@ -5434,6 +5461,7 @@ export type components = {
             map: string[];
         };
         MetaLite: {
+            hanamiRecommendationsEnabled: boolean;
             maintainerName: string | null;
             maintainerEmail: string | null;
             version: string;
@@ -23767,6 +23795,594 @@ export interface operations {
             };
         };
     };
+    'hanami-feedback': {
+        requestBody: {
+            content: {
+                'application/json': {
+                    i?: string;
+                    eventId: string;
+                    snapshotId: string;
+                    entryId: string;
+                    target: {
+                        /** @enum {string} */
+                        kind: 'author' | 'tag' | 'note';
+                        id: string;
+                    };
+                    /** @enum {string} */
+                    action: 'more' | 'less' | 'reset';
+                };
+            };
+        };
+        responses: {
+            /** @description OK (with results) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': {
+                        revision: number;
+                        refreshRequired: boolean;
+                    };
+                };
+            };
+            /** @description Client error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Authentication error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Forbidden error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description I'm Ai */
+            418: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+        };
+    };
+    'hanami-impressions': {
+        requestBody: {
+            content: {
+                'application/json': {
+                    i?: string;
+                    /** @constant */
+                    version: 4;
+                    observations: ({
+                        eventId: string;
+                        snapshotId: string;
+                        entryId: string;
+                        noteId: string;
+                        occurredAtMs: number;
+                        utcOffsetMinutes: number;
+                        deviceContext?: {
+                            /** @enum {string} */
+                            deviceClass: 'mobile' | 'tablet' | 'desktop' | 'unknown';
+                            /** @enum {string} */
+                            viewportClass: 'compact' | 'medium' | 'wide' | 'unknown';
+                            /** @enum {string} */
+                            primaryPointer: 'coarse' | 'fine' | 'none' | 'unknown';
+                        };
+                        windowId?: string;
+                        windowSequence?: number;
+                        windowElapsedMs?: number;
+                        /** @enum {string} */
+                        kind: 'viewport';
+                        sequence: number;
+                        elapsedMs: number;
+                        visibleArea: number;
+                        availableArea: number;
+                        documentVisible: boolean;
+                        ended: boolean;
+                        focused: boolean;
+                        activityAgeMs: number;
+                        scrollIdleMs: number;
+                    } | {
+                        eventId: string;
+                        snapshotId: string;
+                        entryId: string;
+                        noteId: string;
+                        occurredAtMs: number;
+                        utcOffsetMinutes: number;
+                        deviceContext?: {
+                            /** @enum {string} */
+                            deviceClass: 'mobile' | 'tablet' | 'desktop' | 'unknown';
+                            /** @enum {string} */
+                            viewportClass: 'compact' | 'medium' | 'wide' | 'unknown';
+                            /** @enum {string} */
+                            primaryPointer: 'coarse' | 'fine' | 'none' | 'unknown';
+                        };
+                        windowId?: string;
+                        windowSequence?: number;
+                        windowElapsedMs?: number;
+                        /** @enum {string} */
+                        kind: 'detail_open' | 'link_copy' | 'share';
+                    } | {
+                        eventId: string;
+                        snapshotId: string;
+                        entryId: string;
+                        noteId: string;
+                        occurredAtMs: number;
+                        utcOffsetMinutes: number;
+                        deviceContext?: {
+                            /** @enum {string} */
+                            deviceClass: 'mobile' | 'tablet' | 'desktop' | 'unknown';
+                            /** @enum {string} */
+                            viewportClass: 'compact' | 'medium' | 'wide' | 'unknown';
+                            /** @enum {string} */
+                            primaryPointer: 'coarse' | 'fine' | 'none' | 'unknown';
+                        };
+                        windowId?: string;
+                        windowSequence?: number;
+                        windowElapsedMs?: number;
+                        /** @enum {string} */
+                        kind: 'image_open';
+                        fileId: string;
+                    } | {
+                        eventId: string;
+                        snapshotId: string;
+                        entryId: string;
+                        noteId: string;
+                        occurredAtMs: number;
+                        utcOffsetMinutes: number;
+                        deviceContext?: {
+                            /** @enum {string} */
+                            deviceClass: 'mobile' | 'tablet' | 'desktop' | 'unknown';
+                            /** @enum {string} */
+                            viewportClass: 'compact' | 'medium' | 'wide' | 'unknown';
+                            /** @enum {string} */
+                            primaryPointer: 'coarse' | 'fine' | 'none' | 'unknown';
+                        };
+                        windowId?: string;
+                        windowSequence?: number;
+                        windowElapsedMs?: number;
+                        /** @enum {string} */
+                        kind: 'action';
+                        /** @enum {string} */
+                        action: 'reply' | 'quote';
+                        evidenceNoteId: string;
+                    } | {
+                        eventId: string;
+                        snapshotId: string;
+                        entryId: string;
+                        noteId: string;
+                        occurredAtMs: number;
+                        utcOffsetMinutes: number;
+                        deviceContext?: {
+                            /** @enum {string} */
+                            deviceClass: 'mobile' | 'tablet' | 'desktop' | 'unknown';
+                            /** @enum {string} */
+                            viewportClass: 'compact' | 'medium' | 'wide' | 'unknown';
+                            /** @enum {string} */
+                            primaryPointer: 'coarse' | 'fine' | 'none' | 'unknown';
+                        };
+                        windowId?: string;
+                        windowSequence?: number;
+                        windowElapsedMs?: number;
+                        /** @enum {string} */
+                        kind: 'action';
+                        /** @enum {string} */
+                        action: 'follow' | 'mute' | 'block' | 'report';
+                    } | {
+                        eventId: string;
+                        snapshotId: string;
+                        entryId: string;
+                        noteId: string;
+                        occurredAtMs: number;
+                        utcOffsetMinutes: number;
+                        deviceContext?: {
+                            /** @enum {string} */
+                            deviceClass: 'mobile' | 'tablet' | 'desktop' | 'unknown';
+                            /** @enum {string} */
+                            viewportClass: 'compact' | 'medium' | 'wide' | 'unknown';
+                            /** @enum {string} */
+                            primaryPointer: 'coarse' | 'fine' | 'none' | 'unknown';
+                        };
+                        windowId?: string;
+                        windowSequence?: number;
+                        windowElapsedMs?: number;
+                        /** @enum {string} */
+                        kind: 'feedback';
+                    } | {
+                        eventId: string;
+                        snapshotId: string;
+                        entryId: string;
+                        noteId: string;
+                        occurredAtMs: number;
+                        utcOffsetMinutes: number;
+                        deviceContext?: {
+                            /** @enum {string} */
+                            deviceClass: 'mobile' | 'tablet' | 'desktop' | 'unknown';
+                            /** @enum {string} */
+                            viewportClass: 'compact' | 'medium' | 'wide' | 'unknown';
+                            /** @enum {string} */
+                            primaryPointer: 'coarse' | 'fine' | 'none' | 'unknown';
+                        };
+                        windowId: string;
+                        /** @constant */
+                        windowSequence: 0;
+                        /** @constant */
+                        windowElapsedMs: 0;
+                        /** @enum {string} */
+                        kind: 'window';
+                        /** @enum {string} */
+                        phase: 'open';
+                        displayPosition: number;
+                    } | {
+                        eventId: string;
+                        snapshotId: string;
+                        entryId: string;
+                        noteId: string;
+                        occurredAtMs: number;
+                        utcOffsetMinutes: number;
+                        deviceContext?: {
+                            /** @enum {string} */
+                            deviceClass: 'mobile' | 'tablet' | 'desktop' | 'unknown';
+                            /** @enum {string} */
+                            viewportClass: 'compact' | 'medium' | 'wide' | 'unknown';
+                            /** @enum {string} */
+                            primaryPointer: 'coarse' | 'fine' | 'none' | 'unknown';
+                        };
+                        windowId: string;
+                        windowSequence: number;
+                        windowElapsedMs: number;
+                        /** @enum {string} */
+                        kind: 'window';
+                        /** @enum {string} */
+                        phase: 'checkpoint';
+                    } | {
+                        eventId: string;
+                        snapshotId: string;
+                        entryId: string;
+                        noteId: string;
+                        occurredAtMs: number;
+                        utcOffsetMinutes: number;
+                        deviceContext?: {
+                            /** @enum {string} */
+                            deviceClass: 'mobile' | 'tablet' | 'desktop' | 'unknown';
+                            /** @enum {string} */
+                            viewportClass: 'compact' | 'medium' | 'wide' | 'unknown';
+                            /** @enum {string} */
+                            primaryPointer: 'coarse' | 'fine' | 'none' | 'unknown';
+                        };
+                        windowId: string;
+                        windowSequence: number;
+                        windowElapsedMs: number;
+                        /** @enum {string} */
+                        kind: 'window';
+                        /** @enum {string} */
+                        phase: 'close';
+                        recordCount: number;
+                        complete: boolean;
+                        pendingActions: number;
+                        /** @enum {string} */
+                        endReason: 'completed' | 'interrupted' | 'pending_action' | 'delivery_failed' | 'budget_exhausted' | 'timer_gap';
+                    })[];
+                } | {
+                    i?: string;
+                    /** @constant */
+                    version: 3;
+                    observations: ({
+                        eventId: string;
+                        snapshotId: string;
+                        entryId: string;
+                        noteId: string;
+                        occurredAtMs: number;
+                        utcOffsetMinutes: number;
+                        deviceContext?: {
+                            /** @enum {string} */
+                            deviceClass: 'mobile' | 'tablet' | 'desktop' | 'unknown';
+                            /** @enum {string} */
+                            viewportClass: 'compact' | 'medium' | 'wide' | 'unknown';
+                            /** @enum {string} */
+                            primaryPointer: 'coarse' | 'fine' | 'none' | 'unknown';
+                        };
+                        windowId?: string;
+                        windowSequence?: number;
+                        windowElapsedMs?: number;
+                        /** @enum {string} */
+                        kind: 'viewport';
+                        sequence: number;
+                        elapsedMs: number;
+                        visibleArea: number;
+                        availableArea: number;
+                        documentVisible: boolean;
+                        ended: boolean;
+                        focused: boolean;
+                        activityAgeMs: number;
+                        scrollIdleMs: number;
+                    } | {
+                        eventId: string;
+                        snapshotId: string;
+                        entryId: string;
+                        noteId: string;
+                        occurredAtMs: number;
+                        utcOffsetMinutes: number;
+                        deviceContext?: {
+                            /** @enum {string} */
+                            deviceClass: 'mobile' | 'tablet' | 'desktop' | 'unknown';
+                            /** @enum {string} */
+                            viewportClass: 'compact' | 'medium' | 'wide' | 'unknown';
+                            /** @enum {string} */
+                            primaryPointer: 'coarse' | 'fine' | 'none' | 'unknown';
+                        };
+                        windowId?: string;
+                        windowSequence?: number;
+                        windowElapsedMs?: number;
+                        /** @enum {string} */
+                        kind: 'detail_open' | 'link_copy' | 'share';
+                    } | {
+                        eventId: string;
+                        snapshotId: string;
+                        entryId: string;
+                        noteId: string;
+                        occurredAtMs: number;
+                        utcOffsetMinutes: number;
+                        deviceContext?: {
+                            /** @enum {string} */
+                            deviceClass: 'mobile' | 'tablet' | 'desktop' | 'unknown';
+                            /** @enum {string} */
+                            viewportClass: 'compact' | 'medium' | 'wide' | 'unknown';
+                            /** @enum {string} */
+                            primaryPointer: 'coarse' | 'fine' | 'none' | 'unknown';
+                        };
+                        windowId?: string;
+                        windowSequence?: number;
+                        windowElapsedMs?: number;
+                        /** @enum {string} */
+                        kind: 'image_open';
+                        fileId: string;
+                    } | {
+                        eventId: string;
+                        snapshotId: string;
+                        entryId: string;
+                        noteId: string;
+                        occurredAtMs: number;
+                        utcOffsetMinutes: number;
+                        deviceContext?: {
+                            /** @enum {string} */
+                            deviceClass: 'mobile' | 'tablet' | 'desktop' | 'unknown';
+                            /** @enum {string} */
+                            viewportClass: 'compact' | 'medium' | 'wide' | 'unknown';
+                            /** @enum {string} */
+                            primaryPointer: 'coarse' | 'fine' | 'none' | 'unknown';
+                        };
+                        windowId?: string;
+                        windowSequence?: number;
+                        windowElapsedMs?: number;
+                        /** @enum {string} */
+                        kind: 'action';
+                        /** @enum {string} */
+                        action: 'reply' | 'quote';
+                        evidenceNoteId: string;
+                    } | {
+                        eventId: string;
+                        snapshotId: string;
+                        entryId: string;
+                        noteId: string;
+                        occurredAtMs: number;
+                        utcOffsetMinutes: number;
+                        deviceContext?: {
+                            /** @enum {string} */
+                            deviceClass: 'mobile' | 'tablet' | 'desktop' | 'unknown';
+                            /** @enum {string} */
+                            viewportClass: 'compact' | 'medium' | 'wide' | 'unknown';
+                            /** @enum {string} */
+                            primaryPointer: 'coarse' | 'fine' | 'none' | 'unknown';
+                        };
+                        windowId?: string;
+                        windowSequence?: number;
+                        windowElapsedMs?: number;
+                        /** @enum {string} */
+                        kind: 'action';
+                        /** @enum {string} */
+                        action: 'follow' | 'mute' | 'block' | 'report';
+                    } | {
+                        eventId: string;
+                        snapshotId: string;
+                        entryId: string;
+                        noteId: string;
+                        occurredAtMs: number;
+                        utcOffsetMinutes: number;
+                        deviceContext?: {
+                            /** @enum {string} */
+                            deviceClass: 'mobile' | 'tablet' | 'desktop' | 'unknown';
+                            /** @enum {string} */
+                            viewportClass: 'compact' | 'medium' | 'wide' | 'unknown';
+                            /** @enum {string} */
+                            primaryPointer: 'coarse' | 'fine' | 'none' | 'unknown';
+                        };
+                        windowId?: string;
+                        windowSequence?: number;
+                        windowElapsedMs?: number;
+                        /** @enum {string} */
+                        kind: 'feedback';
+                    } | {
+                        eventId: string;
+                        snapshotId: string;
+                        entryId: string;
+                        noteId: string;
+                        occurredAtMs: number;
+                        utcOffsetMinutes: number;
+                        deviceContext?: {
+                            /** @enum {string} */
+                            deviceClass: 'mobile' | 'tablet' | 'desktop' | 'unknown';
+                            /** @enum {string} */
+                            viewportClass: 'compact' | 'medium' | 'wide' | 'unknown';
+                            /** @enum {string} */
+                            primaryPointer: 'coarse' | 'fine' | 'none' | 'unknown';
+                        };
+                        windowId: string;
+                        /** @constant */
+                        windowSequence: 0;
+                        /** @constant */
+                        windowElapsedMs: 0;
+                        /** @enum {string} */
+                        kind: 'window';
+                        /** @enum {string} */
+                        phase: 'open';
+                        displayPosition: number;
+                    } | {
+                        eventId: string;
+                        snapshotId: string;
+                        entryId: string;
+                        noteId: string;
+                        occurredAtMs: number;
+                        utcOffsetMinutes: number;
+                        deviceContext?: {
+                            /** @enum {string} */
+                            deviceClass: 'mobile' | 'tablet' | 'desktop' | 'unknown';
+                            /** @enum {string} */
+                            viewportClass: 'compact' | 'medium' | 'wide' | 'unknown';
+                            /** @enum {string} */
+                            primaryPointer: 'coarse' | 'fine' | 'none' | 'unknown';
+                        };
+                        windowId: string;
+                        windowSequence: number;
+                        windowElapsedMs: number;
+                        /** @enum {string} */
+                        kind: 'window';
+                        /** @enum {string} */
+                        phase: 'checkpoint';
+                    } | {
+                        eventId: string;
+                        snapshotId: string;
+                        entryId: string;
+                        noteId: string;
+                        occurredAtMs: number;
+                        utcOffsetMinutes: number;
+                        deviceContext?: {
+                            /** @enum {string} */
+                            deviceClass: 'mobile' | 'tablet' | 'desktop' | 'unknown';
+                            /** @enum {string} */
+                            viewportClass: 'compact' | 'medium' | 'wide' | 'unknown';
+                            /** @enum {string} */
+                            primaryPointer: 'coarse' | 'fine' | 'none' | 'unknown';
+                        };
+                        windowId: string;
+                        windowSequence: number;
+                        windowElapsedMs: number;
+                        /** @enum {string} */
+                        kind: 'window';
+                        /** @enum {string} */
+                        phase: 'close';
+                        recordCount: number;
+                        complete: boolean;
+                        pendingActions: number;
+                        /** @enum {string} */
+                        endReason: 'completed' | 'interrupted' | 'pending_action' | 'delivery_failed' | 'budget_exhausted' | 'timer_gap';
+                    })[];
+                } | {
+                    i?: string;
+                    /** @constant */
+                    version: 2;
+                    observations: {
+                        eventId: string;
+                        snapshotId: string;
+                        entryId: string;
+                        sequence: number;
+                        elapsedMs: number;
+                        visibleArea: number;
+                        availableArea: number;
+                        documentVisible: boolean;
+                        ended: boolean;
+                    }[];
+                } | {
+                    i?: string;
+                    events: {
+                        eventId: string;
+                        snapshotId: string;
+                        entryId: string;
+                    }[];
+                };
+            };
+        };
+        responses: {
+            /** @description OK (without any results) */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+            };
+            /** @description Client error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Authentication error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Forbidden error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description I'm Ai */
+            418: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+        };
+    };
     hashtags___list: {
         requestBody: {
             content: {
@@ -30123,6 +30739,103 @@ export interface operations {
                 };
                 content: {
                     'application/json': components['schemas']['Note'][];
+                };
+            };
+            /** @description Client error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Authentication error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Forbidden error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description I'm Ai */
+            418: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['Error'];
+                };
+            };
+        };
+    };
+    'notes___hanami-recommendations': {
+        requestBody: {
+            content: {
+                'application/json': {
+                    i?: string;
+                    /** @default 20 */
+                    limit?: number;
+                    cursor?: string;
+                    /** @default false */
+                    refresh?: boolean;
+                    /**
+                     * @default any
+                     * @enum {string}
+                     */
+                    imageFilter?: 'any' | 'with_image' | 'without_image';
+                    /** @default false */
+                    withFiles?: boolean;
+                    utcOffsetMinutes?: number;
+                    deviceContext?: {
+                        /** @enum {string} */
+                        deviceClass: 'mobile' | 'tablet' | 'desktop' | 'unknown';
+                        /** @enum {string} */
+                        viewportClass: 'compact' | 'medium' | 'wide' | 'unknown';
+                        /** @enum {string} */
+                        primaryPointer: 'coarse' | 'fine' | 'none' | 'unknown';
+                    };
+                    clientCapabilities?: {
+                        nativeShare: boolean;
+                    };
+                };
+            };
+        };
+        responses: {
+            /** @description OK (with results) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': {
+                        items: {
+                            entryId: string;
+                            note: components['schemas']['Note'];
+                        }[];
+                        nextCursor: string | null;
+                        snapshotId: string;
+                        revision: number;
+                    };
                 };
             };
             /** @description Client error */

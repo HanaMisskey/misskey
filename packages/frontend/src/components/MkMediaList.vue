@@ -34,6 +34,8 @@ import * as Misskey from 'misskey-js';
 import PhotoSwipeLightbox from 'photoswipe/lightbox';
 import PhotoSwipe from 'photoswipe';
 import 'photoswipe/style.css';
+import type { HanamiDisplayEvent } from '@/utility/hanami-impressions.js';
+import { recordHanamiInteraction } from '@/utility/hanami-interactions.js';
 import { FILE_TYPE_BROWSERSAFE } from '@@/js/const.js';
 import XBanner from '@/components/MkMediaBanner.vue';
 import XImage from '@/components/MkMediaImage.vue';
@@ -45,6 +47,7 @@ import { prefer } from '@/preferences.js';
 const props = defineProps<{
 	mediaList: Misskey.entities.DriveFile[];
 	raw?: boolean;
+	recommendation?: HanamiDisplayEvent;
 }>();
 
 const gallery = useTemplateRef('gallery');
@@ -52,6 +55,10 @@ const pswpZIndex = os.claimZIndex('middle');
 window.document.documentElement.style.setProperty('--mk-pswp-root-z-index', pswpZIndex.toString());
 const count = computed(() => props.mediaList.filter(media => previewable(media)).length);
 let lightbox: PhotoSwipeLightbox | null = null;
+
+let galleryReady = false;
+let openedFileId: string | undefined;
+let zoomed = false;
 
 let activeEl: HTMLElement | null = null;
 
@@ -184,7 +191,27 @@ onMounted(() => {
 		});
 	});
 
+	function recordImage() {
+		const pswp = lightbox?.pswp;
+		if (!galleryReady || !pswp?.isOpen) return;
+		const images = props.mediaList.filter(media => media.type.startsWith('image') && previewable(media));
+		const file = images[pswp.currIndex];
+		if (!file || file.id === openedFileId) return;
+		openedFileId = file.id;
+		zoomed = false;
+		recordHanamiInteraction(props.recommendation, { kind: 'image_open', fileId: file.id });
+	}
+
+	lightbox.on('change', recordImage);
+	lightbox.on('zoomPanUpdate', ({ slide }) => {
+		if (slide !== lightbox?.pswp?.currSlide || !openedFileId) return;
+		const isZoomed = slide.currZoomLevel > slide.zoomLevels.initial;
+		if (isZoomed && !zoomed) recordHanamiInteraction(props.recommendation, { kind: 'image_open', fileId: openedFileId });
+		zoomed = isZoomed;
+	});
 	lightbox.on('afterInit', () => {
+		galleryReady = true;
+		recordImage();
 		activeEl = window.document.activeElement instanceof HTMLElement ? window.document.activeElement : null;
 		focusParent(activeEl, true, true);
 		lightbox?.pswp?.element?.focus({
@@ -194,6 +221,9 @@ onMounted(() => {
 	});
 
 	lightbox.on('destroy', () => {
+		galleryReady = false;
+		openedFileId = undefined;
+		zoomed = false;
 		focusParent(activeEl, true, false);
 		activeEl = null;
 		if (window.location.hash === '#pswp') {

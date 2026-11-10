@@ -4,6 +4,7 @@
  */
 
 import * as Misskey from 'misskey-js';
+import { getHanamiUserContext, hanamiNavigationPath } from '@/utility/hanami-recommendation-context.js';
 import { url } from '@@/js/config.js';
 
 export const acct = (user: Misskey.Acct) => {
@@ -14,6 +15,7 @@ export const userName = (user: Misskey.entities.User) => {
 	return user.name || user.username;
 };
 
-export const userPage = (user: Misskey.Acct, path?: string, absolute = false) => {
-	return `${absolute ? url : ''}/@${acct(user)}${(path ? `/${path}` : '')}`;
+export const userPage = (user: Misskey.Acct & { id?: string }, path?: string, absolute = false) => {
+	const target = `${absolute ? url : ''}/@${acct(user)}${(path ? `/${path}` : '')}`;
+	return absolute || path ? target : hanamiNavigationPath(target, getHanamiUserContext(user));
 };

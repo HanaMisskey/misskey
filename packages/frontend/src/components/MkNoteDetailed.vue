@@ -7,6 +7,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 	v-if="!muted && !hideByPlugin && !isDeleted"
 	ref="rootEl"
 	v-hotkey="keymap"
+	:data-hanami-recommendation="getHanamiNoteContext(appearNote)?.eventId ?? ''"
 	:class="$style.root"
 	tabindex="0"
 >
@@ -112,7 +113,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 						</div>
 					</div>
 					<div v-if="appearNote.files && appearNote.files.length > 0">
-						<MkMediaList ref="galleryEl" :mediaList="appearNote.files"/>
+						<MkMediaList ref="galleryEl" :mediaList="appearNote.files" :recommendation="getHanamiNoteContext(appearNote)"/>
 					</div>
 					<MkPoll
 						v-if="appearNote.poll"
@@ -234,7 +235,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, markRaw, onMounted, provide, ref, useTemplateRef } from 'vue';
+import { computed, inject, markRaw, provide, ref, useTemplateRef, watch } from 'vue';
 import * as mfm from 'mfm-js';
 import * as Misskey from 'misskey-js';
 import { isLink } from '@@/js/is-link.js';
@@ -265,6 +266,8 @@ import { $i } from '@/i.js';
 import { i18n } from '@/i18n.js';
 import { getNoteClipMenu, getNoteMenu, getRenoteMenu } from '@/utility/get-note-menu.js';
 import { noteEvents, useNoteCapture } from '@/composables/use-note-capture.js';
+import { getHanamiNoteContext } from '@/utility/hanami-recommendation-context.js';
+import { recordHanamiInteraction } from '@/utility/hanami-interactions.js';
 import { deepClone } from '@/utility/clone.js';
 import { useTooltip } from '@/composables/use-tooltip.js';
 import { claimAchievement } from '@/utility/achievements.js';
@@ -320,6 +323,12 @@ const { $note: $appearNote, subscribe: subscribeManuallyToNoteCapture } = useNot
 });
 
 const rootEl = useTemplateRef('rootEl');
+let detailObserved = false;
+watch(rootEl, element => {
+	if (!element || detailObserved) return;
+	detailObserved = true;
+	recordHanamiInteraction(getHanamiNoteContext(appearNote), { kind: 'detail_open' });
+}, { flush: 'post' });
 const menuButton = useTemplateRef('menuButton');
 const renoteButton = useTemplateRef('renoteButton');
 const renoteTime = useTemplateRef('renoteTime');

@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { getHanamiNoteContext, hanamiNavigationPath } from '@/utility/hanami-recommendation-context.js';
+
 export const notePage = note => {
-	return `/notes/${note.id}`;
+	return hanamiNavigationPath(`/notes/${note.id}`, getHanamiNoteContext(note));
 };

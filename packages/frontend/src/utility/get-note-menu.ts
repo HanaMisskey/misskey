@@ -24,6 +24,10 @@ import { getAppearNote } from '@/utility/get-appear-note.js';
 import { genEmbedCode } from '@/utility/get-embed-code.js';
 import { prefer } from '@/preferences.js';
 import { getPluginHandlers } from '@/plugin.js';
+import { notePage } from '@/filters/note.js';
+import { getHanamiNoteContext } from '@/utility/hanami-recommendation-context.js';
+import { beginHanamiOperation, copyHanamiLink, interruptHanamiObservation } from '@/utility/hanami-interactions.js';
+import type { HanamiOperationHandle } from '@/utility/hanami-observation-windows.js';
 import { globalEvents } from '@/events.js';
 
 const isInBrowserTranslationAvailable = (
@@ -144,10 +148,14 @@ export function getAbuseNoteMenu(note: Misskey.entities.Note, text: string): Men
 			let noteInfo = '';
 			if (note.url ?? note.uri != null) noteInfo = `Note: ${note.url ?? note.uri}\n`;
 			noteInfo += `Local Note: ${localUrl}\n`;
+			let operation: HanamiOperationHandle | undefined;
 			const { dispose } = await os.popupAsyncWithDialog(import('@/components/MkAbuseReportWindow.vue').then(x => x.default), {
 				user: note.user,
 				initialComment: `${noteInfo}-----\n`,
 			}, {
+				'submit-started': () => { operation = beginHanamiOperation(getHanamiNoteContext(note)); },
+				'submit-failed': () => operation?.uncertain(),
+				submitted: () => operation?.succeeded({ kind: 'action', action: 'report' }),
 				closed: () => dispose(),
 			});
 		},
@@ -158,8 +166,8 @@ export function getCopyNoteLinkMenu(note: Misskey.entities.Note, text: string): 
 	return {
 		icon: 'ti ti-link',
 		text,
-		action: (): void => {
-			copyToClipboard(`${url}/notes/${note.id}`);
+		action: async (): Promise<void> => {
+			await copyHanamiLink(getHanamiNoteContext(note), `${url}/notes/${note.id}`);
 		},
 	};
 }
@@ -275,16 +283,24 @@ export function getNoteMenu(props: {
 		});
 	}
 
-	function share(): void {
-		navigator.share({
-			title: i18n.tsx.noteOf({ user: appearNote.user.name ?? appearNote.user.username }),
-			text: appearNote.text ?? '',
-			url: `${url}/notes/${appearNote.id}`,
-		});
+	async function share(): Promise<void> {
+		const operation = beginHanamiOperation(getHanamiNoteContext(appearNote));
+		try {
+			await navigator.share({
+				title: i18n.tsx.noteOf({ user: appearNote.user.name ?? appearNote.user.username }),
+				text: appearNote.text ?? '',
+				url: `${url}/notes/${appearNote.id}`,
+			});
+		} catch (error) {
+			if (error instanceof DOMException && error.name === 'AbortError') operation.cancelled();
+			else operation.uncertain();
+			return;
+		}
+		operation.succeeded({ kind: 'share' });
 	}
 
 	function openDetail(): void {
-		os.pageWindow(`/notes/${appearNote.id}`);
+		os.pageWindow(notePage(appearNote));
 	}
 
 	async function translate(): Promise<void> {
@@ -363,13 +379,15 @@ export function getNoteMenu(props: {
 			menuItems.push({
 				icon: 'ti ti-link',
 				text: i18n.ts.copyRemoteLink,
-				action: () => {
-					copyToClipboard(link);
+				action: async () => {
+					await copyHanamiLink(getHanamiNoteContext(appearNote), link);
 				},
 			}, {
 				icon: 'ti ti-external-link',
 				text: i18n.ts.showOnRemote,
 				action: () => {
+					const context = getHanamiNoteContext(appearNote);
+					if (context) interruptHanamiObservation(context);
 					window.open(link, '_blank', 'noopener');
 				},
 			});
@@ -447,7 +465,8 @@ export function getNoteMenu(props: {
 			text: i18n.ts.user,
 			children: async () => {
 				const user = appearNote.userId === $i?.id ? $i : await misskeyApi('users/show', { userId: appearNote.userId });
-				const { menu, cleanup } = getUserMenu(user);
+				const recommendation = getHanamiNoteContext(appearNote);
+				const { menu, cleanup } = getUserMenu(recommendation ? { ...user, hanamiRecommendation: recommendation.eventId } : user);
 				cleanups.push(cleanup);
 				return menu;
 			},
@@ -524,13 +543,15 @@ export function getNoteMenu(props: {
 			menuItems.push({
 				icon: 'ti ti-link',
 				text: i18n.ts.copyRemoteLink,
-				action: () => {
-					copyToClipboard(link);
+				action: async () => {
+					await copyHanamiLink(getHanamiNoteContext(appearNote), link);
 				},
 			}, {
 				icon: 'ti ti-external-link',
 				text: i18n.ts.showOnRemote,
 				action: () => {
+					const context = getHanamiNoteContext(appearNote);
+					if (context) interruptHanamiObservation(context);
 					window.open(link, '_blank', 'noopener');
 				},
 			});

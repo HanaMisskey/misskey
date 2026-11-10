@@ -1,0 +1,49 @@
+{
+  "note": {
+    "id": "000000rs00000001",
+    "userId": "author-bob",
+    "userHost": null,
+    "text": "猫😀と é\n\"引用\"",
+    "cw": "",
+    "tags": [
+      "猫",
+      "A"
+    ],
+    "emojis": [
+      "😀",
+      ":猫:"
+    ],
+    "fileIds": [
+      "f2",
+      "f1"
+    ],
+    "attachedFileTypes": [
+      "audio/ogg",
+      "image/png"
+    ],
+    "visibility": "public",
+    "visibleUserIds": [],
+    "mentions": [
+      "viewer-alice"
+    ],
+    "replyId": null,
+    "replyUserId": null,
+    "renoteId": null,
+    "renoteUserId": null,
+    "localOnly": false,
+    "channelId": null,
+    "hasPoll": false,
+    "isNoteInHanaMode": true
+  },
+  "author": {
+    "id": "author-bob",
+    "host": null,
+    "isSuspended": false,
+    "isDeleted": false,
+    "requireSigninToViewContents": true,
+    "makeNotesHiddenBefore": null,
+    "makeNotesFollowersOnlyBefore": null
+  },
+  "canonical": "[\"hanami-note-state-v1\",true,[\"000000rs00000001\",\"author-bob\",null,\"猫😀と é\\n\\\"引用\\\"\",\"\",[\"猫\",\"A\"],[\"😀\",\":猫:\"],[\"f2\",\"f1\"],[\"audio/ogg\",\"image/png\"],\"public\",[],[\"viewer-alice\"],null,null,null,null,false,null,false,true],[\"author-bob\",null,false,false,true,null,null],null,null]",
+  "contentDigest": "bcc40786663e2ff88cc1aafa401a00dd31ef0a83d15f89685623641c01c94682"
+}

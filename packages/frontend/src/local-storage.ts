@@ -17,6 +17,7 @@ export type Keys = (
 	'lang' |
 	'drafts' |
 	'hashtags' |
+	'hanamiRecommendationContexts' |
 	'colorScheme' |
 	'useSystemFont' |
 	'fontSize' |

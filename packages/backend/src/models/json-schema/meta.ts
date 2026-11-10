@@ -7,6 +7,7 @@ export const packedMetaLiteSchema = {
 	type: 'object',
 	optional: false, nullable: false,
 	properties: {
+		hanamiRecommendationsEnabled: { type: 'boolean', optional: false, nullable: false },
 		maintainerName: {
 			type: 'string',
 			optional: false, nullable: true,

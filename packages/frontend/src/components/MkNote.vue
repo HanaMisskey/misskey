@@ -8,6 +8,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 	v-if="!hardMuted && !hideByPlugin && muted === false"
 	ref="rootEl"
 	v-hotkey="keymap"
+	:data-hanami-recommendation="getHanamiNoteContext(appearNote)?.eventId ?? ''"
 	:class="[$style.root, { [$style.showActionsOnlyHover]: prefer.s.showNoteActionsOnlyHover, [$style.skipRender]: prefer.s.skipNoteRender }]"
 	tabindex="0"
 >
@@ -88,7 +89,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 						</div>
 					</div>
 					<div v-if="appearNote.files && appearNote.files.length > 0" style="margin-top: 8px;">
-						<MkMediaList ref="galleryEl" :mediaList="appearNote.files"/>
+						<MkMediaList ref="galleryEl" :mediaList="appearNote.files" :recommendation="getHanamiNoteContext(appearNote)"/>
 					</div>
 					<MkPoll
 						v-if="appearNote.poll"
@@ -232,6 +233,7 @@ import { $i } from '@/i.js';
 import { i18n } from '@/i18n.js';
 import { getAbuseNoteMenu, getCopyNoteLinkMenu, getNoteClipMenu, getNoteMenu, getRenoteMenu } from '@/utility/get-note-menu.js';
 import { noteEvents, useNoteCapture } from '@/composables/use-note-capture.js';
+import { getHanamiNoteContext } from '@/utility/hanami-recommendation-context.js';
 import { deepClone } from '@/utility/clone.js';
 import { useTooltip } from '@/composables/use-tooltip.js';
 import { claimAchievement } from '@/utility/achievements.js';
@@ -251,8 +253,10 @@ const props = withDefaults(defineProps<{
 	pinned?: boolean;
 	mock?: boolean;
 	withHardMute?: boolean;
+	additionalMenuItems?: () => MenuItem[];
 }>(), {
 	mock: false,
+	additionalMenuItems: undefined,
 });
 
 provide(DI.mock, props.mock);
@@ -608,6 +612,7 @@ function onContextmenu(ev: MouseEvent): void {
 		react();
 	} else {
 		const { menu, cleanup } = getNoteMenu({ note: note, translating, translation, currentClip: currentClip?.value });
+		menu.push(...(props.additionalMenuItems?.() ?? []));
 		os.contextMenu(menu, ev).then(focus).finally(cleanup);
 	}
 }
@@ -618,6 +623,7 @@ function showMenu(): void {
 	}
 
 	const { menu, cleanup } = getNoteMenu({ note: note, translating, translation, currentClip: currentClip?.value });
+	menu.push(...(props.additionalMenuItems?.() ?? []));
 	os.popupMenu(menu, menuButton.value).then(focus).finally(cleanup);
 }
 

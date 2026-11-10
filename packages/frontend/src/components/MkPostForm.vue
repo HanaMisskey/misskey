@@ -125,6 +125,8 @@ import { toASCII } from 'punycode.js';
 import { host, url } from '@@/js/config.js';
 import type { Attach } from './MkPostFormAttaches.vue';
 import type { ShallowRef } from 'vue';
+import { getHanamiNoteContext } from '@/utility/hanami-recommendation-context.js';
+import { beginHanamiOperation } from '@/utility/hanami-interactions.js';
 import type { PostFormProps } from '@/types/post-form.js';
 import type { MenuItem } from '@/types/menu.js';
 import type { PollEditorModelValue } from '@/components/MkPollEditor.vue';
@@ -1158,7 +1160,20 @@ async function post(ev?: MouseEvent) {
 		}
 	}
 
+	const replyRecommendation = replyTargetNote.value ? getHanamiNoteContext(replyTargetNote.value) : undefined;
+	const quoteRecommendation = renoteTargetNote.value ? getHanamiNoteContext(renoteTargetNote.value) : undefined;
+	const replyOperation = beginHanamiOperation(replyRecommendation);
+	const quoteOperation = beginHanamiOperation(quoteRecommendation);
 	misskeyApi('notes/create', postData, token).then((res) => {
+		const created = res.createdNote;
+		if (created.userId === $i.id && created.visibility !== 'specified' && postData.visibility !== 'specified') {
+			if (replyRecommendation && created.replyId === replyRecommendation.noteId) {
+				replyOperation.succeeded({ kind: 'action', action: 'reply', evidenceNoteId: created.id });
+			} else replyOperation.uncertain();
+			if (quoteRecommendation && created.renoteId === quoteRecommendation.noteId && !Misskey.note.isPureRenote(created)) {
+				quoteOperation.succeeded({ kind: 'action', action: 'quote', evidenceNoteId: created.id });
+			} else quoteOperation.uncertain();
+		} else { replyOperation.uncertain(); quoteOperation.uncertain(); }
 		if (props.freezeAfterPosted) {
 			posted.value = true;
 		} else {
@@ -1229,6 +1244,8 @@ async function post(ev?: MouseEvent) {
 			}
 		});
 	}).catch(err => {
+		replyOperation.uncertain();
+		quoteOperation.uncertain();
 		posting.value = false;
 		os.alert({
 			type: 'error',

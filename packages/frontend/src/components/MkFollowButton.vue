@@ -46,6 +46,9 @@ import { claimAchievement } from '@/utility/achievements.js';
 import { pleaseLogin } from '@/utility/please-login.js';
 import { $i } from '@/i.js';
 import { prefer } from '@/preferences.js';
+import { getHanamiUserContext } from '@/utility/hanami-recommendation-context.js';
+import { beginHanamiOperation } from '@/utility/hanami-interactions.js';
+import type { HanamiOperationHandle } from '@/utility/hanami-observation-windows.js';
 import { haptic } from '@/utility/haptic.js';
 
 const props = withDefaults(defineProps<{
@@ -92,6 +95,7 @@ async function onClick() {
 	wait.value = true;
 
 	haptic();
+	let operation: HanamiOperationHandle | undefined;
 
 	try {
 		if (isFollowing.value) {
@@ -136,6 +140,8 @@ async function onClick() {
 				}
 			}
 
+			const recommendation = getHanamiUserContext(props.user);
+			operation = beginHanamiOperation(recommendation);
 			await misskeyApi('following/create', {
 				userId: props.user.id,
 				withReplies: prefer.s.defaultFollowWithReplies,
@@ -145,6 +151,14 @@ async function onClick() {
 				withReplies: prefer.s.defaultFollowWithReplies,
 			});
 			hasPendingFollowRequestFromYou.value = true;
+			if (recommendation) {
+				// following/createのUserLiteでは成立と承認待ちを区別できない。
+				void misskeyApi('users/show', { userId: props.user.id }, undefined, AbortSignal.timeout(10_000)).then(relation => {
+					if (relation.id !== props.user.id) operation?.uncertain();
+					else if (relation.isFollowing) operation?.succeeded({ kind: 'action', action: 'follow' });
+					else operation?.cancelled();
+				}, () => operation?.uncertain());
+			}
 
 			if ($i == null) {
 				wait.value = false;
@@ -167,6 +181,7 @@ async function onClick() {
 			}
 		}
 	} catch (err) {
+		operation?.uncertain();
 		console.error(err);
 	} finally {
 		wait.value = false;

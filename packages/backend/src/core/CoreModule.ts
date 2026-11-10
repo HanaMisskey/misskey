@@ -74,6 +74,9 @@ import { FileInfoService } from './FileInfoService.js';
 import { SearchService } from './SearchService.js';
 import { HanamiSearchService } from './hanamisearch/HanamiSearchService.js';
 import { HanamiSearchV2Service } from './hanamisearch/HanamiSearchV2Service.js';
+import { HanamiPlatformClient } from './hanamifeed/HanamiPlatformClient.js';
+import { HanamiNoteAccessService } from './hanamifeed/HanamiNoteAccessService.js';
+import { HanamiRecommendationsService } from './hanamifeed/HanamiRecommendationsService.js';
 import { ClipService } from './ClipService.js';
 import { FeaturedService } from './FeaturedService.js';
 import { FanoutTimelineService } from './FanoutTimelineService.js';
@@ -381,6 +384,9 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		SearchService,
 		HanamiSearchService,
 		HanamiSearchV2Service,
+		HanamiPlatformClient,
+		HanamiNoteAccessService,
+		HanamiRecommendationsService,
 		ClipService,
 		FeaturedService,
 		FanoutTimelineService,
@@ -686,6 +692,9 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		SearchService,
 		HanamiSearchService,
 		HanamiSearchV2Service,
+		HanamiPlatformClient,
+		HanamiNoteAccessService,
+		HanamiRecommendationsService,
 		ClipService,
 		FeaturedService,
 		FanoutTimelineService,

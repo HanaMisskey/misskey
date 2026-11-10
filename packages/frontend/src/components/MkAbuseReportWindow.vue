@@ -45,23 +45,29 @@ const props = defineProps<{
 
 const emit = defineEmits<{
 	(ev: 'closed'): void;
+	(ev: 'submitted'): void;
+	(ev: 'submit-started'): void;
+	(ev: 'submit-failed'): void;
 }>();
 
 const uiWindow = useTemplateRef('uiWindow');
 const comment = ref(props.initialComment ?? '');
 
-function send() {
-	os.apiWithDialog('users/report-abuse', {
-		userId: props.user.id,
-		comment: comment.value,
-	}, undefined).then(res => {
-		os.alert({
-			type: 'success',
-			text: i18n.ts.abuseReported,
-		});
-		uiWindow.value?.close();
-		emit('closed');
-	});
+async function send() {
+	emit('submit-started');
+	try {
+		await os.apiWithDialog('users/report-abuse', {
+			userId: props.user.id,
+			comment: comment.value,
+		}, undefined);
+	} catch (error) {
+		emit('submit-failed');
+		throw error;
+	}
+	emit('submitted');
+	os.alert({ type: 'success', text: i18n.ts.abuseReported });
+	uiWindow.value?.close();
+	emit('closed');
 }
 </script>
 
