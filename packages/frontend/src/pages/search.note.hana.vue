@@ -199,7 +199,7 @@ const searchMode = ref<SearchMode>('v1');
 const showAsGrid = ref(false);
 const onlyWithFiles = ref(false);
 
-const user = shallowRef<Misskey.entities.UserDetailed | null>(null);
+const user = shallowRef<Misskey.entities.UserLite | null>(null);
 
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 const noteSearchableScope = instance.noteSearchableScope ?? 'local';
