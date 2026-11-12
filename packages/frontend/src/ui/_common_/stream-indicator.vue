@@ -25,12 +25,25 @@ import { store } from '@/store.js';
 const zIndex = os.claimZIndex('high');
 
 const hasDisconnected = ref(false);
+let timeoutId: number | null = null;
+
+function clearDisconnectedTimer() {
+	if (timeoutId != null) {
+		window.clearTimeout(timeoutId);
+		timeoutId = null;
+	}
+}
 
 function onDisconnected() {
-	hasDisconnected.value = true;
+	clearDisconnectedTimer();
+	timeoutId = window.setTimeout(() => {
+		timeoutId = null;
+		hasDisconnected.value = true;
+	}, 5000);
 }
 
 function resetDisconnected() {
+	clearDisconnectedTimer();
 	hasDisconnected.value = false;
 }
 
@@ -39,10 +52,15 @@ function reload() {
 }
 
 if (store.s.realtimeMode) {
-	useStream().on('_disconnected_', onDisconnected);
+	const stream = useStream();
+
+	stream.on('_connected_', resetDisconnected);
+	stream.on('_disconnected_', onDisconnected);
 
 	onUnmounted(() => {
-		useStream().off('_disconnected_', onDisconnected);
+		clearDisconnectedTimer();
+		stream.off('_connected_', resetDisconnected);
+		stream.off('_disconnected_', onDisconnected);
 	});
 }
 </script>
