@@ -1,7 +1,7 @@
 import { createHmac } from 'node:crypto';
 import { createServer } from 'node:http';
 import { once } from 'node:events';
-import { afterEach, describe, expect, jest, test } from '@jest/globals';
+import { afterEach, describe, expect, vi, test } from 'vitest';
 import type { Config } from '@/config.js';
 import type { MiUser } from '@/models/_.js';
 import type { MiLocalUser } from '@/models/User.js';
@@ -36,7 +36,7 @@ function fixture() {
 		if (!(target.name in rows)) throw new Error(`Unexpected repository ${target.name}`);
 		return repository(() => rows[target.name]);
 	};
-	const insert = jest.fn<(target: { name: string }, row: TestRow) => Promise<unknown>>().mockImplementation(async (target, row) => {
+	const insert = vi.fn<(target: { name: string }, row: TestRow) => Promise<unknown>>().mockImplementation(async (target, row) => {
 		expect(target.name).toBe('MiHanamiReadBarrier');
 		barriers.push({ ...row });
 		return {};
@@ -46,16 +46,16 @@ function fixture() {
 		findBy: (target: { name: string }, where: unknown) => lookup(target).findBy(where),
 		findOne: (target: { name: string }, options?: { where?: unknown }) => lookup(target).findOne(options),
 		findOneBy: (target: { name: string }, where: unknown) => lookup(target).findOneBy(where),
-		insert, delete: jest.fn<(...args: unknown[]) => Promise<unknown>>().mockResolvedValue({}),
+		insert, delete: vi.fn<(...args: unknown[]) => Promise<unknown>>().mockResolvedValue({}),
 	};
-	const transaction = jest.fn<(isolation: string, work: (value: typeof manager) => Promise<unknown>) => Promise<unknown>>().mockImplementation(async (isolation, work) => {
+	const transaction = vi.fn<(isolation: string, work: (value: typeof manager) => Promise<unknown>) => Promise<unknown>>().mockImplementation(async (isolation, work) => {
 		expect(isolation).toBe('REPEATABLE READ');
 		committed = false;
 		const result = await work(manager);
 		committed = true;
 		return result;
 	});
-	const send = jest.fn<(...args: unknown[]) => Promise<unknown>>().mockImplementation(async () => {
+	const send = vi.fn<(...args: unknown[]) => Promise<unknown>>().mockImplementation(async () => {
 		expect(committed).toBe(true);
 		return { ok: true, json: async () => interactionAck };
 	});
@@ -82,12 +82,12 @@ function operation(f: ReturnType<typeof fixture>, action: Action, createdAtMs = 
 	return { row, observation };
 }
 
-afterEach(() => { jest.restoreAllMocks(); });
+afterEach(() => { vi.restoreAllMocks(); });
 
 /** Oracle: window-api §§4/5. Window and feedback records pass through signing without invented action attestations; actual action records retain their existing database evidence. */
 describe('Hanami signed window metadata', () => {
 	test.each(['window', 'feedback', 'action'] as const)('preserves %s collection metadata in the signed body', async kind => {
-		jest.spyOn(Date, 'now').mockReturnValue(now);
+		vi.spyOn(Date, 'now').mockReturnValue(now);
 		const f = fixture();
 		const record = kind === 'action' ? operation(f, 'reply').observation : kind === 'feedback'
 			? { ...interactionIdentity, kind: 'feedback', eventId: 'saved-feedback' }
@@ -108,7 +108,7 @@ describe('Hanami signed window metadata', () => {
 	});
 
 	test.each(['windowId', 'windowSequence', 'windowElapsedMs'])('rejects incomplete window metadata before the transaction: %s', async missing => {
-		jest.spyOn(Date, 'now').mockReturnValue(now);
+		vi.spyOn(Date, 'now').mockReturnValue(now);
 		const f = fixture();
 		const record: Record<string, unknown> = { ...detailObservation(), windowId: 'window-a', windowSequence: 1, windowElapsedMs: 0 };
 		delete record[missing];
@@ -122,7 +122,7 @@ describe('Hanami signed window metadata', () => {
 describe('Hanami interaction database attestations', () => {
 	/** Oracle: v2/v3 migration rejection precedes database reads, read-barrier insertion, and transport signing. The signed client is also an entry point used by non-HTTP callers. */
 	test.each([2, 3])('requires refresh for old observation version %i before transaction or send', async version => {
-		jest.spyOn(Date, 'now').mockReturnValue(now);
+		vi.spyOn(Date, 'now').mockReturnValue(now);
 		const f = fixture();
 		const observation = version === 2
 			? { eventId: 'old-series', snapshotId: 'snapshot-a', entryId: 'entry-a', sequence: 0, elapsedMs: 0, visibleArea: 7, availableArea: 19, documentVisible: true, ended: false }
@@ -136,7 +136,7 @@ describe('Hanami interaction database attestations', () => {
 	});
 
 	test.each<Action>(['reply', 'quote', 'follow', 'mute', 'block', 'report'])('attests a persisted %s with the authenticated actor and source row ID only', async action => {
-		jest.spyOn(Date, 'now').mockReturnValue(now);
+		vi.spyOn(Date, 'now').mockReturnValue(now);
 		const f = fixture();
 		const { row, observation } = operation(f, action);
 		await expect(f.request([observation])).resolves.toEqual(interactionAck);
@@ -151,7 +151,7 @@ describe('Hanami interaction database attestations', () => {
 	});
 
 	test.each<Action>(['reply', 'quote', 'follow', 'mute', 'block', 'report'])('rejects %s when the successful-looking browser claim has no committed row', async action => {
-		jest.spyOn(Date, 'now').mockReturnValue(now);
+		vi.spyOn(Date, 'now').mockReturnValue(now);
 		const f = fixture();
 		const { observation } = operation(f, action);
 		f.rows[actionRepository[action]] = f.rows[actionRepository[action]].filter(row => row.id === 'note-a');
@@ -169,7 +169,7 @@ describe('Hanami interaction database attestations', () => {
 		['block', 'blockerId', 'someone-else'], ['block', 'blockeeId', 'another-author'],
 		['report', 'reporterId', 'someone-else'], ['report', 'targetUserId', 'another-author'],
 	])('rejects %s whose row has mismatching %s', async (action, field, value) => {
-		jest.spyOn(Date, 'now').mockReturnValue(now);
+		vi.spyOn(Date, 'now').mockReturnValue(now);
 		const f = fixture();
 		const { row, observation } = operation(f, action);
 		row[field] = value;
@@ -178,7 +178,7 @@ describe('Hanami interaction database attestations', () => {
 	});
 
 	test.each<Action>(['reply', 'quote', 'follow', 'mute', 'block', 'report'])('does not use an older %s row to prove a new operation', async action => {
-		jest.spyOn(Date, 'now').mockReturnValue(now);
+		vi.spyOn(Date, 'now').mockReturnValue(now);
 		const f = fixture();
 		const { observation } = operation(f, action, now - 30_001);
 		await expect(f.request([observation])).rejects.toMatchObject({ code: 'INVALID_REQUEST' });
@@ -186,7 +186,7 @@ describe('Hanami interaction database attestations', () => {
 	});
 
 	test('permits a report at the attribution boundary and never forwards its comment', async () => {
-		jest.spyOn(Date, 'now').mockReturnValue(now);
+		vi.spyOn(Date, 'now').mockReturnValue(now);
 		const f = fixture();
 		const { row, observation } = operation(f, 'report', now - 30_000);
 		await f.request([observation]);
@@ -197,7 +197,7 @@ describe('Hanami interaction database attestations', () => {
 
 	/** Oracle: ユーザー要求「DMまでは踏み込まない」。対象が public note でも、本人の返信・引用自体が specified なら観測対象外。home/followers は DM に含めない。 */
 	test.each(['reply', 'quote'] as const)('rejects a specified %s even when its author and public target match', async action => {
-		jest.spyOn(Date, 'now').mockReturnValue(now);
+		vi.spyOn(Date, 'now').mockReturnValue(now);
 		const f = fixture();
 		const { row, observation } = operation(f, action);
 		Object.assign(row, { visibility: 'specified', visibleUserIds: ['author-a'] });
@@ -209,7 +209,7 @@ describe('Hanami interaction database attestations', () => {
 	test.each<['reply' | 'quote', 'home' | 'followers']>([
 		['reply', 'home'], ['reply', 'followers'], ['quote', 'home'], ['quote', 'followers'],
 	])('permits a persisted %s with %s visibility', async (action, visibility) => {
-		jest.spyOn(Date, 'now').mockReturnValue(now);
+		vi.spyOn(Date, 'now').mockReturnValue(now);
 		const f = fixture();
 		const { row, observation } = operation(f, action);
 		row.visibility = visibility;
@@ -218,7 +218,7 @@ describe('Hanami interaction database attestations', () => {
 	});
 
 	test('rejects a pure renote claimed as a quote when no content exists', async () => {
-		jest.spyOn(Date, 'now').mockReturnValue(now);
+		vi.spyOn(Date, 'now').mockReturnValue(now);
 		const f = fixture();
 		const { row, observation } = operation(f, 'quote');
 		Object.assign(row, { text: null });
@@ -228,7 +228,7 @@ describe('Hanami interaction database attestations', () => {
 
 	/** Oracle: Misskey の isQuote 契約は非 null の text/cw、reply、poll、添付のいずれかを引用とする。空文字も非 null として成立する。 */
 	test.each([{ text: '' }, { cw: 'content warning' }, { hasPoll: true }, { fileIds: ['file-a'] }, { replyId: 'another-note' }])('accepts a quote with the existing content condition %p', async content => {
-		jest.spyOn(Date, 'now').mockReturnValue(now);
+		vi.spyOn(Date, 'now').mockReturnValue(now);
 		const f = fixture();
 		const { row, observation } = operation(f, 'quote');
 		Object.assign(row, { text: null, ...content });
@@ -236,7 +236,7 @@ describe('Hanami interaction database attestations', () => {
 	});
 
 	test('rejects a mute that expired at the current time even after a successful API response', async () => {
-		jest.spyOn(Date, 'now').mockReturnValue(now);
+		vi.spyOn(Date, 'now').mockReturnValue(now);
 		const f = fixture();
 		const { row, observation } = operation(f, 'mute');
 		row.expiresAt = new Date(now);
@@ -245,7 +245,7 @@ describe('Hanami interaction database attestations', () => {
 	});
 
 	test('keeps a valid mute or block event even though its target is no longer readable', async () => {
-		jest.spyOn(Date, 'now').mockReturnValue(now);
+		vi.spyOn(Date, 'now').mockReturnValue(now);
 		for (const action of ['mute', 'block'] as const) {
 			const f = fixture();
 			const { observation } = operation(f, action);
@@ -254,7 +254,7 @@ describe('Hanami interaction database attestations', () => {
 	});
 
 	test('rejects the entire batch before a barrier or send when a neighboring action did not happen', async () => {
-		jest.spyOn(Date, 'now').mockReturnValue(now);
+		vi.spyOn(Date, 'now').mockReturnValue(now);
 		const f = fixture();
 		const { observation } = operation(f, 'reply');
 		f.rows.MiNote = f.rows.MiNote.filter(row => row.id === 'note-a');
@@ -268,7 +268,7 @@ describe('Hanami interaction database attestations', () => {
 describe('Hanami v4 signed observation boundary', () => {
 	/** Oracle: 端末文脈契約（2026-11-09）§1/4。公開schema→実service→署名clientを通した全v4種別のcontextは厳密に保持する。成立証拠の検査は既存DB境界doubleで、端末情報を証拠へ昇格させない。本文なし204契約（2026-11-10）では保存成功時の公開応答に内部件数を含めない。 */
 	test.each(['viewport', 'detail_open', 'image_open', 'link_copy', 'share', 'reply', 'quote', 'follow', 'mute', 'block', 'report'] as const)('forwards the exact device context for %s through public validation and signing', async kind => {
-		jest.spyOn(Date, 'now').mockReturnValue(now);
+		vi.spyOn(Date, 'now').mockReturnValue(now);
 		const f = fixture();
 		const service = new HanamiRecommendationsService(...[f.client, {}] as unknown as ConstructorParameters<typeof HanamiRecommendationsService>);
 		const endpoint = new ImpressionsEndpoint(service);
@@ -295,7 +295,7 @@ describe('Hanami v4 signed observation boundary', () => {
 		...['deviceClass', 'viewportClass', 'primaryPointer'].flatMap(key => [null, 1, [], 'unsupported'].map(value => ({ deviceClass: 'mobile', viewportClass: 'compact', primaryPointer: 'coarse', [key]: value }))),
 		{ deviceClass: 'mobile', viewportClass: 'compact', primaryPointer: 'coarse', userAgent: 'synthetic-private-UA' },
 	])('rejects invalid internal device context %p before signing a neighboring valid record', async deviceContext => {
-		jest.spyOn(Date, 'now').mockReturnValue(now);
+		vi.spyOn(Date, 'now').mockReturnValue(now);
 		const f = fixture();
 		await expect(f.request([detailObservation(), { ...imageObservation(), eventId: 'malformed-device', deviceContext }])).rejects.toMatchObject({ code: 'INVALID_REQUEST' });
 		expect(f.insert).not.toHaveBeenCalled();
@@ -317,7 +317,7 @@ describe('Hanami v4 signed observation boundary', () => {
 
 	/** Oracle: 公開 JSON Schema の maxLength:128 は Unicode code point 数。65/128 個の絵文字は有効な eventId なので、後段の署名 client が UTF-16 code unit 数を理由に拒否してはならない。本文なし204契約（2026-11-10）では保存成功時の公開応答に内部件数を含めない。 */
 	test.each([65, 128])('preserves an event ID of %i emoji from the public schema through the signed client', async count => {
-		jest.spyOn(Date, 'now').mockReturnValue(now);
+		vi.spyOn(Date, 'now').mockReturnValue(now);
 		const f = fixture();
 		const service = new HanamiRecommendationsService(...[f.client, {}] as unknown as ConstructorParameters<typeof HanamiRecommendationsService>);
 		const endpoint = new ImpressionsEndpoint(service);
@@ -330,7 +330,7 @@ describe('Hanami v4 signed observation boundary', () => {
 	});
 
 	test('permits an attached image and strips no independent discrete operation after long viewport time', async () => {
-		jest.spyOn(Date, 'now').mockReturnValue(now);
+		vi.spyOn(Date, 'now').mockReturnValue(now);
 		const f = fixture();
 		const observations = [{ ...viewportObservation(), elapsedMs: 3_600_000 }, { ...imageObservation(), eventId: 'image-open' }];
 		f.send.mockResolvedValue({ ok: true, json: async () => ({ accepted: 2, duplicates: 0 }) });
@@ -340,7 +340,7 @@ describe('Hanami v4 signed observation boundary', () => {
 	});
 
 	test.each(['not-attached', 'not-image', 'missing-file'])('rejects an image operation whose file is %s', async invalid => {
-		jest.spyOn(Date, 'now').mockReturnValue(now);
+		vi.spyOn(Date, 'now').mockReturnValue(now);
 		const f = fixture();
 		if (invalid === 'not-attached') f.rows.MiNote[0].fileIds = [];
 		if (invalid === 'not-image') f.rows.MiDriveFile[0].type = 'application/pdf';
@@ -358,7 +358,7 @@ describe('Hanami v4 signed observation boundary', () => {
 		{ ...viewportObservation(), visibleArea: Infinity },
 		{ ...viewportObservation(), activityAgeMs: NaN },
 	])('rejects invalid v4 input before signing %p', async observation => {
-		jest.spyOn(Date, 'now').mockReturnValue(now);
+		vi.spyOn(Date, 'now').mockReturnValue(now);
 		const f = fixture();
 		await expect(f.request([observation])).rejects.toMatchObject({ code: 'INVALID_REQUEST' });
 		expect(f.insert).not.toHaveBeenCalled();
@@ -366,7 +366,7 @@ describe('Hanami v4 signed observation boundary', () => {
 	});
 
 	test('signs the v4 path, authenticated viewer and committed barrier over real HTTP', async () => {
-		jest.spyOn(Date, 'now').mockReturnValue(now);
+		vi.spyOn(Date, 'now').mockReturnValue(now);
 		const received: { path?: string; body: Buffer; headers: Record<string, string | string[] | undefined> }[] = [];
 		const server = createServer(async (req, res) => {
 			const chunks: Buffer[] = [];

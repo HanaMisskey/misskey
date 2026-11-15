@@ -55,7 +55,7 @@ vi.mock('@/components/MkPullToRefresh.vue', async () => {
 import { store } from '@/store.js';
 import { prefer } from '@/preferences.js';
 
-type HeaderAction = { text: string; handler: (event: MouseEvent) => void };
+type HeaderAction = { text: string; handler: (event: PointerEvent) => void };
 const header = defineComponent({ props: { actions: { type: Array as PropType<HeaderAction[]>, default: () => [] } }, setup(props, { slots }) {
 	return () => h('main', [h('header', props.actions.map(action => h('button', { onClick: action.handler }, action.text))), slots.default?.()]);
 } });
@@ -140,7 +140,7 @@ describe('Hanami timeline header controls', () => {
 		else {
 			const action = (await options(view)).find(item => 'text' in item && item.text === 'リロード' && 'action' in item);
 			expect(action).toBeDefined();
-			if (action && 'action' in action) action.action(new MouseEvent('click'));
+			if (action && 'action' in action) action.action(new PointerEvent('click'));
 		}
 		await waitFor(() => expect(refresh).toHaveBeenCalledTimes(1));
 	});

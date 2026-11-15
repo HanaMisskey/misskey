@@ -4,6 +4,7 @@ export class AppearObserver implements IntersectionObserver {
 	static visible = false;
 	readonly root = null;
 	readonly rootMargin = '0px';
+	readonly scrollMargin = '0px';
 	readonly thresholds = [0];
 	readonly targets = new Set<Element>();
 

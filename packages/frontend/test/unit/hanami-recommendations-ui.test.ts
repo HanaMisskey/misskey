@@ -32,7 +32,7 @@ import { prefer } from '@/preferences.js';
 const preferences = prefer.s;
 vi.mock('@/utility/misskey-api.js', () => ({ misskeyApi: request }));
 vi.mock('@/utility/hanami-device-context.js', () => ({ captureHanamiDeviceContext: () => ({ deviceClass: 'desktop', viewportClass: 'wide', primaryPointer: 'fine' }) }));
-vi.mock('@/i.js', () => ({ $i: { id: 'alice', policies: { hanamiTlAvailable: true } } }));
+vi.mock('@/i.js', () => ({ iAmModerator: false, $i: { id: 'alice', policies: { hanamiTlAvailable: true } } }));
 vi.mock('@/instance.js', () => ({ instance: { hanamiRecommendationsEnabled: true } }));
 vi.mock('@/os.js', () => ({ popupMenu, contextMenu, alert: vi.fn(), success: vi.fn() }));
 vi.mock('@/page.js', () => ({ definePage: vi.fn() }));
@@ -133,8 +133,8 @@ function mount(initialWithFiles: WithFiles = false, timeline?: Component) {
 	return { ...view, setWithFiles: (value: WithFiles) => { withFiles.value = value; }, refresh: () => screen.value?.refresh() };
 }
 
-async function menuButtons(items: MenuItem[]): Promise<{ text: string; action: (event: MouseEvent) => void }[]> {
-	const buttons: { text: string; action: (event: MouseEvent) => void }[] = [];
+async function menuButtons(items: MenuItem[]): Promise<{ text: string; action: (event: PointerEvent) => void }[]> {
+	const buttons: { text: string; action: (event: PointerEvent) => void }[] = [];
 	for (const pending of items) {
 		const item = await pending;
 		if ('children' in item) buttons.push(...await menuButtons(await (typeof item.children === 'function' ? item.children() : item.children)));
@@ -221,7 +221,7 @@ describe('recommendation HTTP screen', () => {
 		expect(contextMenu).toHaveBeenCalledTimes(1);
 		const reload = (await menuButtons(contextMenu.mock.calls[0][0])).find(item => item.text === 'リロード');
 		if (!reload) throw new Error('The list context menu has no reload action');
-		await reload.action(new MouseEvent('click'));
+		await reload.action(new PointerEvent('click'));
 		await view.findByText('本文 fresh');
 		expect(request.mock.calls[1][1]).toMatchObject({ limit: 20, withFiles: true });
 		expect(request.mock.calls[1][1].cursor).toBeUndefined();
@@ -295,7 +295,7 @@ describe('recommendation HTTP screen', () => {
 			expect(menu).toContainEqual(expect.objectContaining({ type: 'parent', text: 'おすすめの調整' }));
 			const less = (await menuButtons(menu)).find(item => item.text === 'この作者を減らす');
 			if (!less) throw new Error('Missing author less action');
-			await less.action(new MouseEvent('click'));
+			await less.action(new PointerEvent('click'));
 			if (attempt === 0) expect(view.getByRole('alert').textContent).toContain('調整');
 		}
 		expect(request.mock.calls[2]).toEqual(request.mock.calls[1]);
@@ -322,7 +322,7 @@ describe('recommendation HTTP screen', () => {
 			await fireEvent.click(view.getByRole('button', { name: 'ノートのメニュー' }));
 			const less = (await menuButtons(popupMenu.mock.calls.at(-1)![0])).find(item => item.text === 'この作者を減らす');
 			if (!less) throw new Error('Missing author less action');
-			await less.action(new MouseEvent('click'));
+			await less.action(new PointerEvent('click'));
 		};
 		await chooseLess();
 		view.setWithFiles(true);
@@ -444,7 +444,7 @@ describe('recommendation HTTP screen', () => {
 		expect(buttons.map(button => button.text)).toContain('この作者の調整をリセット');
 		const less = buttons.find(button => button.text === 'この作者を減らす');
 		if (!less) throw new Error('Missing author less action');
-		less.action(new MouseEvent('click'));
+		less.action(new PointerEvent('click'));
 		await waitFor(() => expect(request).toHaveBeenCalledTimes(2));
 		expect(request.mock.calls[1]).toEqual(['hanami-feedback', expect.objectContaining({
 			eventId: expect.any(String), action: 'less', target: { kind: 'author', id: 'bob' }, snapshotId: 'snapshot1', entryId: 'entry-a',
@@ -475,7 +475,7 @@ describe('recommendation HTTP screen', () => {
 		const choice = buttons.find(button => button.text === label);
 		expect(choice).toBeDefined();
 		if (!choice) throw new Error(`Missing action ${label}`);
-		choice.action(new MouseEvent('click'));
+		choice.action(new PointerEvent('click'));
 		await waitFor(() => expect(request).toHaveBeenCalledTimes(2));
 		expect(request.mock.calls[1]).toEqual(['hanami-feedback', expect.objectContaining({ eventId: expect.any(String), target: { kind, id }, action, snapshotId: 'snapshot1', entryId: 'entry-a' })]);
 	});
@@ -818,7 +818,7 @@ describe('feedback operation windows from the real recommendation menu', () => {
 		await fireEvent.click(view.getByRole('button', { name: 'ノートのメニュー' }));
 		const action = (await menuButtons(popupMenu.mock.calls.at(-1)![0])).find(item => item.text === 'この作者を減らす');
 		if (!action) throw new Error('Missing real author-less menu action');
-		return action.action(new MouseEvent('click'));
+		return action.action(new PointerEvent('click'));
 	}
 
 	test('sends one receipt referencing the actual successful feedback and completes after card unmount', async () => {

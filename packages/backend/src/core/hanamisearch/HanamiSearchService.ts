@@ -18,8 +18,8 @@ import { IdService } from '@/core/IdService.js';
 import { UtilityService } from '@/core/UtilityService.js';
 import { isMustRemove } from '@/misc/is-hidden-or-visibility-modified.js';
 import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
-import { removeMutedUsersReactions } from '@/misc/reactions-mute.js';
-import type { Index, MeiliSearch } from 'meilisearch';
+import { QueryService } from '@/core/QueryService.js';
+import type { Index, Meilisearch } from 'meilisearch';
 
 const SEARCH_EMPTY_PAGE_RETRY_LIMIT = 5;
 
@@ -45,7 +45,7 @@ type Q =
 
 function compileValue(value: V): string {
 	if (typeof value === 'string') {
-		return `'${value}'`; // TODO: escape
+		return `'${value.replace(/['\\]/g, '\\$&')}'`;
 	} else if (typeof value === 'number') {
 		return value.toString();
 	} else if (typeof value === 'boolean') {
@@ -122,7 +122,7 @@ export class HanamiSearchService {
 		private config: Config,
 
 		@Inject(DI.hanamisearch)
-		private hanamisearch: MeiliSearch | null,
+		private hanamisearch: Meilisearch | null,
 
 		@Inject(DI.notesRepository)
 		private notesRepository: NotesRepository,
@@ -131,6 +131,7 @@ export class HanamiSearchService {
 		private meta: MiMeta,
 
 		private noteEntityService: NoteEntityService,
+		private queryService: QueryService,
 		private cacheService: CacheService,
 		private idService: IdService,
 		private utilityService: UtilityService,
@@ -145,7 +146,7 @@ export class HanamiSearchService {
 		}
 	}
 
-	private initializeIndex(searchClient: MeiliSearch, indexName: string): Index {
+	private initializeIndex(searchClient: Meilisearch, indexName: string): Index {
 		const index = searchClient.index(indexName);
 		if (!this.config.hanamisearch?.readOnly) index.updateSettings({
 			searchableAttributes: ['text', 'cw'],
@@ -290,6 +291,7 @@ export class HanamiSearchService {
 				.leftJoinAndSelect('renote.user', 'renoteUser');
 
 			query.where('note.id IN (:...noteIds)', { noteIds: res.hits.map(x => x.id) });
+			if (me == null) this.queryService.generateUgcVisibilityQueryForVisitor(query);
 
 			const rawNotes = await query.getMany();
 			const nextUserFilters = me && rawNotes.length > 0
@@ -322,11 +324,7 @@ export class HanamiSearchService {
 				return searchNext(nextOffset, remainingRetries - 1, nextUserFilters);
 			}
 
-			const packedNotes = (await this.noteEntityService.packMany(notes, me, { withReactionAndUserPairCache: true })).filter(note => !isMustRemove(note, 'home'));
-			const userIdsWhoMeMuting = nextUserFilters?.userIdsWhoMeMuting ?? new Set<string>();
-			await Promise.all(
-				packedNotes.map(note => removeMutedUsersReactions(note, userIdsWhoMeMuting)),
-			);
+			const packedNotes = (await this.noteEntityService.packMany(notes, me)).filter(note => !isMustRemove(note, 'home'));
 
 			if (packedNotes.length > 0) {
 				return packedNotes;

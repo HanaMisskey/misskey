@@ -1,4 +1,4 @@
-import { describe, expect, jest, test } from '@jest/globals';
+import { describe, expect, vi, test } from 'vitest';
 import type { HanamiRecommendationsService } from '@/core/hanamifeed/HanamiRecommendationsService.js';
 import type { MiLocalUser } from '@/models/User.js';
 import ImpressionsEndpoint from '@/server/api/endpoints/hanami-impressions.js';
@@ -14,11 +14,11 @@ const close = { ...checkpoint, phase: 'close', windowSequence: 64, windowElapsed
 const feedback = { ...interactionIdentity, kind: 'feedback', eventId: 'saved-feedback', ...metadata };
 
 function fixture() {
-	const submitImpressions = jest.fn<(...args: unknown[]) => Promise<unknown>>().mockImplementation(async (_me, input) => {
+	const submitImpressions = vi.fn<(...args: unknown[]) => Promise<unknown>>().mockImplementation(async (_me, input) => {
 		const request = input as { observations: unknown[] };
 		return { accepted: request.observations.length, duplicates: 0 };
 	});
-	const getRecommendations = jest.fn<(...args: unknown[]) => Promise<unknown>>().mockResolvedValue({ items: [], nextCursor: null, snapshotId: 'snapshot-a', revision: 0 });
+	const getRecommendations = vi.fn<(...args: unknown[]) => Promise<unknown>>().mockResolvedValue({ items: [], nextCursor: null, snapshotId: 'snapshot-a', revision: 0 });
 	const service = { submitImpressions, getRecommendations } as unknown as HanamiRecommendationsService;
 	return { submitImpressions, getRecommendations, endpoint: new ImpressionsEndpoint(service), recommendations: new RecommendationsEndpoint(service) };
 }

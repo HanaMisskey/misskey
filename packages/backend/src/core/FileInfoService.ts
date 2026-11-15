@@ -16,12 +16,12 @@ import probeImageSize from 'probe-image-size';
 import { sharpBmp } from '@misskey-dev/sharp-read-bmp';
 import * as blurhash from 'blurhash';
 import { createTempDir } from '@/misc/create-temp.js';
-import { AiService } from '@/core/AiService.js';
+import { SensitiveMediaDetectionService } from '@/core/SensitiveMediaDetectionService.js';
 import { LoggerService } from '@/core/LoggerService.js';
 import type Logger from '@/logger.js';
 import { bindThis } from '@/decorators.js';
 import { isMimeImage } from '@/misc/is-mime-image.js';
-import type { PredictionType } from 'nsfwjs';
+import type { Prediction } from '@/core/SensitiveMediaDetectionService.js';
 
 export type FileInfo = {
 	size: number;
@@ -54,7 +54,7 @@ export class FileInfoService {
 	private logger: Logger;
 
 	constructor(
-		private aiService: AiService,
+		private sensitiveMediaDetectionService: SensitiveMediaDetectionService,
 		private loggerService: LoggerService,
 	) {
 		this.logger = this.loggerService.getLogger('file-info');
@@ -164,7 +164,6 @@ export class FileInfoService {
 				path,
 				type.mime,
 				opts.sensitiveThreshold ?? 0.5,
-				opts.sensitiveThresholdForPorn ?? 0.75,
 				opts.enableSensitiveMediaDetectionForVideos ?? false,
 			).then(value => {
 				[sensitive, porn] = value;
@@ -188,21 +187,11 @@ export class FileInfoService {
 	}
 
 	@bindThis
-	private async detectSensitivity(source: string, mime: string, sensitiveThreshold: number, sensitiveThresholdForPorn: number, analyzeVideo: boolean): Promise<[sensitive: boolean, porn: boolean]> {
+	private async detectSensitivity(source: string, mime: string, sensitiveThreshold: number, analyzeVideo: boolean): Promise<[sensitive: boolean, porn: boolean]> {
 		let sensitive = false;
-		let porn = false;
 
-		function judgePrediction(result: readonly PredictionType[]): [sensitive: boolean, porn: boolean] {
-			let sensitive = false;
-			let porn = false;
-
-			if ((result.find(x => x.className === 'Sexy')?.probability ?? 0) > sensitiveThreshold) sensitive = true;
-			if ((result.find(x => x.className === 'Hentai')?.probability ?? 0) > sensitiveThreshold) sensitive = true;
-			if ((result.find(x => x.className === 'Porn')?.probability ?? 0) > sensitiveThreshold) sensitive = true;
-
-			if ((result.find(x => x.className === 'Porn')?.probability ?? 0) > sensitiveThresholdForPorn) porn = true;
-
-			return [sensitive, porn];
+		function judgePrediction(result: readonly Prediction[]): boolean {
+			return (result.find(x => x.className === 'nsfw')?.probability ?? 0) > sensitiveThreshold;
 		}
 
 		if (analyzeVideo && (mime === 'image/apng' || mime.startsWith('video/'))) {
@@ -212,7 +201,6 @@ export class FileInfoService {
 					.input(source)
 					.inputOptions([
 						'-skip_frame', 'nokey', // 可能ならキーフレームのみを取得してほしいとする（そうなるとは限らない）
-						'-lowres', '3', // 元の画質でデコードする必要はないので 1/8 画質でデコードしてもよいとする（そうなるとは限らない）
 					])
 					.noAudio()
 					.videoFilters([
@@ -237,18 +225,11 @@ export class FileInfoService {
 								function: 'less', // 50% 未満のフレームを選択する（50% 以上暗部があるフレームだと誤検知を招くかもしれないので）
 							},
 						},
-						{
-							filter: 'scale',
-							options: {
-								w: 299,
-								h: 299,
-							},
-						},
 					])
 					.format('image2')
 					.output(join(outDir, '%d.png'))
-					.outputOptions(['-vsync', '0']); // 可変フレームレートにすることで穴埋めをさせない
-				const results: ReturnType<typeof judgePrediction>[] = [];
+					.outputOptions(['-fps_mode', 'passthrough']); // 固定フレームレートへの補間は、選択済みフレームを重複させるため使わない。
+				const frameBuffers: Buffer[] = [];
 				let frameIndex = 0;
 				let targetIndex = 0;
 				let nextIndex = 1;
@@ -260,39 +241,46 @@ export class FileInfoService {
 						}
 						targetIndex = nextIndex;
 						nextIndex += index; // fibonacci sequence によってフレーム数制限を掛ける
-						const result = await this.aiService.detectSensitive(path);
-						if (result) {
-							results.push(judgePrediction(result));
-						}
+						frameBuffers.push(await this.normalizeSensitiveImage(path, 'image/png'));
 					} finally {
 						fs.promises.unlink(path);
 					}
 				}
-				sensitive = results.filter(x => x[0]).length >= Math.ceil(results.length * sensitiveThreshold);
-				porn = results.filter(x => x[1]).length >= Math.ceil(results.length * sensitiveThresholdForPorn);
+				const predictions = await this.sensitiveMediaDetectionService.detectSensitiveMany(frameBuffers);
+				const results = predictions.filter((x): x is Prediction[] => x != null).map(x => judgePrediction(x));
+				// 判定に成功したフレームが 0 件のとき（接続先未設定・通信失敗等）は、
+				// Math.ceil(0) との比較が 0 >= 0 で真になり全動画がセンシティブ扱いになってしまうため、
+				// 1 件以上判定できたときのみ集約する（失敗時は非センシティブ扱い: misskey-dev/misskey#16804）。
+				if (results.length > 0) {
+					sensitive = results.filter(x => x).length >= Math.ceil(results.length * sensitiveThreshold);
+				}
 			} finally {
 				disposeOutDir();
 			}
 		} else if (isMimeImage(mime, 'sharp-convertible-image-with-bmp')) {
-			/*
-			 * tfjs-node は限られた画像形式しか受け付けないため、sharp で PNG に変換する
-			 * せっかくなので内部処理で使われる最大サイズの299x299に事前にリサイズする
-			 */
-			const png = await (await sharpBmp(source, mime))
-				.resize(299, 299, {
-					withoutEnlargement: false,
-				})
-				.rotate()
-				.flatten({ background: { r: 119, g: 119, b: 119 } }) // 透過部分を18%グレーで塗りつぶす
-				.png()
-				.toBuffer();
-			const result = await this.aiService.detectSensitive(png);
+			const png = await this.normalizeSensitiveImage(source, mime);
+			const result = await this.sensitiveMediaDetectionService.detectSensitive(png);
 			if (result) {
-				[sensitive, porn] = judgePrediction(result);
+				sensitive = judgePrediction(result);
 			}
 		}
 
-		return [sensitive, porn];
+		// nsfw/safe の二分類では Porn を識別できないため、nsfw の高さから porn を推定しない。
+		return [sensitive, false];
+	}
+
+	@bindThis
+	private async normalizeSensitiveImage(source: string, mime: string): Promise<Buffer> {
+		const image = await sharpBmp(source, mime);
+		const { autoOrient } = await image.metadata();
+		// 全領域の切り出しを省くと、回転が補間後へ遅延し、JPEG/WebP の縮小デコードも先行し得る。
+		return image
+			.rotate()
+			.extract({ left: 0, top: 0, width: autoOrient.width, height: autoOrient.height })
+			.flatten({ background: { r: 119, g: 119, b: 119 } })
+			.resize(384, 384, { fit: 'fill', kernel: 'cubic' })
+			.png()
+			.toBuffer();
 	}
 
 	private async *asyncIterateFrames(cwd: string, command: FFmpeg.FfmpegCommand): AsyncGenerator<string, void> {
@@ -484,25 +472,13 @@ export class FileInfoService {
 	 * Calculate blurhash string of image
 	 */
 	@bindThis
-	private getBlurhash(path: string, type: string): Promise<string> {
-		return new Promise(async (resolve, reject) => {
-			(await sharpBmp(path, type))
-				.raw()
-				.ensureAlpha()
-				.resize(64, 64, { fit: 'inside' })
-				.toBuffer((err, buffer, info) => {
-					if (err) return reject(err);
-
-					let hash;
-
-					try {
-						hash = blurhash.encode(new Uint8ClampedArray(buffer), info.width, info.height, 5, 5);
-					} catch (e) {
-						return reject(e);
-					}
-
-					resolve(hash);
-				});
-		});
+	private async getBlurhash(path: string, type: string): Promise<string> {
+		const sharp = await sharpBmp(path, type);
+		const { data: buffer, info } = await sharp
+			.raw()
+			.ensureAlpha()
+			.resize(64, 64, { fit: 'inside' })
+			.toBuffer({ resolveWithObject: true });
+		return blurhash.encode(new Uint8ClampedArray(buffer), info.width, info.height, 5, 5);
 	}
 }

@@ -1,5 +1,5 @@
 import { setImmediate } from 'node:timers/promises';
-import { describe, expect, jest, test } from '@jest/globals';
+import { describe, expect, vi, test } from 'vitest';
 import Fastify from 'fastify';
 import { detailObservation } from '../utils/HanamiInteractionsFixture.js';
 import type { Config } from '@/config.js';
@@ -15,14 +15,15 @@ const v4 = { version: 4, observations: [detailObservation()] };
 const legacy = { events: [{ eventId: 'legacy-a', snapshotId: 'snapshot-a', entryId: 'entry-a' }] };
 
 function fixture() {
-	const request = jest.fn<(...args: unknown[]) => Promise<unknown>>().mockResolvedValue({ accepted: 1, duplicates: 0 });
+	const request = vi.fn<(...args: unknown[]) => Promise<unknown>>().mockResolvedValue({ accepted: 1, duplicates: 0 });
 	const service = new HanamiRecommendationsService(...[{ request }, {}] as unknown as ConstructorParameters<typeof HanamiRecommendationsService>);
 	const endpoint = new ImpressionsEndpoint(service);
 	const api = new ApiCallService(...[
 		{ enableIpLogging: false }, {}, {},
 		{ authenticate: async () => [viewer, null] }, {},
 		{ getUserRoles: async () => [], getUserPolicies: async () => ({ hanamiTlAvailable: true }) },
-		{ logger: { error: jest.fn() } },
+		{ logger: { error: vi.fn() } },
+		{ startSpan: (_name: string, work: () => Promise<unknown>) => work(), captureMessage: vi.fn() },
 	] as unknown as ConstructorParameters<typeof ApiCallService>);
 	const server = Fastify();
 	server.post<{ Body: Record<string, unknown>; Querystring: Record<string, unknown> }>('/api/hanami-impressions', (request, reply) => {
@@ -67,7 +68,7 @@ describe('Hanami observation bodyless public response', () => {
 		try {
 			let responded = false;
 			const pending = f.post(v4).then(response => { responded = true; return response; });
-			await begun;
+			await Promise.race([begun, pending.then(() => { throw new Error('The response completed before receipt collection started'); })]);
 			await setImmediate();
 			expect(responded).toBe(false);
 			resolve(receipt);

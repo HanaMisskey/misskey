@@ -18,7 +18,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 				<template v-else>
 					<div :class="$style.grid">
-						<MkGrid :data="gridItems" :settings="setupGrid()" @event="onGridEvent"/>
+						<MkGrid :data="gridItems" :settings="setupGrid({ changedRow: $style.changedRow, violationRow: $style.violationRow })" @event="onGridEvent"/>
 					</div>
 				</template>
 			</template>
@@ -51,6 +51,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 <script lang="ts">
 import type { SortOrder } from '@/components/MkSortOrderEditor.define.js';
 import type { GridSortOrderKey } from './custom-emojis-manager.impl.js';
+import type { PageHeaderItem } from '@/types/page-header.js';
 
 export type EmojiSearchQuery = {
 	name: string | null;
@@ -69,7 +70,7 @@ export type EmojiSearchQuery = {
 </script>
 
 <script setup lang="ts">
-import { computed, defineAsyncComponent, onMounted, ref, nextTick, useCssModule } from 'vue';
+import { computed, defineAsyncComponent, onMounted, ref, nextTick } from 'vue';
 import * as Misskey from 'misskey-js';
 import type { RequestLogItem } from '@/pages/admin/custom-emojis-manager.impl.js';
 import type { GridCellValidationEvent, GridCellValueChangeEvent, GridEvent } from '@/components/grid/grid-event.js';
@@ -110,9 +111,7 @@ type GridItem = {
 	type: string | null;
 };
 
-function setupGrid(): GridSetting {
-	const $style = useCssModule();
-
+function setupGrid(rowClass: { changedRow: string, violationRow: string }): GridSetting {
 	const required = validators.required();
 	const regex = validators.regex(/^[a-zA-Z0-9_]+$/);
 	const unique = validators.unique();
@@ -131,12 +130,12 @@ function setupGrid(): GridSetting {
 				{
 					// 初期値から変わっていたら背景色を変更
 					condition: ({ row }) => JSON.stringify(gridItems.value[row.index]) !== JSON.stringify(originGridItems.value[row.index]),
-					applyStyle: { className: $style.changedRow },
+					applyStyle: { className: rowClass.changedRow },
 				},
 				{
 					// バリデーションに引っかかっていたら背景色を変更
 					condition: ({ cells }) => cells.some(it => !it.violation.valid),
-					applyStyle: { className: $style.violationRow },
+					applyStyle: { className: rowClass.violationRow },
 				},
 			],
 			// 行のコンテキストメニュー設定
@@ -250,7 +249,7 @@ function setupGrid(): GridSetting {
 						icon: 'ti ti-trash',
 						action: () => {
 							removeDataFromGrid(context, (cell) => {
-								gridItems.value[cell.row.index][cell.column.setting.bindTo] = undefined;
+								(gridItems.value[cell.row.index] as any)[cell.column.setting.bindTo] = undefined;
 							});
 						},
 					},
@@ -454,7 +453,7 @@ function onGridCellValidation(event: GridCellValidationEvent) {
 function onGridCellValueChange(event: GridCellValueChangeEvent) {
 	const { row, column, newValue } = event;
 	if (gridItems.value.length > row.index && column.setting.bindTo in gridItems.value[row.index]) {
-		gridItems.value[row.index][column.setting.bindTo] = newValue;
+		(gridItems.value[row.index] as any)[column.setting.bindTo] = newValue;
 	}
 }
 
@@ -525,7 +524,7 @@ const headerPageMetadata = computed(() => ({
 	icon: 'ti ti-icons',
 }));
 
-const headerActions = computed(() => [{
+const headerActions = computed<PageHeaderItem[]>(() => [{
 	icon: 'ti ti-search',
 	text: i18n.ts.search,
 	handler: async () => {
@@ -552,7 +551,7 @@ const headerActions = computed(() => [{
 }, {
 	icon: 'ti ti-list-numbers',
 	text: i18n.ts._customEmojisManager._gridCommon.searchLimit,
-	handler: (ev: MouseEvent) => {
+	handler: (ev) => {
 		async function changeSearchLimit(to: number) {
 			if (updatedItemsCount.value > 0) {
 				const { canceled } = await os.confirm({

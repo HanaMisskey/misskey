@@ -441,7 +441,7 @@ export function getUserMenu(user: Misskey.entities.UserDetailed & { hanamiRecomm
 		});
 	}
 
-	if (user.host !== null) {
+	if ($i != null && user.host !== null) {
 		menuItems.push({ type: 'divider' }, {
 			icon: 'ti ti-refresh',
 			text: i18n.ts.updateRemoteUser,

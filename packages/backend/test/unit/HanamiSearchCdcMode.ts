@@ -1,4 +1,4 @@
-import { describe, expect, jest, test } from '@jest/globals';
+import { describe, expect, vi, test } from 'vitest';
 import type { MiNote, MiUser } from '@/models/_.js';
 import { HanamiSearchService } from '@/core/hanamisearch/HanamiSearchService.js';
 import { HanamiSearchV2Service } from '@/core/hanamisearch/HanamiSearchV2Service.js';
@@ -9,14 +9,14 @@ const platform = { url: 'http://platform.example.test', keyId: 'test', signingKe
 const cursorEncryptionKey = '0123456789abcdef'.repeat(4);
 
 function writerFixture(readOnly?: boolean) {
-	const updateSettings = jest.fn<(...args: unknown[]) => Promise<void>>().mockResolvedValue();
-	const addDocuments = jest.fn<(...args: unknown[]) => Promise<void>>().mockResolvedValue();
-	const deleteDocument = jest.fn<(...args: unknown[]) => Promise<void>>().mockResolvedValue();
-	const search = jest.fn<(...args: unknown[]) => Promise<unknown>>().mockResolvedValue({ hits: [] });
+	const updateSettings = vi.fn<(...args: unknown[]) => Promise<void>>().mockResolvedValue(undefined);
+	const addDocuments = vi.fn<(...args: unknown[]) => Promise<void>>().mockResolvedValue(undefined);
+	const deleteDocument = vi.fn<(...args: unknown[]) => Promise<void>>().mockResolvedValue(undefined);
+	const search = vi.fn<(...args: unknown[]) => Promise<unknown>>().mockResolvedValue({ hits: [] });
 	const dependencies = [
 		{ hanamisearch: { index: 'notes', scope: 'global', readOnly } },
 		{ index: () => ({ updateSettings, addDocuments, deleteDocument, search }) },
-		{}, {}, {}, {}, { parse: () => ({ date: new Date('2026-10-31T00:00:00.000Z') }) }, {},
+		{}, {}, {}, {}, {}, { parse: () => ({ date: new Date('2026-10-31T00:00:00.000Z') }) }, {},
 	] as unknown as ConstructorParameters<typeof HanamiSearchService>;
 	return { service: new HanamiSearchService(...dependencies), updateSettings, addDocuments, deleteDocument, search };
 }
@@ -39,12 +39,12 @@ describe('HanamiSearch CDC read-only mode', () => {
 
 function searchFixture(...settings: [] | [unknown]) {
 	const platformConfig = settings.length === 0 ? platform : settings[0];
-	const request = jest.fn<(...args: unknown[]) => Promise<unknown>>().mockResolvedValue({ hits: [], nextCursor: null });
-	const send = jest.fn<(...args: unknown[]) => Promise<unknown>>().mockResolvedValue({ ok: true, status: 200, json: async () => ({ hits: [], nextCursor: null }) });
-	const packSearchResults = jest.fn<(...args: unknown[]) => Promise<unknown[]>>().mockResolvedValue([]);
+	const request = vi.fn<(...args: unknown[]) => Promise<unknown>>().mockResolvedValue({ hits: [], nextCursor: null });
+	const send = vi.fn<(...args: unknown[]) => Promise<unknown>>().mockResolvedValue({ ok: true, status: 200, json: async () => ({ hits: [], nextCursor: null }) });
+	const packSearchResults = vi.fn<(...args: unknown[]) => Promise<unknown[]>>().mockResolvedValue([]);
 	const dependencies = [
 		{ hanamisearch: { host: 'legacy.example.test', port: '7700', index: 'notes', apiKey: 'synthetic-legacy-key', cursorEncryptionKey }, ...(platformConfig === undefined ? {} : { hanamiPlatform: platformConfig }) },
-		{}, { blockedHosts: [] }, { packMany: jest.fn() },
+		{}, { blockedHosts: [] }, { packMany: vi.fn() },
 		{ userMutingsCache: { fetch: async () => new Set() }, userBlockedCache: { fetch: async () => new Set() }, userProfileCache: { fetch: async () => ({ mutedInstances: [] }) } },
 		{ isBlockedHost: () => false }, { send }, { request }, { packSearchResults },
 	] as unknown as ConstructorParameters<typeof HanamiSearchV2Service>;
@@ -112,7 +112,7 @@ describe('signed HanamiSearch v2 routing', () => {
 /** Oracle: a present but invalid platform configuration must expose the new feature and its explicit unavailable state. Hiding it behind the old timeline would silently change the requested system. */
 describe('recommendation feature presence', () => {
 	test.each([[undefined, false], [null, true], [{}, true], [{ ...platform, signingKey: '' }, true], [platform, true]])('publishes configured presence %p as %p in both meta forms', async (hanamiPlatform, enabled) => {
-		const query = { where: jest.fn(), andWhere: jest.fn(), getMany: async () => [] };
+		const query = { where: vi.fn(), andWhere: vi.fn(), getMany: async () => [] };
 		query.where.mockReturnValue(query);
 		query.andWhere.mockReturnValue(query);
 		const dependencies = [

@@ -1,7 +1,7 @@
 import { createHmac } from 'node:crypto';
 import { createServer } from 'node:http';
 import { once } from 'node:events';
-import { afterEach, describe, expect, jest, test } from '@jest/globals';
+import { afterEach, describe, expect, vi, test } from 'vitest';
 import type { Config } from '@/config.js';
 import type { MiUser } from '@/models/_.js';
 import { HanamiPlatformClient, createHanamiAuthzVersion } from '@/core/hanamifeed/HanamiPlatformClient.js';
@@ -25,12 +25,12 @@ function fixture(platformConfig: unknown = settings) {
 		if (!(target.name in rows)) throw new Error(`Unexpected repository ${target.name}`);
 		return repository(() => rows[target.name]);
 	};
-	const insert = jest.fn<(_target: { name: string }, row: TestRow) => Promise<unknown>>().mockImplementation(async (target, row) => {
+	const insert = vi.fn<(_target: { name: string }, row: TestRow) => Promise<unknown>>().mockImplementation(async (target, row) => {
 		expect(target.name).toBe('MiHanamiReadBarrier');
 		barriers.push({ ...row });
 		return {};
 	});
-	const remove = jest.fn<(...args: unknown[]) => Promise<unknown>>().mockResolvedValue({});
+	const remove = vi.fn<(...args: unknown[]) => Promise<unknown>>().mockResolvedValue({});
 	const manager = {
 		find: (target: { name: string }, options?: { where?: unknown }) => lookup(target).find(options),
 		findBy: (target: { name: string }, where: unknown) => lookup(target).findBy(where),
@@ -38,14 +38,14 @@ function fixture(platformConfig: unknown = settings) {
 		findOneBy: (target: { name: string }, where: unknown) => lookup(target).findOneBy(where),
 		insert, delete: remove,
 	};
-	const transaction = jest.fn<(isolation: string, work: (value: typeof manager) => Promise<unknown>) => Promise<unknown>>().mockImplementation(async (isolation, work) => {
+	const transaction = vi.fn<(isolation: string, work: (value: typeof manager) => Promise<unknown>) => Promise<unknown>>().mockImplementation(async (isolation, work) => {
 		expect(isolation).toBe('REPEATABLE READ');
 		committed = false;
 		const result = await work(manager);
 		committed = true;
 		return result;
 	});
-	const send = jest.fn<(...args: unknown[]) => Promise<unknown>>().mockImplementation(async () => {
+	const send = vi.fn<(...args: unknown[]) => Promise<unknown>>().mockImplementation(async () => {
 		expect(committed).toBe(true);
 		return { ok: true, status: 200, json: async () => wirePage() };
 	});
@@ -53,7 +53,7 @@ function fixture(platformConfig: unknown = settings) {
 	return { client: new HanamiPlatformClient(...dependencies), dependencies, rows, barriers, transaction, send, insert, remove };
 }
 
-afterEach(() => { jest.restoreAllMocks(); });
+afterEach(() => { vi.restoreAllMocks(); });
 
 /** Oracle: addendum §8 captures browser capability as a separate optional wire field without changing the recommendation response. */
 describe('signed recommendation client capabilities', () => {
@@ -181,7 +181,7 @@ describe('Hanami authenticated context digest', () => {
 /** Oracle: every signed request (including continuation retries) is attached to a committed, append-only barrier from the same fresh relation snapshot. This single-process test verifies ordering; CDC delivery and PG atomicity require integration tests. */
 describe('Hanami platform client', () => {
 	test('commits an append-only barrier before sending and binds it to the exact signed body', async () => {
-		jest.spyOn(Date, 'now').mockReturnValue(now);
+		vi.spyOn(Date, 'now').mockReturnValue(now);
 		const f = fixture();
 		f.rows.MiFollowing = [{ followerId: 'alice', followeeId: 'bob' }];
 		f.rows.MiMuting = [
@@ -254,7 +254,7 @@ describe('Hanami platform client', () => {
 	});
 
 	test('requires refresh when an active mute expires exactly while a read is in flight', async () => {
-		const clock = jest.spyOn(Date, 'now').mockReturnValue(now);
+		const clock = vi.spyOn(Date, 'now').mockReturnValue(now);
 		const f = fixture();
 		f.rows.MiMuting.push({ muterId: 'alice', muteeId: 'bob', expiresAt: new Date(now + 1) });
 		f.send.mockImplementation(async () => {

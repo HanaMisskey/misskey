@@ -17,6 +17,7 @@ import type {
 } from '@/models/_.js';
 import { MemoryKVCache, MemorySingleCache } from '@/misc/cache.js';
 import type { MiUser } from '@/models/User.js';
+import type { Config } from '@/config.js';
 import { DI } from '@/di-symbols.js';
 import { bindThis } from '@/decorators.js';
 import { CacheService } from '@/core/CacheService.js';
@@ -50,6 +51,7 @@ export type RolePolicies = {
 	canSearchUsers: boolean;
 	canUseTranslator: boolean;
 	canHideAds: boolean;
+	canCreateChannel: boolean;
 	driveCapacityMb: number;
 	maxFileSizeMb: number;
 	alwaysMarkNsfw: boolean;
@@ -96,6 +98,7 @@ export const DEFAULT_POLICIES: RolePolicies = {
 	canSearchUsers: true,
 	canUseTranslator: true,
 	canHideAds: false,
+	canCreateChannel: true,
 	driveCapacityMb: 100,
 	maxFileSizeMb: 30,
 	alwaysMarkNsfw: false,
@@ -141,6 +144,9 @@ export class RoleService implements OnApplicationShutdown, OnModuleInit {
 
 	constructor(
 		private moduleRef: ModuleRef,
+
+		@Inject(DI.config)
+		private config: Config,
 
 		@Inject(DI.meta)
 		private meta: MiMeta,
@@ -332,7 +338,7 @@ export class RoleService implements OnApplicationShutdown, OnModuleInit {
 				default:
 					return false;
 			}
-		} catch (err) {
+		} catch (_) {
 			// TODO: log error
 			return false;
 		}
@@ -394,7 +400,7 @@ export class RoleService implements OnApplicationShutdown, OnModuleInit {
 		const roles = await this.getUserRoles(userId);
 
 		function calc<T extends keyof RolePolicies>(name: T, aggregate: (values: RolePolicies[T][]) => RolePolicies[T]) {
-			if (roles.length === 0) return basePolicies[name];
+			if (roles.length === 0) return aggregate([basePolicies[name]]);
 
 			const policies = roles.map(role => role.policies[name] ?? { priority: 0, useDefault: true });
 
@@ -412,6 +418,8 @@ export class RoleService implements OnApplicationShutdown, OnModuleInit {
 			if (vs.some(v => v === 'readonly')) return 'readonly';
 			return 'unavailable';
 		}
+
+		const serverMaxFileSizeMb = Math.floor(this.config.maxFileSize / (1024 * 1024));
 
 		return {
 			gtlAvailable: calc('gtlAvailable', vs => vs.some(v => v === true)),
@@ -431,8 +439,9 @@ export class RoleService implements OnApplicationShutdown, OnModuleInit {
 			canSearchUsers: calc('canSearchUsers', vs => vs.some(v => v === true)),
 			canUseTranslator: calc('canUseTranslator', vs => vs.some(v => v === true)),
 			canHideAds: calc('canHideAds', vs => vs.some(v => v === true)),
+			canCreateChannel: calc('canCreateChannel', vs => vs.some(v => v === true)),
 			driveCapacityMb: calc('driveCapacityMb', vs => Math.max(...vs)),
-			maxFileSizeMb: calc('maxFileSizeMb', vs => Math.max(...vs)),
+			maxFileSizeMb: calc('maxFileSizeMb', vs => Math.min(serverMaxFileSizeMb, Math.max(...vs))),
 			alwaysMarkNsfw: calc('alwaysMarkNsfw', vs => vs.some(v => v === true)),
 			canUpdateBioMedia: calc('canUpdateBioMedia', vs => vs.some(v => v === true)),
 			pinLimit: calc('pinLimit', vs => Math.max(...vs)),
@@ -556,7 +565,8 @@ export class RoleService implements OnApplicationShutdown, OnModuleInit {
 			roleId: In(administratorRoles.map(r => r.id)),
 		}) : [];
 		// TODO: isRootなアカウントも含める
-		return assigns.map(a => a.userId);
+		// Setを経由して重複を除去（ユーザIDは重複する可能性があるので）
+		return [...new Set(assigns.map(a => a.userId))].sort((x, y) => x.localeCompare(y));
 	}
 
 	@bindThis

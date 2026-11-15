@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { afterAll, beforeAll, beforeEach, describe, expect, jest, test } from '@jest/globals';
+import { afterAll, beforeAll, beforeEach, describe, expect, vi, test } from 'vitest';
 import { DataSource } from 'typeorm';
 import type { EntityTarget, ObjectLiteral } from 'typeorm';
 import type { Config } from '@/config.js';
@@ -28,7 +28,7 @@ integration('Hanami interactions against source PostgreSQL', () => {
 	let created = false;
 	let now: number;
 	let client: HanamiPlatformClient;
-	let send: ReturnType<typeof jest.fn<(...args: unknown[]) => Promise<unknown>>>;
+	let send: ReturnType<typeof vi.fn<(...args: unknown[]) => Promise<unknown>>>;
 
 	async function insert(target: EntityTarget<ObjectLiteral>, values: ObjectLiteral) {
 		const row = { ...values };
@@ -85,7 +85,7 @@ integration('Hanami interactions against source PostgreSQL', () => {
 		await insert(MiMeta, { id: 'x', blockedHosts: [] });
 		await insert(MiNote, { id: targetNoteId, userId: targetAuthorId, userHost: null, text: 'synthetic-private-target', fileIds: ['interactionimage'], attachedFileTypes: ['image/png'], visibility: 'public', replyId: null, renoteId: null });
 		await insert(MiDriveFile, { id: 'interactionimage', type: 'image/png', userId: targetAuthorId, name: 'synthetic-image.png' });
-		send = jest.fn<(...args: unknown[]) => Promise<unknown>>().mockImplementation(async (_url, rawOptions) => {
+		send = vi.fn<(...args: unknown[]) => Promise<unknown>>().mockImplementation(async (_url, rawOptions) => {
 			const options = rawOptions as { body: string };
 			const envelope = JSON.parse(options.body);
 			const rows = await control.query(`SELECT nonce FROM "${schema}".hanami_read_barrier WHERE nonce=$1`, [envelope.barrier.nonce]);

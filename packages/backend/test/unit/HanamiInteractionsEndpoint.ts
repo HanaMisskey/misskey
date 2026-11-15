@@ -1,4 +1,4 @@
-import { describe, expect, jest, test } from '@jest/globals';
+import { describe, expect, vi, test } from 'vitest';
 import type { HanamiRecommendationsService } from '@/core/hanamifeed/HanamiRecommendationsService.js';
 import { HanamiPlatformError } from '@/core/hanamifeed/HanamiPlatformClient.js';
 import type { MiLocalUser } from '@/models/User.js';
@@ -18,8 +18,8 @@ const invalidDeviceContexts: unknown[] = [
 ];
 
 function fixture() {
-	const submitImpressions = jest.fn<(...args: unknown[]) => Promise<unknown>>().mockResolvedValue(interactionAck);
-	const getRecommendations = jest.fn<(...args: unknown[]) => Promise<unknown>>().mockResolvedValue({ items: [], nextCursor: null });
+	const submitImpressions = vi.fn<(...args: unknown[]) => Promise<unknown>>().mockResolvedValue(interactionAck);
+	const getRecommendations = vi.fn<(...args: unknown[]) => Promise<unknown>>().mockResolvedValue({ items: [], nextCursor: null });
 	const service = { submitImpressions, getRecommendations } as unknown as HanamiRecommendationsService;
 	return { submitImpressions, getRecommendations, endpoint: new ImpressionsEndpoint(service), recommendations: new RecommendationsEndpoint(service) };
 }

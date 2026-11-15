@@ -48,11 +48,11 @@ import * as Misskey from 'misskey-js';
 import MkNoteHeader from '@/components/MkNoteHeader.vue';
 import MkSubNoteContent from '@/components/MkSubNoteContent.vue';
 import MkCwButton from '@/components/MkCwButton.vue';
-import { notePage } from '@/filters/note.js';
+import { notePage } from '@/utility/hanami-navigation.js';
 import { misskeyApi } from '@/utility/misskey-api.js';
 import { i18n } from '@/i18n.js';
 import { $i } from '@/i.js';
-import { userPage } from '@/filters/user.js';
+import { userPage } from '@/utility/hanami-navigation.js';
 import { checkWordMute } from '@/utility/check-word-mute.js';
 
 const props = withDefaults(defineProps<{

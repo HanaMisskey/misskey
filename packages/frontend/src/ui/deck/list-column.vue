@@ -70,7 +70,7 @@ async function setList() {
 				})),
 			} : undefined),
 		],
-		default: props.column.listId,
+		default: lists.find(x => x.id === props.column.listId)?.id,
 	});
 	if (canceled || listIdOrOperation == null) return;
 
@@ -98,7 +98,7 @@ async function setList() {
 }
 
 function editList() {
-	os.pageWindow('my/lists/' + props.column.listId);
+	os.pageWindow('/my/lists/' + props.column.listId);
 }
 
 const menu: MenuItem[] = [

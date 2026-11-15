@@ -10,7 +10,6 @@ import { CacheService } from '@/core/CacheService.js';
 import { ChannelEntityService } from '@/core/entities/ChannelEntityService.js';
 import { isUserRelated } from '@/misc/is-user-related.js';
 import { DI } from '@/di-symbols.js';
-import { removeMutedUsersReactions } from '@/misc/reactions-mute.js';
 import { ApiError } from '../../error.js';
 
 export const meta = {
@@ -59,7 +58,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				throw new ApiError(meta.errors.noSuchChannel);
 			}
 
-			const packedChannel = await this.channelEntityService.pack(channel, me, true, true);
+			const packedChannel = await this.channelEntityService.pack(channel, me, true);
 			if (packedChannel.pinnedNotes) {
 				const [
 					userIdsWhoMeMuting,
@@ -73,9 +72,6 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 					if (me && isUserRelated(note, userIdsWhoMeMuting)) return false;
 					return true;
 				});
-				await Promise.all(
-					packedChannel.pinnedNotes.map(note => removeMutedUsersReactions(note, userIdsWhoMeMuting)),
-				);
 			}
 			return packedChannel;
 		});

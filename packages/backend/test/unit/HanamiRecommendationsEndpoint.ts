@@ -1,4 +1,4 @@
-import { describe, expect, jest, test } from '@jest/globals';
+import { describe, expect, vi, test } from 'vitest';
 import type { HanamiRecommendationsService } from '@/core/hanamifeed/HanamiRecommendationsService.js';
 import type { MiLocalUser } from '@/models/User.js';
 import RecommendationsEndpoint, { meta as recommendationsMeta } from '@/server/api/endpoints/notes/hanami-recommendations.js';
@@ -9,9 +9,9 @@ import { viewportObservation } from '../utils/HanamiInteractionsFixture.js';
 const viewer = { id: 'alice', host: null } as MiLocalUser;
 
 function fixture() {
-	const getRecommendations = jest.fn<(...args: unknown[]) => Promise<unknown>>();
-	const submitFeedback = jest.fn<(...args: unknown[]) => Promise<unknown>>();
-	const submitImpressions = jest.fn<(...args: unknown[]) => Promise<unknown>>();
+	const getRecommendations = vi.fn<(...args: unknown[]) => Promise<unknown>>();
+	const submitFeedback = vi.fn<(...args: unknown[]) => Promise<unknown>>();
+	const submitImpressions = vi.fn<(...args: unknown[]) => Promise<unknown>>();
 	const service = { getRecommendations, submitFeedback, submitImpressions } as unknown as HanamiRecommendationsService;
 	return {
 		getRecommendations, submitFeedback, submitImpressions,

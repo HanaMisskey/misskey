@@ -5,8 +5,9 @@
 
 import { createServer } from 'node:http';
 import { once } from 'node:events';
-import { describe, expect, jest, test } from '@jest/globals';
+import { describe, expect, vi, test } from 'vitest';
 import { HanamiSearchV2Service } from '@/core/hanamisearch/HanamiSearchV2Service.js';
+import { HanaReactionMuteService } from '@/core/HanaReactionMuteService.js';
 import { HttpRequestService } from '@/core/HttpRequestService.js';
 import type { Config } from '@/config.js';
 import type { MiNote, MiUser } from '@/models/_.js';
@@ -16,20 +17,25 @@ const cursorEncryptionKey = '0123456789abcdef'.repeat(4);
 const note = (id: string, extra = {}) => ({ id, userId: 'author', userHost: null, user: { isSuspended: false }, visibility: 'public', fileIds: [], reactions: {}, ...extra });
 
 function fixture(pages: unknown[], rows: ReturnType<typeof note>[][], settingsOverrides: Partial<NonNullable<Config['hanamisearch']>> = {}) {
-	const send = jest.fn<(...args: unknown[]) => Promise<unknown>>();
+	const send = vi.fn<(...args: unknown[]) => Promise<unknown>>();
 	for (const page of pages) send.mockResolvedValueOnce({ ok: true, status: 200, json: async () => page });
-	const getMany = jest.fn<() => Promise<unknown[]>>();
+	const getMany = vi.fn<() => Promise<unknown[]>>();
 	for (const page of rows) getMany.mockResolvedValueOnce(page);
 	const query: Record<string, unknown> = { getMany };
-	for (const method of ['innerJoinAndSelect', 'leftJoinAndSelect', 'where', 'andWhere']) query[method] = jest.fn(() => query);
+	for (const method of ['innerJoinAndSelect', 'leftJoinAndSelect', 'where', 'andWhere']) query[method] = vi.fn(() => query);
 	const muted = new Set<string>();
 	const blocked = new Set<string>();
 	const mutedInstances: string[] = [];
+	const reactionMute = new HanaReactionMuteService(...[{ find: async () => [{ noteId: 'a', userId: 'muted', reaction: '👍' }] }, { userMutingsCache: { fetch: async () => muted } }, { convertLegacyReaction: (value: string) => value }] as unknown as ConstructorParameters<typeof HanaReactionMuteService>);
 	const dependencies = [
 		{ hanamisearch: { host: 'search.example.test', port: 443, ssl: true, apiKey: 'test-hanamisearch-v2-key', cursorEncryptionKey, index: 'notes', ...settingsOverrides } },
 		{ createQueryBuilder: () => query },
 		{ blockedHosts: [] },
-		{ packMany: async (notes: MiNote[]) => notes.map(n => ({ ...n })) },
+		{ packMany: async (notes: MiNote[], me: MiUser) => {
+			const packed = notes.map(n => ({ ...n })) as unknown as Parameters<HanaReactionMuteService['filterMutedReactions']>[0];
+			await reactionMute.filterMutedReactions(packed, me.id);
+			return packed;
+		} },
 		{ userMutingsCache: { fetch: async () => muted }, userBlockedCache: { fetch: async () => blocked }, userProfileCache: { fetch: async () => ({ mutedInstances }) } },
 		{ isBlockedHost: (_hosts: string[], host: string) => host === 'blocked.example.test' },
 		{ send },
@@ -114,7 +120,7 @@ describe('HanamiSearch v2', () => {
 		const first = await f.service.searchNote('花', viewer, {}, { limit: 1 });
 		await expect(f.service.searchNote('花', viewer, {}, { limit: 1, cursor: `x${first.nextCursor}` })).rejects.toMatchObject({ code: 'INVALID_CURSOR' });
 		const now = Date.now();
-		const clock = jest.spyOn(Date, 'now').mockReturnValue(now + 301_000);
+		const clock = vi.spyOn(Date, 'now').mockReturnValue(now + 301_000);
 		try {
 			await expect(f.service.searchNote('花', viewer, {}, { limit: 1, cursor: first.nextCursor! })).rejects.toMatchObject({ code: 'INVALID_CURSOR' });
 		} finally {
@@ -180,7 +186,7 @@ describe('HanamiSearch v2', () => {
 	 */
 	test('rejects an unexpired legacy continuation with matching search conditions', async () => {
 		const now = 1_783_000_000_000;
-		const clock = jest.spyOn(Date, 'now').mockReturnValue(now);
+		const clock = vi.spyOn(Date, 'now').mockReturnValue(now);
 		try {
 			const cursor = 'AQEBAQEBAQEBAQEBg4UoWW5O7az2xdrtvtraJ81dORNwrM9M5Ie48WFpFOylNn8QxZeJpUpUN4MCZlPiR25bdKyOwd2vVKGohd8IAm0T-l4OrAua9_YAc-diDgIBvI1MZCIjJ58jpl3zeQwJIw39kO634xcrngKdj8Hx6fqRKXV8DjSvFxyLiDDw3ojZQaK1efwTH4PzAI9hPAL5qlbfv845bw';
 			const f = fixture([{ hits: [], nextCursor: null }], []);

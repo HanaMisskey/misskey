@@ -1,4 +1,4 @@
-import { describe, expect, jest, test } from '@jest/globals';
+import { describe, expect, vi, test } from 'vitest';
 import type { MiUser } from '@/models/_.js';
 import { HanamiPlatformError } from '@/core/hanamifeed/HanamiPlatformClient.js';
 import { HanamiRecommendationsService } from '@/core/hanamifeed/HanamiRecommendationsService.js';
@@ -11,8 +11,8 @@ const page = (ids: string[], nextCursor: string | null = null) => ({ kind: 'page
 const authorize = (ids: string[], continuation = 'opaque-step') => ({ kind: 'authorize', continuation, items: ids.map(reference) });
 
 function fixture() {
-	const request = jest.fn<(...args: unknown[]) => Promise<unknown>>();
-	const pack = jest.fn<(refs: ReturnType<typeof reference>[]) => Promise<{ id: string; text?: string }[]>>().mockImplementation(async refs => refs.map(item => ({ id: item.noteId })));
+	const request = vi.fn<(...args: unknown[]) => Promise<unknown>>();
+	const pack = vi.fn<(refs: ReturnType<typeof reference>[]) => Promise<{ id: string; text?: string }[]>>().mockImplementation(async refs => refs.map(item => ({ id: item.noteId })));
 	const access = { packReferences: async (refs: ReturnType<typeof reference>[], _me: MiUser, afterPack?: () => Promise<void>) => {
 		const notes = await pack(refs);
 		await afterPack?.();

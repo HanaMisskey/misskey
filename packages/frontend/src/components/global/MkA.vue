@@ -31,7 +31,9 @@ const props = withDefaults(defineProps<{
 	behavior: null,
 });
 
-const behavior = props.behavior ?? inject<MkABehavior>('linkNavigationBehavior', null);
+const injectedBehavior = inject<MkABehavior>('linkNavigationBehavior', null);
+const behavior = computed(() => props.behavior ?? injectedBehavior);
+const isWindow = inject<boolean>('inWindow', false);
 
 const el = useTemplateRef('el');
 
@@ -49,7 +51,7 @@ const active = computed(() => {
 	return resolved.route.name === router.currentRoute.value.name;
 });
 
-function onContextmenu(ev) {
+function onContextmenu(ev: PointerEvent) {
 	const selection = window.getSelection();
 	if (selection && selection.toString() !== '') return;
 	os.contextMenu([{
@@ -94,19 +96,23 @@ function interruptNavigation() {
 	if (context) interruptHanamiObservation(context);
 }
 
-function nav(ev: MouseEvent) {
+function nav(ev: PointerEvent) {
 	// 制御キーとの組み合わせは無視（shiftを除く）
 	if (ev.metaKey || ev.altKey || ev.ctrlKey) return;
 
 	ev.preventDefault();
 
-	if (behavior === 'browser') {
+	if (behavior.value === 'browser') {
 		interruptNavigation();
-		window.location.href = props.to;
+		if (isWindow) {
+			window.open(props.to, '_blank', 'noopener');
+		} else {
+			window.location.href = props.to;
+		}
 		return;
 	}
 
-	if (behavior === 'window') {
+	if (behavior.value === 'window') {
 		return openWindow();
 	}
 

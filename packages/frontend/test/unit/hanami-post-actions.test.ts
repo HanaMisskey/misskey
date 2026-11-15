@@ -17,16 +17,16 @@ vi.mock('@/instance.js', () => ({ instance: { maxNoteTextLength: 3000 } }));
 vi.mock('@/preferences.js', () => ({ prefer: { s: { defaultNoteVisibility: 'public', defaultNoteLocalOnly: false }, commit: vi.fn() } }));
 vi.mock('@/store.js', async () => {
 	const { ref } = await import('vue');
-	return { store: { s: { showPreview: false }, r: { tips: ref({ postForm: true }) }, set: vi.fn(), makeGetterSetter: () => ({ get: () => false, set: vi.fn() }) } };
+	return { store: { s: { showPreview: false }, r: { tips: ref({ postForm: true }) }, set: vi.fn(), model: (name: string) => ref(name === 'postFormHashtags' ? '' : false), makeGetterSetter: () => ({ get: () => false, set: vi.fn() }) } };
 });
 vi.mock('@/local-storage.js', () => ({ miLocalStorage: { getItem: () => null, setItem: vi.fn() } }));
 vi.mock('@/composables/use-uploader.js', async () => {
 	const { ref } = await import('vue');
-	return { useUploader: () => ({ uploading: ref(false), items: ref([]), readyForUpload: ref(true), allItemsUploaded: ref(true), events: { on: vi.fn() }, upload: vi.fn() }) };
+	return { useUploader: () => ({ uploading: ref(false), items: ref([]), readyForUpload: ref(true), allItemsUploaded: ref(true), events: { on: vi.fn() }, upload: vi.fn(), reset: vi.fn(), abortAll: vi.fn() }) };
 });
 vi.mock('@/plugin.js', () => ({ getPluginHandlers: () => [] }));
 vi.mock('@/accounts.js', () => ({ getAccounts: async () => [], getAccountMenu: vi.fn() }));
-vi.mock('@/utility/autocomplete.js', () => ({ Autocomplete: class {} }));
+vi.mock('@/utility/autocomplete.js', () => ({ Autocomplete: class { detach() {} } }));
 vi.mock('@/utility/drive.js', () => ({ chooseDriveFile: vi.fn(), chooseFileFromUrl: vi.fn() }));
 vi.mock('@/utility/achievements.js', () => ({ claimAchievement: vi.fn() }));
 vi.mock('@/utility/emoji-picker.js', () => ({ emojiPicker: {} }));
@@ -89,8 +89,8 @@ async function settle(milliseconds = 0) {
 }
 
 async function submit(view: ReturnType<typeof mount>, text = 'これは私の応答です') {
-	const input = view.container.querySelector('textarea[data-cy-post-form-text]');
-	const button = view.container.querySelector('button[data-cy-open-post-form-submit]');
+	const input = view.container.querySelector('textarea[data-testid="post-form-text"]');
+	const button = view.container.querySelector('button[data-testid="post-form-submit"]');
 	if (!input || !button) throw new Error('The real composer controls did not render');
 	await fireEvent.update(input, text);
 	expect((button as HTMLButtonElement).disabled).toBe(false);
@@ -149,7 +149,7 @@ describe('recommended reply and quote composer', () => {
 		await settle(500);
 		expect(view.emitted().postError).toHaveLength(1);
 		expect(view.emitted().posted).toBeUndefined();
-		expect((view.container.querySelector('[data-cy-open-post-form-submit]') as HTMLButtonElement).disabled).toBe(false);
+		expect((view.container.querySelector('[data-testid="post-form-submit"]') as HTMLButtonElement).disabled).toBe(false);
 		expect(observations()).toEqual([]);
 	});
 

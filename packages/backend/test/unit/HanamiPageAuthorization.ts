@@ -1,9 +1,10 @@
-import { afterEach, describe, expect, jest, test } from '@jest/globals';
+import { afterEach, describe, expect, vi, test } from 'vitest';
 import type { MiUser } from '@/models/_.js';
 import { HanamiPlatformClient } from '@/core/hanamifeed/HanamiPlatformClient.js';
 import { HanamiNoteAccessService } from '@/core/hanamifeed/HanamiNoteAccessService.js';
 import { HanamiRecommendationsService } from '@/core/hanamifeed/HanamiRecommendationsService.js';
 import { HanamiSearchV2Service } from '@/core/hanamisearch/HanamiSearchV2Service.js';
+import { HanaReactionMuteService } from '@/core/HanaReactionMuteService.js';
 import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
 import { referenceForRows } from '../utils/HanamiNoteReferenceFixture.js';
 import { repository, type TestRow } from '../utils/HanamiRecommendationsFixture.js';
@@ -31,7 +32,7 @@ function fixture(purpose: Purpose, options: { holdValidation?: boolean; replay?:
 		MiUser: [author('alice'), author('bob')],
 		MiFollowing: [], MiBlocking: [], MiMuting: [], MiRenoteMuting: [],
 		MiUserProfile: [{ userId: 'alice', mutedInstances: [] }], MiMeta: [{ id: 'x', blockedHosts: [] }],
-		MiHanamiReadBarrier: [],
+		MiHanamiReadBarrier: [], MiNoteReaction: [],
 	};
 	const lookup = (name: string) => repository(() => rows[name]);
 	const manager = {
@@ -44,7 +45,9 @@ function fixture(purpose: Purpose, options: { holdValidation?: boolean; replay?:
 	const idService = { parse: () => ({ date: new Date(900_000) }), gen: () => 'z' };
 	const packUser = async (src: string | TestRow) => ({ ...rows.MiUser.find(user => user.id === (typeof src === 'string' ? src : src.id)) });
 	const packFiles = async (ids: string[]) => ids.map(id => ({ id, type: 'image/png', url: `https://files.example.test/${id}` }));
+	const muteCache = { userMutingsCache: { fetch: async () => new Set<string>() } };
 	const entityDependencies: Record<string, unknown> = {
+		HanaReactionMuteService: new HanaReactionMuteService(...[lookup('MiNoteReaction'), muteCache, { convertLegacyReaction: (value: string) => value }] as unknown as ConstructorParameters<typeof HanaReactionMuteService>),
 		UserEntityService: { pack: packUser, packMany: async (users: (string | TestRow)[]) => Promise.all(users.map(packUser)) },
 		DriveFileEntityService: { packManyByIds: packFiles, packManyByIdsMap: async (ids: string[]) => new Map((await packFiles(ids)).map(file => [file.id, file])) },
 		CustomEmojiService: { populateEmojis: () => ({}), prefetchEmojis: async () => {} },
@@ -58,7 +61,7 @@ function fixture(purpose: Purpose, options: { holdValidation?: boolean; replay?:
 		lookup('MiUser'), lookup('MiNote'), lookup('MiFollowing'), {}, {}, {}, {},
 	] as unknown as ConstructorParameters<typeof NoteEntityService>);
 	entity.onModuleInit();
-	const packMany = jest.spyOn(entity, 'packMany');
+	const packMany = vi.spyOn(entity, 'packMany');
 	const access = new HanamiNoteAccessService(...[
 		lookup('MiNote'), lookup('MiUser'), lookup('MiFollowing'), lookup('MiBlocking'), lookup('MiMuting'), lookup('MiRenoteMuting'), lookup('MiUserProfile'), lookup('MiMeta'),
 		idService, entity, { isBlockedHost: () => false },
@@ -80,7 +83,7 @@ function fixture(purpose: Purpose, options: { holdValidation?: boolean; replay?:
 	const supplementStarted = deferred<void>();
 	const supplement = deferred<ReturnType<typeof page>>();
 	const http = {
-		send: jest.fn(async (url: string, requestOptions: { body: string }) => {
+		send: vi.fn(async (url: string, requestOptions: { body: string }) => {
 			if (url.endsWith('/internal/v1/recommendations/validate')) {
 				validationStarted.resolve();
 				if (options.holdValidation) await validationRelease.promise;
@@ -122,7 +125,7 @@ function fixture(purpose: Purpose, options: { holdValidation?: boolean; replay?:
 	};
 }
 
-afterEach(() => { jest.restoreAllMocks(); });
+afterEach(() => { vi.restoreAllMocks(); });
 
 /**
  * Oracle: Connector ADR-0020 (09e750148bccfc0ae5e37f73d5251fb230d0407a),
@@ -139,7 +142,7 @@ afterEach(() => { jest.restoreAllMocks(); });
  */
 describe.each(['recommendations', 'search'] as const)('%s final response authorization', purpose => {
 	test.each(['deleted', 'author-hidden', 'unchanged'] as const)('returns only currently readable content when a becomes %s during supplementation', async change => {
-		jest.spyOn(Date, 'now').mockReturnValue(1_000_000);
+		vi.spyOn(Date, 'now').mockReturnValue(1_000_000);
 		const f = fixture(purpose);
 		const result = f.read();
 		await Promise.race([
@@ -171,7 +174,7 @@ describe.each(['recommendations', 'search'] as const)('%s final response authori
  */
 describe.each(['first', 'supplemented', 'replay'] as const)('recommendation validation wait on %s page', acquisition => {
 	test.each(['unchanged', 'deleted', 'author-hidden', 'muted', 'time-expired', 'content-changed'] as const)('returns only the original currently readable content after %s', async change => {
-		const clock = jest.spyOn(Date, 'now').mockReturnValue(999_999);
+		const clock = vi.spyOn(Date, 'now').mockReturnValue(999_999);
 		const f = fixture('recommendations', { holdValidation: true, replay: acquisition === 'replay', noSupplement: acquisition === 'first' });
 		if (change === 'time-expired') f.rows.MiUser[1].makeNotesHiddenBefore = -100;
 		const result = f.read();

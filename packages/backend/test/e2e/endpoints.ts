@@ -6,12 +6,15 @@
 process.env.NODE_ENV = 'test';
 
 import * as assert from 'assert';
+import { describe, beforeAll, test, expect, vi } from 'vitest';
 // node-fetch only supports it's own Blob yet
 // https://github.com/node-fetch/node-fetch/pull/1664
 import { Blob } from 'node-fetch';
-import { api, castAsError, initTestDb, post, signup, simpleGet, uploadFile } from '../utils.js';
+import { api, castAsError, initTestDb, post, role, signup, simpleGet, uploadFile } from '../utils.js';
 import type * as misskey from 'misskey-js';
 import { MiUser } from '@/models/_.js';
+
+const waitForPushToTlOptions = { timeout: 3000, interval: 25 };
 
 describe('Endpoints', () => {
 	let alice: misskey.entities.SignupResponse;
@@ -26,6 +29,32 @@ describe('Endpoints', () => {
 		dave = await signup({ username: 'dave' });
 		await api('admin/update-meta', { federation: 'all' }, alice as misskey.entities.SignupResponse);
 	}, 1000 * 60 * 2);
+
+	/** PR #424: 空キー・false は明示値として保存でき、null を保存すればファイル設定の継承へ戻せる。 */
+	test('admin/meta はセンシティブ判定の明示値と継承への復帰を保存・取得できる', async () => {
+		const original = await api('admin/meta', {}, alice);
+		expect(original.status).toBe(200);
+		try {
+			for (const settings of [
+				{ sensitiveMediaDetectionApiKey: '', sensitiveMediaDetectionUseProxy: false,
+					sensitiveMediaDetectionTimeout: 8000, sensitiveMediaDetectionMaxImagesPerRequest: 2 },
+				{ sensitiveMediaDetectionApiKey: null, sensitiveMediaDetectionUseProxy: null,
+					sensitiveMediaDetectionTimeout: null, sensitiveMediaDetectionMaxImagesPerRequest: null },
+			]) {
+				expect((await api('admin/update-meta', settings, alice)).status).toBe(204);
+				const response = await api('admin/meta', {}, alice);
+				expect(response.status).toBe(200);
+				expect(response.body).toMatchObject(settings);
+			}
+		} finally {
+			expect((await api('admin/update-meta', {
+				sensitiveMediaDetectionApiKey: original.body.sensitiveMediaDetectionApiKey,
+				sensitiveMediaDetectionUseProxy: original.body.sensitiveMediaDetectionUseProxy,
+				sensitiveMediaDetectionTimeout: original.body.sensitiveMediaDetectionTimeout,
+				sensitiveMediaDetectionMaxImagesPerRequest: original.body.sensitiveMediaDetectionMaxImagesPerRequest,
+			}, alice)).status).toBe(204);
+		}
+	});
 
 	describe('signup', () => {
 		test('不正なユーザー名でアカウントが作成できない', async () => {
@@ -211,6 +240,174 @@ describe('Endpoints', () => {
 				noteId: 'kyoppie',
 			});
 			assert.strictEqual(res.status, 400);
+		});
+	});
+
+	/** 集約表示の元種類は和集合として絞り、通常のID順ページングとlocal表記を維持する。 */
+	describe('notes/reactions types', () => {
+		/**
+		 * Oracle: 既存cursor契約ではsinceだけのページはanchor直後から新しい順へ進む。
+		 * 同じ種類の反応をalice→bob→carol→daveの順に作り、sinceId=aliceの次はbob、
+		 * fixtureと独立した2020年の日付以降の最初はalice。typeとtypesは同じページを返す。
+		 */
+		test.each(['sinceId', 'sinceDate'] as const)('同じ種類のtypeとtypesは%sの直後の1件を返す', async (cursor) => {
+			const note = await post(alice, { text: `same reaction forward page ${cursor}` });
+			for (const user of [alice, bob, carol, dave]) {
+				expect((await api('notes/reactions/create', { noteId: note.id, reaction: '😺' }, user)).status).toBe(204);
+			}
+			const all = await api('notes/reactions', { noteId: note.id, type: '😺' });
+			expect(all.status).toBe(200);
+			expect(all.body.map(reaction => reaction.user.id)).toEqual([dave.id, carol.id, bob.id, alice.id]);
+			const anchor = all.body.find(reaction => reaction.user.id === alice.id)!;
+			const sinceDate = Date.parse('2020-01-01T00:00:00.000Z');
+			expect(Date.parse(anchor.createdAt)).toBeGreaterThan(sinceDate);
+			const pagination = cursor === 'sinceId' ? { sinceId: anchor.id } : { sinceDate };
+			const scalar = await api('notes/reactions', { noteId: note.id, type: '😺', limit: 1, ...pagination });
+			const grouped = await api('notes/reactions', { noteId: note.id, types: ['😺'], limit: 1, ...pagination });
+			expect(scalar.status).toBe(200);
+			expect(grouped.status).toBe(200);
+			const expected = [{ userId: cursor === 'sinceId' ? bob.id : alice.id, type: '😺' }];
+			expect(scalar.body.map(reaction => ({ userId: reaction.user.id, type: reaction.type }))).toEqual(expected);
+			expect(grouped.body.map(reaction => ({ userId: reaction.user.id, type: reaction.type }))).toEqual(expected);
+			expect(grouped.body.map(reaction => reaction.id)).toEqual(scalar.body.map(reaction => reaction.id));
+		});
+
+		/**
+		 * Oracle: 種類の和集合全体にcursorとlimitを適用する。
+		 * alice😺→bob❤→carol😺→dave❤の作成順なのでaliceの次はbob、
+		 * fixture以前の独立した日付anchorの次はalice。各種類の最新1件へ飛ばない。
+		 */
+		test.each(['sinceId', 'sinceDate'] as const)('複数種類の和集合から%sの直後の1件を返す', async (cursor) => {
+			const note = await post(alice, { text: `mixed reaction forward page ${cursor}` });
+			for (const [user, reaction] of [[alice, '😺'], [bob, '❤'], [carol, '😺'], [dave, '❤']] as const) {
+				expect((await api('notes/reactions/create', { noteId: note.id, reaction }, user)).status).toBe(204);
+			}
+			const all = await api('notes/reactions', { noteId: note.id, types: ['😺', '❤'] });
+			expect(all.status).toBe(200);
+			expect(all.body.map(reaction => reaction.user.id)).toEqual([dave.id, carol.id, bob.id, alice.id]);
+			const anchor = all.body.find(reaction => reaction.user.id === alice.id)!;
+			const sinceDate = Date.parse('2020-01-01T00:00:00.000Z');
+			expect(Date.parse(anchor.createdAt)).toBeGreaterThan(sinceDate);
+			const pagination = cursor === 'sinceId' ? { sinceId: anchor.id } : { sinceDate };
+			const response = await api('notes/reactions', { noteId: note.id, types: ['😺', '❤'], limit: 1, ...pagination });
+			expect(response.status).toBe(200);
+			expect(response.body.map(reaction => ({ userId: reaction.user.id, type: reaction.type })))
+				.toEqual(cursor === 'sinceId' ? [{ userId: bob.id, type: '❤' }] : [{ userId: alice.id, type: '😺' }]);
+		});
+
+		/** 古い方向の契約は同じ作成順を逆に辿り、未指定はdave、untilId=daveの次はcarol。 */
+		test('typeとtypesはcursor未指定とuntilIdで古い方向の順序を維持する', async () => {
+			const note = await post(alice, { text: 'same reaction backward page' });
+			for (const user of [alice, bob, carol, dave]) {
+				expect((await api('notes/reactions/create', { noteId: note.id, reaction: '😺' }, user)).status).toBe(204);
+			}
+			const scalar = await api('notes/reactions', { noteId: note.id, type: '😺', limit: 1 });
+			const grouped = await api('notes/reactions', { noteId: note.id, types: ['😺'], limit: 1 });
+			expect(scalar.status).toBe(200);
+			expect(grouped.status).toBe(200);
+			expect(scalar.body.map(reaction => reaction.user.id)).toEqual([dave.id]);
+			expect(grouped.body.map(reaction => reaction.id)).toEqual(scalar.body.map(reaction => reaction.id));
+			const untilId = scalar.body[0].id;
+			const scalarNext = await api('notes/reactions', { noteId: note.id, type: '😺', limit: 1, untilId });
+			const groupedNext = await api('notes/reactions', { noteId: note.id, types: ['😺'], limit: 1, untilId });
+			expect(scalarNext.status).toBe(200);
+			expect(groupedNext.status).toBe(200);
+			expect(scalarNext.body.map(reaction => reaction.user.id)).toEqual([carol.id]);
+			expect(groupedNext.body.map(reaction => reaction.id)).toEqual(scalarNext.body.map(reaction => reaction.id));
+		});
+
+		/** frontendが送れるハートの二表記は、作成後には同じ実ハートとして検索できる。 */
+		test('色付きハートの追加は実ハートとして検索できる', async () => {
+			const note = await post(alice, { text: 'real heart' });
+			expect((await api('notes/reactions/create', { noteId: note.id, reaction: '❤️' }, bob)).status).toBe(204);
+			const response = await api('notes/reactions', { noteId: note.id, type: '❤' });
+			expect(response.status).toBe(200);
+			expect(response.body.map(reaction => ({ userId: reaction.user.id, type: reaction.type })))
+				.toEqual([{ userId: bob.id, type: '❤' }]);
+		});
+
+		test('元種類の和集合から実ハートも含めてページングし、他の反応を混ぜない', async () => {
+			const note = await post(alice, { text: 'reaction group' });
+			for (const [user, reaction] of [[alice, '😺'], [bob, '👍'], [carol, '❤']] as const) {
+				expect((await api('notes/reactions/create', { noteId: note.id, reaction }, user)).status).toBe(204);
+			}
+			const first = await api('notes/reactions', { noteId: note.id, types: ['😺', '❤'], limit: 1 });
+			expect(first.status).toBe(200);
+			expect(first.body.map(r => r.user.id)).toEqual([carol.id]);
+			const next = await api('notes/reactions', {
+				noteId: note.id, types: ['😺', '❤'], limit: 1, untilId: first.body[0].id,
+			});
+			expect(next.status).toBe(200);
+			expect(next.body.map(r => r.user.id)).toEqual([alice.id]);
+			const scalar = await api('notes/reactions', { noteId: note.id, type: '👍' });
+			expect(scalar.status).toBe(200);
+			expect(scalar.body.map(r => r.user.id)).toEqual([bob.id]);
+		});
+
+		/** 古い非ミュートUと新しいミュートMが群内にあるとき、limit1はMを除いた上位1件のUを返す。 */
+		test('群の利用者ミュートをLIMITより前に適用し、古い非ミュート反応を返す', async () => {
+			const note = await post(alice, { text: 'visible reaction page' });
+			expect((await api('notes/reactions/create', { noteId: note.id, reaction: '😺' }, bob)).status).toBe(204);
+			expect((await api('notes/reactions/create', { noteId: note.id, reaction: '❤' }, carol)).status).toBe(204);
+			expect((await api('mute/create', { userId: carol.id }, dave)).status).toBe(204);
+			try {
+				const all = await api('notes/reactions', { noteId: note.id, types: ['😺', '❤'], limit: 2 }, dave);
+				expect(all.status).toBe(200);
+				expect(all.body.map(reaction => reaction.user.id)).toEqual([bob.id]);
+				const page = await api('notes/reactions', { noteId: note.id, types: ['😺', '❤'], limit: 1 }, dave);
+				expect(page.status).toBe(200);
+				expect(page.body.map(reaction => reaction.user.id)).toEqual([bob.id]);
+			} finally {
+				expect((await api('mute/delete', { userId: carol.id }, dave)).status).toBe(204);
+			}
+		});
+
+		test('typesのlocal @.表記も既存typeと同じDB表記で検索する', async () => {
+			const emojiOwner = await signup({ username: 'reaction_emoji_owner' });
+			const file = await uploadFile(emojiOwner);
+			assert.strictEqual(file.status, 200);
+			assert.ok(file.body);
+			expect((await api('admin/emoji/add', { fileId: file.body.id, name: 'reaction_group_local' }, alice)).status).toBe(200);
+			const note = await post(alice, { text: 'local reaction group' });
+			expect((await api('notes/reactions/create', { noteId: note.id, reaction: ':reaction_group_local:' }, bob)).status).toBe(204);
+			expect((await api('notes/reactions/create', { noteId: note.id, reaction: '👍' }, carol)).status).toBe(204);
+			const response = await api('notes/reactions', { noteId: note.id, types: [':reaction_group_local@.:'] });
+			expect(response.status).toBe(200);
+			expect(response.body.map(r => r.user.id)).toEqual([bob.id]);
+		});
+
+		/** 空の群・上限超過・旧条件との同時指定は、無条件検索へ縮退せず入力エラーになる。 */
+		test.each([
+			{ reason: '空配列', filter: { types: [] } },
+			{ reason: '1000件超過', filter: { types: Array.from({ length: 1001 }, (_, i) => `:emoji${i}@a.test:`) } },
+			{ reason: 'typeとの同時指定', filter: { type: '😺', types: ['😺'] } },
+		])('typesは$reasonを拒否する', async ({ filter }) => {
+			const note = await post(alice, { text: 'invalid reaction group' });
+			const response = await api('notes/reactions', { noteId: note.id, ...filter });
+			expect(response.status).toBe(400);
+			const body: unknown = response.body;
+			assert.ok(body && typeof body === 'object' && 'error' in body);
+			expect(castAsError(body).error.code).toBe('INVALID_PARAM');
+		});
+
+		/** API上限ちょうどの群は有効であり、上限未満へ狭めて拒否しない。 */
+		test('typesは1000種類まで受け付ける', async () => {
+			const note = await post(alice, { text: 'maximum reaction group' });
+			const response = await api('notes/reactions', {
+				noteId: note.id, types: Array.from({ length: 1000 }, (_, i) => `:emoji${i}@a.test:`),
+			});
+			expect(response.status).toBe(200);
+			expect(response.body).toEqual([]);
+		});
+
+		/** 群指定もノートの可視性を越えず、既存の拒否結果を保つ。 */
+		test('typesを指定しても閲覧できないノートの反応を返さない', async () => {
+			const note = await post(alice, { text: 'private reactions', visibility: 'specified', visibleUserIds: [] });
+			const response = await api('notes/reactions', { noteId: note.id, types: ['❤'] }, bob);
+			expect(response.status).toBe(400);
+			const body: unknown = response.body;
+			assert.ok(body && typeof body === 'object' && 'error' in body);
+			expect(castAsError(body).error.code).toBe('NO_SUCH_NOTE');
 		});
 	});
 
@@ -581,6 +778,30 @@ describe('Endpoints', () => {
 	});
 
 	describe('drive/files/create', () => {
+		const assignRole = async (userId: string, policies: Record<string, unknown>) => {
+			const createdRole = await role(alice, {}, policies);
+
+			const assign = await api('admin/roles/assign', {
+				userId,
+				roleId: createdRole.id,
+			}, alice);
+
+			assert.strictEqual(assign.status, 204);
+
+			return createdRole;
+		};
+
+		const cleanupRole = async (userId: string, roleId: string) => {
+			await api('admin/roles/unassign', {
+				userId,
+				roleId,
+			}, alice);
+
+			await api('admin/roles/delete', {
+				roleId,
+			}, alice);
+		};
+
 		test('ファイルを作成できる', async () => {
 			const res = await uploadFile(alice);
 
@@ -659,6 +880,104 @@ describe('Endpoints', () => {
 				assert.strictEqual(webpublicType, 'image/webp');
 			});
 		}
+
+		test('uploadableFileTypes が */* なら任意のファイルをアップロードできる', async () => {
+			const createdRole = await assignRole(bob.id, {
+				uploadableFileTypes: {
+					useDefault: false,
+					priority: 1,
+					value: ['*/*'],
+				},
+			});
+
+			try {
+				const res = await uploadFile(bob, {
+					blob: new Blob([new Uint8Array(10)]),
+				});
+
+				assert.strictEqual(res.status, 200);
+			} finally {
+				await cleanupRole(bob.id, createdRole.id);
+			}
+		});
+
+		test('uploadableFileTypes に含まれない MIME type は拒否される', async () => {
+			const createdRole = await assignRole(bob.id, {
+				uploadableFileTypes: {
+					useDefault: false,
+					priority: 1,
+					value: ['image/png'],
+				},
+			});
+
+			try {
+				const res = await uploadFile(bob, { path: '192.jpg' });
+
+				assert.strictEqual(res.status, 400);
+				assert.ok(res.body);
+				assert.strictEqual(castAsError(res.body).error.code, 'UNALLOWED_FILE_TYPE');
+			} finally {
+				await cleanupRole(bob.id, createdRole.id);
+			}
+		});
+
+		test('maxFileSizeMb 制限付きロールでも制限内ならアップロードできる', async () => {
+			const allowAllTypesRole = await assignRole(bob.id, {
+				uploadableFileTypes: {
+					useDefault: false,
+					priority: 1,
+					value: ['*/*'],
+				},
+			});
+			const tinyAttachmentRole = await assignRole(bob.id, {
+				maxFileSizeMb: {
+					useDefault: false,
+					priority: 1,
+					value: 10 / 1024 / 1024, // 10バイト
+				},
+			});
+
+			try {
+				const res = await uploadFile(bob, {
+					blob: new Blob([new Uint8Array(10)]),
+				});
+
+				assert.strictEqual(res.status, 200);
+			} finally {
+				await cleanupRole(bob.id, tinyAttachmentRole.id);
+				await cleanupRole(bob.id, allowAllTypesRole.id);
+			}
+		});
+
+		test('maxFileSizeMb 制限を超えると 413 になる', async () => {
+			const allowAllTypesRole = await assignRole(bob.id, {
+				uploadableFileTypes: {
+					useDefault: false,
+					priority: 1,
+					value: ['*/*'],
+				},
+			});
+			const tinyAttachmentRole = await assignRole(bob.id, {
+				maxFileSizeMb: {
+					useDefault: false,
+					priority: 1,
+					value: 10 / 1024 / 1024, // 10バイト
+				},
+			});
+
+			try {
+				const res = await uploadFile(bob, {
+					blob: new Blob([new Uint8Array(11)]),
+				});
+
+				assert.strictEqual(res.status, 413);
+				assert.ok(res.body);
+				assert.strictEqual(castAsError(res.body).error.code, 'MAX_FILE_SIZE_EXCEEDED');
+			} finally {
+				await cleanupRole(bob.id, tinyAttachmentRole.id);
+				await cleanupRole(bob.id, allowAllTypesRole.id);
+			}
+		});
 	});
 
 	describe('drive/files/update', () => {
@@ -1026,12 +1345,14 @@ describe('Endpoints', () => {
 				visibility: 'followers',
 			});
 
-			const res = await api('notes/timeline', {}, dave);
+			await vi.waitFor(async () => {
+				const res = await api('notes/timeline', {}, dave);
 
-			assert.strictEqual(res.status, 200);
-			assert.strictEqual(Array.isArray(res.body), true);
-			assert.strictEqual(res.body.length, 1);
-			assert.strictEqual(res.body[0].id, carolPost.id);
+				assert.strictEqual(res.status, 200);
+				assert.strictEqual(Array.isArray(res.body), true);
+				assert.strictEqual(res.body.length, 1);
+				assert.strictEqual(res.body[0].id, carolPost.id);
+			}, waitForPushToTlOptions);
 		});
 	});
 

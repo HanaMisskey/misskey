@@ -19,7 +19,6 @@ import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
 import { isUserRelated } from '@/misc/is-user-related.js';
 import { isInstanceMuted } from '@/misc/is-instance-muted.js';
 import { isMustRemove } from '@/misc/is-hidden-or-visibility-modified.js';
-import { removeMutedUsersReactions } from '@/misc/reactions-mute.js';
 
 type SearchOptions = {
 	userId?: string | null;
@@ -140,9 +139,8 @@ export class HanamiSearchV2Service {
 						const note = rowsById.get(id);
 						return note && this.isAllowed(note, opts, muted, blocked, mutedInstances) ? [note] : [];
 					});
-					notes = (await this.noteEntityService.packMany(ordered, me, { withReactionAndUserPairCache: true }))
+					notes = (await this.noteEntityService.packMany(ordered, me))
 						.filter(note => !isMustRemove(note, 'home'));
-					await Promise.all(notes.map(note => removeMutedUsersReactions(note, muted)));
 				}
 			}
 			if (platform) {

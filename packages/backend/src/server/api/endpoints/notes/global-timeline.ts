@@ -15,7 +15,6 @@ import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
 import ActiveUsersChart from '@/core/chart/charts/active-users.js';
 import { DI } from '@/di-symbols.js';
 import { RoleService } from '@/core/RoleService.js';
-import { removeMutedUsersReactions } from '@/misc/reactions-mute.js';
 import { ApiError } from '../../error.js';
 
 export const meta = {
@@ -94,6 +93,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				.leftJoinAndSelect('renote.user', 'renoteUser');
 
 			this.queryService.generateBaseNoteFilteringQuery(query, me);
+			if (me == null) this.queryService.generateUgcVisibilityQueryForVisitor(query);
 			if (me) this.queryService.generateMutedUserRenotesQueryForNotes(query, me);
 
 			if (ps.withFiles) {
@@ -126,10 +126,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				}
 			});
 
-			const packedNotes = await this.noteEntityService.packMany(notes, me, { withReactionAndUserPairCache: true });
-			await Promise.all(
-				packedNotes.map(note => removeMutedUsersReactions(note, userIdsWhoMeMuting)),
-			);
+			const packedNotes = await this.noteEntityService.packMany(notes, me);
 			return packedNotes;
 		});
 	}

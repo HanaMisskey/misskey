@@ -7,12 +7,12 @@ import { startHanamiWindow } from '../helpers/hanami-window.js';
 import type * as Misskey from 'misskey-js';
 import type { MenuItem } from '@/types/menu.js';
 
-const { request, popupMenu, contextMenu, userCleanup, stream, viewer, pageWindow, navigate, share, toast, post, lightboxes } = vi.hoisted(() => ({
-	request: vi.fn(), popupMenu: vi.fn(), contextMenu: vi.fn(), userCleanup: vi.fn(), pageWindow: vi.fn(), navigate: vi.fn(), share: vi.fn(), toast: vi.fn(), post: vi.fn(), lightboxes: [] as { next: () => void; zoom: (level: number) => void }[], stream: { send: vi.fn(), on: vi.fn(), off: vi.fn() },
+const { request, popupMenu, contextMenu, userCleanup, stream, viewer, pageWindow, navigate, share, toast, post, popup, lightboxes } = vi.hoisted(() => ({
+	request: vi.fn(), popupMenu: vi.fn(), contextMenu: vi.fn(), userCleanup: vi.fn(), pageWindow: vi.fn(), navigate: vi.fn(), share: vi.fn(), toast: vi.fn(), post: vi.fn(), popup: vi.fn(), lightboxes: [] as { next: () => void; zoom: (level: number) => void }[], stream: { send: vi.fn(), on: vi.fn(), off: vi.fn() },
 	viewer: { id: 'alice', policies: {}, mutedWords: [] as string[][], hardMutedWords: [] as string[][] },
 }));
 vi.mock('@/utility/misskey-api.js', () => ({ misskeyApi: request, misskeyApiGet: request }));
-vi.mock('@/os.js', () => ({ popupMenu, contextMenu, pageWindow, toast, post, claimZIndex: () => 100, success: vi.fn(), alert: vi.fn() }));
+vi.mock('@/os.js', () => ({ popupMenu, contextMenu, pageWindow, toast, post, claimZIndex: () => 100, popupAsyncWithDialog: popup, success: vi.fn(), alert: vi.fn() }));
 vi.mock('@/i.js', () => ({ $i: viewer, iAmModerator: false }));
 vi.mock('@/instance.js', () => ({ instance: {} }));
 vi.mock('@/store.js', () => ({ store: { s: { realtimeMode: true } } }));
@@ -47,7 +47,6 @@ vi.mock('@/components/MkMediaBanner.vue', () => ({ default: { render: () => null
 vi.mock('@/components/MkMediaVideo.vue', () => ({ default: { render: () => null } }));
 vi.mock('@/components/MkImgWithBlurhash.vue', () => ({ default: { render: () => null } }));
 vi.mock('@/utility/sensitive-file.js', () => ({ shouldHideFileByDefault: () => false, canRevealFile: async () => true }));
-vi.mock('photoswipe', () => ({ default: {} }));
 vi.mock('@/components/MkCwButton.vue', () => ({ default: { render: () => null } }));
 vi.mock('@/components/MkPoll.vue', () => ({ default: { render: () => null } }));
 vi.mock('@/components/MkUsersTooltip.vue', () => ({ default: { render: () => null } }));
@@ -77,39 +76,12 @@ vi.mock('@/components/MkUserCardMini.vue', () => ({ default: { render: () => nul
 vi.mock('@/components/MkReactionIcon.vue', () => ({ default: { render: () => null } }));
 vi.mock('@/components/MkClipPreview.vue', () => ({ default: { render: () => null } }));
 
-/** PhotoSwipe is the external presentation boundary: clicks on the actual image element open its gallery, and its documented lifecycle events are delivered back to real MkMediaList. */
-vi.mock('photoswipe/lightbox', () => ({ default: class {
-	callbacks = new Map<string, ((event?: unknown) => void)[]>();
-	pswp: { currIndex: number; currSlide: { data: unknown; currZoomLevel: number; zoomLevels: { initial: number } }; element: HTMLElement; isOpen: boolean; ui: { registerElement: () => void } } | undefined;
-	constructor(private options: { gallery: HTMLElement; dataSource: unknown[] }) { lightboxes.push(this); }
-	on(name: string, callback: (event?: unknown) => void) { this.callbacks.set(name, [...(this.callbacks.get(name) ?? []), callback]); }
-	addFilter() {}
-	emit(name: string) { for (const callback of this.callbacks.get(name) ?? []) callback({ slide: this.pswp?.currSlide }); }
-	click = (event: Event) => {
-		const target = (event.target as HTMLElement).closest('.image');
-		if (!target) return;
-		event.preventDefault();
-		this.loadAndOpen([...this.options.gallery.querySelectorAll('.image')].indexOf(target));
-	};
-	init() { this.options.gallery.addEventListener('click', this.click); }
-	loadAndOpen(index: number) {
-		this.pswp = { currIndex: index, currSlide: { data: this.options.dataSource[index], currZoomLevel: 1, zoomLevels: { initial: 1 } }, element: document.createElement('div'), isOpen: true, ui: { registerElement() {} } };
-		this.emit('change');
-		this.emit('afterInit');
-	}
-	next() {
-		if (!this.pswp) throw new Error('Gallery has not opened');
-		this.pswp.currIndex++;
-		this.pswp.currSlide = { data: this.options.dataSource[this.pswp.currIndex], currZoomLevel: 1, zoomLevels: { initial: 1 } };
-		this.emit('change');
-	}
-	zoom(level: number) {
-		if (!this.pswp) throw new Error('Gallery has not opened');
-		this.pswp.currSlide.currZoomLevel = level;
-		this.emit('zoomPanUpdate');
-	}
-	destroy() { this.options.gallery.removeEventListener('click', this.click); this.emit('destroy'); }
-} }));
+vi.mock('@/utility/get-file-menu.js', () => ({ getFileMenu: () => [] }));
+vi.mock('@/utility/focus-trap.js', () => ({ focusTrap: () => ({ release: vi.fn() }) }));
+vi.mock('@/utility/touch.js', () => ({ isTouchUsing: false }));
+vi.mock('@/components/MkLightbox.item.controls.vue', () => ({ default: { render: () => null } }));
+vi.mock('@/components/MkLightbox.item.fileinfo.vue', () => ({ default: { render: () => null } }));
+vi.mock('@/components/MkBlurhash.vue', () => ({ default: { render: () => null } }));
 
 import MkNote from '@/components/MkNote.vue';
 import MkA from '@/components/global/MkA.vue';
@@ -182,6 +154,14 @@ beforeEach(() => {
 	viewer.hardMutedWords = [];
 	window.localStorage.clear();
 	lightboxes.length = 0;
+	popup.mockImplementation(async (component, props, listeners) => {
+		const view = render(await component, { props: { ...props, ...Object.fromEntries(Object.entries(listeners).map(([name, handler]) => [`on${name[0].toUpperCase()}${name.slice(1)}`, handler])) }, global: { directives: { hotkey: {} }, stubs: { MkLoading: true, MkCondensedLine: true } } });
+		lightboxes.push({
+			next: () => { view.container.querySelector('.ti-arrow-right')!.closest('button')!.click(); },
+			zoom: () => { view.container.querySelector('img')!.dispatchEvent(new WheelEvent('wheel', { bubbles: true, deltaY: -100, clientX: 200, clientY: 200 })); },
+		});
+		return { dispose: () => view.unmount() };
+	});
 	pageWindow.mockReset();
 	navigate.mockReset();
 	share.mockResolvedValue(undefined);
@@ -226,7 +206,7 @@ describe('recommended note existing menu integration', () => {
 		const children = await adjustment(menu);
 		const less = children.find(item => 'text' in item && item.text === 'この作者を減らす');
 		if (!less || !('action' in less)) throw new Error('Author less action is missing');
-		await less.action(new MouseEvent('click'));
+		await less.action(new PointerEvent('click'));
 		expect(request).toHaveBeenCalledWith('hanami-feedback', expect.objectContaining({ snapshotId: 'snapshot1', entryId: 'entry-recommended', target: { kind: 'author', id: 'bob' }, action: 'less', eventId: expect.any(String) }));
 		expect(view.queryByRole('button', { name: 'おすすめの調整' })).toBeNull();
 	});
@@ -283,7 +263,7 @@ test.each(['reply', 'quote'] as const)('passes recommendation context through th
 			const menu = await Promise.all(popupMenu.mock.calls.at(-1)?.[0] as MenuItem[]);
 			const quote = menu.find(item => 'text' in item && item.text === '引用');
 			if (!quote || !('action' in quote)) throw new Error('The existing quote action did not open');
-			await quote.action(new MouseEvent('click'));
+			await quote.action(new PointerEvent('click'));
 		}
 		await nextTick();
 		const args = post.mock.calls.at(-1)?.[0];
@@ -367,20 +347,20 @@ describe('recommendation interaction outcomes from existing note controls', () =
 			if (!copy || !('action' in copy)) throw new Error('Timestamp context menu has no copy-link action');
 			return copy.action;
 		};
-		await (await timestampCopy('ordinary'))(new MouseEvent('click'));
+		await (await timestampCopy('ordinary'))(new PointerEvent('click'));
 		await settle(500);
 		expect(navigator.clipboard.writeText).toHaveBeenCalledTimes(1);
 		expect(interactions()).toEqual([]);
 		const copy = await timestampCopy('recommended');
 		await settle(500);
 		expect(interactions()).toEqual([]);
-		await copy(new MouseEvent('click'));
+		await copy(new PointerEvent('click'));
 		await settle(500);
 		expect(navigator.clipboard.writeText).toHaveBeenCalledTimes(2);
 		expect(interactions()).toEqual([expect.objectContaining({ kind: 'link_copy', noteId: 'recommended', snapshotId: 'snapshot1', entryId: 'entry-recommended' })]);
 	});
 
-	/** Oracle: image opening, changing to another attached image and deliberate zoom are separate observable interactions; merely rendering thumbnails or PhotoSwipe's repeated zoom callbacks is not another operation. Image identity comes from the displayed recommendation's actual files. */
+	/** Oracle: image opening, changing to another attached image and deliberate zoom are separate observable interactions; merely rendering thumbnails or continuing the same gallery zoom is not another operation. Image identity comes from the displayed recommendation's actual files. */
 	test('records the actual gallery open, zoom and next image without counting initial thumbnails', async () => {
 		const top = note('recommended');
 		top.files = ['first', 'second'].map(id => ({
@@ -392,6 +372,7 @@ describe('recommendation interaction outcomes from existing note controls', () =
 		await settle();
 		expect(interactions()).toEqual([]);
 		await fireEvent.click(view.getByAltText('first.png'));
+		await vi.dynamicImportSettled();
 		await settle(500);
 		expect(interactions().filter(record => record.kind === 'image_open')).toEqual([expect.objectContaining({ kind: 'image_open', noteId: 'recommended', fileId: 'first' })]);
 		lightboxes[0].zoom(2);
@@ -416,7 +397,7 @@ describe('recommendation interaction outcomes from existing note controls', () =
 		const view = mount();
 		await settle();
 		const action = await choose(view, label);
-		const outcome = action(new MouseEvent('click'));
+		const outcome = action(new PointerEvent('click'));
 		await settle(500);
 		expect(kind === 'link_copy' ? navigator.clipboard.writeText : share).toHaveBeenCalledTimes(1);
 		expect(interactions().filter(record => record.kind === kind)).toEqual([]);
@@ -438,10 +419,10 @@ describe('recommendation interaction outcomes from existing note controls', () =
 		const view = mount();
 		await settle();
 		const action = await choose(view, label);
-		await Promise.resolve(action(new MouseEvent('click'))).catch(() => {});
+		await Promise.resolve(action(new PointerEvent('click'))).catch(() => {});
 		await settle(500);
 		expect(interactions().filter(record => record.kind === kind)).toEqual([]);
-		await action(new MouseEvent('click'));
+		await action(new PointerEvent('click'));
 		await settle(500);
 		expect(interactions().filter(record => record.kind === kind)).toHaveLength(1);
 	});
@@ -449,11 +430,11 @@ describe('recommendation interaction outcomes from existing note controls', () =
 	test('does not attribute an ordinary note copy to the recommendation beside it', async () => {
 		const view = mount();
 		await settle();
-		await (await choose(view, 'リンクをコピー', '本文 ordinary'))(new MouseEvent('click'));
+		await (await choose(view, 'リンクをコピー', '本文 ordinary'))(new PointerEvent('click'));
 		await settle(500);
 		expect(navigator.clipboard.writeText).toHaveBeenCalledTimes(1);
 		expect(interactions()).toEqual([]);
-		await (await choose(view, 'リンクをコピー'))(new MouseEvent('click'));
+		await (await choose(view, 'リンクをコピー'))(new PointerEvent('click'));
 		await settle(500);
 		expect(interactions()).toEqual([expect.objectContaining({ kind: 'link_copy', noteId: 'recommended' })]);
 	});
@@ -474,7 +455,7 @@ describe('recommendation interaction outcomes from existing note controls', () =
 		};
 		pageWindow.mockImplementation(open);
 		navigate.mockImplementation(open);
-		if (source === 'menu') await (await choose(view, '詳細'))(new MouseEvent('click'));
+		if (source === 'menu') await (await choose(view, '詳細'))(new PointerEvent('click'));
 		else {
 			const link = [...view.container.querySelectorAll('a')].find(element => element.getAttribute('href')?.startsWith('/notes/recommended'));
 			if (!link) throw new Error('The real note header has no timestamp link');
@@ -528,7 +509,7 @@ describe('native note-menu operations inside a window', () => {
 			await fireEvent.contextMenu(view.getByText('日時'));
 			const item = contextMenu.mock.calls.at(-1)?.[0].find((item: MenuItem) => 'text' in item && item.text === 'リンクをコピー');
 			outcome = item.action();
-		} else outcome = (await actionFor(value, kind === 'share' ? '共有' : kind === 'remote-copy' ? 'リモートのリンクをコピー' : 'リンクをコピー'))(new MouseEvent('click'));
+		} else outcome = (await actionFor(value, kind === 'share' ? '共有' : kind === 'remote-copy' ? 'リモートのリンクをコピー' : 'リンクをコピー'))(new PointerEvent('click'));
 		await settle(60_500);
 		expect(closes()).toEqual([expect.objectContaining({ complete: false })]);
 		succeed(); await outcome; await settle(500);
@@ -544,7 +525,7 @@ describe('native note-menu operations inside a window', () => {
 			await fireEvent.contextMenu(view.getByText('日時'));
 			const item = contextMenu.mock.calls.at(-1)?.[0].find((item: MenuItem) => 'text' in item && item.text === '新しいタブで開く');
 			item.action();
-		} else await (await actionFor(value, kind === 'spa' ? '詳細' : 'リモートで表示'))(new MouseEvent('click'));
+		} else await (await actionFor(value, kind === 'spa' ? '詳細' : 'リモートで表示'))(new PointerEvent('click'));
 		await settle(60_500);
 		expect(closes()).toEqual([expect.objectContaining({ complete: kind === 'spa' })]);
 	});
@@ -568,7 +549,7 @@ describe('recommendation provenance across a fresh document module context', () 
 		const menu = await Promise.all(contextMenu.mock.calls.at(-1)?.[0] as MenuItem[]);
 		const newTab = menu.find(item => 'text' in item && item.text === '新しいタブで開く');
 		if (!newTab || !('action' in newTab)) throw new Error('The native new-tab action was not rendered');
-		await newTab.action(new MouseEvent('click'));
+		await newTab.action(new PointerEvent('click'));
 		const path = browserOpen.mock.calls[0]?.[0];
 		if (typeof path !== 'string') throw new Error('The new-tab action did not supply a route');
 		expect(new URL(path, 'https://example.test').searchParams.get('hanami')).toBeTruthy();
@@ -581,8 +562,8 @@ describe('recommendation provenance across a fresh document module context', () 
 		expect(interactions()).toEqual([expect.objectContaining({ kind: 'detail_open', noteId: 'recommended', snapshotId: 'snapshot1', entryId: 'entry-recommended' })]);
 		await fireEvent.click(detail.getByAltText('new-tab-image.png'));
 		await settle(500);
-		await (await choose(detail, 'リンクをコピー'))(new MouseEvent('click'));
-		await (await choose(detail, '共有'))(new MouseEvent('click'));
+		await (await choose(detail, 'リンクをコピー'))(new PointerEvent('click'));
+		await (await choose(detail, '共有'))(new PointerEvent('click'));
 		await settle(500);
 		expect(interactions().map(record => record.kind)).toEqual(['detail_open', 'image_open', 'link_copy', 'share']);
 		expect(interactions().every(record => record.noteId === 'recommended' && record.entryId === 'entry-recommended')).toBe(true);

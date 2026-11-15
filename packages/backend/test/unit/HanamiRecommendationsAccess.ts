@@ -1,9 +1,10 @@
 import { readFileSync } from 'node:fs';
-import { afterEach, describe, expect, jest, test } from '@jest/globals';
+import { afterEach, describe, expect, vi, test } from 'vitest';
 import { Test } from '@nestjs/testing';
 import type { MiUser } from '@/models/_.js';
 import { HanamiPlatformError } from '@/core/hanamifeed/HanamiPlatformClient.js';
 import { HanamiNoteAccessService } from '@/core/hanamifeed/HanamiNoteAccessService.js';
+import { HanaReactionMuteService } from '@/core/HanaReactionMuteService.js';
 import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
 import { IdService } from '@/core/IdService.js';
 import { UtilityService } from '@/core/UtilityService.js';
@@ -17,7 +18,7 @@ const viewer = { id: 'alice', host: null } as MiUser;
 const modules: TestingModule[] = [];
 
 function author(id: string, extra: TestRow = {}): TestRow {
-	return { id, username: id, host: null, isSuspended: false, isDeleted: false, isInHanaMode: false, requireSigninToViewContents: false, makeNotesHiddenBefore: null, makeNotesFollowersOnlyBefore: null, ...extra };
+	return { id, username: id, emojis: [], host: null, isSuspended: false, isDeleted: false, isInHanaMode: false, requireSigninToViewContents: false, makeNotesHiddenBefore: null, makeNotesFollowersOnlyBefore: null, ...extra };
 }
 
 function note(id: string, extra: TestRow = {}): TestRow {
@@ -35,7 +36,7 @@ function note(id: string, extra: TestRow = {}): TestRow {
 async function fixture(initialNotes: TestRow[] = [note('note1')]) {
 	const state = {
 		unpackedFiles: new Set<string>(), notes: initialNotes, users: [author('alice'), author('bob'), author('carol')],
-		followings: [] as TestRow[], blockings: [] as TestRow[], mutings: [] as TestRow[], renoteMutings: [] as TestRow[],
+		reactions: [] as TestRow[], cachedMuted: new Set<string>(), followings: [] as TestRow[], blockings: [] as TestRow[], mutings: [] as TestRow[], renoteMutings: [] as TestRow[],
 		profiles: [{ userId: 'alice', mutedInstances: [] }] as TestRow[], metas: [{ id: 'x', blockedHosts: [] }] as TestRow[],
 	};
 	const repos = {
@@ -45,24 +46,31 @@ async function fixture(initialNotes: TestRow[] = [note('note1')]) {
 		profiles: repository(() => state.profiles), metas: repository(() => state.metas),
 	};
 	const createdAt = new Map(initialNotes.map(row => [String(row.id), 900_000]));
-	const idService = { parse: (id: string) => ({ date: new Date(createdAt.get(id) ?? 900_000) }) };
+	const idService = { gen: () => 'z', parse: (id: string) => ({ date: new Date(createdAt.get(id) ?? 900_000) }) };
+	const packUser = async (src: string | TestRow) => ({ ...state.users.find(user => user.id === (typeof src === 'string' ? src : src.id)) });
+	const packFiles = async (ids: string[]) => ids.filter(id => !state.unpackedFiles.has(id)).map(id => ({ id, type: 'image/png', url: `https://files.example.test/${id}` }));
+	const reactionRepository = repository(() => state.reactions);
+	const cache = { userFollowingsCache: { fetch: async (id: string) => Object.fromEntries(state.followings.filter(row => row.followerId === id).map(row => [row.followeeId, {}])) }, userMutingsCache: { fetch: async () => state.cachedMuted } };
+	const reaction = { convertLegacyReactions: (value: unknown) => value, convertLegacyReaction: (value: string) => value, decodeReaction: () => ({ name: null }) };
 	const entityDependencies: Record<string, unknown> = {
-		UserEntityService: { pack: async (src: string | TestRow) => ({ ...state.users.find(user => user.id === (typeof src === 'string' ? src : src.id)) }) },
-		DriveFileEntityService: { packManyByIds: async (ids: string[]) => ids.filter(id => !state.unpackedFiles.has(id)).map(id => ({ id, type: 'image/png', url: `https://files.example.test/${id}` })) },
-		CustomEmojiService: { populateEmojis: () => ({}) },
-		ReactionService: { convertLegacyReactions: (value: unknown) => value },
+		UserEntityService: { pack: packUser, packMany: async (users: (string | TestRow)[]) => Promise.all(users.map(packUser)) },
+		DriveFileEntityService: { packManyByIds: packFiles, packManyByIdsMap: async (ids: string[]) => new Map((await packFiles(ids)).map(file => [file.id, file])) },
+		CustomEmojiService: { populateEmojis: () => ({}), prefetchEmojis: async () => {}, parseEmojiStr: (name: string, host: string | null) => ({ name, host }) },
+		ReactionService: reaction,
 		ReactionsBufferingService: { mergeReactions: (value: unknown) => value },
 		IdService: idService,
-		CacheService: { userFollowingsCache: { fetch: async (id: string) => Object.fromEntries(state.followings.filter(row => row.followerId === id).map(row => [row.followeeId, {}])) } },
+		CacheService: cache,
+		HanaReactionMuteService: new HanaReactionMuteService(...[reactionRepository, cache, reaction] as unknown as ConstructorParameters<typeof HanaReactionMuteService>),
 	};
 	const actualPack = new NoteEntityService(...[
 		{ get: (name: string) => entityDependencies[name] }, { enableReactionsBuffering: false },
-		repos.users, repos.notes, repos.followings, {}, {}, {}, repository(() => [{ id: 'channel1', name: 'test channel', color: '#000000', isSensitive: false, allowRenoteToExternal: false, userId: 'bob' }]),
+		repos.users, repos.notes, repos.followings, {}, {}, reactionRepository, repository(() => [{ id: 'channel1', name: 'test channel', color: '#000000', isSensitive: false, allowRenoteToExternal: false, userId: 'bob' }]),
 	] as unknown as ConstructorParameters<typeof NoteEntityService>);
 	actualPack.onModuleInit();
 	let afterPack: () => void = () => {};
-	const packMany = jest.spyOn(actualPack, 'packMany').mockImplementation(async (notes, me) => {
-		const packed = await Promise.all(notes.map(row => actualPack.pack(row, me, { detail: true, withReactionAndUserPairCache: true })));
+	const originalPackMany = actualPack.packMany.bind(actualPack);
+	const packMany = vi.spyOn(actualPack, 'packMany').mockImplementation(async (notes, me, options) => {
+		const packed = await originalPackMany(notes, me, options);
 		afterPack();
 		return packed;
 	});
@@ -82,7 +90,7 @@ async function fixture(initialNotes: TestRow[] = [note('note1')]) {
 }
 
 afterEach(async () => {
-	jest.restoreAllMocks();
+	vi.restoreAllMocks();
 	await Promise.all(modules.splice(0).map(app => app.close()));
 });
 
@@ -229,7 +237,7 @@ describe('source state reference guards', () => {
 	});
 
 	test('rejects an expired generic guard at equality without interpreting its reason', async () => {
-		const clock = jest.spyOn(Date, 'now').mockReturnValue(now - 1);
+		const clock = vi.spyOn(Date, 'now').mockReturnValue(now - 1);
 		const f = await fixture();
 		const refs = f.refs(['note1'], now);
 		expect((await f.service.packReferences(refs, viewer)).map((row: { id: string }) => row.id)).toEqual(['note1']);
@@ -270,6 +278,7 @@ describe('current reference authorization', () => {
 		expect(f.packMany).not.toHaveBeenCalled();
 	});
 
+	/** Oracle: a relationship change after packing invalidates its reaction projection; REFRESH_REQUIRED prevents releasing counts based on the superseded mute set. Deletion or visibility changes may still remove individual notes. */
 	test.each(['deleted', 'private', 'hidden', 'muted', 'renote-muted'] as const)('rechecks %s after final validation', async change => {
 		const f = await fixture();
 		const refs = f.refs(['note1']);
@@ -280,14 +289,37 @@ describe('current reference authorization', () => {
 			if (change === 'muted') f.state.mutings.push({ muterId: 'alice', muteeId: 'bob', expiresAt: null });
 			if (change === 'renote-muted') f.state.renoteMutings.push({ muterId: 'alice', muteeId: 'bob' });
 		});
-		if (change === 'renote-muted') await expect(result).rejects.toMatchObject({ code: 'REFRESH_REQUIRED' });
+		if (change === 'muted' || change === 'renote-muted') await expect(result).rejects.toMatchObject({ code: 'REFRESH_REQUIRED' });
 		else expect(await result).toEqual([]);
 	});
 
 	test.each(['empty', 'denied', 'packed'] as const)('runs and propagates final validation for %s references', async condition => {
 		const f = await fixture([note('note1', condition === 'denied' ? { visibility: 'specified', visibleUserIds: [] } : {})]);
-		const callback = jest.fn(async () => { throw new HanamiPlatformError(); });
+		const callback = vi.fn(async () => { throw new HanamiPlatformError(); });
 		await expect(f.service.packReferences(f.refs(condition === 'empty' ? [] : ['note1']), viewer, callback)).rejects.toMatchObject({ code: 'UNAVAILABLE' });
 		expect(callback).toHaveBeenCalledTimes(1);
+	});
+});
+
+/** Oracle: an authenticated page uses current database mutes for reaction privacy even while the usual cache is stale. The real Access, NoteEntity packMany and reaction projector run; only repository rows and ancillary serialization are doubled. */
+describe('fresh reaction visibility through recommendation packing', () => {
+	test.each([false, true])('projects the current mute set while the cache has the opposite state: muted=%s', async muted => {
+		const f = await fixture([note('note1', { reactions: { '👍': 2 }, reactionAndUserPairCache: ['other/👍'] })]);
+		f.state.reactions.push({ noteId: 'note1', userId: 'carol', reaction: '👍' });
+		if (muted) f.state.mutings.push({ muterId: 'alice', muteeId: 'carol', expiresAt: null });
+		else f.state.cachedMuted.add('carol');
+		const result = await f.service.packReferences(f.refs(['note1']), viewer);
+		expect(result).toHaveLength(1);
+		expect(result[0].reactions).toEqual({ '👍': muted ? 1 : 2 });
+		expect(result[0].reactionCount).toBe(muted ? 1 : 2);
+		expect(result[0]).not.toHaveProperty('reactionAndUserPairCache');
+	});
+
+	test('requires refresh when a reacting non-author is muted during final validation', async () => {
+		const f = await fixture([note('note1', { reactions: { '👍': 2 }, reactionAndUserPairCache: ['other/👍'] })]);
+		f.state.reactions.push({ noteId: 'note1', userId: 'carol', reaction: '👍' });
+		await expect(f.service.packReferences(f.refs(['note1']), viewer, async () => {
+			f.state.mutings.push({ muterId: 'alice', muteeId: 'carol', expiresAt: null });
+		})).rejects.toMatchObject({ code: 'REFRESH_REQUIRED' });
 	});
 });

@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: syuilo and misskey-project
+ * SPDX-License-Identifier: AGPL-3.0-only
+ */
+
 import { Inject, Injectable } from '@nestjs/common';
 import { DI } from '@/di-symbols.js';
 import type { NotesRepository, UsersRepository, FollowingsRepository, BlockingsRepository, MutingsRepository, RenoteMutingsRepository, UserProfilesRepository, MetasRepository, MiNote, MiUser } from '@/models/_.js';
@@ -6,7 +11,6 @@ import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
 import { IdService } from '@/core/IdService.js';
 import { UtilityService } from '@/core/UtilityService.js';
 import { shouldHideNoteByTime } from '@/misc/should-hide-note-by-time.js';
-import { removeMutedUsersReactions } from '@/misc/reactions-mute.js';
 import { HanamiPlatformError } from './HanamiPlatformClient.js';
 import { hanamiNoteStateDigest, validHanamiNoteReference } from './HanamiNoteReference.js';
 import type { HanamiNoteReference, HanamiNoteGraph } from './HanamiNoteReference.js';
@@ -144,9 +148,10 @@ export class HanamiNoteAccessService {
 		}
 		const versions = new Map(graphs.map(graph => [graph.note.id, this.version(graph)]));
 		// 通常のpackはfollow cacheを使うため、この境界ではfreshな判定を前後に行う。
-		const packed = await this.noteEntityService.packMany(graphs.map(graph => graph.note), me, { detail: true, skipHide: true, withReactionAndUserPairCache: true });
+		const packed = await this.noteEntityService.packMany(graphs.map(graph => graph.note), me, { detail: true, skipHide: true, mutedUserIds: access.muted });
 		await afterPack?.();
 		const current = await this.access(me);
+		if (current.muted.size !== access.muted.size || [...current.muted].some(id => !access.muted.has(id))) throw new HanamiPlatformError('REFRESH_REQUIRED');
 		if (current.renoteMuted.size !== access.renoteMuted.size || [...current.renoteMuted].some(id => !access.renoteMuted.has(id))) throw new HanamiPlatformError('REFRESH_REQUIRED');
 		const currentGraphs = await Promise.all(graphs.map(graph => this.graph(graph.note.id, true, new Set(), reference)));
 		const allowed = new Set(currentGraphs.filter((graph): graph is Graph => graph != null && this.matches(graph, request) && this.allowed(graph, me, current, request) && this.version(graph) === versions.get(graph.note.id)).map(graph => graph.note.id));
@@ -156,7 +161,6 @@ export class HanamiNoteAccessService {
 			const note = byId.get(id);
 			return note ? [note] : [];
 		});
-		await Promise.all(result.map(note => removeMutedUsersReactions(note, current.muted)));
 		return result as HanamiPackedNote[];
 	}
 

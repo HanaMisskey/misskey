@@ -16,12 +16,12 @@ import { UserSearchService } from '@/core/UserSearchService.js';
 import { WebhookTestService } from '@/core/WebhookTestService.js';
 import { FlashService } from '@/core/FlashService.js';
 import { ChannelMutingService } from '@/core/ChannelMutingService.js';
+import { HanaReactionMuteService } from '@/core/HanaReactionMuteService.js';
 import { AccountMoveService } from './AccountMoveService.js';
 import { AccountUpdateService } from './AccountUpdateService.js';
-import { AiService } from './AiService.js';
+import { SensitiveMediaDetectionService } from './SensitiveMediaDetectionService.js';
 import { AnnouncementService } from './AnnouncementService.js';
 import { AntennaService } from './AntennaService.js';
-import { AppLockService } from './AppLockService.js';
 import { AchievementService } from './AchievementService.js';
 import { AvatarDecorationService } from './AvatarDecorationService.js';
 import { CaptchaService } from './CaptchaService.js';
@@ -147,7 +147,7 @@ import { ApLoggerService } from './activitypub/ApLoggerService.js';
 import { ApMfmService } from './activitypub/ApMfmService.js';
 import { ApRendererService } from './activitypub/ApRendererService.js';
 import { ApRequestService } from './activitypub/ApRequestService.js';
-import { ApResolverService } from './activitypub/ApResolverService.js';
+import { ApResolverService, Resolver } from './activitypub/ApResolverService.js';
 import { JsonLdService } from './activitypub/JsonLdService.js';
 import { RemoteLoggerService } from './RemoteLoggerService.js';
 import { RemoteUserResolveService } from './RemoteUserResolveService.js';
@@ -160,18 +160,19 @@ import { ApQuestionService } from './activitypub/models/ApQuestionService.js';
 import { QueueModule } from './QueueModule.js';
 import { QueueService } from './QueueService.js';
 import { LoggerService } from './LoggerService.js';
+import { TelemetryService } from './telemetry/TelemetryService.js';
 import type { Provider } from '@nestjs/common';
 
 //#region 文字列ベースでのinjection用(循環参照対応のため)
 const $LoggerService: Provider = { provide: 'LoggerService', useExisting: LoggerService };
+const $TelemetryService: Provider = { provide: 'TelemetryService', useExisting: TelemetryService };
 const $AbuseReportService: Provider = { provide: 'AbuseReportService', useExisting: AbuseReportService };
 const $AbuseReportNotificationService: Provider = { provide: 'AbuseReportNotificationService', useExisting: AbuseReportNotificationService };
 const $AccountMoveService: Provider = { provide: 'AccountMoveService', useExisting: AccountMoveService };
 const $AccountUpdateService: Provider = { provide: 'AccountUpdateService', useExisting: AccountUpdateService };
-const $AiService: Provider = { provide: 'AiService', useExisting: AiService };
+const $SensitiveMediaDetectionService: Provider = { provide: 'SensitiveMediaDetectionService', useExisting: SensitiveMediaDetectionService };
 const $AnnouncementService: Provider = { provide: 'AnnouncementService', useExisting: AnnouncementService };
 const $AntennaService: Provider = { provide: 'AntennaService', useExisting: AntennaService };
-const $AppLockService: Provider = { provide: 'AppLockService', useExisting: AppLockService };
 const $AchievementService: Provider = { provide: 'AchievementService', useExisting: AchievementService };
 const $AvatarDecorationService: Provider = { provide: 'AvatarDecorationService', useExisting: AvatarDecorationService };
 const $CaptchaService: Provider = { provide: 'CaptchaService', useExisting: CaptchaService };
@@ -209,6 +210,7 @@ const $SignupService: Provider = { provide: 'SignupService', useExisting: Signup
 const $WebAuthnService: Provider = { provide: 'WebAuthnService', useExisting: WebAuthnService };
 const $UserBlockingService: Provider = { provide: 'UserBlockingService', useExisting: UserBlockingService };
 const $CacheService: Provider = { provide: 'CacheService', useExisting: CacheService };
+const $HanaReactionMuteService: Provider = { provide: 'HanaReactionMuteService', useExisting: HanaReactionMuteService };
 const $UserService: Provider = { provide: 'UserService', useExisting: UserService };
 const $UserFollowingService: Provider = { provide: 'UserFollowingService', useExisting: UserFollowingService };
 const $UserKeypairService: Provider = { provide: 'UserKeypairService', useExisting: UserKeypairService };
@@ -324,10 +326,9 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		AbuseReportNotificationService,
 		AccountMoveService,
 		AccountUpdateService,
-		AiService,
+		SensitiveMediaDetectionService,
 		AnnouncementService,
 		AntennaService,
-		AppLockService,
 		AchievementService,
 		AvatarDecorationService,
 		CaptchaService,
@@ -365,6 +366,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		WebAuthnService,
 		UserBlockingService,
 		CacheService,
+		HanaReactionMuteService,
 		UserService,
 		UserFollowingService,
 		UserKeypairService,
@@ -462,6 +464,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		ApRendererService,
 		ApRequestService,
 		ApResolverService,
+		Resolver,
 		JsonLdService,
 		RemoteLoggerService,
 		RemoteUserResolveService,
@@ -472,6 +475,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		ApPersonService,
 		ApQuestionService,
 		QueueService,
+		TelemetryService,
 
 		//#region 文字列ベースでのinjection用(循環参照対応のため)
 		$LoggerService,
@@ -479,10 +483,9 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$AbuseReportNotificationService,
 		$AccountMoveService,
 		$AccountUpdateService,
-		$AiService,
+		$SensitiveMediaDetectionService,
 		$AnnouncementService,
 		$AntennaService,
-		$AppLockService,
 		$AchievementService,
 		$AvatarDecorationService,
 		$CaptchaService,
@@ -520,6 +523,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$WebAuthnService,
 		$UserBlockingService,
 		$CacheService,
+		$HanaReactionMuteService,
 		$UserService,
 		$UserFollowingService,
 		$UserKeypairService,
@@ -623,6 +627,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$ApNoteService,
 		$ApPersonService,
 		$ApQuestionService,
+		$TelemetryService,
 		//#endregion
 	],
 	exports: [
@@ -632,10 +637,9 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		AbuseReportNotificationService,
 		AccountMoveService,
 		AccountUpdateService,
-		AiService,
+		SensitiveMediaDetectionService,
 		AnnouncementService,
 		AntennaService,
-		AppLockService,
 		AchievementService,
 		AvatarDecorationService,
 		CaptchaService,
@@ -673,6 +677,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		WebAuthnService,
 		UserBlockingService,
 		CacheService,
+		HanaReactionMuteService,
 		UserService,
 		UserFollowingService,
 		UserKeypairService,
@@ -769,6 +774,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		ApRendererService,
 		ApRequestService,
 		ApResolverService,
+		Resolver,
 		JsonLdService,
 		RemoteLoggerService,
 		RemoteUserResolveService,
@@ -779,6 +785,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		ApPersonService,
 		ApQuestionService,
 		QueueService,
+		TelemetryService,
 
 		//#region 文字列ベースでのinjection用(循環参照対応のため)
 		$LoggerService,
@@ -786,10 +793,9 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$AbuseReportNotificationService,
 		$AccountMoveService,
 		$AccountUpdateService,
-		$AiService,
+		$SensitiveMediaDetectionService,
 		$AnnouncementService,
 		$AntennaService,
-		$AppLockService,
 		$AchievementService,
 		$AvatarDecorationService,
 		$CaptchaService,
@@ -827,6 +833,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$WebAuthnService,
 		$UserBlockingService,
 		$CacheService,
+		$HanaReactionMuteService,
 		$UserService,
 		$UserFollowingService,
 		$UserKeypairService,
@@ -928,6 +935,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$ApNoteService,
 		$ApPersonService,
 		$ApQuestionService,
+		$TelemetryService,
 		//#endregion
 	],
 })

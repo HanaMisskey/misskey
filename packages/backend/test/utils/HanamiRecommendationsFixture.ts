@@ -10,6 +10,7 @@ export function matchesWhere(row: TestRow, where: unknown): boolean {
 		if (expected != null && typeof expected === 'object' && 'type' in expected && 'value' in expected) {
 			const operator = expected as { type: string; value: unknown };
 			switch (operator.type) {
+				case 'any':
 				case 'in': return (operator.value as unknown[]).includes(actual);
 				case 'isNull': return actual == null;
 				case 'not': return !matchesWhere(row, { [key]: operator.value });

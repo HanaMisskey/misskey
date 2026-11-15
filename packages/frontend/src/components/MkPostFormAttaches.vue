@@ -5,37 +5,34 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 <template>
 <div v-show="props.modelValue.length != 0" :class="$style.root">
-	<Sortable
+	<MkDraggable
 		:modelValue="props.modelValue"
 		:class="$style.files"
-		itemKey="id"
-		:animation="150"
-		:delay="100"
-		:delayOnTouchOnly="true"
-		:disabled="props.draggable === false"
+		direction="horizontal"
+		withGaps
 		@update:modelValue="v => emit('update:modelValue', v)"
 	>
-		<template #item="{ element }">
+		<template #default="{ item }">
 			<div
 				:class="[$style.file, { [$style.dragEnabled]: props.draggable !== false }]"
 				role="button"
 				tabindex="0"
-				@click="handleClick(element, $event)"
-				@keydown.space.enter="showFileMenu(element, $event)"
-				@contextmenu.prevent="showFileMenu(element, $event)"
+				@click="handleClick(item, $event)"
+				@keydown.space.enter="showFileMenu(item, $event)"
+				@contextmenu.prevent.stop="showFileMenu(item, $event)"
 			>
-				<MkDriveFileThumbnail v-if="element.type === 'driveFile'" :data-id="element.id" :class="$style.thumbnail" :file="element.file" fit="cover"/>
-				<template v-else-if="element.type === 'uploaderItem'">
-					<img v-if="element.file.thumbnail" :src="element.file.thumbnail" :class="[$style.thumbnail, $style.uploaderThumbnail]" />
+				<MkDriveFileThumbnail v-if="item.type === 'driveFile'" :data-id="item.id" :class="$style.thumbnail" :file="item.file" fit="cover"/>
+				<template v-else-if="item.type === 'uploaderItem'">
+					<img v-if="item.file.thumbnail" :src="item.file.thumbnail" :class="[$style.thumbnail, $style.uploaderThumbnail]" />
 					<div v-else v-panel :class="[$style.thumbnail, $style.uploaderThumbnailIcon]">
-						<i :class="[$style.icon, getFileTypeIcon(getFileType(element.file.file.type))]"></i>
+						<i :class="[$style.icon, getFileTypeIcon(getFileType(item.file.file.type))]"></i>
 					</div>
-					<div :class="[$style.uploadProgressWrapper, { uploading: element.file.uploading }]">
+					<div :class="[$style.uploadProgressWrapper, { uploading: item.file.uploading }]">
 						<svg :class="$style.uploadProgressSvg" viewBox="0 0 64 64">
 							<circle
 								:class="$style.uploadProgressFg"
 								cx="32" cy="32" r="16"
-								:stroke-dasharray="progressDashArray(element.file)"
+								:stroke-dasharray="progressDashArray(item.file)"
 							/>
 						</svg>
 						<div :class="$style.uploadAbortButton">
@@ -44,12 +41,12 @@ SPDX-License-Identifier: AGPL-3.0-only
 						</div>
 					</div>
 				</template>
-				<div v-if="(element.type === 'driveFile' && element.file.isSensitive) || (element.type === 'uploaderItem' && element.file.isSensitive)" :class="$style.sensitive">
+				<div v-if="(item.type === 'driveFile' && item.file.isSensitive) || (item.type === 'uploaderItem' && item.file.isSensitive)" :class="$style.sensitive">
 					<i class="ti ti-eye-exclamation" style="margin: auto;"></i>
 				</div>
 			</div>
 		</template>
-	</Sortable>
+	</MkDraggable>
 	<p
 		:class="[$style.remain, {
 			[$style.exceeded]: props.modelValue.length > 16,
@@ -75,20 +72,21 @@ export type Attach = {
 </script>
 
 <script lang="ts" setup>
-import { defineAsyncComponent, inject } from 'vue';
+import { inject, watch, onUnmounted } from 'vue';
 import * as Misskey from 'misskey-js';
 import type { MenuItem } from '@/types/menu';
 import { copyToClipboard } from '@/utility/copy-to-clipboard.js';
 import { getFileType, getFileTypeIcon } from '@/utility/file-type.js';
 import MkDriveFileThumbnail from '@/components/MkDriveFileThumbnail.vue';
+import MkDraggable from '@/components/MkDraggable.vue';
+import type { Content } from '@/components/MkLightbox.item.vue';
 import * as os from '@/os.js';
 import { misskeyApi } from '@/utility/misskey-api.js';
 import { i18n } from '@/i18n.js';
 import { prefer } from '@/preferences.js';
 import { DI } from '@/di.js';
 import { globalEvents } from '@/events.js';
-
-const Sortable = defineAsyncComponent(() => import('vuedraggable').then(x => x.default));
+import { isPreviewable, getType } from '@/utility/lightbox.js';
 
 const props = defineProps<{
 	draggable?: boolean;
@@ -105,6 +103,32 @@ const emit = defineEmits<{
 	(ev: 'changeDriveFileName', file: Misskey.entities.DriveFile, newName: string): void;
 	(ev: 'showUploaderMenu', uploaderItem: UploaderItem, event: MouseEvent | KeyboardEvent): void;
 }>();
+
+//#region objectUrlMap
+const objectUrlMap = new Map<string, string>();
+
+watch(() => props.modelValue, () => {
+	for (const item of props.modelValue) {
+		if (!objectUrlMap.has(item.id) && item.type === 'uploaderItem') {
+			objectUrlMap.set(item.id, URL.createObjectURL(item.file.file));
+		}
+	}
+
+	for (const [item, url] of objectUrlMap.entries()) {
+		if (!props.modelValue.find(x => x.id === item)) {
+			URL.revokeObjectURL(url);
+			objectUrlMap.delete(item);
+		}
+	}
+}, { immediate: true, deep: true });
+
+onUnmounted(() => {
+	for (const url of objectUrlMap.values()) {
+		URL.revokeObjectURL(url);
+	}
+	objectUrlMap.clear();
+});
+//#endregion
 
 function progressDashArray(item: UploaderItem): string {
 	const progress = item.progress ? item.progress.value / item.progress.max : 0;
@@ -187,8 +211,8 @@ async function describeDriveFile(file: Misskey.entities.DriveFile) {
 	});
 }
 
-function handleClick(attach: Attach, ev: MouseEvent | KeyboardEvent): void {
-	if (ev instanceof MouseEvent && ev.button !== 0) return; // 左クリック以外は無視
+function handleClick(attach: Attach, ev: PointerEvent | KeyboardEvent): void {
+	if (ev instanceof PointerEvent && ev.button !== 0) return; // 左クリック以外は無視
 
 	if (attach.type === 'driveFile' || (attach.type === 'uploaderItem' && !attach.file.uploading)) {
 		showFileMenu(attach, ev);
@@ -205,7 +229,6 @@ function handleClick(attach: Attach, ev: MouseEvent | KeyboardEvent): void {
 function showFileMenu(attach: Attach, ev: MouseEvent | KeyboardEvent): void {
 	if (attach.type === 'driveFile') {
 		const file = attach.file;
-		const isImage = file.type.startsWith('image/');
 
 		const menuItems: MenuItem[] = [];
 		menuItems.push({
@@ -222,13 +245,29 @@ function showFileMenu(attach: Attach, ev: MouseEvent | KeyboardEvent): void {
 			action: () => { describeDriveFile(file); },
 		});
 
-		if (isImage) {
+		if (isPreviewable(file.type)) {
 			menuItems.push({
 				text: i18n.ts.preview,
 				icon: 'ti ti-photo-search',
 				action: async () => {
-					const { dispose } = await os.popupAsyncWithDialog(import('@/components/MkImgPreviewDialog.vue').then(x => x.default), {
-						file: file,
+					const constents = props.modelValue.filter(item => (
+						isPreviewable(file.type) &&
+						(item.type === 'driveFile' || objectUrlMap.has(item.id))
+					)).map<Content>(item => ({
+						id: item.id,
+						type: getType(item.type === 'driveFile' ? item.file.type : item.file.file.type),
+						url: item.type === 'driveFile' ? item.file.url : objectUrlMap.get(item.id)!,
+						thumbnailUrl: item.type === 'driveFile' ? item.file.thumbnailUrl : item.file.thumbnail,
+						width: item.type === 'driveFile' ? item.file.properties.width : null,
+						height: item.type === 'driveFile' ? item.file.properties.height : null,
+						filename: item.type === 'driveFile' ? item.file.name : item.file.name,
+						caption: item.type === 'driveFile' ? item.file.comment : item.file.caption,
+						file: item.type === 'driveFile' ? item.file : undefined,
+						//sourceElement: TODO
+					}));
+					const { dispose } = await os.popupAsyncWithDialog(import('@/components/MkLightbox.vue').then(x => x.default), {
+						defaultIndex: constents.findIndex(content => content.id === file.id),
+						contents: constents,
 					}, {
 						closed: () => dispose(),
 					});
@@ -281,7 +320,6 @@ function showFileMenu(attach: Attach, ev: MouseEvent | KeyboardEvent): void {
 	position: relative;
 	width: 64px;
 	height: 64px;
-	margin-right: 4px;
 	border-radius: 8px;
 	overflow: hidden;
 

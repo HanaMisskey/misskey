@@ -28,8 +28,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 							<i class="ti ti-confetti" style="display: block; margin: auto; font-size: 3em; color: var(--MI_THEME-accent);"></i>
 							<div style="font-size: 120%;">{{ i18n.ts._initialTutorial._landing.title }}</div>
 							<div>{{ i18n.ts._initialTutorial._landing.description }}</div>
-							<MkButton primary rounded gradate style="margin: 16px auto 0 auto;" data-cy-user-setup-start @click="next">{{ i18n.ts._initialTutorial.launchTutorial }} <i class="ti ti-arrow-right"></i></MkButton>
-							<MkButton v-if="skippable" style="margin: 0 auto;" transparent rounded data-cy-user-setup-close @click="emit('close', true)">{{ i18n.ts.close }}</MkButton>
+							<MkButton primary rounded gradate style="margin: 16px auto 0 auto;" data-testid="user-setup-start" @click="next">{{ i18n.ts._initialTutorial.launchTutorial }} <i class="ti ti-arrow-right"></i></MkButton>
+							<MkButton v-if="skippable" style="margin: 0 auto;" transparent rounded data-testid="user-setup-close" @click="emit('close', true)">{{ i18n.ts.close }}</MkButton>
 						</div>
 					</div>
 				</div>
@@ -72,7 +72,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 	<div :class="[$style.pageFooter, { [$style.pageFooterShown]: (page > 0 && page < MAX_PAGE) }]" :inert="(page <= 0 && page >= MAX_PAGE)">
 		<div class="_buttonsCenter">
 			<MkButton v-if="initialPage !== page" :disabled="areButtonsLocked" rounded @click="prev"><i class="ti ti-arrow-left"></i> {{ i18n.ts.goBack }}</MkButton>
-			<MkButton primary rounded gradate :disabled="!canContinue" data-cy-user-setup-next @click="next">{{ i18n.ts.continue }} <i class="ti ti-arrow-right"></i></MkButton>
+			<MkButton primary rounded gradate :disabled="!canContinue" data-testid="user-setup-next" @click="next">{{ i18n.ts.continue }} <i class="ti ti-arrow-right"></i></MkButton>
 		</div>
 	</div>
 </div>
@@ -91,7 +91,7 @@ import { i18n } from '@/i18n.js';
  * 2. tutorialBodyPagesDefにページのアイコン・タイトル・区分を追加
  *    （区分がsetupの場合はwithSetup == falseのときにスキップされます）
  * 3. componentsDefにページのコンポーネントを追加（順番を対応させること）
- * 4. cypress/e2e/basic.cy.tsにページ分のテストを追加
+ * 4. packages/frontend/test/e2e/basic.spec.tsにページ分のテストを追加
  */
 
 /** チュートリアルページ用Expose */
@@ -191,7 +191,7 @@ const emit = defineEmits<{
 // テストの場合は全インタラクションをスキップする
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error
-const isTest = (import.meta.env.MODE === 'test' || window.Cypress != null);
+const isTest = (import.meta.env.MODE === 'test' || window.isPlaywright);
 
 type ComponentDef = {
 	component: Component;

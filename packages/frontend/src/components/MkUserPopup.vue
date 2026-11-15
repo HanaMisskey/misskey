@@ -61,8 +61,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 import { onMounted, ref } from 'vue';
 import * as Misskey from 'misskey-js';
 import MkFollowButton from '@/components/MkFollowButton.vue';
+import { userPage } from '@/utility/hanami-navigation.js';
 import { hanamiContextForUser } from '@/utility/hanami-recommendation-context.js';
-import { userPage } from '@/filters/user.js';
 import * as os from '@/os.js';
 import { misskeyApi } from '@/utility/misskey-api.js';
 import { getUserMenu } from '@/utility/get-user-menu.js';
@@ -91,7 +91,7 @@ const top = ref(0);
 const left = ref(0);
 const error = ref(false);
 
-function showMenu(ev: MouseEvent) {
+function showMenu(ev: PointerEvent) {
 	if (user.value == null) return;
 	const { menu, cleanup } = getUserMenu(user.value);
 	os.popupMenu(menu, ev.currentTarget ?? ev.target).finally(cleanup);

@@ -1,4 +1,4 @@
-import { describe, expect, jest, test } from '@jest/globals';
+import { describe, expect, vi, test } from 'vitest';
 import type { MiUser } from '@/models/_.js';
 import { HanamiRecommendationsService } from '@/core/hanamifeed/HanamiRecommendationsService.js';
 import type { HanamiImpressionsRequest } from '@/core/hanamifeed/HanamiPlatformWire.js';
@@ -7,7 +7,7 @@ import { detailObservation, imageObservation, interactionAck, viewportObservatio
 const viewer = { id: 'alice', host: null } as MiUser;
 
 function fixture() {
-	const request = jest.fn<(...args: unknown[]) => Promise<unknown>>().mockResolvedValue(interactionAck);
+	const request = vi.fn<(...args: unknown[]) => Promise<unknown>>().mockResolvedValue(interactionAck);
 	const service = new HanamiRecommendationsService(...[{ request }, {}] as unknown as ConstructorParameters<typeof HanamiRecommendationsService>);
 	return { request, service };
 }
