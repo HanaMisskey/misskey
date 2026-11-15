@@ -8,6 +8,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 	v-if="!muted && !hideByPlugin && !isDeleted"
 	ref="rootEl"
 	v-hotkey="keymap"
+	:data-hanami-recommendation="getHanamiNoteContext(appearNote)?.eventId ?? ''"
 	:class="$style.root"
 	tabindex="0"
 >
@@ -113,7 +114,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 						</div>
 					</div>
 					<div v-if="appearNote.files && appearNote.files.length > 0">
-						<MkMediaList ref="galleryEl" :mediaList="appearNote.files" :user="appearNote.user"/>
+						<MkMediaList ref="galleryEl" :mediaList="appearNote.files" :user="appearNote.user" :recommendation="getHanamiNoteContext(appearNote)"/>
 					</div>
 					<MkPoll
 						v-if="appearNote.poll"
@@ -243,11 +244,13 @@ SPDX-License-Identifier: AGPL-3.0-only
 <script lang="ts" setup>
 import { inject, provide, ref, useTemplateRef, markRaw, computed, watch } from 'vue';
 import * as Misskey from 'misskey-js';
+import { getHanamiNoteContext } from '@/utility/hanami-recommendation-context.js';
+import { recordHanamiInteraction } from '@/utility/hanami-interactions.js';
 import { useNote } from '@/composables/use-note.js';
 import { prefer } from '@/preferences.js';
 import { i18n } from '@/i18n.js';
-import { userPage } from '@@/js/user.js';
-import { notePage } from '@@/js/note.js';
+import { userPage } from '@/utility/hanami-navigation.js';
+import { notePage } from '@/utility/hanami-navigation.js';
 import { isEnabledUrlPreview } from '@/utility/url-preview.js';
 import { Paginator } from '@/utility/paginator.js';
 import { fetchReactionGroup, groupReactions } from '@/utility/HanaReactionGroups.js';
@@ -282,6 +285,12 @@ const inChannel = inject(DI.inChannel, null);
 
 // Template Refsの定義
 const rootEl = useTemplateRef('rootEl');
+let detailObserved = false;
+watch(rootEl, element => {
+	if (!element || detailObserved) return;
+	detailObserved = true;
+	recordHanamiInteraction(getHanamiNoteContext(appearNote), { kind: 'detail_open' });
+}, { flush: 'post' });
 const menuButton = useTemplateRef('menuButton');
 const renoteButton = useTemplateRef('renoteButton');
 const renoteTime = useTemplateRef('renoteTime');

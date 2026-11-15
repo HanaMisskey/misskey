@@ -39,7 +39,6 @@ import { ClipChannel } from './api/stream/channels/clip.js';
 import { DriveChannel } from './api/stream/channels/drive.js';
 import { GlobalTimelineChannel } from './api/stream/channels/global-timeline.js';
 import { HashtagChannel } from './api/stream/channels/hashtag.js';
-import { HanamiTimelineChannel } from './api/stream/channels/hanami-timeline.js';
 import { HomeTimelineChannel } from './api/stream/channels/home-timeline.js';
 import { HybridTimelineChannel } from './api/stream/channels/hybrid-timeline.js';
 import { LocalTimelineChannel } from './api/stream/channels/local-timeline.js';
@@ -91,7 +90,6 @@ import { SigninWithPasskeyApiService } from './api/SigninWithPasskeyApiService.j
 		DriveChannel,
 		GlobalTimelineChannel,
 		HashtagChannel,
-		HanamiTimelineChannel,
 		RoleTimelineChannel,
 		ChatUserChannel,
 		ChatRoomChannel,

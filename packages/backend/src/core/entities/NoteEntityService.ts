@@ -542,6 +542,7 @@ export class NoteEntityService implements OnModuleInit {
 			detail?: boolean;
 			skipHide?: boolean;
 			withReactionAndUserPairCache?: boolean;
+			mutedUserIds?: ReadonlySet<string>;
 		},
 	) {
 		if (notes.length === 0) return [];
@@ -626,7 +627,7 @@ export class NoteEntityService implements OnModuleInit {
 				packedUsers,
 			},
 		})));
-		await this.filterMutedReactions(packed, meId);
+		await this.filterMutedReactions(packed, meId, false, options?.mutedUserIds);
 		return packed;
 	}
 
@@ -667,8 +668,8 @@ export class NoteEntityService implements OnModuleInit {
 	}
 
 	@bindThis
-	public async filterMutedReactions(notes: Packed<'Note'>[], meId: MiUser['id'] | null, withReactionAndUserPairCache = false): Promise<void> {
-		await this.hanaReactionMuteService.filterMutedReactions(notes, meId, withReactionAndUserPairCache);
+	public async filterMutedReactions(notes: Packed<'Note'>[], meId: MiUser['id'] | null, withReactionAndUserPairCache = false, mutedUserIds?: ReadonlySet<string>): Promise<void> {
+		await this.hanaReactionMuteService.filterMutedReactions(notes, meId, withReactionAndUserPairCache, mutedUserIds);
 	}
 
 	@bindThis

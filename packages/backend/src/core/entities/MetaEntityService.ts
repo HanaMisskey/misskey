@@ -66,6 +66,7 @@ export class MetaEntityService {
 		}
 
 		const packed: Packed<'MetaLite'> = {
+			hanamiRecommendationsEnabled: Object.hasOwn(this.config, 'hanamiPlatform'),
 			maintainerName: instance.maintainerName,
 			maintainerEmail: instance.maintainerEmail,
 

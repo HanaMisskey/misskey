@@ -6,7 +6,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 <template>
 <PageWithHeader v-model:tab="tab" :actions="headerActions" :tabs="headerTabs" :swipable="true">
 	<div v-if="tab === 'note'" class="_spacer">
-		<div v-if="notesSearchAvailable || ignoreNotesSearchAvailable">
+		<div v-if="hanamiSearchAvailable || ignoreNotesSearchAvailable">
 			<XNote v-bind="props"/>
 		</div>
 		<div v-else>
@@ -30,7 +30,7 @@ import { computed, defineAsyncComponent, ref, toRef } from 'vue';
 import { $i } from '@/i.js';
 import { i18n } from '@/i18n.js';
 import { definePage } from '@/page.js';
-import { notesSearchAvailable, usersSearchAvailable } from '@/utility/check-permissions.js';
+import { hanamiSearchAvailable, usersSearchAvailable } from '@/utility/check-permissions.js';
 import MkInfo from '@/components/MkInfo.vue';
 
 const props = withDefaults(defineProps<{

@@ -148,7 +148,7 @@ export class HanamiSearchService {
 
 	private initializeIndex(searchClient: Meilisearch, indexName: string): Index {
 		const index = searchClient.index(indexName);
-		index.updateSettings({
+		if (!this.config.hanamisearch?.readOnly) index.updateSettings({
 			searchableAttributes: ['text', 'cw'],
 			sortableAttributes: ['createdAt'],
 			filterableAttributes: [
@@ -171,6 +171,7 @@ export class HanamiSearchService {
 
 	@bindThis
 	public async indexNote(note: MiNote): Promise<void> {
+		if (this.config.hanamisearch?.readOnly) return;
 		if (note.text == null && note.cw == null) return;
 		if (!['home', 'public'].includes(note.visibility)) return;
 
@@ -197,6 +198,7 @@ export class HanamiSearchService {
 
 	@bindThis
 	public async unindexNote(note: MiNote): Promise<void> {
+		if (this.config.hanamisearch?.readOnly) return;
 		if (!['home', 'public'].includes(note.visibility)) return;
 
 		if (this.hanamisearch) {

@@ -27,7 +27,8 @@ import MkUserCardMini from '@/components/MkUserCardMini.vue';
 import * as os from '@/os.js';
 import { i18n } from '@/i18n.js';
 import { useLowresTime } from '@@/js/use-lowres-time.js';
-import { userPage, acct } from '@@/js/user.js';
+import { userPage } from '@/utility/hanami-navigation.js';
+import { acct } from '@@/js/user.js';
 
 const props = defineProps<{
 	item: Misskey.entities.UsersGetFollowingUsersByBirthdayResponse[number];

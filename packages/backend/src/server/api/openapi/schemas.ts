@@ -11,6 +11,20 @@ export function convertSchemaToOpenApiSchema(schema: Schema, type: 'param' | 're
 	// optional, nullable, refはスキーマ定義に含まれないので分離しておく
 	const { optional, nullable, ref, selfRef, ...res1 }: any = schema;
 	const res = deepClone(res1);
+	const dependencies: Record<string, string[] | Schema | boolean> | undefined = res.dependencies;
+	if (dependencies) {
+		// Draft 7 dependencies cannot be emitted verbatim in the OpenAPI 3.1 schema dialect.
+		delete res.dependencies;
+		for (const [key, dependency] of Object.entries(dependencies)) {
+			if (Array.isArray(dependency)) {
+				(res.dependentRequired ??= {})[key] = dependency;
+			} else {
+				(res.dependentSchemas ??= {})[key] = typeof dependency === 'boolean'
+					? dependency
+					: convertSchemaToOpenApiSchema(dependency, type, includeSelfRef);
+			}
+		}
+	}
 
 	if (schema.type === 'object' && schema.properties) {
 		if (type === 'res') {

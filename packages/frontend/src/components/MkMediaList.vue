@@ -55,6 +55,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 <script lang="ts" setup>
 import { computed, markRaw, onMounted, onUnmounted, useTemplateRef } from 'vue';
 import * as Misskey from 'misskey-js';
+import type { HanamiDisplayEvent } from '@/utility/hanami-impressions.js';
+import { recordHanamiInteraction } from '@/utility/hanami-interactions.js';
 import type { Content } from '@/components/MkLightbox.item.vue';
 import type { MediaComponentExposes } from '@/types/media-component.js';
 import XBanner from '@/components/MkMediaBanner.vue';
@@ -70,6 +72,7 @@ const props = defineProps<{
 	mediaList: Misskey.entities.DriveFile[];
 	user?: Misskey.entities.User | null; // DriveFileのuserはnullになることがある。その場合に使用する所有者情報
 	raw?: boolean;
+	recommendation?: HanamiDisplayEvent;
 }>();
 
 const gallery = useTemplateRef('gallery');
@@ -178,6 +181,7 @@ async function openGallery(id?: string) {
 		initiallyRevealedContentIds,
 		user: props.user,
 	}, {
+		imageOpen: (fileId) => recordHanamiInteraction(props.recommendation, { kind: 'image_open', fileId }),
 		closed: () => dispose(),
 	});
 }

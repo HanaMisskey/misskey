@@ -6,11 +6,13 @@ SPDX-License-Identifier: AGPL-3.0-only
 <template>
 <PageWithHeader v-model:tab="src" :actions="headerActions" :tabs="$i ? headerTabs : headerTabsWhenNotLogin" :swipable="true" :displayMyAvatar="true" :canOmitTitle="true">
 	<div class="_spacer" style="--MI_SPACER-w: 800px;">
-		<MkTip v-if="isBasicTimeline(src)" :k="`tl.${src}`" style="margin-bottom: var(--MI-margin);">
+		<MkTip v-if="isBasicTimeline(src) && !(src === 'hanami' && instance.hanamiRecommendationsEnabled)" :k="`tl.${src}`" style="margin-bottom: var(--MI-margin);">
 			{{ i18n.ts._timelineDescription[src] }}
 		</MkTip>
 		<MkPostForm v-if="prefer.r.showFixedPostForm.value" :class="$style.postForm" class="_panel" fixed style="margin-bottom: var(--MI-margin);"/>
+		<MkHanamiRecommendations v-if="src === 'hanami' && instance.hanamiRecommendationsEnabled" ref="recommendationsComponent" :withFiles="hanamiRecommendationWithFiles"/>
 		<MkStreamingNotesTimeline
+			v-else
 			ref="tlComponent"
 			:key="src + withRenotes + withReplies + onlyFiles + withSensitive"
 			:class="$style.tl"
@@ -31,6 +33,8 @@ import { computed, watch, provide, useTemplateRef, ref, onMounted, onActivated }
 import type { Tab } from '@/components/global/MkPageHeader.tabs.vue';
 import type { MenuItem } from '@/types/menu.js';
 import type { BasicTimelineType } from '@/timelines.js';
+import { instance } from '@/instance.js';
+import MkHanamiRecommendations from '@/components/MkHanamiRecommendations.vue';
 import type { PageHeaderItem } from '@/types/page-header.js';
 import MkStreamingNotesTimeline from '@/components/MkStreamingNotesTimeline.vue';
 import MkPostForm from '@/components/MkPostForm.vue';
@@ -47,6 +51,9 @@ import { availableBasicTimelines, hasWithReplies, isAvailableBasicTimeline, isBa
 import { prefer } from '@/preferences.js';
 
 const tlComponent = useTemplateRef('tlComponent');
+const recommendationsComponent = useTemplateRef('recommendationsComponent');
+
+async function refreshRecommendations() { await recommendationsComponent.value?.refresh(); }
 
 type TimelinePageSrc = BasicTimelineType | `list:${string}`;
 
@@ -105,6 +112,10 @@ const withSensitive = computed<boolean>({
 });
 
 const showFixedPostForm = prefer.model('showFixedPostForm');
+const hanamiRecommendationWithFiles = computed({
+	get: () => store.r.hanamiRecommendationWithFiles.value,
+	set: (value) => store.set('hanamiRecommendationWithFiles', value),
+});
 
 async function chooseList(ev: PointerEvent): Promise<void> {
 	const lists = await userListsCache.fetch();
@@ -205,41 +216,53 @@ onActivated(() => {
 });
 
 const headerActions = computed<PageHeaderItem[]>(() => {
+	const isRecommendations = src.value === 'hanami' && instance.hanamiRecommendationsEnabled;
 	const items: PageHeaderItem[] = [{
 		icon: 'ti ti-dots',
 		text: i18n.ts.options,
 		handler: (ev) => {
 			const menuItems: MenuItem[] = [];
 
-			menuItems.push({
-				type: 'switch',
-				icon: 'ti ti-repeat',
-				text: i18n.ts.showRenotes,
-				ref: withRenotes,
-			});
-
-			if (isBasicTimeline(src.value) && hasWithReplies(src.value)) {
+			if (isRecommendations) {
 				menuItems.push({
 					type: 'switch',
-					icon: 'ti ti-messages',
-					text: i18n.ts.showRepliesToOthersInTimeline,
-					ref: withReplies,
-					disabled: onlyFiles,
+					icon: 'ti ti-photo',
+					text: i18n.ts.fileAttachedOnly,
+					ref: hanamiRecommendationWithFiles,
+				});
+			} else {
+				menuItems.push({
+					type: 'switch',
+					icon: 'ti ti-repeat',
+					text: i18n.ts.showRenotes,
+					ref: withRenotes,
+				});
+
+				if (isBasicTimeline(src.value) && hasWithReplies(src.value)) {
+					menuItems.push({
+						type: 'switch',
+						icon: 'ti ti-messages',
+						text: i18n.ts.showRepliesToOthersInTimeline,
+						ref: withReplies,
+						disabled: onlyFiles,
+					});
+				}
+
+				menuItems.push({
+					type: 'switch',
+					icon: 'ti ti-eye-exclamation',
+					text: i18n.ts.withSensitive,
+					ref: withSensitive,
+				}, {
+					type: 'switch',
+					icon: 'ti ti-photo',
+					text: i18n.ts.fileAttachedOnly,
+					ref: onlyFiles,
+					disabled: isBasicTimeline(src.value) && hasWithReplies(src.value) ? withReplies : false,
 				});
 			}
 
 			menuItems.push({
-				type: 'switch',
-				icon: 'ti ti-eye-exclamation',
-				text: i18n.ts.withSensitive,
-				ref: withSensitive,
-			}, {
-				type: 'switch',
-				icon: 'ti ti-photo',
-				text: i18n.ts.fileAttachedOnly,
-				ref: onlyFiles,
-				disabled: isBasicTimeline(src.value) && hasWithReplies(src.value) ? withReplies : false,
-			}, {
 				type: 'divider',
 			}, {
 				type: 'switch',
@@ -251,12 +274,16 @@ const headerActions = computed<PageHeaderItem[]>(() => {
 		},
 	}];
 
-	if (deviceKind === 'desktop') {
+	if (deviceKind === 'desktop' || isRecommendations) {
 		items.unshift({
 			icon: 'ti ti-refresh',
 			text: i18n.ts.reload,
 			handler: () => {
-				tlComponent.value?.reloadTimeline();
+				if (isRecommendations) {
+					void refreshRecommendations();
+				} else {
+					tlComponent.value?.reloadTimeline();
+				}
 			},
 		});
 	}

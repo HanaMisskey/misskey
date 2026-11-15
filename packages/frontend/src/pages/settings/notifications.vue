@@ -105,7 +105,7 @@ import MkPushNotificationAllowButton from '@/components/MkPushNotificationAllowB
 import MkFeatureBanner from '@/components/MkFeatureBanner.vue';
 import { Paginator } from '@/utility/paginator.js';
 import MkPagination from '@/components/MkPagination.vue';
-import { userPage } from '@@/js/user.js';
+import { userPage } from '@/utility/hanami-navigation.js';
 import MkUserCardMini from '@/components/MkUserCardMini.vue';
 
 const $i = ensureSignin();

@@ -61,6 +61,10 @@ export const store = markRaw(new Pizzax('base', {
 			},
 		},
 	},
+	hanamiRecommendationWithFiles: {
+		where: 'deviceAccount',
+		default: false,
+	},
 	darkMode: {
 		where: 'device',
 		default: false,

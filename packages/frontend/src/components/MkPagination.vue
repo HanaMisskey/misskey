@@ -20,7 +20,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 			<MkError v-else-if="paginator.error.value" @retry="paginator.init()"/>
 
-			<div v-else-if="paginator.items.value.length === 0" key="_empty_">
+			<div v-else-if="paginator.items.value.length === 0 && !paginator.canFetchOlder.value && !paginator.canFetchNewer.value" key="_empty_">
 				<slot name="empty"><MkResult type="empty"/></slot>
 			</div>
 
@@ -33,7 +33,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 				</div>
 				<slot :items="getValue(paginator.items)" :fetching="paginator.fetching.value || paginator.fetchingOlder.value"></slot>
 				<div v-if="direction === 'down' || direction === 'both'" v-show="downButtonVisible">
-					<MkButton v-if="!downButtonLoading" v-appear="shouldEnableInfiniteScroll ? downButtonClick : null" :class="$style.more" primary rounded @click="downButtonClick">
+					<MkError v-if="paginator.fetchOlderError?.value" @retry="downButtonClick"/>
+					<MkButton v-else-if="!downButtonLoading" v-appear="shouldEnableInfiniteScroll ? downButtonClick : null" :class="$style.more" primary rounded @click="downButtonClick">
 						{{ i18n.ts.loadMore }}
 					</MkButton>
 					<MkLoading v-else/>

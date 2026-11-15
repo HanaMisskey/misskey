@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: syuilo and misskey-project
+ * SPDX-License-Identifier: AGPL-3.0-only
+ */
+
 import { Inject, Injectable } from '@nestjs/common';
 import { Any } from 'typeorm';
 import { DI } from '@/di-symbols.js';
@@ -26,10 +31,10 @@ export class HanaReactionMuteService {
 	}
 
 	@bindThis
-	public async fetchMutedReactions(noteIds: string[], meId: MiUser['id'] | null, myReactions?: Map<string, string | null>): Promise<Map<string, string[]>> {
+	public async fetchMutedReactions(noteIds: string[], meId: MiUser['id'] | null, myReactions?: Map<string, string | null>, mutedUserIdsOverride?: ReadonlySet<string>): Promise<Map<string, string[]>> {
 		const result = new Map<string, string[]>();
 		if (meId == null || noteIds.length === 0) return result;
-		const mutedUserIds = await this.cacheService.userMutingsCache.fetch(meId);
+		const mutedUserIds = mutedUserIdsOverride ?? await this.cacheService.userMutingsCache.fetch(meId);
 		if (mutedUserIds.size === 0) return result;
 		if (myReactions) {
 			for (const noteId of noteIds) myReactions.set(noteId, null);
@@ -53,7 +58,7 @@ export class HanaReactionMuteService {
 	}
 
 	@bindThis
-	public async filterMutedReactions(notes: Packed<'Note'>[], meId: MiUser['id'] | null, withReactionAndUserPairCache = false): Promise<void> {
+	public async filterMutedReactions(notes: Packed<'Note'>[], meId: MiUser['id'] | null, withReactionAndUserPairCache = false, mutedUserIds?: ReadonlySet<string>): Promise<void> {
 		if (meId == null) return;
 		const targets = new Set<Packed<'Note'>>();
 		const collect = (note: Packed<'Note'>) => {
@@ -65,7 +70,7 @@ export class HanaReactionMuteService {
 		for (const note of notes) collect(note);
 		const noteIds = [...new Set([...targets].filter(note => Object.keys(note.reactions).length > 0).map(note => note.id))];
 		const myReactions = new Map<string, string | null>();
-		const mutedReactions = await this.fetchMutedReactions(noteIds, meId, myReactions);
+		const mutedReactions = await this.fetchMutedReactions(noteIds, meId, myReactions, mutedUserIds);
 		for (const note of targets) {
 			const muted = mutedReactions.get(note.id) ?? [];
 			const hasMutedReactions = muted.some(reaction => (note.reactions[reaction] ?? 0) > 0);

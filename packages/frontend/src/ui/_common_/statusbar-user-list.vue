@@ -37,7 +37,7 @@ import { useInterval } from '@@/js/use-interval.js';
 import MkMarqueeText from '@/components/MkMarqueeText.vue';
 import { misskeyApi } from '@/utility/misskey-api.js';
 import { getNoteSummary } from '@/utility/get-note-summary.js';
-import { notePage } from '@@/js/note.js';
+import { notePage } from '@/utility/hanami-navigation.js';
 
 const props = defineProps<{
 	userListId?: string;

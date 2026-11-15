@@ -703,17 +703,6 @@ export type Channels = {
         };
         receives: null;
     };
-    hanamiTimeline: {
-        params: {
-            withRenotes?: boolean;
-            withReplies?: boolean;
-            withFiles?: boolean;
-        };
-        events: {
-            note: (payload: Note) => void;
-        };
-        receives: null;
-    };
     localTimeline: {
         params: {
             withRenotes?: boolean;
@@ -1950,6 +1939,9 @@ declare namespace entities {
         GalleryPostsUpdateResponse,
         GetAvatarDecorationsResponse,
         GetOnlineUsersCountResponse,
+        HanamiFeedbackRequest,
+        HanamiFeedbackResponse,
+        HanamiImpressionsRequest,
         HashtagsListRequest,
         HashtagsListResponse,
         HashtagsSearchRequest,
@@ -2074,10 +2066,14 @@ declare namespace entities {
         NotesFeaturedResponse,
         NotesGlobalTimelineRequest,
         NotesGlobalTimelineResponse,
+        NotesHanamiRecommendationsRequest,
+        NotesHanamiRecommendationsResponse,
         NotesHanamiTimelineRequest,
         NotesHanamiTimelineResponse,
         NotesHanamisearchV1Request,
         NotesHanamisearchV1Response,
+        NotesHanamisearchV2Request,
+        NotesHanamisearchV2Response,
         NotesHybridTimelineRequest,
         NotesHybridTimelineResponse,
         NotesLocalTimelineRequest,
@@ -2538,6 +2534,15 @@ type GetAvatarDecorationsResponse = operations['get-avatar-decorations']['respon
 
 // @public (undocumented)
 type GetOnlineUsersCountResponse = operations['get-online-users-count']['responses']['200']['content']['application/json'];
+
+// @public (undocumented)
+type HanamiFeedbackRequest = operations['hanami-feedback']['requestBody']['content']['application/json'];
+
+// @public (undocumented)
+type HanamiFeedbackResponse = operations['hanami-feedback']['responses']['200']['content']['application/json'];
+
+// @public (undocumented)
+type HanamiImpressionsRequest = operations['hanami-impressions']['requestBody']['content']['application/json'];
 
 // @public (undocumented)
 type Hashtag = components['schemas']['Hashtag'];
@@ -3048,10 +3053,22 @@ type NotesGlobalTimelineRequest = operations['notes___global-timeline']['request
 type NotesGlobalTimelineResponse = operations['notes___global-timeline']['responses']['200']['content']['application/json'];
 
 // @public (undocumented)
+type NotesHanamiRecommendationsRequest = operations['notes___hanami-recommendations']['requestBody']['content']['application/json'];
+
+// @public (undocumented)
+type NotesHanamiRecommendationsResponse = operations['notes___hanami-recommendations']['responses']['200']['content']['application/json'];
+
+// @public (undocumented)
 type NotesHanamisearchV1Request = operations['notes___hanamisearch-v1']['requestBody']['content']['application/json'];
 
 // @public (undocumented)
 type NotesHanamisearchV1Response = operations['notes___hanamisearch-v1']['responses']['200']['content']['application/json'];
+
+// @public (undocumented)
+type NotesHanamisearchV2Request = operations['notes___hanamisearch-v2']['requestBody']['content']['application/json'];
+
+// @public (undocumented)
+type NotesHanamisearchV2Response = operations['notes___hanamisearch-v2']['responses']['200']['content']['application/json'];
 
 // @public (undocumented)
 type NotesHanamiTimelineRequest = operations['notes___hanami-timeline']['requestBody']['content']['application/json'];
@@ -3816,8 +3833,8 @@ type VerifyEmailRequest = operations['verify-email']['requestBody']['content']['
 // Warnings were encountered during analysis:
 //
 // src/streaming.ts:57:3 - (ae-forgotten-export) The symbol "ReconnectingWebSocket" needs to be exported by the entry point index.d.ts
-// src/streaming.types.ts:247:4 - (ae-forgotten-export) The symbol "ReversiUpdateKey" needs to be exported by the entry point index.d.ts
-// src/streaming.types.ts:262:4 - (ae-forgotten-export) The symbol "ReversiUpdateSettings" needs to be exported by the entry point index.d.ts
+// src/streaming.types.ts:236:4 - (ae-forgotten-export) The symbol "ReversiUpdateKey" needs to be exported by the entry point index.d.ts
+// src/streaming.types.ts:251:4 - (ae-forgotten-export) The symbol "ReversiUpdateSettings" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

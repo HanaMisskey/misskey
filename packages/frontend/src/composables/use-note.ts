@@ -33,7 +33,7 @@ import { globalEvents, useGlobalEvent } from '@/events.js';
 import MkUsersTooltip from '@/components/MkUsersTooltip.vue';
 import MkReactionsViewerDetails from '@/components/MkReactionsViewer.details.vue';
 import MkRippleEffect from '@/components/MkRippleEffect.vue';
-import { notePage } from '@@/js/note.js';
+import { notePage } from '@/utility/hanami-navigation.js';
 import type { DI as DIType } from '@/di.js';
 import type { ExtractInjectedType } from '@/types/misc.js';
 import type { MenuItem } from '@/types/menu.js';
@@ -44,6 +44,7 @@ export interface UseNoteProps {
 	pinned?: boolean;
 	mock?: boolean;
 	withHardMute?: boolean;
+	additionalMenuItems?: () => MenuItem[];
 }
 
 export interface UseNoteElements {
@@ -351,6 +352,7 @@ export function useNote(
 				currentClip: currentClip?.value,
 				currentAntenna: currentAntenna?.value ?? undefined,
 			});
+			menu.push(...(props.additionalMenuItems?.() ?? []));
 			os.contextMenu(menu, ev).then(focus).finally(cleanup);
 		}
 	}
@@ -364,6 +366,7 @@ export function useNote(
 			currentClip: currentClip?.value,
 			currentAntenna: currentAntenna?.value ?? undefined,
 		});
+		menu.push(...(props.additionalMenuItems?.() ?? []));
 		os.popupMenu(menu, els.menuButton.value).then(focus).finally(cleanup);
 	}
 

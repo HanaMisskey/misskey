@@ -393,6 +393,9 @@ import type {
 	GalleryPostsUpdateResponse,
 	GetAvatarDecorationsResponse,
 	GetOnlineUsersCountResponse,
+	HanamiFeedbackRequest,
+	HanamiFeedbackResponse,
+	HanamiImpressionsRequest,
 	HashtagsListRequest,
 	HashtagsListResponse,
 	HashtagsSearchRequest,
@@ -519,10 +522,14 @@ import type {
 	NotesFeaturedResponse,
 	NotesGlobalTimelineRequest,
 	NotesGlobalTimelineResponse,
+	NotesHanamiRecommendationsRequest,
+	NotesHanamiRecommendationsResponse,
 	NotesHanamiTimelineRequest,
 	NotesHanamiTimelineResponse,
 	NotesHanamisearchV1Request,
 	NotesHanamisearchV1Response,
+	NotesHanamisearchV2Request,
+	NotesHanamisearchV2Response,
 	NotesHybridTimelineRequest,
 	NotesHybridTimelineResponse,
 	NotesLocalTimelineRequest,
@@ -928,6 +935,8 @@ export type Endpoints = {
 	'gallery/posts/update': { req: GalleryPostsUpdateRequest; res: GalleryPostsUpdateResponse };
 	'get-avatar-decorations': { req: EmptyRequest; res: GetAvatarDecorationsResponse };
 	'get-online-users-count': { req: EmptyRequest; res: GetOnlineUsersCountResponse };
+	'hanami-feedback': { req: HanamiFeedbackRequest; res: HanamiFeedbackResponse };
+	'hanami-impressions': { req: HanamiImpressionsRequest; res: EmptyResponse };
 	'hashtags/list': { req: HashtagsListRequest; res: HashtagsListResponse };
 	'hashtags/search': { req: HashtagsSearchRequest; res: HashtagsSearchResponse };
 	'hashtags/show': { req: HashtagsShowRequest; res: HashtagsShowResponse };
@@ -1016,8 +1025,10 @@ export type Endpoints = {
 	'notes/favorites/delete': { req: NotesFavoritesDeleteRequest; res: EmptyResponse };
 	'notes/featured': { req: NotesFeaturedRequest; res: NotesFeaturedResponse };
 	'notes/global-timeline': { req: NotesGlobalTimelineRequest; res: NotesGlobalTimelineResponse };
+	'notes/hanami-recommendations': { req: NotesHanamiRecommendationsRequest; res: NotesHanamiRecommendationsResponse };
 	'notes/hanami-timeline': { req: NotesHanamiTimelineRequest; res: NotesHanamiTimelineResponse };
 	'notes/hanamisearch-v1': { req: NotesHanamisearchV1Request; res: NotesHanamisearchV1Response };
+	'notes/hanamisearch-v2': { req: NotesHanamisearchV2Request; res: NotesHanamisearchV2Response };
 	'notes/hybrid-timeline': { req: NotesHybridTimelineRequest; res: NotesHybridTimelineResponse };
 	'notes/local-timeline': { req: NotesLocalTimelineRequest; res: NotesLocalTimelineResponse };
 	'notes/mentions': { req: NotesMentionsRequest; res: NotesMentionsResponse };

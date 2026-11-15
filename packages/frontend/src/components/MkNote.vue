@@ -8,6 +8,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 	v-if="!hardMuted && !hideByPlugin && muted === false"
 	ref="rootEl"
 	v-hotkey="keymap"
+	:data-hanami-recommendation="getHanamiNoteContext(appearNote)?.eventId ?? ''"
 	:class="[$style.root, { [$style.showActionsOnlyHover]: prefer.s.showNoteActionsOnlyHover, [$style.skipRender]: prefer.s.skipNoteRender }]"
 	tabindex="0"
 >
@@ -88,7 +89,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 						</div>
 					</div>
 					<div v-if="appearNote.files && appearNote.files.length > 0" style="margin-top: 8px;">
-						<MkMediaList ref="galleryEl" :mediaList="appearNote.files" :user="appearNote.user"/>
+						<MkMediaList ref="galleryEl" :mediaList="appearNote.files" :user="appearNote.user" :recommendation="getHanamiNoteContext(appearNote)"/>
 					</div>
 					<MkPoll
 						v-if="appearNote.poll"
@@ -200,15 +201,17 @@ SPDX-License-Identifier: AGPL-3.0-only
 import { inject, ref, useTemplateRef, provide, computed } from 'vue';
 import type { Ref } from 'vue';
 import * as Misskey from 'misskey-js';
+import { getHanamiNoteContext } from '@/utility/hanami-recommendation-context.js';
 import { useNote } from '@/composables/use-note.js';
 import { prefer } from '@/preferences.js';
 import { i18n } from '@/i18n.js';
-import { userPage } from '@@/js/user.js';
+import { userPage } from '@/utility/hanami-navigation.js';
 import { getNoteSummary } from '@/utility/get-note-summary.js';
 import { isEnabledUrlPreview } from '@/utility/url-preview.js';
 import { focusPrev, focusNext } from '@/utility/focus.js';
 import number from '@/filters/number.js';
 import { DI } from '@/di.js';
+import type { MenuItem } from '@/types/menu.js';
 import type { Keymap } from '@/utility/hotkey.js';
 
 // コンポーネント外部の依存関係
@@ -227,8 +230,10 @@ const props = withDefaults(defineProps<{
 	pinned?: boolean;
 	mock?: boolean;
 	withHardMute?: boolean;
+	additionalMenuItems?: () => MenuItem[];
 }>(), {
 	mock: false,
+	additionalMenuItems: undefined,
 });
 
 const emit = defineEmits<{

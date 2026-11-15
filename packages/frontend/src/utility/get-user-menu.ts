@@ -19,20 +19,20 @@ import { antennasCache, rolesCache, userListsCache } from '@/cache.js';
 import { mainRouter } from '@/router.js';
 import { genEmbedCode } from '@/utility/get-embed-code.js';
 import { prefer } from '@/preferences.js';
+import { getHanamiUserContext } from '@/utility/hanami-recommendation-context.js';
+import { beginHanamiOperation, interruptHanamiObservation } from '@/utility/hanami-interactions.js';
+import type { HanamiOperationHandle } from '@/utility/hanami-observation-windows.js';
 import { getPluginHandlers } from '@/plugin.js';
 
-export function getUserMenu(user: Misskey.entities.UserDetailed, router: Router = mainRouter) {
+export function getUserMenu(user: Misskey.entities.UserDetailed & { hanamiRecommendation?: string }, router: Router = mainRouter) {
 	const meId = $i ? $i.id : null;
 
 	const cleanups = [] as (() => void)[];
 
 	async function toggleMute() {
 		if (user.isMuted) {
-			os.apiWithDialog('mute/delete', {
-				userId: user.id,
-			}).then(() => {
-				user.isMuted = false;
-			});
+			await os.apiWithDialog('mute/delete', { userId: user.id });
+			user.isMuted = false;
 		} else {
 			const { canceled, result: period } = await os.select({
 				title: i18n.ts.mutePeriod,
@@ -58,12 +58,15 @@ export function getUserMenu(user: Misskey.entities.UserDetailed, router: Router 
 				: period === 'oneWeek' ? Date.now() + (1000 * 60 * 60 * 24 * 7)
 				: null;
 
-			os.apiWithDialog('mute/create', {
-				userId: user.id,
-				expiresAt,
-			}).then(() => {
-				user.isMuted = true;
-			});
+			const operation = beginHanamiOperation(getHanamiUserContext(user));
+			try {
+				await os.apiWithDialog('mute/create', { userId: user.id, expiresAt });
+			} catch (error) {
+				operation.uncertain();
+				throw error;
+			}
+			user.isMuted = true;
+			operation.succeeded({ kind: 'action', action: 'mute' });
 		}
 	}
 
@@ -78,11 +81,16 @@ export function getUserMenu(user: Misskey.entities.UserDetailed, router: Router 
 	async function toggleBlock() {
 		if (!await getConfirmed(user.isBlocking ? i18n.ts.unblockConfirm : i18n.ts.blockConfirm)) return;
 
-		os.apiWithDialog(user.isBlocking ? 'blocking/delete' : 'blocking/create', {
-			userId: user.id,
-		}).then(() => {
-			user.isBlocking = !user.isBlocking;
-		});
+		const blocking = !user.isBlocking;
+		const operation = blocking ? beginHanamiOperation(getHanamiUserContext(user)) : undefined;
+		try {
+			await os.apiWithDialog(blocking ? 'blocking/create' : 'blocking/delete', { userId: user.id });
+		} catch (error) {
+			operation?.uncertain();
+			throw error;
+		}
+		user.isBlocking = blocking;
+		operation?.succeeded({ kind: 'action', action: 'block' });
 	}
 
 	async function toggleNotify() {
@@ -95,9 +103,13 @@ export function getUserMenu(user: Misskey.entities.UserDetailed, router: Router 
 	}
 
 	async function reportAbuse() {
+		let operation: HanamiOperationHandle | undefined;
 		const { dispose } = await os.popupAsyncWithDialog(import('@/components/MkAbuseReportWindow.vue').then(x => x.default), {
 			user: user,
 		}, {
+			'submit-started': () => { operation = beginHanamiOperation(getHanamiUserContext(user)); },
+			'submit-failed': () => operation?.uncertain(),
+			submitted: () => operation?.succeeded({ kind: 'action', action: 'report' }),
 			closed: () => dispose(),
 		});
 	}
@@ -198,6 +210,8 @@ export function getUserMenu(user: Misskey.entities.UserDetailed, router: Router 
 			text: i18n.ts.showOnRemote,
 			action: () => {
 				if (user.url == null) return;
+				const context = getHanamiUserContext(user);
+				if (context) interruptHanamiObservation(context);
 				window.open(user.url, '_blank', 'noopener');
 			},
 		});

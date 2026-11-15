@@ -249,6 +249,10 @@ export const packedRolePoliciesSchema = {
 			type: 'boolean',
 			optional: false, nullable: false,
 		},
+		canSearchWithHanamiSearchV2: {
+			type: 'boolean',
+			optional: false, nullable: false,
+		},
 		canSearchUsers: {
 			type: 'boolean',
 			optional: false, nullable: false,

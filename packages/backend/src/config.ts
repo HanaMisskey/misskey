@@ -76,10 +76,13 @@ type Source = {
 		index: string;
 		scope?: 'local' | 'global' | string[];
 	};
+	hanamiPlatform?: { url: string; keyId: string; signingKey: string; sourceId: string; generation: number } | null;
 	hanamisearch?: {
 		host: string;
 		port: string;
 		apiKey: string;
+		cursorEncryptionKey?: string;
+		readOnly?: boolean;
 		ssl?: boolean;
 		index: string;
 		scope?: 'local' | 'global' | string[];
@@ -184,10 +187,13 @@ export type Config = {
 		index: string;
 		scope?: 'local' | 'global' | string[];
 	} | undefined;
+	hanamiPlatform?: Source['hanamiPlatform'];
 	hanamisearch: {
 		host: string;
 		port: string;
 		apiKey: string;
+		cursorEncryptionKey?: string;
+		readOnly?: boolean;
 		ssl?: boolean;
 		index: string;
 		scope?: 'local' | 'global' | string[];
@@ -354,6 +360,7 @@ export function loadConfig(): Config {
 		fulltextSearch,
 		meilisearch: config.meilisearch,
 		hanamisearch: config.hanamisearch,
+		...(Object.hasOwn(config, 'hanamiPlatform') ? { hanamiPlatform: config.hanamiPlatform } : {}),
 		redis,
 		redisForPubsub: config.redisForPubsub ? convertRedisOptions(config.redisForPubsub, host) : redis,
 		redisForJobQueue: config.redisForJobQueue ? convertRedisOptions(config.redisForJobQueue, host) : redis,

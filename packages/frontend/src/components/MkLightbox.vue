@@ -34,6 +34,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 						:initiallyRevealed="props.initiallyRevealedContentIds?.includes(content.id) ?? false"
 						:activated="activatedIndexes.has(i)"
 						@close="onItemClose"
+						@imageZoom="onImageZoom(i)"
 						@horizontalSwipe="onHorizontalSwipe"
 						@prev="onPrev"
 						@next="onNext"
@@ -70,6 +71,7 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{
 	(ev: 'closed'): void;
+	(ev: 'imageOpen', fileId: string): void;
 }>();
 
 const rootEl = useTemplateRef('rootEl');
@@ -81,6 +83,8 @@ const pixelatedZoom = ref(false);
 
 watch(currentIndex, (newIndex, oldIndex) => {
 	activatedIndexes.value.add(newIndex);
+	const content = props.contents[newIndex];
+	if (content?.type === 'image') emit('imageOpen', content.id);
 
 	nextTick(() => {
 		if (oldIndex != null && items.has(oldIndex)) {
@@ -180,6 +184,11 @@ function onPrev() {
 		currentIndex.value--;
 	}
 	scrollToCurrentIndex();
+}
+
+function onImageZoom(index: number) {
+	const content = props.contents[index];
+	if (showing.value && index === currentIndex.value && content?.type === 'image') emit('imageOpen', content.id);
 }
 
 function onItemClose() {

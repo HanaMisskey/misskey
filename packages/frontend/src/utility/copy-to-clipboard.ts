@@ -6,12 +6,13 @@
 import * as os from '@/os.js';
 import { i18n } from '@/i18n.js';
 
-/**
- * Clipboardに値をコピー(TODO: 文字列以外も対応)
- */
-export function copyToClipboard(input: string | null) {
-	if (input) {
-		navigator.clipboard.writeText(input);
-		os.toast(i18n.ts.copiedToClipboard);
+export async function copyToClipboard(input: string | null): Promise<boolean> {
+	if (!input) return false;
+	try {
+		await navigator.clipboard.writeText(input);
+	} catch {
+		return false;
 	}
-};
+	os.toast(i18n.ts.copiedToClipboard);
+	return true;
+}

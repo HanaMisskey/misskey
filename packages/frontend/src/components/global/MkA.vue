@@ -4,7 +4,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 -->
 
 <template>
-<a ref="el" :href="to" :class="active ? activeClass : null" @click="nav" @contextmenu.prevent.stop="onContextmenu">
+<a ref="el" :href="to" :class="active ? activeClass : null" :data-hanami-shift-navigation="behavior === 'browser' ? undefined : 'same-document'" @click="nav" @contextmenu.prevent.stop="onContextmenu">
 	<slot></slot>
 </a>
 </template>
@@ -17,7 +17,8 @@ export type MkABehavior = 'window' | 'browser' | null;
 import { computed, inject, useTemplateRef } from 'vue';
 import { url } from '@@/js/config.js';
 import * as os from '@/os.js';
-import { copyToClipboard } from '@/utility/copy-to-clipboard.js';
+import { copyHanamiNavigationLink, interruptHanamiObservation } from '@/utility/hanami-interactions.js';
+import { hanamiContextForNote } from '@/utility/hanami-recommendation-context.js';
 import { i18n } from '@/i18n.js';
 import { useRouter } from '@/router.js';
 
@@ -72,19 +73,27 @@ function onContextmenu(ev: PointerEvent) {
 		icon: 'ti ti-external-link',
 		text: i18n.ts.openInNewTab,
 		action: () => {
+			interruptNavigation();
 			window.open(props.to, '_blank', 'noopener');
 		},
 	}, {
 		icon: 'ti ti-link',
 		text: i18n.ts.copyLink,
 		action: () => {
-			copyToClipboard(`${url}${props.to}`);
+			copyHanamiNavigationLink(`${url}${props.to}`);
 		},
 	}], ev);
 }
 
 function openWindow() {
 	os.pageWindow(props.to);
+}
+
+function interruptNavigation() {
+	const target = new URL(props.to, url);
+	const noteId = /^\/notes\/([^/]+)(?:\/|$)/.exec(target.pathname)?.[1];
+	const context = noteId ? hanamiContextForNote(target.searchParams.get('hanami') ?? undefined, noteId) : undefined;
+	if (context) interruptHanamiObservation(context);
 }
 
 function nav(ev: PointerEvent) {
@@ -94,6 +103,7 @@ function nav(ev: PointerEvent) {
 	ev.preventDefault();
 
 	if (behavior.value === 'browser') {
+		interruptNavigation();
 		if (isWindow) {
 			window.open(props.to, '_blank', 'noopener');
 		} else {

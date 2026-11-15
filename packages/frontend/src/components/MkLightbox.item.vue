@@ -224,6 +224,7 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{
 	(ev: 'close'): void;
+	(ev: 'imageZoom'): void;
 	(ev: 'horizontalSwipe', offset: number): void;
 	(ev: 'next'): void;
 	(ev: 'prev'): void;
@@ -414,6 +415,10 @@ if (props.content.sourceElement != null && props.activated) {
 const hideForFallback = ref(!canOpenAnimation);
 
 const isZooming = ref(false);
+
+watch(() => isZooming.value && transform.value.scale > 1, (zoomed, wasZoomed) => {
+	if (zoomed && !wasZoomed && props.content.type === 'image') emit('imageZoom');
+});
 
 function clampZoomTransform(nextTransform: { x: number; y: number; scale: number }) {
 	if (mainEl.value == null || nextTransform.scale <= 1) {
