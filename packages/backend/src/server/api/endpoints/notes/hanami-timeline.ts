@@ -26,7 +26,6 @@ import { FanoutTimelineEndpointService } from '@/core/FanoutTimelineEndpointServ
 import { FeaturedService } from '@/core/FeaturedService.js';
 import { isUserRelated } from '@/misc/is-user-related.js';
 import { isInstanceMuted } from '@/misc/is-instance-muted.js';
-import { removeMutedUsersReactions } from '@/misc/reactions-mute.js';
 import { ApiError } from '../../error.js';
 
 export const meta = {
@@ -269,10 +268,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			return true;
 		});
 
-		const packedFeauturedNotes = await this.noteEntityService.packMany(feauturedNotes, me, { withReactionAndUserPairCache: true });
-		await Promise.all(
-			packedFeauturedNotes.map(note => removeMutedUsersReactions(note, userIdsWhoMeMuting)),
-		);
+		const packedFeauturedNotes = await this.noteEntityService.packMany(feauturedNotes, me);
 
 		return packedFeauturedNotes;
 	}

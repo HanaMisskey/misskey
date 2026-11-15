@@ -16,8 +16,11 @@ import { bindThis } from '@/decorators.js';
 import { DebounceLoader } from '@/misc/loader.js';
 import { IdService } from '@/core/IdService.js';
 import { shouldHideNoteByTime } from '@/misc/should-hide-note-by-time.js';
+import { isQuotePacked, isRenotePacked } from '@/misc/is-renote.js';
 import { ReactionsBufferingService } from '@/core/ReactionsBufferingService.js';
 import { CacheService } from '@/core/CacheService.js';
+import { removeMutedUsersReactions } from '@/misc/reactions-mute.js';
+import type { HanaReactionMuteService } from '@/core/HanaReactionMuteService.js';
 import type { OnModuleInit } from '@nestjs/common';
 import type { CustomEmojiService } from '../CustomEmojiService.js';
 import type { ReactionService } from '../ReactionService.js';
@@ -36,16 +39,20 @@ function isPureRenote(note: MiNote): note is MiNote & { renoteId: MiNote['id']; 
 	);
 }
 
-function getAppearNoteIds(notes: MiNote[]): Set<string> {
-	const appearNoteIds = new Set<string>();
-	for (const note of notes) {
-		if (isPureRenote(note)) {
-			appearNoteIds.add(note.renoteId);
-		} else {
-			appearNoteIds.add(note.id);
-		}
-	}
-	return appearNoteIds;
+function getPackedNoteIds(notes: MiNote[]): Set<string> {
+	const ids = new Set<string>();
+	const visited = new Set<MiNote>();
+	const collect = (note: MiNote) => {
+		if (visited.has(note)) return;
+		visited.add(note);
+		ids.add(note.id);
+		if (note.renoteId) ids.add(note.renoteId);
+		if (note.replyId) ids.add(note.replyId);
+		if (note.renote) collect(note.renote);
+		if (note.reply) collect(note.reply);
+	};
+	for (const note of notes) collect(note);
+	return ids;
 }
 
 async function nullIfEntityNotFound<T>(promise: Promise<T>): Promise<T | null> {
@@ -69,6 +76,7 @@ export class NoteEntityService implements OnModuleInit {
 	private idService: IdService;
 	private cacheService: CacheService;
 	private noteLoader = new DebounceLoader(this.findNoteOrFail);
+	private hanaReactionMuteService: HanaReactionMuteService;
 
 	constructor(
 		private moduleRef: ModuleRef,
@@ -115,6 +123,7 @@ export class NoteEntityService implements OnModuleInit {
 		this.reactionsBufferingService = this.moduleRef.get('ReactionsBufferingService');
 		this.idService = this.moduleRef.get('IdService');
 		this.cacheService = this.moduleRef.get('CacheService');
+		this.hanaReactionMuteService = this.moduleRef.get('HanaReactionMuteService');
 	}
 
 	@bindThis
@@ -132,6 +141,9 @@ export class NoteEntityService implements OnModuleInit {
 	public async shouldHideNote(packedNote: Packed<'Note'>, meId: MiUser['id'] | null): Promise<boolean> {
 		if (meId === packedNote.userId) return false;
 		// TODO: isVisibleForMe を使うようにしても良さそう(型違うけど)
+
+		// TODO: ugcVisibilityForVisitor が local の場合も、付随するリモートのノートをリンクだけ残して内容を隠せるようにする
+		if (meId == null && this.meta.ugcVisibilityForVisitor === 'none') return true;
 
 		if (packedNote.user.requireSigninToViewContents && meId == null) {
 			return true;
@@ -191,7 +203,7 @@ export class NoteEntityService implements OnModuleInit {
 	}
 
 	@bindThis
-	private async populatePoll(note: MiNote, meId: MiUser['id'] | null) {
+	private async populatePoll(note: Pick<MiNote, 'id'>, meId: MiUser['id'] | null) {
 		const poll = await this.pollsRepository.findOneByOrFail({ noteId: note.id });
 		const choices = poll.choices.map(c => ({
 			text: c,
@@ -230,9 +242,27 @@ export class NoteEntityService implements OnModuleInit {
 	}
 
 	@bindThis
+	public async withMyPollVotes(note: Packed<'Note'>, meId: MiUser['id'] | null): Promise<Packed<'Note'>> {
+		const [poll, renote, reply] = await Promise.all([
+			note.poll ? this.populatePoll(note, meId) : note.poll,
+			note.renote ? this.withMyPollVotes(note.renote, meId) : note.renote,
+			note.reply ? this.withMyPollVotes(note.reply, meId) : note.reply,
+		]);
+
+		if (poll === note.poll && renote === note.renote && reply === note.reply) return note;
+
+		return { ...note, poll, renote, reply };
+	}
+
+	@bindThis
 	public async populateMyReaction(note: { id: MiNote['id']; reactions: MiNote['reactions']; reactionAndUserPairCache?: MiNote['reactionAndUserPairCache']; }, meId: MiUser['id'], _hint_?: {
 		myReactions: Map<MiNote['id'], string | null>;
 	}) {
+		const projected = this.hanaReactionMuteService.getMyReaction(note, meId);
+		if (projected) {
+			return projected.reaction ? this.reactionService.convertLegacyReaction(projected.reaction) : undefined;
+		}
+
 		if (_hint_?.myReactions) {
 			const reaction = _hint_.myReactions.get(note.id);
 			if (reaction) {
@@ -271,10 +301,40 @@ export class NoteEntityService implements OnModuleInit {
 	}
 
 	@bindThis
+	public async withMyRenoteReaction(note: Packed<'Note'>, meId: MiUser['id'] | null): Promise<Packed<'Note'>> {
+		if (meId == null) return note;
+		if (!isRenotePacked(note) || isQuotePacked(note)) return note;
+		if (note.renote == null || Object.keys(note.renote.reactions).length === 0) return note;
+
+		const myReaction = await this.populateMyReaction(note.renote, meId);
+
+		return {
+			...note,
+			renote: {
+				...note.renote,
+				myReaction,
+			},
+		};
+	}
+
+	@bindThis
 	public async isVisibleForMe(note: MiNote, meId: MiUser['id'] | null): Promise<boolean> {
 		// This code must always be synchronized with the checks in QueryService.generateVisibilityQuery.
+		if (meId === note.userId) return true;
+
+		const author = note.user ?? await this.cacheService.findUserById(note.userId);
+		if (meId == null && author.requireSigninToViewContents) return false;
+
+		const createdAt = this.idService.parse(note.id).date;
+		if (shouldHideNoteByTime(author.makeNotesHiddenBefore, createdAt)) return false;
+
+		const visibility = (note.visibility === 'public' || note.visibility === 'home')
+			&& shouldHideNoteByTime(author.makeNotesFollowersOnlyBefore, createdAt)
+			? 'followers'
+			: note.visibility;
+
 		// visibility が specified かつ自分が指定されていなかったら非表示
-		if (note.visibility === 'specified') {
+		if (visibility === 'specified') {
 			if (meId == null) {
 				return false;
 			} else if (meId === note.userId) {
@@ -286,12 +346,12 @@ export class NoteEntityService implements OnModuleInit {
 		}
 
 		// visibility が followers かつ自分が投稿者のフォロワーでなかったら非表示
-		if (note.visibility === 'followers') {
+		if (visibility === 'followers') {
 			if (meId == null) {
 				return false;
 			} else if (meId === note.userId) {
 				return true;
-			} else if (note.reply && (meId === note.reply.userId)) {
+			} else if (note.replyUserId && (meId === note.replyUserId)) {
 				// 自分の投稿に対するリプライ
 				return true;
 			} else if (note.mentions && note.mentions.some(id => meId === id)) {
@@ -347,6 +407,7 @@ export class NoteEntityService implements OnModuleInit {
 			detail?: boolean;
 			skipHide?: boolean;
 			withReactionAndUserPairCache?: boolean;
+			_skipReactionsMute?: boolean;
 			_hint_?: {
 				bufferedReactions: Map<MiNote['id'], { deltas: Record<string, number>; pairs: ([MiUser['id'], string])[] }> | null;
 				myReactions: Map<MiNote['id'], string | null>;
@@ -365,11 +426,10 @@ export class NoteEntityService implements OnModuleInit {
 		const note = typeof src === 'object' ? src : await this.noteLoader.load(src);
 		const host = note.userHost;
 
-		const bufferedReactions = opts._hint_?.bufferedReactions != null
-			? (opts._hint_.bufferedReactions.get(note.id) ?? { deltas: {}, pairs: [] })
-			: this.meta.enableReactionsBuffering
+		const bufferedReactions = opts._hint_?.bufferedReactions?.get(note.id)
+			?? (this.meta.enableReactionsBuffering
 				? await this.reactionsBufferingService.get(note.id)
-				: { deltas: {}, pairs: [] };
+				: { deltas: {}, pairs: [] });
 		const reactions = this.reactionService.convertLegacyReactions(this.reactionsBufferingService.mergeReactions(note.reactions, bufferedReactions.deltas ?? {}));
 
 		const reactionAndUserPairCache = note.reactionAndUserPairCache.concat(bufferedReactions.pairs.map(x => x.join('/')));
@@ -438,6 +498,7 @@ export class NoteEntityService implements OnModuleInit {
 					detail: false,
 					skipHide: opts.skipHide,
 					withReactionAndUserPairCache: opts.withReactionAndUserPairCache,
+					_skipReactionsMute: true,
 					_hint_: options?._hint_,
 				})) : undefined,
 
@@ -446,6 +507,7 @@ export class NoteEntityService implements OnModuleInit {
 					detail: true,
 					skipHide: opts.skipHide,
 					withReactionAndUserPairCache: opts.withReactionAndUserPairCache,
+					_skipReactionsMute: true,
 					_hint_: options?._hint_,
 				})) : undefined,
 
@@ -463,9 +525,11 @@ export class NoteEntityService implements OnModuleInit {
 
 		this.treatVisibility(packed);
 
-		if (!opts.skipHide && await this.shouldHideNote(packed, meId)) {
+		if (!opts.skipHide && (await this.shouldHideNote(packed, meId))) {
 			this.hideNote(packed);
 		}
+
+		if (!opts._skipReactionsMute) await this.filterMutedReactions([packed], meId);
 
 		return packed;
 	}
@@ -482,7 +546,7 @@ export class NoteEntityService implements OnModuleInit {
 	) {
 		if (notes.length === 0) return [];
 
-		const bufferedReactions = this.meta.enableReactionsBuffering ? await this.reactionsBufferingService.getMany([...getAppearNoteIds(notes)]) : null;
+		const bufferedReactions = this.meta.enableReactionsBuffering ? await this.reactionsBufferingService.getMany([...getPackedNoteIds(notes)]) : null;
 
 		const meId = me ? me.id : null;
 		const myReactionsMap = new Map<MiNote['id'], string | null>();
@@ -552,8 +616,9 @@ export class NoteEntityService implements OnModuleInit {
 		const packedUsers = await this.userEntityService.packMany(users, me)
 			.then(users => new Map(users.map(u => [u.id, u])));
 
-		return await Promise.all(notes.map(n => this.pack(n, me, {
+		const packed = await Promise.all(notes.map(n => this.pack(n, me, {
 			...options,
+			_skipReactionsMute: true,
 			_hint_: {
 				bufferedReactions,
 				myReactions: myReactionsMap,
@@ -561,6 +626,8 @@ export class NoteEntityService implements OnModuleInit {
 				packedUsers,
 			},
 		})));
+		await this.filterMutedReactions(packed, meId);
+		return packed;
 	}
 
 	@bindThis
@@ -591,33 +658,62 @@ export class NoteEntityService implements OnModuleInit {
 	private findNoteOrFail(id: string): Promise<MiNote> {
 		return this.notesRepository.findOneOrFail({
 			where: { id },
-			relations: ['user', 'renote', 'reply'],
+			relations: {
+				user: true,
+				renote: true,
+				reply: true,
+			},
 		});
 	}
 
 	@bindThis
-	public async fetchDiffs(noteIds: MiNote['id'][]) {
-		if (noteIds.length === 0) return [];
+	public async filterMutedReactions(notes: Packed<'Note'>[], meId: MiUser['id'] | null, withReactionAndUserPairCache = false): Promise<void> {
+		await this.hanaReactionMuteService.filterMutedReactions(notes, meId, withReactionAndUserPairCache);
+	}
 
-		const notes = await this.notesRepository.find({
+	@bindThis
+	public async fetchDiffs(noteIds: MiNote['id'][], meId: MiUser['id'] | null = null) {
+		if (noteIds.length === 0) return [];
+		// TODO: ugcVisibilityForVisitor が local の場合の扱いを shouldHideNote と揃える
+		if (meId == null && this.meta.ugcVisibilityForVisitor === 'none') return [];
+
+		const fetched = await this.notesRepository.find({
 			where: {
 				id: In(noteIds),
 			},
 			select: {
 				id: true,
+				userId: true,
 				userHost: true,
+				visibility: true,
+				visibleUserIds: true,
+				mentions: true,
+				replyUserId: true,
 				reactions: true,
 				reactionAndUserPairCache: true,
 			},
 		});
 
+		const notes: MiNote[] = [];
+		for (const note of fetched) {
+			if (await this.isVisibleForMe(note, meId)) {
+				notes.push(note);
+			}
+		}
+
 		const bufferedReactionsMap = this.meta.enableReactionsBuffering ? await this.reactionsBufferingService.getMany(noteIds) : null;
 
-		const packings = notes.map(note => {
-			const bufferedReactions = bufferedReactionsMap?.get(note.id);
-			//const reactionAndUserPairCache = note.reactionAndUserPairCache.concat(bufferedReactions.pairs.map(x => x.join('/')));
+		const reactionsByNoteId = new Map(notes.map(note => [note.id, this.reactionService.convertLegacyReactions(
+			this.reactionsBufferingService.mergeReactions(note.reactions, bufferedReactionsMap?.get(note.id)?.deltas ?? {}),
+		)]));
+		const noteIdsWithReactions = [...reactionsByNoteId].filter(([, reactions]) => Object.values(reactions).some(count => count > 0)).map(([noteId]) => noteId);
+		const mutedReactions = await this.hanaReactionMuteService.fetchMutedReactions(noteIdsWithReactions, meId);
 
-			const reactions = this.reactionService.convertLegacyReactions(this.reactionsBufferingService.mergeReactions(note.reactions, bufferedReactions?.deltas ?? {}));
+		const packings = notes.map(note => {
+			const reactions = removeMutedUsersReactions(
+				reactionsByNoteId.get(note.id)!,
+				mutedReactions.get(note.id) ?? [],
+			);
 
 			const reactionEmojiNames = Object.keys(reactions)
 				.filter(x => x.startsWith(':') && x.includes('@') && !x.includes('@.')) // リモートカスタム絵文字のみ

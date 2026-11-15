@@ -5,7 +5,7 @@
 
 import { Injectable } from '@nestjs/common';
 import * as mfm from 'mfm-js';
-import { MfmService, Appender } from '@/core/MfmService.js';
+import { MfmService } from '@/core/MfmService.js';
 import type { MiNote } from '@/models/Note.js';
 import { bindThis } from '@/decorators.js';
 import { extractApHashtagObjects } from './models/tag.js';
@@ -19,23 +19,29 @@ export class ApMfmService {
 	}
 
 	@bindThis
-	public htmlToMfm(html: string, tag?: IObject | IObject[]): string {
-		const hashtagNames = extractApHashtagObjects(tag).map(x => x.name);
-		return this.mfmService.fromHtml(html, hashtagNames);
+	public htmlToMfm(
+		html: string,
+		options: {
+			tag?: IObject | IObject[],
+			hasQuote?: boolean,
+		} = {},
+	): string {
+		const hashtagNames = extractApHashtagObjects(options.tag).map(x => x.name);
+		return this.mfmService.fromHtml(html, { hashtagNames, hasQuote: options.hasQuote });
 	}
 
 	@bindThis
-	public getNoteHtml(note: Pick<MiNote, 'text' | 'mentionedRemoteUsers'>, additionalAppender: Appender[] = []) {
+	public getNoteHtml(note: Pick<MiNote, 'text' | 'mentionedRemoteUsers'>, extraHtml: string | null = null) {
 		let noMisskeyContent = false;
 		const srcMfm = (note.text ?? '');
 
 		const parsed = mfm.parse(srcMfm);
 
-		if (!additionalAppender.length && parsed.every(n => ['text', 'unicodeEmoji', 'emojiCode', 'mention', 'hashtag', 'url'].includes(n.type))) {
+		if (extraHtml == null && parsed.every(n => ['text', 'unicodeEmoji', 'emojiCode', 'mention', 'hashtag', 'url'].includes(n.type))) {
 			noMisskeyContent = true;
 		}
 
-		const content = this.mfmService.toHtml(parsed, JSON.parse(note.mentionedRemoteUsers), additionalAppender);
+		const content = this.mfmService.toHtml(parsed, JSON.parse(note.mentionedRemoteUsers), extraHtml);
 
 		return {
 			content,

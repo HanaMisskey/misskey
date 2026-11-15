@@ -8,7 +8,7 @@ import * as Misskey from 'misskey-js';
 import { FETCH_TIMEOUT_MS } from '@/const.js';
 import type { PushNotificationDataMap } from '@/types.js';
 import type { I18n } from '@@/js/i18n.js';
-import type { Locale } from '../../../locales/index.js';
+import type { Locale } from 'i18n';
 import { createEmptyNotification, createNotification } from '@/scripts/create-notification.js';
 import { swLang } from '@/scripts/lang.js';
 import * as swos from '@/scripts/operations.js';
@@ -61,18 +61,29 @@ async function offlineContentHTML() {
 
 globalThis.addEventListener('install', (ev) => {
 	// 次の問題が発生するため、ServiceWorkerAutoPreload をオプトアウトする必要がある
+	// ルールを1つでも登録すればオプトアウトされる
 	// https://issues.chromium.org/issues/466790291
 	if ('addRoutes' in ev) {
 		// doc: https://developer.mozilla.org/en-US/docs/Web/API/InstallEvent/addRoutes
-		// @ts-expect-error 実験的なAPIなので型定義がない
-		ev.addRoutes({
-			condition: {
-				// doc: https://developer.mozilla.org/ja/docs/Web/API/URLPattern
-				// @ts-expect-error 実験的なAPIなので型定義がない
-				urlPattern: new URLPattern({}),
-			},
+		const addRoutes = (rules: unknown) => (ev.addRoutes as (rules: unknown) => Promise<void>).call(ev, rules);
+
+		// doc: https://developer.mozilla.org/ja/docs/Web/API/URLPattern
+		const anyUrl = new URLPattern({});
+		const urlEndsWithSlash = new URLPattern({ pathname: '*/', search: '' });
+
+		ev.waitUntil(addRoutes([
+			{ condition: { requestMode: 'navigate' }, source: 'fetch-event' },
+			// fetchハンドラーはURLが/で終わるリクエストもHTMLとして扱う (クエリが付くと/では終わらない)
+			{ condition: { urlPattern: urlEndsWithSlash }, source: 'fetch-event' },
+			// ルールは先に一致したものが優先されるので、これは上記以外のすべてに当たる
+			{ condition: { urlPattern: anyUrl }, source: 'network' },
+		]).catch(() => addRoutes({
+			// 上記のルールを受け付けないブラウザでも、オプトアウトは維持する
+			condition: { urlPattern: anyUrl },
 			source: 'fetch-event',
-		});
+		})).catch(() => {
+			// ルールの登録に失敗してもインストールは止めない
+		}));
 	}
 });
 

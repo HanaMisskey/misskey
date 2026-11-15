@@ -4,24 +4,32 @@
  */
 
 import { Inject, Injectable } from '@nestjs/common';
-import { In } from 'typeorm';
 import { DI } from '@/di-symbols.js';
 import type { Config } from '@/config.js';
 import { bindThis } from '@/decorators.js';
 import { Packed } from '@/misc/json-schema.js';
 import { MiNote } from '@/models/Note.js';
-import { MiUser } from '@/models/_.js';
+import { MiMeta, MiUser } from '@/models/_.js';
 import type { NotesRepository } from '@/models/_.js';
 import { isUserRelated } from '@/misc/is-user-related.js';
+import { isInstanceMuted } from '@/misc/is-instance-muted.js';
 import { CacheService } from '@/core/CacheService.js';
 import { IdService } from '@/core/IdService.js';
+import { UtilityService } from '@/core/UtilityService.js';
 import { isMustRemove } from '@/misc/is-hidden-or-visibility-modified.js';
 import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
-import { removeMutedUsersReactions } from '@/misc/reactions-mute.js';
-import type { Index, MeiliSearch } from 'meilisearch';
+import { QueryService } from '@/core/QueryService.js';
+import type { Index, Meilisearch } from 'meilisearch';
+
+const SEARCH_EMPTY_PAGE_RETRY_LIMIT = 5;
 
 type K = string;
 type V = string | number | boolean;
+type SearchUserFilters = {
+	userIdsWhoMeMuting: Set<string>;
+	userIdsWhoBlockingMe: Set<string>;
+	userMutedInstances: Set<string>;
+};
 type Q =
 	{ op: '=', k: K, v: V } |
 	{ op: '!=', k: K, v: V } |
@@ -37,7 +45,7 @@ type Q =
 
 function compileValue(value: V): string {
 	if (typeof value === 'string') {
-		return `'${value}'`; // TODO: escape
+		return `'${value.replace(/['\\]/g, '\\$&')}'`;
 	} else if (typeof value === 'number') {
 		return value.toString();
 	} else if (typeof value === 'boolean') {
@@ -63,6 +71,47 @@ function compileQuery(q: Q): string {
 	}
 }
 
+/**
+ * 索引へ送る 1 件ぶんを組み立てる。
+ *
+ * **クラスの外に出しているのは、ここが試験できる形でないと抜けに気づけないため。**
+ * 送る項目が足りないことは、送った側からは何も起きない。索引が受け取った分だけで
+ * 文書を作り、200 を返す。**気づくのは、PG から作り直した文書と突き合わせたとき**で、
+ * それは何日も後になる。
+ *
+ * 空の配列を `null` に畳むのは、索引側が「空の列」と「その項目が無い」を同じに
+ * 扱うため。畳まずに送ると、同じ投稿でも経路によって `_source` が変わり、
+ * **全件が「中身が違う」になる。**
+ */
+export function buildHanamiSearchDocument(note: MiNote, createdAt: number) {
+	return {
+		id: note.id,
+		createdAt,
+		userId: note.userId,
+		userHost: note.userHost,
+		channelId: note.channelId,
+		cw: note.cw,
+		text: note.text,
+		// 配列が空の場合は null にする（検索時のパフォーマンスのためにインデックスしない）
+		tags: (note.tags.length > 0) ? note.tags : null,
+		fileIds: (note.fileIds.length > 0) ? note.fileIds : null,
+		// **カスタム絵文字の「印」は、この列からしか導けない。**
+		//
+		// HanamiSearch はカスタム絵文字を `:name:` という印として索引に入れ、
+		// ファンマーク検索がそれを引く。本文からは導けない — 本文に書かれた
+		// `:name:` が実在する絵文字とは限らないので、索引側は本文を信じない。
+		//
+		// **送っていなかった。** そのため live で入った投稿だけ印を持たず、
+		// PG から作り直した分には付くので、突き合わせが毎周これを
+		// contentMismatch として出し、**昇格が止まっていた**。
+		//
+		// 2026-08-12 実測: 直近 20 分の索引対象 2,035 件のうち 451 件が食い違い、
+		// 欠けていた印 652 個は**全部カスタム絵文字**、Unicode 絵文字は 0 個。
+		// 10 日前から 3,000 件（作り直しで入った分）の食い違いは 0 件。
+		emojis: (note.emojis.length > 0) ? note.emojis : null,
+	};
+}
+
 @Injectable()
 export class HanamiSearchService {
 	private readonly hanamisearchIndexScope: 'local' | 'global' | string[] = 'global';
@@ -73,14 +122,19 @@ export class HanamiSearchService {
 		private config: Config,
 
 		@Inject(DI.hanamisearch)
-		private hanamisearch: MeiliSearch | null,
+		private hanamisearch: Meilisearch | null,
 
 		@Inject(DI.notesRepository)
 		private notesRepository: NotesRepository,
 
+		@Inject(DI.meta)
+		private meta: MiMeta,
+
 		private noteEntityService: NoteEntityService,
+		private queryService: QueryService,
 		private cacheService: CacheService,
 		private idService: IdService,
+		private utilityService: UtilityService,
 	) {
 		this.hanamisearchIndexScope = config.hanamisearch?.scope || 'global';
 
@@ -92,7 +146,7 @@ export class HanamiSearchService {
 		}
 	}
 
-	private initializeIndex(searchClient: MeiliSearch, indexName: string): Index {
+	private initializeIndex(searchClient: Meilisearch, indexName: string): Index {
 		const index = searchClient.index(indexName);
 		index.updateSettings({
 			searchableAttributes: ['text', 'cw'],
@@ -120,22 +174,7 @@ export class HanamiSearchService {
 		if (note.text == null && note.cw == null) return;
 		if (!['home', 'public'].includes(note.visibility)) return;
 
-		// 配列が空の場合は null にする（検索時のパフォーマンスのためにインデックスしない）
-		const fileIds = (note.fileIds.length > 0) ? note.fileIds : null;
-		const tags = (note.tags.length > 0) ? note.tags : null;
-
-		const createdAt = this.idService.parse(note.id).date.getTime();
-		const noteData = {
-			id: note.id,
-			createdAt,
-			userId: note.userId,
-			userHost: note.userHost,
-			channelId: note.channelId,
-			cw: note.cw,
-			text: note.text,
-			tags: tags,
-			fileIds: fileIds,
-		};
+		const noteData = buildHanamiSearchDocument(note, this.idService.parse(note.id).date.getTime());
 
 		const shouldIndex = (scope: string | string[], userHost: string | null): boolean => {
 			if (scope === 'global') return true;
@@ -221,37 +260,101 @@ export class HanamiSearchService {
 		}
 		if (opts.onlyWithFiles) filter.qs.push({ op: 'is not null', k: 'fileIds' });
 
-		const res = await searchClient.search(q, {
-			sort: shouldTimeSeriesSort ? ['createdAt:desc'] : undefined,
-			matchingStrategy: 'all',
-			attributesToRetrieve: ['id', 'createdAt'],
-			filter: compileQuery(filter),
-			limit: pagination.limit,
-		});
+		const limit = pagination.limit ?? 10;
+		const compiledFilter = compileQuery(filter);
 
-		if (res.hits.length === 0) return [];
+		const searchNext = async (
+			offset: number,
+			remainingRetries: number,
+			userFilters: SearchUserFilters | null,
+		): Promise<Packed<'Note'>[]> => {
+			if (remainingRetries <= 0) return [];
 
-		const [userIdsWhoMeMuting, userIdsWhoBlockingMe] = me
-			? await Promise.all([
-				this.cacheService.userMutingsCache.fetch(me.id),
-				this.cacheService.userBlockedCache.fetch(me.id),
-			])
-			: [new Set<string>(), new Set<string>()];
+			const res = await searchClient.search(q, {
+				sort: shouldTimeSeriesSort ? ['createdAt:desc'] : undefined,
+				matchingStrategy: 'all',
+				attributesToRetrieve: ['id', 'createdAt'],
+				filter: compiledFilter,
+				limit,
+				offset,
+			});
 
-		const notes = (await this.notesRepository.findBy({
-			id: In(res.hits.map((x) => x.id)),
-		})).filter((note) => {
-			if (me && isUserRelated(note, userIdsWhoBlockingMe)) return false;
-			if (me && isUserRelated(note, userIdsWhoMeMuting)) return false;
-			return true;
-		});
+			if (res.hits.length === 0) return [];
 
-		notes.sort((a, b) => a.id > b.id ? -1 : 1);
-		const packedNotes = (await this.noteEntityService.packMany(notes, me, { withReactionAndUserPairCache: true })).filter(note => !isMustRemove(note, 'home'));
-		await Promise.all(
-			packedNotes.map(note => removeMutedUsersReactions(note, userIdsWhoMeMuting)),
-		);
+			const query = this.notesRepository.createQueryBuilder('note')
+				.innerJoinAndSelect('note.user', 'user')
+				.leftJoinAndSelect('note.reply', 'reply')
+				.leftJoinAndSelect('note.renote', 'renote')
+				.leftJoinAndSelect('reply.user', 'replyUser')
+				.leftJoinAndSelect('renote.user', 'renoteUser');
 
-		return packedNotes;
+			query.where('note.id IN (:...noteIds)', { noteIds: res.hits.map(x => x.id) });
+			if (me == null) this.queryService.generateUgcVisibilityQueryForVisitor(query);
+
+			const rawNotes = await query.getMany();
+			const nextUserFilters = me && rawNotes.length > 0
+				? userFilters ?? await this.fetchSearchUserFilters(me)
+				: userFilters;
+
+			const notes = rawNotes.filter((note) => {
+				if (this.utilityService.isBlockedHost(this.meta.blockedHosts, note.userHost)) return false;
+				if (note.userId !== note.renoteUserId && this.utilityService.isBlockedHost(this.meta.blockedHosts, note.renoteUserHost)) return false;
+				if (note.userId !== note.replyUserId && this.utilityService.isBlockedHost(this.meta.blockedHosts, note.replyUserHost)) return false;
+
+				if (note.user!.isSuspended) return false;
+				if (note.userId !== note.renoteUserId && note.renote?.user?.isSuspended) return false;
+				if (note.userId !== note.replyUserId && note.reply?.user?.isSuspended) return false;
+
+				if (nextUserFilters && isUserRelated(note, nextUserFilters.userIdsWhoBlockingMe)) return false;
+				if (nextUserFilters && isUserRelated(note, nextUserFilters.userIdsWhoMeMuting)) return false;
+				if (nextUserFilters && isUserRelated(note.renote, nextUserFilters.userIdsWhoBlockingMe)) return false;
+				if (nextUserFilters && isUserRelated(note.renote, nextUserFilters.userIdsWhoMeMuting)) return false;
+				if (nextUserFilters && isInstanceMuted(note, nextUserFilters.userMutedInstances)) return false;
+
+				return true;
+			}).sort((a, b) => a.id > b.id ? -1 : 1);
+
+			if (notes.length === 0) {
+				const nextOffset = offset + res.hits.length;
+				if (res.hits.length < limit || nextOffset >= res.estimatedTotalHits) {
+					return [];
+				}
+				return searchNext(nextOffset, remainingRetries - 1, nextUserFilters);
+			}
+
+			const packedNotes = (await this.noteEntityService.packMany(notes, me)).filter(note => !isMustRemove(note, 'home'));
+
+			if (packedNotes.length > 0) {
+				return packedNotes;
+			}
+
+			const nextOffset = offset + res.hits.length;
+			if (res.hits.length < limit || nextOffset >= res.estimatedTotalHits) {
+				return [];
+			}
+
+			return searchNext(nextOffset, remainingRetries - 1, nextUserFilters);
+		};
+
+		return searchNext(0, SEARCH_EMPTY_PAGE_RETRY_LIMIT, null);
+	}
+
+	@bindThis
+	private async fetchSearchUserFilters(me: MiUser): Promise<SearchUserFilters> {
+		const [
+			userIdsWhoMeMuting,
+			userIdsWhoBlockingMe,
+			userMutedInstances,
+		] = await Promise.all([
+			this.cacheService.userMutingsCache.fetch(me.id),
+			this.cacheService.userBlockedCache.fetch(me.id),
+			this.cacheService.userProfileCache.fetch(me.id).then(p => new Set(p.mutedInstances)),
+		]);
+
+		return {
+			userIdsWhoMeMuting,
+			userIdsWhoBlockingMe,
+			userMutedInstances,
+		};
 	}
 }

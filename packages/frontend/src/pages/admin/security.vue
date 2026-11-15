@@ -19,18 +19,96 @@ SPDX-License-Identifier: AGPL-3.0-only
 						<template v-else-if="sensitiveMediaDetectionForm.savedState.sensitiveMediaDetection === 'remote'" #suffix>{{ i18n.ts.remoteOnly }}</template>
 						<template v-else #suffix>{{ i18n.ts.none }}</template>
 						<template v-if="sensitiveMediaDetectionForm.modified.value" #footer>
-							<MkFormFooter :form="sensitiveMediaDetectionForm"/>
+							<MkFormFooter :form="sensitiveMediaDetectionForm" :canSaving="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionApiKeyMode !== 'custom' || sensitiveMediaDetectionForm.state.sensitiveMediaDetectionApiKey !== ''"/>
 						</template>
 
 						<div class="_gaps_m">
 							<div><SearchText>{{ i18n.ts._sensitiveMediaDetection.description }}</SearchText></div>
 
-							<MkRadios v-model="sensitiveMediaDetectionForm.state.sensitiveMediaDetection">
-								<option value="none">{{ i18n.ts.none }}</option>
-								<option value="all">{{ i18n.ts.all }}</option>
-								<option value="local">{{ i18n.ts.localOnly }}</option>
-								<option value="remote">{{ i18n.ts.remoteOnly }}</option>
+							<MkInfo warn><SearchText>{{ i18n.ts._sensitiveMediaDetection.externalServiceInfo }}</SearchText></MkInfo>
+
+							<MkRadios
+								v-model="sensitiveMediaDetectionForm.state.sensitiveMediaDetection"
+								:options="[
+									{ value: 'none', label: i18n.ts.none },
+									{ value: 'all', label: i18n.ts.all },
+									{ value: 'local', label: i18n.ts.localOnly },
+									{ value: 'remote', label: i18n.ts.remoteOnly },
+								]"
+							>
 							</MkRadios>
+
+							<SearchMarker :keywords="['api', 'url', 'endpoint', 'sensitive']">
+								<MkInput v-model="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionApiUrl" type="url">
+									<template #label><SearchLabel>{{ i18n.ts._sensitiveMediaDetection.apiUrl }}</SearchLabel></template>
+									<template #caption>
+										<SearchText>{{ i18n.ts._hana._sensitiveMediaDetection.apiUrlDescription }}</SearchText>
+										<div>{{ i18n.tsx._hana._sensitiveMediaDetection.serverSettingDescription({ value: meta.sensitiveMediaDetectionDefaults.apiUrl ?? i18n.ts.notSet }) }}</div>
+									</template>
+								</MkInput>
+							</SearchMarker>
+
+							<SearchMarker :keywords="['api', 'key', 'token', 'sensitive']">
+								<MkSelect
+									v-model="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionApiKeyMode"
+									:items="[
+										{ value: 'default', label: i18n.ts._hana._sensitiveMediaDetection.useServerSetting },
+										{ value: 'custom', label: i18n.ts._hana._sensitiveMediaDetection.specifyApiKey },
+										{ value: 'none', label: i18n.ts._hana._sensitiveMediaDetection.noAuthentication },
+									]"
+								>
+									<template #label><SearchLabel>{{ i18n.ts._sensitiveMediaDetection.apiKey }}</SearchLabel></template>
+									<template #caption><SearchText>{{ i18n.ts._hana._sensitiveMediaDetection.apiKeyDescription }}</SearchText></template>
+								</MkSelect>
+								<MkInput v-if="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionApiKeyMode === 'custom'" v-model="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionApiKey" type="password" autocomplete="new-password" required>
+									<template #prefix><i class="ti ti-key"></i></template>
+									<template #label><SearchLabel>{{ i18n.ts._hana._sensitiveMediaDetection.specifyApiKey }}</SearchLabel></template>
+								</MkInput>
+							</SearchMarker>
+
+							<SearchMarker :keywords="['proxy', 'sensitive']">
+								<MkSelect
+									v-model="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionUseProxyMode"
+									:items="[
+										{ value: 'default', label: i18n.ts._hana._sensitiveMediaDetection.useServerSetting },
+										{ value: 'on', label: i18n.ts.enabled },
+										{ value: 'off', label: i18n.ts.disabled },
+									]"
+								>
+									<template #label><SearchLabel>{{ i18n.ts._hana._sensitiveMediaDetection.useProxy }}</SearchLabel></template>
+									<template #caption>
+										<SearchText>{{ i18n.ts._hana._sensitiveMediaDetection.useProxyDescription }}</SearchText>
+										<div>{{ i18n.tsx._hana._sensitiveMediaDetection.serverSettingDescription({ value: meta.sensitiveMediaDetectionDefaults.useProxy ? i18n.ts.enabled : i18n.ts.disabled }) }}</div>
+									</template>
+								</MkSelect>
+							</SearchMarker>
+
+							<!-- MkInput に null を戻すと 0 が再通知されるため、継承中の空欄は NaN で渡す。 -->
+							<SearchMarker :keywords="['timeout', 'sensitive']">
+								<MkInput
+									:modelValue="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionTimeout ?? Number.NaN" type="number" :min="1"
+									@update:modelValue="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionTimeout = Number.isNaN($event) ? null : $event"
+								>
+									<template #label><SearchLabel>{{ i18n.ts._sensitiveMediaDetection.timeout }}</SearchLabel></template>
+									<template #caption>
+										<SearchText>{{ i18n.ts._sensitiveMediaDetection.timeoutDescription }}</SearchText>
+										<div>{{ i18n.tsx._hana._sensitiveMediaDetection.serverSettingDescription({ value: `${meta.sensitiveMediaDetectionDefaults.timeout}ms` }) }}</div>
+									</template>
+								</MkInput>
+							</SearchMarker>
+
+							<SearchMarker :keywords="['max', 'images', 'chunk', 'sensitive']">
+								<MkInput
+										:modelValue="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionMaxImagesPerRequest ?? Number.NaN" type="number" :min="1"
+									@update:modelValue="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionMaxImagesPerRequest = Number.isNaN($event) ? null : $event"
+								>
+									<template #label><SearchLabel>{{ i18n.ts._sensitiveMediaDetection.maxImagesPerRequest }}</SearchLabel></template>
+									<template #caption>
+										<SearchText>{{ i18n.ts._sensitiveMediaDetection.maxImagesPerRequestDescription }}</SearchText>
+										<div>{{ i18n.tsx._hana._sensitiveMediaDetection.serverSettingDescription({ value: meta.sensitiveMediaDetectionDefaults.maxImagesPerRequest }) }}</div>
+									</template>
+								</MkInput>
+							</SearchMarker>
 
 							<SearchMarker :keywords="['sensitivity']">
 								<MkRange v-model="sensitiveMediaDetectionForm.state.sensitiveMediaDetectionSensitivity" :min="0" :max="4" :step="1" :textConverter="(v) => `${v + 1}`">
@@ -165,7 +243,9 @@ import MkRadios from '@/components/MkRadios.vue';
 import MkSwitch from '@/components/MkSwitch.vue';
 import MkRange from '@/components/MkRange.vue';
 import MkInput from '@/components/MkInput.vue';
+import MkSelect from '@/components/MkSelect.vue';
 import MkTextarea from '@/components/MkTextarea.vue';
+import MkInfo from '@/components/MkInfo.vue';
 import * as os from '@/os.js';
 import { misskeyApi } from '@/utility/misskey-api.js';
 import { fetchInstance } from '@/instance.js';
@@ -185,6 +265,12 @@ const sensitiveMediaDetectionForm = useForm({
 	meta.sensitiveMediaDetectionSensitivity === 'veryHigh' ? 4 : 0,
 	setSensitiveFlagAutomatically: meta.setSensitiveFlagAutomatically,
 	enableSensitiveMediaDetectionForVideos: meta.enableSensitiveMediaDetectionForVideos,
+	sensitiveMediaDetectionApiUrl: meta.sensitiveMediaDetectionApiUrl,
+	sensitiveMediaDetectionApiKey: meta.sensitiveMediaDetectionApiKey ?? '',
+	sensitiveMediaDetectionApiKeyMode: meta.sensitiveMediaDetectionApiKey == null ? 'default' as const : meta.sensitiveMediaDetectionApiKey === '' ? 'none' as const : 'custom' as const,
+	sensitiveMediaDetectionUseProxyMode: meta.sensitiveMediaDetectionUseProxy == null ? 'default' as const : meta.sensitiveMediaDetectionUseProxy ? 'on' as const : 'off' as const,
+	sensitiveMediaDetectionTimeout: meta.sensitiveMediaDetectionTimeout,
+	sensitiveMediaDetectionMaxImagesPerRequest: meta.sensitiveMediaDetectionMaxImagesPerRequest,
 }, async (state) => {
 	await os.apiWithDialog('admin/update-meta', {
 		sensitiveMediaDetection: state.sensitiveMediaDetection,
@@ -197,6 +283,11 @@ const sensitiveMediaDetectionForm = useForm({
 			null as never,
 		setSensitiveFlagAutomatically: state.setSensitiveFlagAutomatically,
 		enableSensitiveMediaDetectionForVideos: state.enableSensitiveMediaDetectionForVideos,
+		sensitiveMediaDetectionApiUrl: state.sensitiveMediaDetectionApiUrl,
+		sensitiveMediaDetectionApiKey: state.sensitiveMediaDetectionApiKeyMode === 'default' ? null : state.sensitiveMediaDetectionApiKeyMode === 'none' ? '' : state.sensitiveMediaDetectionApiKey,
+		sensitiveMediaDetectionUseProxy: state.sensitiveMediaDetectionUseProxyMode === 'default' ? null : state.sensitiveMediaDetectionUseProxyMode === 'on',
+		sensitiveMediaDetectionTimeout: state.sensitiveMediaDetectionTimeout,
+		sensitiveMediaDetectionMaxImagesPerRequest: state.sensitiveMediaDetectionMaxImagesPerRequest,
 	});
 	fetchInstance(true);
 });

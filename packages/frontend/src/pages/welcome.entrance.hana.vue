@@ -1,8 +1,8 @@
 <template>
 <div :class="$style.root">
 	<div v-if="isTest">
-		<button data-cy-signup @click="signup()">{{ i18n.ts.joinThisServer }}</button>
-		<button data-cy-signin @click="signin()">{{ i18n.ts.login }}</button>
+		<button data-testid="signup" @click="signup()">{{ i18n.ts.joinThisServer }}</button>
+		<button data-testid="signin" @click="signin()">{{ i18n.ts.login }}</button>
 	</div>
 	<iframe
 		ref="frameEl"
@@ -51,7 +51,7 @@ import XSignupDialog from '@/components/MkSignupDialog.vue';
 // テストの場合はボタンを別途配置
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error
-const isTest = (import.meta.env.MODE === 'test' || window.Cypress != null);
+const isTest = (import.meta.env.MODE === 'test' || window.isPlaywright);
 
 const dev = _DEV_ ? '?debug' : '';
 

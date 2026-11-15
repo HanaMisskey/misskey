@@ -8,8 +8,6 @@ import { isInstanceMuted } from '@/misc/is-instance-muted.js';
 import { isUserRelated } from '@/misc/is-user-related.js';
 import { isQuotePacked, isRenotePacked } from '@/misc/is-renote.js';
 import { isChannelRelated } from '@/misc/is-channel-related.js';
-import { removeMutedUsersReactions } from '@/misc/reactions-mute.js';
-import { deepClone } from '@/misc/clone.js';
 import type { Awaitable } from '@/types.js';
 import type { Packed } from '@/misc/json-schema.js';
 import type { JsonObject, JsonValue } from '@/misc/json-value.js';
@@ -25,7 +23,7 @@ export default abstract class Channel {
 	public abstract readonly chName: string;
 	public static readonly shouldShare: boolean;
 	public static readonly requireCredential: boolean;
-	public static readonly kind?: string | null;
+	public static readonly kind: string | null;
 
 	protected get user() {
 		return this.connection.user;
@@ -109,7 +107,7 @@ export default abstract class Channel {
 	 */
 	protected isNoteMutedOrBlocked(note: Packed<'Note'>): boolean {
 		// 流れてきたNoteがインスタンスミュートしたインスタンスが関わる
-		if (isInstanceMuted(note, new Set<string>(this.userProfile?.mutedInstances ?? []))) return true;
+		if (isInstanceMuted(note, this.userMutedInstances)) return true;
 
 		// 流れてきたNoteがミュートしているユーザーが関わる
 		if (isUserRelated(note, this.userIdsWhoMeMuting)) return true;
@@ -125,14 +123,9 @@ export default abstract class Channel {
 		return false;
 	}
 
-	protected async removeMutedReactions(note: Packed<'Note'>): Promise<Packed<'Note'>> {
-		const cloned = deepClone(note);
-		return await removeMutedUsersReactions(cloned, this.userIdsWhoMeMuting, false);
-	}
-
-	constructor(id: string, connection: Connection) {
-		this.id = id;
-		this.connection = connection;
+	constructor(request: ChannelRequest) {
+		this.id = request.id;
+		this.connection = request.connection;
 	}
 
 	public send(payload: { type: string, body: JsonValue }): void;
@@ -163,9 +156,14 @@ export default abstract class Channel {
 	public onMessage?(type: string, body: JsonValue): void;
 }
 
-export type MiChannelService<T extends boolean> = {
+export interface ChannelRequest {
+	id: string,
+	connection: Connection,
+}
+
+export interface ChannelConstructor<T extends boolean> {
+	new(...args: any[]): Channel;
 	shouldShare: boolean;
 	requireCredential: T;
 	kind: T extends true ? string : string | null | undefined;
-	create: (id: string, connection: Connection) => Channel;
-};
+}

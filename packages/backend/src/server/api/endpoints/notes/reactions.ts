@@ -4,23 +4,20 @@
  */
 
 import { Inject, Injectable } from '@nestjs/common';
-import { Brackets, type FindOptionsWhere } from 'typeorm';
 import type { NoteReactionsRepository } from '@/models/_.js';
-import type { MiNoteReaction } from '@/models/NoteReaction.js';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { NoteReactionEntityService } from '@/core/entities/NoteReactionEntityService.js';
+import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
 import { DI } from '@/di-symbols.js';
 import { QueryService } from '@/core/QueryService.js';
-import { isThisReactionUserRelated } from '@/misc/is-user-related.js';
 import { CacheService } from '@/core/CacheService.js';
+import { GetterService } from '@/server/api/GetterService.js';
+import { ApiError } from '../../error.js';
 
 export const meta = {
 	tags: ['notes', 'reactions'],
 
 	requireCredential: false,
-
-	allowGet: true,
-	cacheSec: 60,
 
 	res: {
 		type: 'array',
@@ -46,6 +43,7 @@ export const paramDef = {
 	properties: {
 		noteId: { type: 'string', format: 'misskey:id' },
 		type: { type: 'string', nullable: true },
+		types: { type: 'array', minItems: 1, maxItems: 1000, items: { type: 'string' } },
 		limit: { type: 'integer', minimum: 1, maximum: 100, default: 10 },
 		sinceId: { type: 'string', format: 'misskey:id' },
 		untilId: { type: 'string', format: 'misskey:id' },
@@ -53,6 +51,7 @@ export const paramDef = {
 		untilDate: { type: 'integer' },
 	},
 	required: ['noteId'],
+	not: { required: ['type', 'types'] },
 } as const;
 
 @Injectable()
@@ -63,30 +62,41 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 
 		private cacheService: CacheService,
 		private noteReactionEntityService: NoteReactionEntityService,
+		private noteEntityService: NoteEntityService,
 		private queryService: QueryService,
+		private getterService: GetterService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
+			const note = await this.getterService.getNote(ps.noteId).catch(err => {
+				if (err.id === '9725d0ce-ba28-4dde-95a7-2cbb2c15de24') throw new ApiError(meta.errors.noSuchNote);
+				throw err;
+			});
+
+			if (!await this.noteEntityService.isVisibleForMe(note, me ? me.id : null)) {
+				throw new ApiError(meta.errors.noSuchNote);
+			}
+
 			const [userIdsWhoMeMuting] = me ? await Promise.all([
 				this.cacheService.userMutingsCache.fetch(me.id),
 			]) : [new Set<string>()];
 
 			const query = this.queryService.makePaginationQuery(this.noteReactionsRepository.createQueryBuilder('reaction'), ps.sinceId, ps.untilId, ps.sinceDate, ps.untilDate)
-				.andWhere('reaction.noteId = :noteId', { noteId: ps.noteId })
+				.andWhere('reaction.noteId = :noteId', { noteId: note.id })
 				.leftJoinAndSelect('reaction.user', 'user')
 				.leftJoinAndSelect('reaction.note', 'note');
 
-			if (ps.type) {
-				// ローカルリアクションはホスト名が . とされているが
-				// DB 上ではそうではないので、必要に応じて変換
-				const suffix = '@.:';
-				const type = ps.type.endsWith(suffix) ? ps.type.slice(0, ps.type.length - suffix.length) + ':' : ps.type;
-				query.andWhere('reaction.reaction = :type', { type });
+			const toDatabaseReaction = (type: string) => type.endsWith('@.:') ? type.slice(0, -3) + ':' : type;
+			if (ps.types) {
+				query.andWhere('reaction.reaction IN (:...types)', { types: ps.types.map(toDatabaseReaction) });
+			} else if (ps.type) {
+				query.andWhere('reaction.reaction = :type', { type: toDatabaseReaction(ps.type) });
 			}
 
-			const reactions = (await query.limit(ps.limit).getMany()).filter(reactions => {
-				if (me && isThisReactionUserRelated(reactions, userIdsWhoMeMuting)) return false;
-				return true;
-			});
+			if (userIdsWhoMeMuting.size > 0) {
+				query.andWhere('reaction.userId NOT IN (:...mutedUserIds)', { mutedUserIds: [...userIdsWhoMeMuting] });
+			}
+
+			const reactions = await query.limit(ps.limit).getMany();
 
 			return await this.noteReactionEntityService.packMany(reactions, me);
 		});

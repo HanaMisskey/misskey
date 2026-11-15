@@ -3,30 +3,31 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Injectable } from '@nestjs/common';
-import { normalizeForSearch } from '@/misc/normalize-for-search.js';
+import { Inject, Injectable, Scope } from '@nestjs/common';
+import { normalizeTag } from '@/misc/normalize-tag.js';
 import type { Packed } from '@/misc/json-schema.js';
 import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
 import { NoteStreamingHidingService } from '../NoteStreamingHidingService.js';
 import { bindThis } from '@/decorators.js';
-import { isRenotePacked, isQuotePacked } from '@/misc/is-renote.js';
 import type { JsonObject } from '@/misc/json-value.js';
-import Channel, { type MiChannelService } from '../channel.js';
+import Channel, { type ChannelRequest } from '../channel.js';
+import { REQUEST } from '@nestjs/core';
 
-class HashtagChannel extends Channel {
+@Injectable({ scope: Scope.TRANSIENT })
+export class HashtagChannel extends Channel {
 	public readonly chName = 'hashtag';
 	public static shouldShare = false;
 	public static requireCredential = false as const;
 	private q: string[][];
 
 	constructor(
+		@Inject(REQUEST)
+		request: ChannelRequest,
+
 		private noteEntityService: NoteEntityService,
 		private noteStreamingHidingService: NoteStreamingHidingService,
-
-		id: string,
-		connection: Channel['connection'],
 	) {
-		super(id, connection);
+		super(request);
 		//this.onNote = this.onNote.bind(this);
 	}
 
@@ -36,9 +37,9 @@ class HashtagChannel extends Channel {
 		if (!params.q.every((x): x is string[] => (
 			Array.isArray(x) &&
 			x.length >= 1 &&
-			x.every(y => typeof y === 'string')
+			x.every(y => typeof y === 'string' && Array.from(y).length <= 128)
 		))) return false;
-		this.q = params.q;
+		this.q = params.q.map(tags => tags.map(tag => normalizeTag(tag)));
 
 		// Subscribe stream
 		this.subscriber.on('notesStream', this.onNote);
@@ -49,7 +50,7 @@ class HashtagChannel extends Channel {
 	@bindThis
 	private async onNote(note: Packed<'Note'>) {
 		const noteTags = note.tags ? note.tags.map((t: string) => t.toLowerCase()) : [];
-		const matched = this.q.some(tags => tags.every(tag => noteTags.includes(normalizeForSearch(tag))));
+		const matched = this.q.some(tags => tags.every(tag => noteTags.includes(tag)));
 		if (!matched) return;
 
 		if (!this.isNoteVisibleForMe(note)) return;
@@ -58,49 +59,16 @@ class HashtagChannel extends Channel {
 		if (note.reply && note.reply.user.requireSigninToViewContents && this.user == null) return;
 		if (this.isNoteMutedOrBlocked(note)) return;
 
-		const reactionMutedNote = await this.removeMutedReactions(note);
+		const filtered = await this.noteStreamingHidingService.filter(note, this.user?.id ?? null);
+		if (!filtered) return;
+		const reactionMutedNote = filtered;
 
-		const { shouldSkip } = await this.noteStreamingHidingService.processHiding(reactionMutedNote, this.user?.id ?? null);
-		if (shouldSkip) return;
-
-		if (this.user) {
-			if (isRenotePacked(reactionMutedNote) && !isQuotePacked(reactionMutedNote)) {
-				if (reactionMutedNote.renote && Object.keys(reactionMutedNote.renote.reactions).length > 0) {
-					const myRenoteReaction = await this.noteEntityService.populateMyReaction(reactionMutedNote.renote, this.user.id);
-					reactionMutedNote.renote.myReaction = myRenoteReaction;
-				}
-			}
-		}
-
-		this.send('note', reactionMutedNote);
+		this.send('note', await this.noteEntityService.withMyRenoteReaction(reactionMutedNote, this.user?.id ?? null));
 	}
 
 	@bindThis
 	public dispose() {
 		// Unsubscribe events
 		this.subscriber.off('notesStream', this.onNote);
-	}
-}
-
-@Injectable()
-export class HashtagChannelService implements MiChannelService<false> {
-	public readonly shouldShare = HashtagChannel.shouldShare;
-	public readonly requireCredential = HashtagChannel.requireCredential;
-	public readonly kind = HashtagChannel.kind;
-
-	constructor(
-		private noteEntityService: NoteEntityService,
-		private noteStreamingHidingService: NoteStreamingHidingService,
-	) {
-	}
-
-	@bindThis
-	public create(id: string, connection: Channel['connection']): HashtagChannel {
-		return new HashtagChannel(
-			this.noteEntityService,
-			this.noteStreamingHidingService,
-			id,
-			connection,
-		);
 	}
 }

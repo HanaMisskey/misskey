@@ -10,7 +10,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 		<div :class="$style.title">{{ i18n.ts._hana._visitorLoginPopup.title }}</div>
 		<div :class="$style.text">{{ i18n.ts._hana._visitorLoginPopup.description }}</div>
 		<div class="_buttonsCenter">
-			<MkButton rounded gradate link to="/" @click.passive="close">{{ i18n.ts.joinThisServer }}</MkButton>
+			<MkButton rounded gradate type="routerLink" to="/" @click.passive="close">{{ i18n.ts.joinThisServer }}</MkButton>
 		</div>
 		<div class="_buttonsCenter">
 			<button :class="$style.loginButton" class="_textButton" @click="signin">{{ i18n.ts.login }}</button>

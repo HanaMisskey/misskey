@@ -1,6 +1,7 @@
-import { strictEqual } from 'assert';
+import { describe, test, beforeAll, afterAll, vi } from 'vitest';
+import { rejects, strictEqual } from 'assert';
 import * as Misskey from 'misskey-js';
-import { createAccount, fetchAdmin, isNoteUpdatedEventFired, isFired, type LoginUser, type Request, resolveRemoteUser, sleep, createRole } from './utils.js';
+import { createAccount, fetchAdmin, isNoteUpdatedEventFired, isFired, type LoginUser, type Request, resolveRemoteUser, sleep, createRole, waitForFollowRelation, FEDERATION_TIMEOUT, WAIT_FOR_FEDERATION } from './utils.js';
 
 const bAdmin = await fetchAdmin('b.test');
 
@@ -20,7 +21,9 @@ describe('Timeline', () => {
 		]);
 
 		await bob.client.request('following/create', { userId: aliceInB.id });
-		await sleep();
+		// NOTE: 配送側 (a.test) だけでなく、受信側のホームタイムラインへの fan-out にも
+		//       followings が要るので、両サーバーへ反映されるまで待つ
+		await waitForFollowRelation(bob, alice, 1);
 	});
 
 	type TimelineChannel = keyof Misskey.Channels & (`${string}Timeline` | 'antenna' | 'userList' | 'hashtag');
@@ -38,21 +41,39 @@ describe('Timeline', () => {
 
 	async function postAndCheckReception<C extends TimelineChannel>(
 		timelineChannel: C,
-		expect: boolean,
+		expected: boolean | { streaming: boolean; endpoint: boolean },
 		noteParams: Misskey.entities.NotesCreateRequest = {},
 		channelParams: Misskey.Channels[C]['params'] = {},
 	) {
+		const { streaming: expectStreaming, endpoint: expectEndpoint } = typeof expected === 'boolean'
+			? { streaming: expected, endpoint: expected }
+			: expected;
 		let note: Misskey.entities.Note | undefined;
+		let streamedNote: Misskey.entities.Note | undefined;
 		const text = noteParams.text ?? crypto.randomUUID();
 		const streamingFired = await isFired(
 			'b.test', bob, timelineChannel,
 			async () => {
 				note = (await alice.client.request('notes/create', { text, ...noteParams })).createdNote;
 			},
-			'note', msg => msg.text === text,
+			'note', msg => {
+				if (msg.text !== text) return false;
+				streamedNote = msg;
+				return true;
+			},
 			channelParams,
+			expectStreaming ? FEDERATION_TIMEOUT : undefined,
 		);
-		strictEqual(streamingFired, expect);
+		strictEqual(streamingFired, expectStreaming);
+
+		const noteUri = `https://a.test/notes/${note!.id}`;
+		if (expectStreaming) {
+			await vi.waitFor(async () => {
+				const deliveredNote = await bob.client.request('notes/show', { noteId: streamedNote!.id });
+				strictEqual(deliveredNote.uri, noteUri);
+				strictEqual(deliveredNote.text, text);
+			}, WAIT_FOR_FEDERATION);
+		}
 
 		const endpoint = timelineMap.get(timelineChannel)!;
 		const params: Misskey.Endpoints[typeof endpoint]['req'] =
@@ -62,25 +83,39 @@ describe('Timeline', () => {
 			endpoint === 'roles/notes' ? { roleId: (channelParams as Misskey.Channels['roleTimeline']['params']).roleId } :
 			{};
 
+		const fetchNoteInB = async () => (await (bob.client.request as Request)(endpoint, params))
+			.filter(({ uri }) => uri === noteUri).pop();
+
 		await sleep();
-		const notes = await (bob.client.request as Request)(endpoint, params);
-		const noteInB = notes.filter(({ uri }) => uri === `https://a.test/notes/${note!.id}`).pop();
+		// 届かないはずのケースは待っても意味がないので 1 回だけ取得する
+		const noteInB = expectEndpoint
+			? await vi.waitFor(async () => {
+				const noteInB = await fetchNoteInB();
+				strictEqual(noteInB != null, true);
+				return noteInB!;
+			}, WAIT_FOR_FEDERATION)
+			: await fetchNoteInB();
 		const endpointFired = noteInB != null;
-		strictEqual(endpointFired, expect);
+		strictEqual(endpointFired, expectEndpoint);
 
 		// Let's check Delete reception
-		if (expect) {
+		if (expectStreaming) {
 			const streamingFired = await isNoteUpdatedEventFired(
-				'b.test', bob, noteInB!.id,
+				'b.test', bob, streamedNote!.id,
 				async () => await alice.client.request('notes/delete', { noteId: note!.id }),
-				msg => msg.type === 'deleted' && msg.id === noteInB!.id,
+				msg => msg.type === 'deleted' && msg.id === streamedNote!.id,
+				FEDERATION_TIMEOUT,
 			);
 			strictEqual(streamingFired, true);
 
-			await sleep();
-			const notes = await (bob.client.request as Request)(endpoint, params);
-			const endpointFired = notes.every(({ uri }) => uri !== `https://a.test/notes/${note!.id}`);
-			strictEqual(endpointFired, true);
+			await vi.waitFor(async () => {
+				await rejects(
+					bob.client.request('notes/show', { noteId: streamedNote!.id }),
+					{ code: 'NO_SUCH_NOTE' },
+				);
+				const endpointFired = await fetchNoteInB() == null;
+				strictEqual(endpointFired, true);
+			}, WAIT_FOR_FEDERATION);
 		}
 	}
 
@@ -117,7 +152,7 @@ describe('Timeline', () => {
 			 * FIXME: can receive this
 			 * @see https://github.com/misskey-dev/misskey/issues/14083
 			 */
-			test.failing('Don\'t receive remote followee\'s invisible and mentioned specified-only Note', async () => {
+			test.skip('Don\'t receive remote followee\'s invisible and mentioned specified-only Note', async () => {
 				await postAndCheckReception(homeTimeline, false, { text: `@${bob.username}@b.test Hello`, visibility: 'specified' });
 			});
 
@@ -125,7 +160,7 @@ describe('Timeline', () => {
 			 * FIXME: cannot receive this
 			 * @see https://github.com/misskey-dev/misskey/issues/14084
 			 */
-			test.failing('Receive remote followee\'s visible specified-only reply to invisible specified-only Note', async () => {
+			test.skip('Receive remote followee\'s visible specified-only reply to invisible specified-only Note', async () => {
 				const note = (await alice.client.request('notes/create', { text: 'a', visibility: 'specified' })).createdNote;
 				await postAndCheckReception(homeTimeline, true, { replyId: note.id, visibility: 'specified', visibleUserIds: [bobInA.id] });
 			});
@@ -216,6 +251,12 @@ describe('Timeline', () => {
 		});
 	});
 
+	/**
+	 * Oracle: hanami commit 4e9070a013baa37359872fe1cc0d21f55308e3b4 limits
+	 * notes/search-by-tag to public/home so it cannot bypass author visibility changes.
+	 * Followers-only and addressed specified-only notes remain visible to Bob through
+	 * streaming and notes/show, but are excluded from hashtag search.
+	 */
 	describe('hashtag', () => {
 		const hashtag = 'hashtag';
 
@@ -230,14 +271,14 @@ describe('Timeline', () => {
 				await postAndCheckReception(hashtag, true, { text: `#${tag}`, visibility: 'home' }, { q: [[tag]] });
 			});
 
-			test('Receive remote followee\'s followers-only Note', async () => {
+			test('Receive remote followee\'s followers-only Note in streaming but exclude it from hashtag search', async () => {
 				const tag = crypto.randomUUID();
-				await postAndCheckReception(hashtag, true, { text: `#${tag}`, visibility: 'followers' }, { q: [[tag]] });
+				await postAndCheckReception(hashtag, { streaming: true, endpoint: false }, { text: `#${tag}`, visibility: 'followers' }, { q: [[tag]] });
 			});
 
-			test('Receive remote followee\'s visible specified-only Note', async () => {
+			test('Receive remote followee\'s visible specified-only Note in streaming but exclude it from hashtag search', async () => {
 				const tag = crypto.randomUUID();
-				await postAndCheckReception(hashtag, true, { text: `#${tag}`, visibility: 'specified', visibleUserIds: [bobInA.id] }, { q: [[tag]] });
+				await postAndCheckReception(hashtag, { streaming: true, endpoint: false }, { text: `#${tag}`, visibility: 'specified', visibleUserIds: [bobInA.id] }, { q: [[tag]] });
 			});
 		});
 	});

@@ -6,19 +6,30 @@
 import * as fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
-import * as yaml from 'js-yaml';
+import { load as loadYaml } from 'js-yaml';
 import { type FastifyServerOptions } from 'fastify';
+import type { SensitiveMediaDetectionConfig } from './misc/sensitive-media-detection-config.js';
 import type * as Sentry from '@sentry/node';
 import type * as SentryVue from '@sentry/vue';
-import type { RedisOptions } from 'ioredis';
+import type { RedisOptions as IoRedisRedisOptions } from 'ioredis';
+import type { RedisOptions as BullMqRedisOptions } from 'bullmq';
+import type { AccessLogConfiguration, LogFormat, LogLevelSetting } from './logging/types.js';
 
-type RedisOptionsSource = Partial<RedisOptions> & {
+type RedisOptionsRequiredFields = {
 	host: string;
 	port: number;
 	family?: number;
 	pass: string;
 	db?: number;
 	prefix?: string;
+};
+type RedisOptionsSource = Partial<IoRedisRedisOptions & BullMqRedisOptions> & RedisOptionsRequiredFields;
+type RedisOptionsResolved = IoRedisRedisOptions & BullMqRedisOptions & RedisOptionsRequiredFields;
+
+type SentryBackendConfig = {
+	options: Partial<Sentry.NodeOptions>;
+	enableNodeProfiling: boolean;
+	disabledIntegrations?: string[];
 };
 
 /**
@@ -30,6 +41,7 @@ type Source = {
 	socket?: string;
 	trustProxy?: FastifyServerOptions['trustProxy'];
 	chmodSocket?: string;
+	enableIpRateLimit?: boolean;
 	disableHsts?: boolean;
 	db: {
 		host: string;
@@ -76,7 +88,7 @@ type Source = {
 		host: string;
 		apiKey: string;
 	};
-	sentryForBackend?: { options: Partial<Sentry.NodeOptions>; enableNodeProfiling: boolean; };
+	sentryForBackend?: SentryBackendConfig;
 	sentryForFrontend?: {
 		options: Partial<SentryVue.BrowserOptions> & { dsn: string };
 		vueIntegration?: SentryVue.VueIntegrationOptions | null;
@@ -95,8 +107,10 @@ type Source = {
 	allowedPrivateNetworks?: string[];
 
 	maxFileSize?: number;
+	sensitiveMediaDetection?: SensitiveMediaDetectionConfig;
 
 	clusterLimit?: number;
+	threadPoolSize?: number;
 
 	id: string;
 
@@ -127,6 +141,10 @@ type Source = {
 	pidFile: string;
 
 	logging?: {
+		format?: LogFormat;
+		level?: LogLevelSetting;
+		domains?: Record<string, LogLevelSetting> | null;
+		access?: AccessLogConfiguration;
 		sql?: {
 			disableQueryTruncation?: boolean,
 			enableQueryParamLogging?: boolean,
@@ -138,8 +156,9 @@ export type Config = {
 	url: string;
 	port: number;
 	socket: string | undefined;
-	trustProxy: FastifyServerOptions['trustProxy'];
+	trustProxy: NonNullable<FastifyServerOptions['trustProxy']>;
 	chmodSocket: string | undefined;
+	enableIpRateLimit: boolean;
 	disableHsts: boolean | undefined;
 	db: {
 		host: string;
@@ -186,7 +205,9 @@ export type Config = {
 	proxyBypassHosts: string[] | undefined;
 	allowedPrivateNetworks: string[] | undefined;
 	maxFileSize: number;
+	sensitiveMediaDetection?: SensitiveMediaDetectionConfig;
 	clusterLimit: number | undefined;
+	threadPoolSize: number;
 	id: string;
 	outgoingAddress: string | undefined;
 	outgoingAddressFamily: 'ipv4' | 'ipv6' | 'dual' | undefined;
@@ -199,6 +220,10 @@ export type Config = {
 	deliverJobMaxAttempts: number | undefined;
 	inboxJobMaxAttempts: number | undefined;
 	logging?: {
+		format?: LogFormat;
+		level?: LogLevelSetting;
+		domains?: Record<string, LogLevelSetting> | null;
+		access?: AccessLogConfiguration;
 		sql?: {
 			disableQueryTruncation?: boolean,
 			enableQueryParamLogging?: boolean,
@@ -217,19 +242,18 @@ export type Config = {
 	authUrl: string;
 	driveUrl: string;
 	userAgent: string;
-	frontendEntry: { file: string | null };
 	frontendManifestExists: boolean;
-	frontendEmbedEntry: { file: string | null };
 	frontendEmbedManifestExists: boolean;
+	rootDir: string;
 	mediaProxy: string;
 	externalMediaProxyEnabled: boolean;
 	videoThumbnailGenerator: string | null;
-	redis: RedisOptions & RedisOptionsSource;
-	redisForPubsub: RedisOptions & RedisOptionsSource;
-	redisForJobQueue: RedisOptions & RedisOptionsSource;
-	redisForTimelines: RedisOptions & RedisOptionsSource;
-	redisForReactions: RedisOptions & RedisOptionsSource;
-	sentryForBackend: { options: Partial<Sentry.NodeOptions>; enableNodeProfiling: boolean; } | undefined;
+	redis: RedisOptionsResolved;
+	redisForPubsub: RedisOptionsResolved;
+	redisForJobQueue: RedisOptionsResolved;
+	redisForTimelines: RedisOptionsResolved;
+	redisForReactions: RedisOptionsResolved;
+	sentryForBackend: SentryBackendConfig | undefined;
 	sentryForFrontend: {
 		options: Partial<SentryVue.BrowserOptions> & { dsn: string };
 		vueIntegration?: SentryVue.VueIntegrationOptions | null;
@@ -253,33 +277,38 @@ export type FulltextSearchProvider = 'sqlLike' | 'sqlPgroonga' | 'meilisearch';
 const _filename = fileURLToPath(import.meta.url);
 const _dirname = dirname(_filename);
 
-/**
- * Path of configuration directory
- */
-const dir = `${_dirname}/../../../.config`;
+/** Path of repository root directory */
+let rootDir = _dirname;
+// 見つかるまで上に遡る
+while (!fs.existsSync(resolve(rootDir, 'packages'))) {
+	const parentDir = dirname(rootDir);
+	if (parentDir === rootDir) {
+		throw new Error('Cannot find root directory');
+	}
+	rootDir = parentDir;
+}
+
+/** Path of configuration directory */
+const configDir = resolve(rootDir, '.config');
+/** Path of built directory */
+const projectBuiltDir = resolve(rootDir, 'built');
 
 /**
  * Path of configuration file
  */
 export const path = process.env.MISSKEY_CONFIG_YML
-	? resolve(dir, process.env.MISSKEY_CONFIG_YML)
+	? resolve(configDir, process.env.MISSKEY_CONFIG_YML)
 	: process.env.NODE_ENV === 'test'
-		? resolve(dir, 'test.yml')
-		: resolve(dir, 'default.yml');
+		? resolve(configDir, 'test.yml')
+		: resolve(configDir, 'default.yml');
 
 export function loadConfig(): Config {
-	const meta = JSON.parse(fs.readFileSync(`${_dirname}/../../../built/meta.json`, 'utf-8'));
+	const meta = JSON.parse(fs.readFileSync(resolve(projectBuiltDir, 'meta.json'), 'utf-8'));
 
-	const frontendManifestExists = fs.existsSync(_dirname + '/../../../built/_frontend_vite_/manifest.json');
-	const frontendEmbedManifestExists = fs.existsSync(_dirname + '/../../../built/_frontend_embed_vite_/manifest.json');
-	const frontendManifest = frontendManifestExists ?
-		JSON.parse(fs.readFileSync(`${_dirname}/../../../built/_frontend_vite_/manifest.json`, 'utf-8'))
-		: { 'src/_boot_.ts': { file: null } };
-	const frontendEmbedManifest = frontendEmbedManifestExists ?
-		JSON.parse(fs.readFileSync(`${_dirname}/../../../built/_frontend_embed_vite_/manifest.json`, 'utf-8'))
-		: { 'src/boot.ts': { file: null } };
+	const frontendManifestExists = fs.existsSync(resolve(projectBuiltDir, '_frontend_vite_/manifest.json'));
+	const frontendEmbedManifestExists = fs.existsSync(resolve(projectBuiltDir, '_frontend_embed_vite_/manifest.json'));
 
-	const config = yaml.load(fs.readFileSync(path, 'utf-8')) as Source;
+	const config = loadYaml(fs.readFileSync(path, 'utf-8')) as Source;
 
 	const url = tryCreateUrl(config.url ?? process.env.MISSKEY_URL ?? '');
 	const version = meta.version;
@@ -308,9 +337,17 @@ export function loadConfig(): Config {
 		url: url.origin,
 		port: config.port ?? parseInt(process.env.PORT ?? '', 10),
 		socket: config.socket,
-		trustProxy: config.trustProxy,
+		trustProxy: config.trustProxy ?? [
+			'10.0.0.0/8',
+			'172.16.0.0/12',
+			'192.168.0.0/16',
+			'127.0.0.1/32',
+			'::1/128',
+			'fc00::/7',
+		],
 		chmodSocket: config.chmodSocket,
 		disableHsts: config.disableHsts,
+		enableIpRateLimit: config.enableIpRateLimit ?? true,
 		host,
 		hostname,
 		scheme,
@@ -339,12 +376,14 @@ export function loadConfig(): Config {
 		proxyBypassHosts: config.proxyBypassHosts,
 		allowedPrivateNetworks: config.allowedPrivateNetworks,
 		maxFileSize: config.maxFileSize ?? 262144000,
+		sensitiveMediaDetection: config.sensitiveMediaDetection,
 		clusterLimit: config.clusterLimit,
+		threadPoolSize: config.threadPoolSize ?? 1,
 		outgoingAddress: config.outgoingAddress,
 		outgoingAddressFamily: config.outgoingAddressFamily,
-		deliverJobConcurrency: config.deliverJobConcurrency,
-		inboxJobConcurrency: config.inboxJobConcurrency,
-		relationshipJobConcurrency: config.relationshipJobConcurrency,
+		deliverJobConcurrency: validateJobConcurrency('deliverJobConcurrency', config.deliverJobConcurrency),
+		inboxJobConcurrency: validateJobConcurrency('inboxJobConcurrency', config.inboxJobConcurrency),
+		relationshipJobConcurrency: validateJobConcurrency('relationshipJobConcurrency', config.relationshipJobConcurrency),
 		deliverJobPerSec: config.deliverJobPerSec,
 		inboxJobPerSec: config.inboxJobPerSec,
 		relationshipJobPerSec: config.relationshipJobPerSec,
@@ -356,10 +395,9 @@ export function loadConfig(): Config {
 			config.videoThumbnailGenerator.endsWith('/') ? config.videoThumbnailGenerator.substring(0, config.videoThumbnailGenerator.length - 1) : config.videoThumbnailGenerator
 			: null,
 		userAgent: `Misskey/${version} (${config.url})`,
-		frontendEntry: frontendManifest['src/_boot_.ts'],
 		frontendManifestExists: frontendManifestExists,
-		frontendEmbedEntry: frontendEmbedManifest['src/boot.ts'],
 		frontendEmbedManifestExists: frontendEmbedManifestExists,
+		rootDir,
 		perChannelMaxNoteCacheCount: config.perChannelMaxNoteCacheCount ?? 1000,
 		perUserNotificationsMaxCount: config.perUserNotificationsMaxCount ?? 500,
 		deactivateAntennaThreshold: config.deactivateAntennaThreshold ?? (1000 * 60 * 60 * 24 * 7),
@@ -372,12 +410,21 @@ export function loadConfig(): Config {
 function tryCreateUrl(url: string) {
 	try {
 		return new URL(url);
-	} catch (e) {
+	} catch (_) {
 		throw new Error(`url="${url}" is not a valid URL.`);
 	}
 }
 
-function convertRedisOptions(options: RedisOptionsSource, host: string): RedisOptions & RedisOptionsSource {
+function validateJobConcurrency(key: string, value: number | undefined) {
+	if (value == null) return undefined;
+	// BullMQ の Worker は 1 未満の concurrency を受け付けないため、起動時に設定キーを明示して落とす
+	if (typeof value !== 'number' || !Number.isFinite(value) || value < 1) {
+		throw new Error(`${key}=${JSON.stringify(value)} is invalid. It must be a finite number greater than or equal to 1.`);
+	}
+	return value;
+}
+
+function convertRedisOptions(options: RedisOptionsSource, host: string): RedisOptionsResolved {
 	return {
 		...options,
 		password: options.pass,
