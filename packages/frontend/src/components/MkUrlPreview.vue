@@ -37,7 +37,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 		></iframe>
 	</div>
 	<div :class="$style.action">
-		<MkButton :small="true" inline @click="postExpanded = false">
+		<MkButton :small="true" inline @click="setPostExpanded(false)">
 			<i class="ti ti-x"></i> {{ i18n.ts.close }}
 		</MkButton>
 	</div>
@@ -53,7 +53,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 		></iframe>
 	</div>
 	<div :class="$style.action">
-		<MkButton :small="true" inline @click="postExpanded = false">
+		<MkButton :small="true" inline @click="setPostExpanded(false)">
 			<i class="ti ti-x"></i> {{ i18n.ts.close }}
 		</MkButton>
 	</div>
@@ -81,12 +81,12 @@ SPDX-License-Identifier: AGPL-3.0-only
 	</component>
 	<template v-if="showActions">
 		<div v-if="tweetId" :class="$style.action">
-			<MkButton :small="true" inline @click="postExpanded = true">
+			<MkButton :small="true" inline @click="setPostExpanded(true)">
 				<i class="ti ti-brand-x"></i> {{ i18n.ts.expandPost }}
 			</MkButton>
 		</div>
 		<div v-if="bskyPostRecordKey" :class="$style.action">
-			<MkButton :small="true" inline @click="openBskyEmbed">
+			<MkButton :small="true" inline @click="setPostExpanded(true)">
 				<i class="ti ti-brand-bluesky"></i> {{ i18n.ts.expandPost }}
 			</MkButton>
 		</div>
@@ -103,9 +103,10 @@ SPDX-License-Identifier: AGPL-3.0-only
 </template>
 
 <script lang="ts" setup>
-import { computed, defineAsyncComponent, onDeactivated, onUnmounted, ref } from 'vue';
+import { computed, defineAsyncComponent, onActivated, onDeactivated, onUnmounted, ref } from 'vue';
 import { url as local } from '@@/js/config.js';
 import { versatileLang } from '@@/js/intl-const.js';
+import { maybeMakeRelative } from '@@/js/url.js';
 import type { SummalyResult } from '@misskey-dev/summaly';
 import { i18n } from '@/i18n.js';
 import * as os from '@/os.js';
@@ -114,7 +115,6 @@ import MkButton from '@/components/MkButton.vue';
 import { transformPlayerUrl } from '@/utility/url-preview.js';
 import { store } from '@/store.js';
 import { prefer } from '@/preferences.js';
-import { maybeMakeRelative } from '@@/js/url.js';
 
 const props = withDefaults(defineProps<{
 	url: string;
@@ -143,10 +143,11 @@ const icon = computed(() => summalyResult.value?.icon ?? null);
 const sitename = computed(() => summalyResult.value?.sitename ?? null);
 const sensitive = computed(() => summalyResult.value?.sensitive ?? false);
 const player = computed(() => summalyResult.value?.player ?? { url: null, width: null, height: null });
-const playerEnabled = ref(false);
+const playerEnabled = ref(false); // 初期値はsummaly取り終わったあとに設定
 
 const embedId = `embed${Math.random().toString().replace(/\D/, '')}`;
-const postExpanded = ref(props.detail);
+const postExpanded = ref(false); // 初期値はsummaly取り終わったあとに設定
+let postExpandedByUser = false;
 const postHeight = ref(150);
 
 const tweetId = ref<string | null>(null);
@@ -156,8 +157,14 @@ const bskyDid = ref<string | null>(null);
 const bskyPostRecordKey = ref<string | null>(null);
 
 const unknownUrl = ref(false);
+let isDeactivated = false;
+
+onActivated(() => {
+	isDeactivated = false;
+});
 
 onDeactivated(() => {
+	isDeactivated = true;
 	playerEnabled.value = false;
 });
 
@@ -175,10 +182,6 @@ if (requestUrl.hostname === 'bsky.app') {
 	if (bskyPostPageUrl[0] === 'profile' && bskyPostPageUrl[1] && bskyPostPageUrl[2] === 'post' && bskyPostPageUrl[3]) {
 		bskyHandleOrDid.value = bskyPostPageUrl[1];
 		bskyPostRecordKey.value = bskyPostPageUrl[3];
-
-		if (postExpanded.value) {
-			openBskyEmbed();
-		}
 	}
 }
 
@@ -199,10 +202,17 @@ window.fetch(`/url?url=${encodeURIComponent(requestUrl.href)}&lang=${versatileLa
 
 		return res.json();
 	})
+	.catch(err => {
+		if (_DEV_) {
+			console.warn('Failed to fetch url preview', err);
+		}
+		return null;
+	})
 	.then((info: SummalyResult | null) => {
 		if (!info || info.url == null) {
 			fetching.value = false;
 			unknownUrl.value = true;
+			autoExpandPost();
 			return;
 		}
 
@@ -210,7 +220,32 @@ window.fetch(`/url?url=${encodeURIComponent(requestUrl.href)}&lang=${versatileLa
 		unknownUrl.value = false;
 
 		summalyResult.value = info;
+
+		if (!info.sensitive) {
+			autoExpandPost();
+			if (!isDeactivated) {
+				playerEnabled.value = (props.showActions && prefer.s.expandUrlPreviewAutomatically);
+			}
+		}
 	});
+
+function setPostExpanded(expanded: boolean) {
+	postExpandedByUser = true;
+	if (expanded && bskyPostRecordKey.value != null) {
+		openBskyEmbed();
+	} else {
+		postExpanded.value = expanded;
+	}
+}
+
+function autoExpandPost() {
+	if (!props.detail || postExpandedByUser) return;
+	if (bskyPostRecordKey.value != null) {
+		openBskyEmbed();
+	} else {
+		postExpanded.value = true;
+	}
+}
 
 async function openBskyEmbed() {
 	if (bskyHandleOrDid.value == null || bskyPostRecordKey.value == null) return;
