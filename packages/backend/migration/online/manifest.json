@@ -8,6 +8,14 @@
 			"implementation": "online/1767169026317-birthday-index.js",
 			"dependencies": ["online/concurrent-index.js"],
 			"recoverableIndexes": ["public.IDX_USERPROFILE_BIRTHDAY_DATE", "public.IDX_de22cd2b445eee31ae51cdbe99"]
+		},
+		{
+			"name": "FollowingRequestId1794917481157",
+			"source": "1794917481157-following-request-id.js",
+			"sourceSha256": "c0b5ba760cfd0c1e95a3eae7631b7d5cba7c0e684ac314c8718aebc2bbec737b",
+			"implementation": "online/1794917481157-following-request-id.js",
+			"dependencies": ["1794917481157-following-request-id.js"],
+			"recoverableIndexes": []
 		}
 	]
 }

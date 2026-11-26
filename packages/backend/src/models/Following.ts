@@ -61,7 +61,7 @@ export class MiFollowing {
 	// フォロー関係の元になった Follow アクティビティの ID
 	// この列の追加前に作られたフォロー関係では null
 	@Column('varchar', {
-		length: 512, nullable: true,
+		nullable: true,
 		comment: 'id of Follow Activity.',
 	})
 	public requestId: string | null;
