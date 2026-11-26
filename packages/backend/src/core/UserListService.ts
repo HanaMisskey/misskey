@@ -101,7 +101,7 @@ export class UserListService implements OnApplicationShutdown, OnModuleInit {
 		} as MiUserListMembership);
 
 		this.globalEventService.publishInternalEvent('userListMemberAdded', { userListId: list.id, memberId: target.id });
-		this.globalEventService.publishUserListStream(list.id, 'internalMembershipUpdated', { userId: target.id });
+		this.globalEventService.publishInternalUserListStream(list.id, 'internalMembershipUpdated');
 		this.globalEventService.publishUserListStream(list.id, 'userAdded', await this.userEntityService.pack(target));
 
 		// このインスタンス内にこのリモートユーザーをフォローしているユーザーがいなくても投稿を受け取るためにダミーのユーザーがフォローしたということにする
@@ -119,7 +119,7 @@ export class UserListService implements OnApplicationShutdown, OnModuleInit {
 		});
 
 		this.globalEventService.publishInternalEvent('userListMemberRemoved', { userListId: list.id, memberId: target.id });
-		this.globalEventService.publishUserListStream(list.id, 'internalMembershipUpdated', { userId: target.id });
+		this.globalEventService.publishInternalUserListStream(list.id, 'internalMembershipUpdated');
 		this.globalEventService.publishUserListStream(list.id, 'userRemoved', await this.userEntityService.pack(target));
 	}
 
@@ -140,7 +140,7 @@ export class UserListService implements OnApplicationShutdown, OnModuleInit {
 			withReplies: options.withReplies,
 		});
 
-		this.globalEventService.publishUserListStream(list.id, 'internalMembershipUpdated', { userId: target.id });
+		this.globalEventService.publishInternalUserListStream(list.id, 'internalMembershipUpdated');
 	}
 
 	@bindThis
@@ -159,7 +159,7 @@ export class UserListService implements OnApplicationShutdown, OnModuleInit {
 
 		for (const { userListId } of removed) {
 			this.globalEventService.publishInternalEvent('userListMemberRemoved', { userListId, memberId: target.id });
-			this.globalEventService.publishUserListStream(userListId, 'internalMembershipUpdated', { userId: target.id });
+			this.globalEventService.publishInternalUserListStream(userListId, 'internalMembershipUpdated');
 		}
 
 		if (!(options.notifyClients ?? true)) return;
@@ -219,7 +219,7 @@ export class UserListService implements OnApplicationShutdown, OnModuleInit {
 
 			for (const { userListId } of arrayToInsert) {
 				this.globalEventService.publishInternalEvent('userListMemberAdded', { userListId, memberId: dst.id });
-				this.globalEventService.publishUserListStream(userListId, 'internalMembershipUpdated', { userId: dst.id });
+				this.globalEventService.publishInternalUserListStream(userListId, 'internalMembershipUpdated');
 			}
 		}
 

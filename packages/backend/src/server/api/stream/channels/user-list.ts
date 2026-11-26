@@ -24,7 +24,9 @@ export class UserListChannel extends Channel {
 	private listId: string;
 	private membershipsMap: Record<string, Pick<MiUserListMembership, 'withReplies'> | undefined> = {};
 	private listUsersFetchCount = 0;
-	private isListDeleted = false;
+	private listUsersClock: NodeJS.Timeout | undefined;
+	private isPollingListUsers = false;
+	private isDisposed = false;
 	private withFiles: boolean;
 	private withRenotes: boolean;
 
@@ -61,37 +63,50 @@ export class UserListChannel extends Channel {
 			},
 		});
 		if (!listExist) return false;
+		// ここで false を返すと、同じ接続 ID が再利用されたときに新しいチャンネルも切断される。
+		if (this.isDisposed) return true;
 
 		// Subscribe stream
 		this.subscriber.on(`userListStream:${this.listId}`, this.onListEvent);
+		this.subscriber.on(`internalUserListStream:${this.listId}`, this.onInternalListEvent);
 
 		this.subscriber.on('notesStream', this.onNote);
 
-		// 初回。以降はイベントを受けたときだけ読み直す
-		this.updateListUsers();
+		// 通知が届かなかったり通知を受けた際のDB読み込みに失敗したりすると、通知だけでは復旧できない。
+		this.listUsersClock = setInterval(this.pollListUsers, 5000);
+		this.pollListUsers();
 
 		return true;
 	}
 
 	@bindThis
 	private onListEvent(data: GlobalEvents['userList']['payload']) {
-		if (data.type === 'internalListDeleted') {
-			// リストが削除されたら、以降のノートを配信しない
-			this.isListDeleted = true;
-			this.listUsersFetchCount++;
-			this.membershipsMap = {};
-			return;
-		}
-
-		// 所属の読み直しは、メンバーシップの変更時に必ず発行される internalMembershipUpdated だけをきっかけにする
-		if (data.type === 'internalMembershipUpdated') {
-			this.updateListUsers();
-			return;
-		}
-
-		// クライアントに転送するのはメンバーの追加・削除のみ
+		// 公開ストリームをそのまま転送すると、旧版が送った内部通知もクライアントへ届く。
 		if (data.type === 'userAdded' || data.type === 'userRemoved') {
 			this.send(data);
+		}
+	}
+
+	@bindThis
+	private onInternalListEvent(data: GlobalEvents['internalUserList']['payload']) {
+		if (data.type === 'internalListDeleted') {
+			this.dispose();
+			return;
+		}
+
+		if (data.type === 'internalMembershipUpdated') {
+			this.updateListUsers();
+		}
+	}
+
+	@bindThis
+	private async pollListUsers() {
+		if (this.isPollingListUsers) return;
+		this.isPollingListUsers = true;
+		try {
+			await this.updateListUsers();
+		} finally {
+			this.isPollingListUsers = false;
 		}
 	}
 
@@ -113,7 +128,7 @@ export class UserListChannel extends Channel {
 		}
 
 		// 読み込み中に次の読み込みが始まっていれば古い結果は使わない
-		if (fetchCount !== this.listUsersFetchCount) return;
+		if (this.isDisposed || fetchCount !== this.listUsersFetchCount) return;
 
 		const membershipsMap: Record<string, Pick<MiUserListMembership, 'withReplies'> | undefined> = {};
 		for (const membership of memberships) {
@@ -158,16 +173,21 @@ export class UserListChannel extends Channel {
 
 		const packed = await this.noteEntityService.withMyRenoteReaction(note, this.user?.id ?? null);
 
-		// 処理中にリストが削除されていれば送らない
-		if (this.isListDeleted) return;
+		if (this.isDisposed) return;
 
 		this.send('note', packed);
 	}
 
 	@bindThis
 	public dispose() {
+		if (this.isDisposed) return;
+		this.isDisposed = true;
+		clearInterval(this.listUsersClock);
+		this.membershipsMap = {};
+
 		// Unsubscribe events
 		this.subscriber.off(`userListStream:${this.listId}`, this.onListEvent);
+		this.subscriber.off(`internalUserListStream:${this.listId}`, this.onInternalListEvent);
 		this.subscriber.off('notesStream', this.onNote);
 	}
 }

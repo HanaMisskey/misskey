@@ -140,8 +140,10 @@ type NoteStreamEventTypes = {
 export interface UserListEventTypes {
 	userAdded: Packed<'UserLite'>;
 	userRemoved: Packed<'UserLite'>;
-	// internal なイベントはクライアントには転送しない
-	internalMembershipUpdated: { userId: MiUser['id']; };
+}
+
+interface InternalUserListEventTypes {
+	internalMembershipUpdated: undefined;
 	internalListDeleted: undefined;
 }
 
@@ -300,6 +302,10 @@ export type GlobalEvents = {
 		name: `userListStream:${MiUserList['id']}`;
 		payload: EventTypesToEventPayload<UserListEventTypes>;
 	};
+	internalUserList: {
+		name: `internalUserListStream:${MiUserList['id']}`;
+		payload: EventTypesToEventPayload<InternalUserListEventTypes>;
+	};
 	clip: {
 		name: `clipStream:${MiClip['id']}`;
 		payload: EventTypesToEventPayload<ClipEventTypes>;
@@ -407,6 +413,11 @@ export class GlobalEventService {
 	@bindThis
 	public publishUserListStream<K extends keyof UserListEventTypes>(listId: MiUserList['id'], type: K, value?: UserListEventTypes[K]): void {
 		this.publish(`userListStream:${listId}`, type, typeof value === 'undefined' ? null : value);
+	}
+
+	@bindThis
+	public publishInternalUserListStream(listId: MiUserList['id'], type: keyof InternalUserListEventTypes): void {
+		this.publish(`internalUserListStream:${listId}`, type);
 	}
 
 	@bindThis
