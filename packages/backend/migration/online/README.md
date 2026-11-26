@@ -2,7 +2,9 @@
 
 `MISSKEY_MIGRATION_CREATE_INDEX_CONCURRENTLY=1` のとき、`manifest.json` に登録した
 migration をオンライン実装へ置き換える。未登録の migration は元の実装を実行する。
-SQL の自動変換は行わない。現時点の対象は BirthdayIndex1767169026317 のみ。
+SQL の自動変換は行わない。
+BirthdayIndex1767169026317 は索引を並行に構築する。
+FollowingRequestId1794917481157 は `following` テーブルのロックを取れなければ待たずに失敗する。
 
 元の migration ファイルは編集しない。オンライン実装は同じ TypeORM migration 名と
 timestamp を持つ単一のクラスを export する。ファイル名から履歴上の名前を推測しない。

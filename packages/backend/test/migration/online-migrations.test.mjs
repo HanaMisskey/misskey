@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: syuilo and misskey-project
+ * SPDX-License-Identifier: AGPL-3.0-only
+ */
+
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { appendFile, cp, mkdtemp, readFile, readdir, rename, rm, writeFile } from 'node:fs/promises';
@@ -34,29 +39,41 @@ test('normal mode selects every original migration once with its original file h
 	}
 });
 
-/** Oracle: the explicit online opt-in changes only the declared migration, retaining its TypeORM identity. */
-test('online mode replaces BirthdayIndex once and leaves undeclared migrations unchanged', async t => {
+/** Oracle: online opt-in replaces only the known migrations and preserves their TypeORM history identities. */
+test('online mode replaces BirthdayIndex and FollowingRequestId once and leaves other migrations unchanged', async t => {
 	const directory = await copyMigrations(t);
 	await writeFile(join(directory, '1999999999999-future.js'), 'export class Future1999999999999 {}\n');
 	const { selectMigrations } = await selection(directory);
 	const normal = await selectMigrations(directory, false);
 	const online = await selectMigrations(directory, true);
 	assert.equal(online.length, normal.length);
-	const replacement = online.filter(entry => entry.name === 'BirthdayIndex1767169026317');
-	assert.equal(replacement.length, 1);
-	assert.equal(replacement[0].file, join(directory, 'online', sourceName));
-	assert.ok(!online.some(entry => entry.file === join(directory, sourceName)));
-	assert.deepEqual(replacement[0].recoverableIndexes.toSorted(), [
-		'public.IDX_USERPROFILE_BIRTHDAY_DATE',
-		'public.IDX_de22cd2b445eee31ae51cdbe99',
-	].toSorted());
+	const replacements = [
+		{
+			name: 'BirthdayIndex1767169026317',
+			file: sourceName,
+			recoverableIndexes: ['public.IDX_USERPROFILE_BIRTHDAY_DATE', 'public.IDX_de22cd2b445eee31ae51cdbe99'],
+		},
+		{
+			name: 'FollowingRequestId1794917481157',
+			file: '1794917481157-following-request-id.js',
+			recoverableIndexes: [],
+		},
+	];
+	for (const { name, file, recoverableIndexes } of replacements) {
+		const replacement = online.filter(entry => entry.name === name);
+		assert.equal(replacement.length, 1, name);
+		assert.equal(replacement[0].file, join(directory, 'online', file));
+		assert.ok(!online.some(entry => entry.file === join(directory, file)));
+		assert.deepEqual(replacement[0].recoverableIndexes.toSorted(), recoverableIndexes.toSorted());
+		const original = await import(pathToFileURL(join(migrationDirectory, file)).href);
+		const substitute = await import(pathToFileURL(join(migrationDirectory, 'online', file)).href);
+		assert.equal(new substitute[name]().name, new original[name]().name);
+	}
+	const replacedFiles = new Set(replacements.map(({ file }) => file));
 	assert.deepEqual(
-		online.filter(entry => entry.file !== replacement[0].file),
-		normal.filter(entry => entry.file !== join(directory, sourceName)),
+		online.filter(entry => !replacedFiles.has(basename(entry.file))),
+		normal.filter(entry => !replacedFiles.has(basename(entry.file))),
 	);
-	const original = await import(pathToFileURL(join(migrationDirectory, sourceName)).href);
-	const substitute = await import(pathToFileURL(join(migrationDirectory, 'online', sourceName)).href);
-	assert.equal(new substitute.BirthdayIndex1767169026317().name, new original.BirthdayIndex1767169026317().name);
 });
 
 /** Oracle: a replacement written for an older upstream source must not silently execute after that source changes. */
